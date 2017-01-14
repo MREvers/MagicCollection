@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Card_Database>
+	<cards>
+		<card>
+			<name>cat</name>
+			<set>KTK, KTK</set>
+		</card>
+		<card>
+			<set>KTK</set>
+			<name>chicken</name>
+		</card>
+		<card>
+			<set>KTK</set>
+			<name>cow</name>
+		</card>
+		<card>
+			<name>dog</name>
+			<set>KTK, KTK</set>
+		</card>
+	</cards>
+</Card_Database>
+

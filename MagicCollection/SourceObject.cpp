@@ -1,0 +1,55 @@
+#include "SourceObject.h"
+
+
+SourceObject::SourceObject(std::string aszName)
+{
+   m_szName = aszName;
+   AddAttribute("name", aszName);
+}
+
+
+SourceObject::~SourceObject()
+{
+}
+
+std::string SourceObject::GetName()
+{
+   return m_szName;
+}
+
+// This may be used in the future.. but not now.
+bool SourceObject::HasAttribute(std::string aszName)
+{
+   return false;
+   /* assume that the database is not redundant
+      bool bRetval = false;
+      for (auto keyVal : Attributes)
+      {
+         bRetval || keyVal.first == aszName;
+         if (bRetval)
+         {
+            break;
+         }
+      }
+
+      return bRetval;
+      */
+}
+
+bool SourceObject::AddAttribute(std::string key, std::string value)
+{
+
+   if (key == "set" ||
+      key == "power" ||
+      key == "toughness" ||
+      key == "manaCost" ||
+      key == "name" ||
+      key == "text" ||
+      key == "loyalty" ||
+      key == "colors")
+   {
+      Attributes.insert(std::make_pair(key, value));
+   }
+
+   return false;
+}

@@ -1,0 +1,9 @@
+﻿  SourceObject.cpp
+  CollectionSource.cpp
+c:\users\matthew\documents\github\magiccollection\magiccollection\magiccollection\collectionsource.cpp(63): warning C4018: '>=': signed/unsigned mismatch
+c:\users\matthew\documents\github\magiccollection\magiccollection\magiccollection\collectionsource.cpp(349): warning C4018: '<': signed/unsigned mismatch
+c:\users\matthew\documents\github\magiccollection\magiccollection\magiccollection\collectionsource.cpp(400): warning C4018: '>=': signed/unsigned mismatch
+c:\users\matthew\documents\github\magiccollection\magiccollection\magiccollection\collectionsource.cpp(421): warning C4018: '<': signed/unsigned mismatch
+  Generating Code...
+  MagicCollection.vcxproj -> C:\Users\Matthew\Documents\GitHub\MagicCollection\MagicCollection\Debug\MagicCollection.exe
+  MagicCollection.vcxproj -> C:\Users\Matthew\Documents\GitHub\MagicCollection\MagicCollection\Debug\MagicCollection.pdb (Full PDB)
