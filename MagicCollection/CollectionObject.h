@@ -1,7 +1,11 @@
 #pragma once
+#pragma message ("Starting CollectionObject.h")
 #include "ICollectionObject.h"
-#include "Collection.h"
+//#include "Collection.h"
+#include <vector>
 #include <map>
+
+class Collection;
 
 // Number of copies
 // Later: Set specief
@@ -23,7 +27,7 @@ public:
    CollectionObject(std::string aszName);
    ~CollectionObject();
 
-   std::string GetName() override;
+   std::string GetName();
 
    // Gets called by the collection Source. Implement in base class to get needed attributes.
    virtual bool MapAttributes(std::string aszName, std::string aszValue);
@@ -44,3 +48,4 @@ private:
 
 };
 
+#pragma message ("Finish CollectionObject.h")

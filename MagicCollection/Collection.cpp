@@ -20,6 +20,7 @@ Collection::~Collection()
 // AddItem(name) -- from source
 void Collection::AddItem(std::string aszNewItem)
 {
+
    // Just use magic card shit for now
 
    // If this Collection doesn't already have this card...
@@ -32,6 +33,7 @@ void Collection::AddItem(std::string aszNewItem)
    {
       delete mCO;
    }
+   
 }
 
 int Collection::compareItems(std::string aszItemOne, std::string aszItemTwo)

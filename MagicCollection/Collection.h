@@ -1,10 +1,14 @@
 #pragma once
-#include "CollectionObject.h"
+#pragma message ("Starting Collection.h")
 #include "ICollection.h"
-#include "CollectionSource.h"
+
+#include "ICollectionObject.h"
+#include "CollectionObject.h"
 
 // Just use magic card object for now
 #include "MagicCardObject.h"
+
+#include "CollectionSource.h"
 
 #include <vector>
 #include <map>
@@ -31,3 +35,4 @@ private:
    //std::string importItem(std::string aszName);
 };
 
+#pragma message ("Finish Collection.h")

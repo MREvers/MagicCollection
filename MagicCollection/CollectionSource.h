@@ -1,10 +1,12 @@
 #pragma once
-#include "Collection.h"
-#include "json.hpp"
+#pragma message ("Starting CollectionSource.h")
 #include "SourceObject.h"
+#include "CollectionObject.h"
+
 #include "rapidxml-1.13\rapidxml_print.hpp"
 #include "rapidxml-1.13\rapidxml.hpp"
 #include "rapidxml-1.13\rapidxml_utils.hpp"
+#include "json.hpp"
 
 #include <string>
 #include <fstream>
@@ -13,6 +15,9 @@
 #include <map>
 #include <algorithm>
 #include <ctime>
+
+class CollectionObject;
+class Collection;
 
 // CardAttributes is used to convert allsets json to xml.
 class CardAttributes
@@ -58,3 +63,4 @@ private:
    void import_AddSorted(std::vector<std::pair<std::string, CardAttributes*>>& buffer, std::pair<std::string, CardAttributes*>* element);
 };
 
+#pragma message ("Finish CollectionSource.h")

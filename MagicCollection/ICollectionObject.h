@@ -1,6 +1,11 @@
 #pragma once
+#pragma message ("Starting ICollectionObject.h")
+
 #include <string>
 #include <vector>
+
+class Collection;
+
 class ICollectionObject
 {
 public:
@@ -17,4 +22,4 @@ public:
    //virtual int Get
 
 };
-
+#pragma message ("Finish ICollectionObject.h")

@@ -1,6 +1,9 @@
 #pragma once
+#pragma message ("Starting SourceObject.h")
 #include <map>
 #include "ICollectionObject.h"
+
+class ICollectionObject;
 
 class SourceObject
 {
@@ -26,3 +29,4 @@ private:
    ICollectionObject* m_oCollectionObject;
 };
 
+#pragma message ("Finish SourceObject.h")

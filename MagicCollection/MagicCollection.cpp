@@ -4,14 +4,13 @@
 #include <iostream>
 #include <fstream>
 #include <iterator>
-
 #include <xmllite.h>
+
 #include "Collection.h"
 #include "json.hpp"
 #include "json/json.h"
 #include "rapidxml-1.13\rapidxml_print.hpp"
 #include "rapidxml-1.13\rapidxml.hpp"
-#include "CollectionSource.h"
 
 using json = nlohmann::json;
 
@@ -31,9 +30,9 @@ int main()
       std::cout << i->GetName() << std::endl;
    }
 
-   CollectionSource CS;
+   //CollectionSource CS;
 
-   CS.LoadLib("AllCards.xml");
+   //CS.LoadLib("AllCards.xml");
    //CS.PrintAllWith("Ice", true);
    //CS.ConvertJSONCollection("AllSets.json");
 

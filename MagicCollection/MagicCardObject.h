@@ -1,5 +1,8 @@
 #pragma once
+#pragma message ("Starting MagicCardObject.h")
 #include "CollectionObject.h"
+
+
 class MagicCardObject :
    public CollectionObject
 {
@@ -22,3 +25,4 @@ private:
    
 };
 
+#pragma message ("Finish MagicCardObject.h")

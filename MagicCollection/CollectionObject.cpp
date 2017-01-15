@@ -38,6 +38,8 @@ ICollectionObject* CollectionObject::IncludeInCollection(Collection* aoCol, std:
 
    // Make sure the collection has a pointer to this object.
    addSorted(this, alstColOs);
+
+   return this;
 }
 
 std::vector<int> CollectionObject::GetCopies(Collection* aoCol)
