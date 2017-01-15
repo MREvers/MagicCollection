@@ -45,7 +45,7 @@ public:
    void LoadLib(std::string aszFileName);
 
    // Service functions
-   bool GetCard(std::string aszName, CollectionObject& roCard);
+   bool GetCard(std::string aszName, ICollectionObject& roCard);
    void PrintAllWith(std::string aszMatch);
    void PrintAllWith(std::string aszMatch, bool caseSensitive);
 

@@ -17,10 +17,14 @@
 class Collection : public ICollection
 {
 public:
-   Collection();
+   Collection(CollectionSource* aoSource);
    ~Collection();
 
    void AddItem(std::string aszNewItem) override;
+   void AddItem(std::string aszNewItem, ICollection* aoCol) override;
+   int FindInCollection(std::string aszItem) override;
+   bool GetFromCollection(std::string aszName, ICollectionObject& rptColO) override;
+
    std::vector<ICollectionObject*> GetList();
 
 private:

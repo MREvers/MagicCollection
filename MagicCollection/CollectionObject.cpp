@@ -22,7 +22,7 @@ bool CollectionObject::MapAttributes(std::string aszName, std::string aszValue)
    return true;
 }
 
-ICollectionObject* CollectionObject::IncludeInCollection(Collection* aoCol, std::vector<ICollectionObject*>& alstColOs)
+ICollectionObject* CollectionObject::IncludeInCollection(ICollection* aoCol, std::vector<ICollectionObject*>& alstColOs)
 {
    CollectionAnalytics cA;
 
@@ -33,7 +33,7 @@ ICollectionObject* CollectionObject::IncludeInCollection(Collection* aoCol, std:
    cA.MapParentCollection.insert(std::make_pair(m_iAllCopies, aoCol));
 
    // Prepare to store the collection info
-   std::pair<Collection*, CollectionAnalytics> oPair(aoCol, cA);
+   std::pair<ICollection*, CollectionAnalytics> oPair(aoCol, cA);
    m_mapAnalytics.insert(oPair);
 
    // Make sure the collection has a pointer to this object.
@@ -42,22 +42,22 @@ ICollectionObject* CollectionObject::IncludeInCollection(Collection* aoCol, std:
    return this;
 }
 
-std::vector<int> CollectionObject::GetCopies(Collection* aoCol)
+std::vector<int> CollectionObject::GetCopies(ICollection* aoCol)
 {
    return m_mapAnalytics.at(aoCol).ListCopies;
 }
 
-int CollectionObject::GetNumberOfCopies(Collection* aoCol)
+int CollectionObject::GetNumberOfCopies(ICollection* aoCol)
 {
    return m_mapAnalytics.at(aoCol).ListCopies.size();
 }
 
-Collection* CollectionObject::GetResidentCollection(Collection* aoCol, int aiCardID)
+ICollection* CollectionObject::GetResidentCollection(ICollection* aoCol, int aiCardID)
 {
    return m_mapAnalytics.at(aoCol).MapParentCollection.at(aiCardID);
 }
 
-void CollectionObject::addSorted(ICollectionObject* aoColO, std::vector<ICollectionObject*> alstColOs)
+void CollectionObject::addSorted(ICollectionObject* aoColO, std::vector<ICollectionObject*>& alstColOs)
 {
    std::string szName = aoColO->GetName();
 

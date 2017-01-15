@@ -5,7 +5,7 @@
 #include <vector>
 #include <map>
 
-class Collection;
+class ICollection;
 
 // Number of copies
 // Later: Set specief
@@ -14,7 +14,7 @@ class CollectionAnalytics
 public:
 
    std::vector<int> ListCopies;
-   std::map<int, Collection*> MapParentCollection;
+   std::map<int, ICollection*> MapParentCollection;
 
    // Map copyID to card uniques such as set.
 };
@@ -33,18 +33,18 @@ public:
    virtual bool MapAttributes(std::string aszName, std::string aszValue);
    
    // Collection Side Interface
-   ICollectionObject* IncludeInCollection(Collection* aoCol, std::vector<ICollectionObject*>& aoColOs);
-   std::vector<int> GetCopies(Collection* aoCol);
-   int GetNumberOfCopies(Collection* aoCol);
-   Collection* GetResidentCollection(Collection* aoCol, int aiCopyID);
+   ICollectionObject* IncludeInCollection(ICollection* aoCol, std::vector<ICollectionObject*>& aoColOs);
+   std::vector<int> GetCopies(ICollection* aoCol);
+   int GetNumberOfCopies(ICollection* aoCol);
+   ICollection* GetResidentCollection(ICollection* aoCol, int aiCopyID);
 
 private:
    int m_iAllCopies; // Used in assigning IDs.
    std::string m_szName;
 
-   std::map<Collection*, CollectionAnalytics> m_mapAnalytics;
+   std::map<ICollection*, CollectionAnalytics> m_mapAnalytics;
 
-   void addSorted(ICollectionObject* aoColO, std::vector<ICollectionObject*> alstColOs);
+   void addSorted(ICollectionObject* aoColO, std::vector<ICollectionObject*>& alstColOs);
 
 };
 

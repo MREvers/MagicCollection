@@ -18,21 +18,24 @@ std::string escape(const std::string& str);
 
 int main()
 {
-   Collection colTestCollection;
+   CollectionSource CS;
 
+   CS.LoadLib("AllCards.xml");
 
-   colTestCollection.AddItem("Adoc");
-   colTestCollection.AddItem("Bdoc");
-   colTestCollection.AddItem("Aadog");
+   Collection TestCol(&CS);
 
-   for (auto i : colTestCollection.GetList())
+   TestCol.AddItem("Thing in the Ice");
+   TestCol.AddItem("Jace Beleren");
+   TestCol.AddItem("Seeker of the Way");
+   
+   std::vector<ICollectionObject*> lst = TestCol.GetList();
+   for (std::vector<ICollectionObject*>::iterator card_iter = lst.begin();
+    card_iter != lst.end();
+     ++card_iter)
    {
-      std::cout << i->GetName() << std::endl;
+      std::cout << (*card_iter)->GetName() << std::endl;
    }
 
-   //CollectionSource CS;
-
-   //CS.LoadLib("AllCards.xml");
    //CS.PrintAllWith("Ice", true);
    //CS.ConvertJSONCollection("AllSets.json");
 

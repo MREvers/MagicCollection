@@ -1,9 +1,9 @@
 #pragma once
 #pragma message ("Starting SourceObject.h")
 #include <map>
-#include "ICollectionObject.h"
+#include "CollectionObject.h"
 
-class ICollectionObject;
+class CollectionObject;
 
 class SourceObject
 {
