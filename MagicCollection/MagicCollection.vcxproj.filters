@@ -36,6 +36,9 @@
     <ClCompile Include="SourceObject.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="MagicCardObject.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ICollection.h">
@@ -54,6 +57,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="SourceObject.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MagicCardObject.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

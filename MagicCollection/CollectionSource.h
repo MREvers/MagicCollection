@@ -12,6 +12,7 @@
 #include <vector>
 #include <map>
 #include <algorithm>
+#include <ctime>
 
 // CardAttributes is used to convert allsets json to xml.
 class CardAttributes
@@ -34,13 +35,17 @@ public:
 
    std::string ImportCollectionObject(std::string aszImportItem);
    
+   // Database Functions
    void ConvertJSONCollection(std::string aszFileName);
    void LoadLib(std::string aszFileName);
+
+   // Service functions
+   bool GetCard(std::string aszName, CollectionObject& roCard);
    void PrintAllWith(std::string aszMatch);
    void PrintAllWith(std::string aszMatch, bool caseSensitive);
 
 private:
-   std::vector<SourceObject*> lstCardBuffer;
+   std::vector<SourceObject*> m_lstCardBuffer;
    std::string str_trim(const std::string& srz, char removeChar);
    std::string str_clean(const std::string & src);
 

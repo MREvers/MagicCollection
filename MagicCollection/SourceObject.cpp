@@ -38,7 +38,6 @@ bool SourceObject::HasAttribute(std::string aszName)
 
 bool SourceObject::AddAttribute(std::string key, std::string value)
 {
-
    if (key == "set" ||
       key == "power" ||
       key == "toughness" ||
@@ -52,4 +51,23 @@ bool SourceObject::AddAttribute(std::string key, std::string value)
    }
 
    return false;
+}
+
+bool SourceObject::GetCollectionObject(ICollectionObject& roColO)
+{
+   if (m_bHasCO)
+   {
+      roColO = *m_oCollectionObject;
+      return true;
+   }
+   else
+   {
+      return false;
+   }
+}
+
+void SourceObject::Cache(ICollectionObject* aoColO)
+{
+   m_oCollectionObject = aoColO;
+   m_bHasCO = true;
 }

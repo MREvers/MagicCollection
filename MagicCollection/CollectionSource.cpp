@@ -18,10 +18,46 @@ CollectionSource::~CollectionSource()
 {
 }
 
+bool CollectionSource::GetCard(std::string aszName, CollectionObject& roCard)
+{
+   bool bRetVal = false;
+
+   // Search through all cards to find a match
+   std::vector<SourceObject*>::iterator iter = m_lstCardBuffer.begin();
+   for (; iter != m_lstCardBuffer.end(); ++iter)
+   {
+      std::string szName = (*iter)->GetName();
+      if (szName == aszName)
+      {
+         bRetVal = true;
+         // Check if this object is already cached
+         if (!(*iter)->GetCollectionObject(roCard))
+         {
+            CollectionObject oRetVal(szName);
+
+            // Iterate over all the attributes stored in the source object.
+            std::map<std::string, std::string>::iterator att_iter = (*iter)->Attributes.begin();
+            bool bHasAllAttributes = false;
+            for (; att_iter != (*iter)->Attributes.end() && !bHasAllAttributes; ++att_iter)
+            {
+               bHasAllAttributes = oRetVal.MapAttributes(att_iter->first, att_iter->second);
+            }
+
+            // Return the CollectionObject
+            roCard = oRetVal;
+            (*iter)->Cache(&roCard);
+         }
+         
+      }
+   }
+
+   return bRetVal;
+}
+
 void CollectionSource::PrintAllWith(std::string aszMatch)
 {
-   std::vector<SourceObject*>::iterator iter = lstCardBuffer.begin();
-   for (; iter != lstCardBuffer.end(); ++iter)
+   std::vector<SourceObject*>::iterator iter = m_lstCardBuffer.begin();
+   for (; iter != m_lstCardBuffer.end(); ++iter)
    {
       std::string szName = (*iter)->GetName();
       if (szName.find(aszMatch) != std::string::npos)
@@ -33,8 +69,8 @@ void CollectionSource::PrintAllWith(std::string aszMatch)
 
 void CollectionSource::PrintAllWith(std::string aszMatch, bool caseSensitive)
 {
-   std::vector<SourceObject*>::iterator iter = lstCardBuffer.begin();
-   for (; iter != lstCardBuffer.end(); ++iter)
+   std::vector<SourceObject*>::iterator iter = m_lstCardBuffer.begin();
+   for (; iter != m_lstCardBuffer.end(); ++iter)
    {
       std::string szName = (*iter)->GetName();
       std::transform(szName.begin(), szName.end(), szName.begin(), ::toupper);
@@ -50,7 +86,7 @@ void CollectionSource::PrintAllWith(std::string aszMatch, bool caseSensitive)
 int CollectionSource::load_Contains(std::string aszName)
 {
    int iLeft = 0;
-   int iRight = lstCardBuffer.size();
+   int iRight = m_lstCardBuffer.size();
    if (iRight < 1)
    {
       return -1;
@@ -60,14 +96,14 @@ int CollectionSource::load_Contains(std::string aszName)
    {
       int middle = (iLeft + iRight) / 2;
 
-      if (middle < 0 || middle >= lstCardBuffer.size())
+      if (middle < 0 || middle >= m_lstCardBuffer.size())
       {
          return -1;
       }
 
-      if (lstCardBuffer[middle]->GetName() == aszName)
+      if (m_lstCardBuffer[middle]->GetName() == aszName)
          return middle;
-      else if (aszName.compare(lstCardBuffer[middle]->GetName()) < 0)
+      else if (aszName.compare(m_lstCardBuffer[middle]->GetName()) < 0)
          iRight = middle - 1;
       else
          iLeft = middle + 1;
@@ -89,6 +125,9 @@ void CollectionSource::LoadLib(std::string aszFileName)
    doc.parse<0>(&content[0]);
    std::cout << "Parse Done" << std::endl;
 
+   // Mechanisms
+   clock_t begin = clock();
+
    rapidxml::xml_node<> *xmlNode_CardDatabase = doc.first_node();
    // With the xml example above this is the <document/> node
    rapidxml::xml_node<> *xmlNode_Cards = xmlNode_CardDatabase->first_node("cards");
@@ -103,11 +142,13 @@ void CollectionSource::LoadLib(std::string aszFileName)
       while (xmlNode_CardAttribute != 0)
       {
          std::string szCardKey = xmlNode_CardAttribute->name();
+         
          if (szCardKey != "name")
          {
             //std::cout << xmlNode_CardAttribute->value() << std::endl;
             sO->AddAttribute(szCardKey, xmlNode_CardAttribute->value());
          }
+         
          xmlNode_CardAttribute = xmlNode_CardAttribute->next_sibling();
 
       }
@@ -116,12 +157,17 @@ void CollectionSource::LoadLib(std::string aszFileName)
       load_AddSorted(sO);
    }
 
+   // Mechanisms
+   clock_t end = clock();
+   double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;
+   std::cout << "Load Time: " << elapsed_secs << std::endl;
+
    std::cout << "Load Done" << std::endl;
 }
 
 void CollectionSource::load_AddSorted(SourceObject* oSrcObj)
 {
-   lstCardBuffer.push_back(oSrcObj);
+   m_lstCardBuffer.push_back(oSrcObj);
    /*
       int iLastSpot = 0;
       while (iLastSpot < lstCardBuffer.size())

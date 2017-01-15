@@ -1,6 +1,10 @@
 #pragma once
 #include "CollectionObject.h"
 #include "ICollection.h"
+#include "CollectionSource.h"
+
+// Just use magic card object for now
+#include "MagicCardObject.h"
 
 #include <vector>
 #include <map>
@@ -16,6 +20,7 @@ public:
    std::vector<ICollectionObject*> GetList();
 
 private:
+   CollectionSource* m_ColSource;
    std::vector<ICollectionObject*> m_lstCollection;
    std::map<std::string, ICollection*> m_mapChildren;
    ICollection* m_Parent;

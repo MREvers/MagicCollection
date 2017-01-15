@@ -2,7 +2,7 @@
 #include <map>
 #include "ICollectionObject.h"
 
-class SourceObject : ICollectionObject
+class SourceObject
 {
 public:
    SourceObject(std::string aszName);
@@ -14,9 +14,15 @@ public:
 
    bool HasAttribute(std::string aszname);
 
-   std::string GetName() override;
+   std::string GetName();
+
+   bool GetCollectionObject(ICollectionObject& roColO);
+
+   void Cache(ICollectionObject* roColO);
 
 private:
    std::string m_szName;
+   bool m_bHasCO;
+   ICollectionObject* m_oCollectionObject;
 };
 

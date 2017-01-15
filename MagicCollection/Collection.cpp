@@ -15,24 +15,23 @@ Collection::~Collection()
 }
 
 // Looks up from the source collection then adds it.
+// Should either look up from a "source" or another collection.
+// AddItem(AnotherCollection, name) -- from another collection.
+// AddItem(name) -- from source
 void Collection::AddItem(std::string aszNewItem)
 {
-   int iLastSpot = 0;
-   while (iLastSpot < m_lstCollection.size())
+   // Just use magic card shit for now
+
+   // If this Collection doesn't already have this card...
+   MagicCardObject* mCO = new MagicCardObject(aszNewItem);
+   if (m_ColSource->GetCard(aszNewItem, *mCO))
    {
-      int iComparisonResult = compareItems(m_lstCollection.at(iLastSpot)->GetName(), aszNewItem);
-      if (iComparisonResult < 0)
-      {
-         iLastSpot++;
-      }
-      else
-      {
-         break;
-      }
+      mCO->IncludeInCollection(this, m_lstCollection);
    }
-   CollectionObject* colNewCollectionObject = new CollectionObject(aszNewItem);
-   std::vector<ICollectionObject*>::iterator iter = m_lstCollection.begin() + iLastSpot;
-   m_lstCollection.insert(iter, colNewCollectionObject);
+   else
+   {
+      delete mCO;
+   }
 }
 
 int Collection::compareItems(std::string aszItemOne, std::string aszItemTwo)

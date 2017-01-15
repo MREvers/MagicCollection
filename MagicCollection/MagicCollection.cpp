@@ -34,7 +34,7 @@ int main()
    CollectionSource CS;
 
    CS.LoadLib("AllCards.xml");
-   CS.PrintAllWith("Ice", true);
+   //CS.PrintAllWith("Ice", true);
    //CS.ConvertJSONCollection("AllSets.json");
 
    /*

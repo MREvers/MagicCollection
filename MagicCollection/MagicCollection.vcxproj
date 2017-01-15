@@ -150,6 +150,7 @@
     <ClCompile Include="CollectionObject.cpp" />
     <ClCompile Include="CollectionSource.cpp" />
     <ClCompile Include="jsoncpp.cpp" />
+    <ClCompile Include="MagicCardObject.cpp" />
     <ClCompile Include="MagicCollection.cpp" />
     <ClCompile Include="SourceObject.cpp" />
   </ItemGroup>
@@ -159,6 +160,7 @@
     <ClInclude Include="CollectionSource.h" />
     <ClInclude Include="ICollection.h" />
     <ClInclude Include="ICollectionObject.h" />
+    <ClInclude Include="MagicCardObject.h" />
     <ClInclude Include="SourceObject.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
