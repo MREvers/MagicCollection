@@ -53,11 +53,11 @@ bool SourceObject::AddAttribute(std::string key, std::string value)
    return false;
 }
 
-bool SourceObject::GetCollectionObject(ICollectionObject& roColO)
+bool SourceObject::GetCollectionObject(CollectionObject*& roColO)
 {
    if (m_bHasCO)
    {
-      roColO = *m_oCollectionObject;
+      roColO = m_oCollectionObject;
       return true;
    }
    else
@@ -66,7 +66,7 @@ bool SourceObject::GetCollectionObject(ICollectionObject& roColO)
    }
 }
 
-void SourceObject::Cache(ICollectionObject* aoColO)
+void SourceObject::Cache(CollectionObject* aoColO)
 {
    m_oCollectionObject = aoColO;
    m_bHasCO = true;

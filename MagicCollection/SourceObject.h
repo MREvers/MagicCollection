@@ -19,14 +19,14 @@ public:
 
    std::string GetName();
 
-   bool GetCollectionObject(ICollectionObject& roColO);
+   bool GetCollectionObject(CollectionObject*& roColO);
 
-   void Cache(ICollectionObject* roColO);
+   void Cache(CollectionObject* roColO);
 
 private:
    std::string m_szName;
    bool m_bHasCO;
-   ICollectionObject* m_oCollectionObject;
+   CollectionObject* m_oCollectionObject;
 };
 
 #pragma message ("Finish SourceObject.h")

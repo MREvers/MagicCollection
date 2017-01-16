@@ -28,10 +28,20 @@ void Collection::AddItem(std::string aszNewItem)
    // If this Collection doesn't already have this card...
    // Create a copy of the desired subtype. If the source has one already, this will get lost,
    //  because the pointer to it will be changed.
-   CollectionObject* mCO = new MagicCardObject(aszNewItem);
-   if (m_ColSource->GetCard(aszNewItem, *mCO))
+   CollectionObject* mExisting = nullptr;
+   CollectionObject* mNew = new MagicCardObject(aszNewItem);
+   if (m_ColSource->GetCard(aszNewItem, *mNew, mExisting))
    {
-      mCO->IncludeInCollection(this, m_lstCollection);
+      if (mExisting == nullptr)
+      {
+         mNew->IncludeInCollection(this, m_lstCollection);
+      }
+      else
+      {
+         mExisting->IncludeInCollection(this, m_lstCollection);
+         delete mNew;
+      }
+      
    }
    
 }

@@ -18,7 +18,7 @@ CollectionSource::~CollectionSource()
 {
 }
 
-bool CollectionSource::GetCard(std::string aszName, ICollectionObject& roCard)
+bool CollectionSource::GetCard(std::string aszName, CollectionObject& roCard, CollectionObject*& roRetCard)
 {
    bool bRetVal = false;
 
@@ -30,20 +30,27 @@ bool CollectionSource::GetCard(std::string aszName, ICollectionObject& roCard)
       if (szName == aszName)
       {
          bRetVal = true;
+         CollectionObject* ptrOCol;
          // Check if this object is already cached
-         if (!(*iter)->GetCollectionObject(roCard))
+         if (!(*iter)->GetCollectionObject(ptrOCol))
          {
             // Iterate over all the attributes stored in the source object.
             std::map<std::string, std::string>::iterator att_iter = (*iter)->Attributes.begin();
             bool bHasAllAttributes = false;
             for (; att_iter != (*iter)->Attributes.end() && !bHasAllAttributes; ++att_iter)
             {
-               bHasAllAttributes = (&roCard)->MapAttributes(att_iter->first, att_iter->second);
+               bHasAllAttributes = roCard.MapAttributes(att_iter->first, att_iter->second);
             }
 
             // Return the CollectionObject
             (*iter)->Cache(&roCard);
          }
+         else
+         {
+            roRetCard = ptrOCol;
+         }
+
+         break;
          
       }
    }
