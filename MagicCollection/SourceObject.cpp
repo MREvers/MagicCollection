@@ -7,7 +7,6 @@ SourceObject::SourceObject(std::string aszName)
    AddAttribute("name", aszName);
 }
 
-
 SourceObject::~SourceObject()
 {
 }
@@ -71,3 +70,4 @@ void SourceObject::Cache(CollectionObject* aoColO)
    m_oCollectionObject = aoColO;
    m_bHasCO = true;
 }
+

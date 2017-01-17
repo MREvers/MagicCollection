@@ -22,33 +22,64 @@ Collection::~Collection()
 // This will also be fairly slow. In the future this should strictly be used for cards from source.
 void Collection::AddItem(std::string aszNewItem)
 {
+   int iFound;
+   if ((iFound = FindInCollection(aszNewItem)) == -1)
+   {
+      // If this Collection doesn't already have this card...
+      // Create a copy of the desired subtype. If the source has one already, this will get lost,
+      //  because the pointer to it will be changed.
+      CollectionObject* mExisting = nullptr;
+      CollectionObject* mNew = new MagicCardObject(aszNewItem);
+      if (m_ColSource->GetCard(aszNewItem, *mNew, mExisting))
+      {
+         if (mExisting == nullptr)
+         {
+            // Get a card from the collection (need card id) then add it.
 
-   // Just use magic card shit for now
+            mNew->IncludeInCollection(this, m_lstCollection);
+         }
+         else
+         {
+            mExisting->IncludeInCollection(this, m_lstCollection);
+            delete mNew;
+         }
 
-   // If this Collection doesn't already have this card...
-   // Create a copy of the desired subtype. If the source has one already, this will get lost,
-   //  because the pointer to it will be changed.
+      }
+   }
+   else
+   {
+      // This card is already in this collection
+      m_lstCollection.at(iFound)->IncrementItem(this);
+   }
+
+}
+
+void Collection::AddItem(std::string aszNewItem, ICollection* aoCol)
+{
+   // First we have to check if that collection has that card
+   if (aoCol == this)
+   {
+      return;
+   }
+
    CollectionObject* mExisting = nullptr;
    CollectionObject* mNew = new MagicCardObject(aszNewItem);
    if (m_ColSource->GetCard(aszNewItem, *mNew, mExisting))
    {
       if (mExisting == nullptr)
       {
-         mNew->IncludeInCollection(this, m_lstCollection);
+         // The card doesn't exist so obviously just escape.
+         delete mNew;
+         return;
+         
       }
       else
       {
-         mExisting->IncludeInCollection(this, m_lstCollection);
+         mExisting->AddItem(this, aoCol);
          delete mNew;
       }
-      
+
    }
-   
-}
-
-void Collection::AddItem(std::string aszNewItem, ICollection* aoCol)
-{
-
 }
 
 int Collection::FindInCollection(std::string aszName)
@@ -97,7 +128,7 @@ int Collection::compareItems(std::string aszItemOne, std::string aszItemTwo)
    return aszItemOne.compare(aszItemTwo);
 }
 
-std::vector<ICollectionObject*> Collection::GetList()
+std::vector<ICollectionObject*>& Collection::GetList()
 {
    return m_lstCollection;
 }

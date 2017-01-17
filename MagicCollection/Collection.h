@@ -25,7 +25,7 @@ public:
    int FindInCollection(std::string aszItem) override;
    bool GetFromCollection(std::string aszName, ICollectionObject& rptColO) override;
 
-   std::vector<ICollectionObject*> GetList();
+   std::vector<ICollectionObject*>& GetList() override;
 
 private:
    CollectionSource* m_ColSource;

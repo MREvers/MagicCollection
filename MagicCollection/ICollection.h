@@ -17,6 +17,8 @@ public:
    virtual void AddItem(std::string aszNewItem, ICollection* aoCol) = 0;
    // Get a particular copy from another collection.
    //virtual void AddItem(std::string aszNewItem, ICollection* aoCol, int aiCopyID) = 0;
+
+   virtual std::vector<ICollectionObject*>& GetList() = 0;
    
 };
 

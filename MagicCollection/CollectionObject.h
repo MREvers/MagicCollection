@@ -1,6 +1,7 @@
 #pragma once
 #pragma message ("Starting CollectionObject.h")
 #include "ICollectionObject.h"
+#include "ICollection.h"
 //#include "Collection.h"
 #include <vector>
 #include <map>
@@ -9,12 +10,14 @@ class ICollection;
 
 // Number of copies
 // Later: Set specief
+// ONE OF THESE PER COLLECTION
 class CollectionAnalytics
 {
 public:
 
    std::vector<int> ListCopies;
-   std::map<int, ICollection*> MapParentCollection;
+   std::map<int, ICollection*> Map_ID_Parent_Collection;
+   std::map<int, std::vector<ICollection*>> Map_ID_Derived_Collections;
 
    // Map copyID to card uniques such as set.
 };
@@ -36,7 +39,14 @@ public:
    ICollectionObject* IncludeInCollection(ICollection* aoCol, std::vector<ICollectionObject*>& aoColOs);
    std::vector<int> GetCopies(ICollection* aoCol);
    int GetNumberOfCopies(ICollection* aoCol);
+   std::vector<int> GetLocalCopies(ICollection* aoCol);
+   int GetNumOfLocalCopies(ICollection* aoCol);
    ICollection* GetResidentCollection(ICollection* aoCol, int aiCopyID);
+   void IncrementItem(ICollection* aoCol);
+   void RemoveItem(ICollection* aoCol, int aiCardID);
+   bool AddItem(ICollection* aoCallingCol, ICollection* aoSourcingCol);
+   bool AddItem(ICollection* aoCallingCol, ICollection* aoSourcingCol, int aiCardID);
+
 
 private:
    int m_iAllCopies; // Used in assigning IDs.

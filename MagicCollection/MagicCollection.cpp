@@ -23,7 +23,9 @@ int main()
    CS.LoadLib("AllCards.xml");
 
    Collection TestCol(&CS);
+   Collection TestCol2(&CS);
 
+   TestCol.AddItem("Seeker of the Way");
    TestCol.AddItem("Thing in the Ice");
    TestCol.AddItem("Jace Beleren");
    TestCol.AddItem("Seeker of the Way");
@@ -35,6 +37,20 @@ int main()
    {
       std::cout << (*card_iter)->GetName() << std::endl;
    }
+
+   TestCol2.AddItem("Seeker of the Way", &TestCol);
+
+   std::vector<ICollectionObject*> lstt = TestCol2.GetList();
+   for (std::vector<ICollectionObject*>::iterator card_iter = lstt.begin();
+      card_iter != lstt.end();
+      ++card_iter)
+   {
+      std::cout << (*card_iter)->GetName() << " Local: " 
+      << (*card_iter)->GetNumOfLocalCopies(&TestCol2) 
+      << " Total: " << (*card_iter)->GetNumberOfCopies(&TestCol2) << std::endl;
+   }
+
+   
 
    //CS.PrintAllWith("Ice", true);
    //CS.ConvertJSONCollection("AllSets.json");

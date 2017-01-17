@@ -11,17 +11,17 @@ public:
    SourceObject(std::string aszName);
    ~SourceObject();
 
-   std::map<std::string, std::string> Attributes;
-
-   bool AddAttribute(std::string key, std::string value);
-
-   bool HasAttribute(std::string aszname);
-
    std::string GetName();
 
-   bool GetCollectionObject(CollectionObject*& roColO);
+   // Used in building this object
+   std::map<std::string, std::string> Attributes;
+   bool AddAttribute(std::string key, std::string value);
+   bool HasAttribute(std::string aszname);
 
+   // Used in loading from source DB.
+   bool GetCollectionObject(CollectionObject*& roColO);
    void Cache(CollectionObject* roColO);
+
 
 private:
    std::string m_szName;
