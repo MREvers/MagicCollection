@@ -177,8 +177,10 @@ void CollectionSource::ConvertJSONCollection(std::string aszFileName)
    // j is a complete json object.
    for (nlohmann::json::iterator iter_set = j.begin(); iter_set != j.end(); ++iter_set)
    {
+      clock_t end = clock();
+      double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;
       std::string szSetName = iter_set.key();
-      std::cout << "Set: " << iter_set.key() << " Cards: " << lstCardNameNode->size() << std::endl;
+      std::cout << "Set: " << szSetName << " Cards: " << lstCardNameNode->size() << " " << elapsed_secs << std::endl;
       nlohmann::json jsonListCards = iter_set.value().at("cards");
 
       // jsonCardsList is a json-list of json objects... same as JSON, but no 'key'
