@@ -11,35 +11,37 @@ class IName
 
       virtual ~IName(){};
 
-      std::string GetName()
+      std::string inline GetName()
       {
          return m_szName;
       }
 
       static int inline FindInsertionPoint(std::string aszInsert, const std::vector<IName*>& aLstNames)
       {
+         int iSize = aLstNames.size();
          int iIndex = 0;
          std::vector<IName*>::const_iterator iter = aLstNames.begin();
-         while (iIndex < aLstNames.size())
+         while (iIndex < iSize)
          {
-            if (aszInsert.compare((*iter)->GetName()) > 0)
+            std::string szOther = (*iter)->GetName();
+            if (szOther.compare(aszInsert) < 0)
             {
                iIndex++;
             }
             else
             {
-               return iIndex;
+               break;
             }
          }
 
-         return 0;
+         return iIndex;
       }
 
       static int inline FindInSortedList(std::string aszFindName, const std::vector<IName*>& aLstNames)
       {
-
+         int iSize = aLstNames.size();
          int iLeft = 0;
-         int iRight = aLstNames.size();
+         int iRight = iSize;
          if (iRight < 1)
          {
             return -1;
@@ -49,14 +51,14 @@ class IName
          {
             int middle = (iLeft + iRight) / 2;
 
-            if (middle < 0 || middle >= aLstNames.size())
+            if (middle < 0 || middle >= iSize)
             {
                return -1;
             }
-
-            if (aLstNames.at(middle)->GetName() == aszFindName)
+            std::string szName = aLstNames.at(middle)->GetName();
+            if (szName == aszFindName)
                return middle;
-            else if (aszFindName.compare(aLstNames.at(middle)->GetName()) < 0)
+            else if (aszFindName.compare(szName) < 0)
                iRight = middle - 1;
             else
                iLeft = middle + 1;
