@@ -160,6 +160,7 @@
     <ClInclude Include="CollectionSource.h" />
     <ClInclude Include="ICollection.h" />
     <ClInclude Include="ICollectionObject.h" />
+    <ClInclude Include="IName.h" />
     <ClInclude Include="MagicCardObject.h" />
     <ClInclude Include="SourceObject.h" />
   </ItemGroup>

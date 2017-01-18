@@ -1,19 +1,13 @@
 #include "SourceObject.h"
 
 
-SourceObject::SourceObject(std::string aszName)
+SourceObject::SourceObject(std::string aszName) : IName(aszName)
 {
-   m_szName = aszName;
    AddAttribute("name", aszName);
 }
 
 SourceObject::~SourceObject()
 {
-}
-
-std::string SourceObject::GetName()
-{
-   return m_szName;
 }
 
 // This may be used in the future.. but not now.

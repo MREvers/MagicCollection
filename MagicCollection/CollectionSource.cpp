@@ -1,14 +1,5 @@
 
 #include "CollectionSource.h"
-
-CardAttributes::CardAttributes()
-{
-}
-
-CardAttributes::~CardAttributes()
-{
-}
-
 CollectionSource::CollectionSource()
 {
 }
@@ -87,35 +78,6 @@ void CollectionSource::PrintAllWith(std::string aszMatch, bool caseSensitive)
    }
 }
 
-int CollectionSource::load_Contains(std::string aszName)
-{
-   int iLeft = 0;
-   int iRight = m_lstCardBuffer.size();
-   if (iRight < 1)
-   {
-      return -1;
-   }
-
-   while (iLeft <= iRight)
-   {
-      int middle = (iLeft + iRight) / 2;
-
-      if (middle < 0 || middle >= m_lstCardBuffer.size())
-      {
-         return -1;
-      }
-
-      if (m_lstCardBuffer[middle]->GetName() == aszName)
-         return middle;
-      else if (aszName.compare(m_lstCardBuffer[middle]->GetName()) < 0)
-         iRight = middle - 1;
-      else
-         iLeft = middle + 1;
-   }
-
-   return -1;
-}
-
 void CollectionSource::LoadLib(std::string aszFileName)
 {
    rapidxml::xml_document<> doc;
@@ -158,7 +120,7 @@ void CollectionSource::LoadLib(std::string aszFileName)
       }
 
       xmlNode_Card = xmlNode_Card->next_sibling();
-      load_AddSorted(sO);
+      m_lstCardBuffer.push_back(sO);
    }
 
    // Mechanisms
@@ -167,54 +129,6 @@ void CollectionSource::LoadLib(std::string aszFileName)
    std::cout << "Load Time: " << elapsed_secs << std::endl;
 
    std::cout << "Load Done" << std::endl;
-}
-
-void CollectionSource::load_AddSorted(SourceObject* oSrcObj)
-{
-   m_lstCardBuffer.push_back(oSrcObj);
-   /*
-      int iLastSpot = 0;
-      while (iLastSpot < lstCardBuffer.size())
-      {
-         int iComparisonResult = lstCardBuffer[iLastSpot]->GetName().compare(oSrcObj->GetName());
-         if (iComparisonResult < 0)
-         {
-            iLastSpot++;
-         }
-         else
-         {
-            break;
-         }
-      }
-      std::vector<SourceObject*>::iterator iter = lstCardBuffer.begin() + iLastSpot;
-      lstCardBuffer.insert(iter, oSrcObj);
-      */
-}
-
-
-std::string CollectionSource::ImportCollectionObject(std::string aszNewItem)
-{
-
-
-
-
-   std::ifstream i("JSONTest.txt");
-
-
-   nlohmann::json j;
-   i >> j;
-   nlohmann::json cardsJ = j;
-   for (nlohmann::json::iterator it = cardsJ.begin(); it != cardsJ.end(); ++it)
-   {
-      nlohmann::json js = it.value().at("cards");
-      std::cout << it.key() << " : " << it.value() << "\n";
-      for (nlohmann::json::iterator iter = js.begin(); iter != js.end(); ++iter)
-      {
-         std::cout << iter.value().find("name").value() << "\n";
-      }
-
-   }
-   return "hi";
 }
 
 // ConvertJSONCollection
@@ -228,13 +142,14 @@ void CollectionSource::ConvertJSONCollection(std::string aszFileName)
    i >> j;
 
    std::cout << "JSON Loaded Into Memory: " << sizeof(j) << std::endl;
-
+   clock_t begin = clock();
    // Allocate on Heap to avoid stack overflow.
    rapidxml::xml_document<>* xmlCardDoc = new rapidxml::xml_document<>;
 
    // Allocate on Heap to avoid stack overflow.
-   std::vector<std::pair<std::string, CardAttributes*>>* lstCardNameNode
-      = new std::vector<std::pair<std::string, CardAttributes*>>();
+   // IName will actually be "Card Attributes"
+   std::vector<IName*>* lstCardNameNode
+      = new std::vector<IName*>();
 
    // Since rapid xml takes char* pointers, we don't want those strings deleted (thereby created hanging pointers)
    //  before the strings are saved off. We also don't want the strings moved for the same reason.
@@ -272,9 +187,8 @@ void CollectionSource::ConvertJSONCollection(std::string aszFileName)
          nlohmann::json jsonCard = iter_cards.value();
          std::stringstream ssCardName;
          ssCardName << jsonCard.at("name").begin().value();
-         std::string szCardName = ssCardName.str();
-
-         int iFound = import_Contains(*lstCardNameNode, str_trim(szCardName, '\"'));
+         std::string szCardName = str_trim(ssCardName.str(), '\"');
+         int iFound = IName::FindInSortedList(szCardName, *lstCardNameNode);//import_Contains(*lstCardNameNode, str_trim(szCardName, '\"'));
          if (iFound == -1)
          {
             // Create the card node.
@@ -284,11 +198,7 @@ void CollectionSource::ConvertJSONCollection(std::string aszFileName)
             //xmlNode_Cards->append_node(xmlNode_Card);
 
             // Create the data structure.
-            CardAttributes* oCA = new CardAttributes();
-
-            // Make the pair.
-            std::pair<std::string, CardAttributes*>* pair_Name_CA =
-               new std::pair<std::string, CardAttributes*>(str_trim(szCardName, '\"'), oCA);
+            CardAttributes* oCA = new CardAttributes(szCardName);
 
             oCA->XMLNode = xmlNode_Card;
 
@@ -326,36 +236,40 @@ void CollectionSource::ConvertJSONCollection(std::string aszFileName)
             } // End Card Attributes iterator
 
             // The pair is built up now add it.
-            import_AddSorted(*lstCardNameNode, pair_Name_CA);
-            delete pair_Name_CA;
+            int iInsertPt = IName::FindInsertionPoint(szCardName, *lstCardNameNode);
+            std::vector<IName*>::iterator insertion_iter = lstCardNameNode->begin() + iInsertPt;
+            lstCardNameNode->insert(insertion_iter, oCA);
          } // End card not yet added
          else
          {
             //std::cout << "Duplicate found: " << szCardName << std::endl;
             int iSetKeyIndex = 0;
-            std::string szCurrentKey = lstCardNameNode->at(iFound).second->Keys[iSetKeyIndex];
+            CardAttributes* oCardNameNode = reinterpret_cast<CardAttributes*> (lstCardNameNode->at(iFound));
+            std::string szCurrentKey = oCardNameNode->Keys[iSetKeyIndex];
             while (iSetKeyIndex < 31 && szCurrentKey != "set")
             {
                iSetKeyIndex++;
-               szCurrentKey = lstCardNameNode->at(iFound).second->Keys[iSetKeyIndex];
+               szCurrentKey = oCardNameNode->Keys[iSetKeyIndex];
             }
 
             if (szCurrentKey == "set")
             {
                // Update the string buffer
-               lstCardNameNode->at(iFound).second->Vals[iSetKeyIndex] = lstCardNameNode->at(iFound).second->Vals[iSetKeyIndex] + ", " + szSetName;
+               
+               oCardNameNode->Vals[iSetKeyIndex] = oCardNameNode->Vals[iSetKeyIndex] + ", " + szSetName;
 
                // Update the node
-               rapidxml::xml_node<>* xmlNode_RemoveNode = lstCardNameNode->at(iFound).second->XMLChildNodes[iSetKeyIndex];
+               rapidxml::xml_node<>* xmlNode_RemoveNode = oCardNameNode->XMLChildNodes[iSetKeyIndex];
                rapidxml::xml_node<>* xmlNode_NewNode = xmlCardDoc->allocate_node(rapidxml::node_element,
-                  lstCardNameNode->at(iFound).second->Keys[iSetKeyIndex].c_str(), lstCardNameNode->at(iFound).second->Vals[iSetKeyIndex].c_str());
+                  oCardNameNode->Keys[iSetKeyIndex].c_str(),
+                  oCardNameNode->Vals[iSetKeyIndex].c_str());
 
                // Swap out the old node for the new.
-               lstCardNameNode->at(iFound).second->XMLNode->remove_node(xmlNode_RemoveNode);
-               lstCardNameNode->at(iFound).second->XMLNode->append_node(xmlNode_NewNode);
+               oCardNameNode->XMLNode->remove_node(xmlNode_RemoveNode);
+               oCardNameNode->XMLNode->append_node(xmlNode_NewNode);
 
                // Update the stored reference.
-               lstCardNameNode->at(iFound).second->XMLChildNodes[iSetKeyIndex] = xmlNode_NewNode;
+               oCardNameNode->XMLChildNodes[iSetKeyIndex] = xmlNode_NewNode;
 
             }
          } // Card already in database
@@ -367,7 +281,7 @@ void CollectionSource::ConvertJSONCollection(std::string aszFileName)
    // Iterate throught the buffer and add the nodes in the right order
    for (auto card : *lstCardNameNode)
    {
-      xmlNode_Cards->append_node(card.second->XMLNode);
+      xmlNode_Cards->append_node(((CardAttributes*)card)->XMLNode);
    }
 
    std::cout << "Parsing Complete" << std::endl;
@@ -381,11 +295,15 @@ void CollectionSource::ConvertJSONCollection(std::string aszFileName)
    file_stored.close();
    xmlCardDoc->clear();
 
+   clock_t end = clock();
+   double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;
+   std::cout << "Load Time: " << elapsed_secs << std::endl;
+
    std::cout << "XML Saved to Disk" << std::endl;
 
    for (auto card : *lstCardNameNode)
    {
-      delete card.second;
+      delete card;
    }
 
    lstCardNameNode->clear();
@@ -433,55 +351,3 @@ std::string CollectionSource::str_clean(const std::string& src)
 
    return szRetVal;
 }
-
-int CollectionSource::import_Contains(std::vector<std::pair<std::string, CardAttributes*>>& buffer, std::string aszName)
-{
-   int iLeft = 0;
-   int iRight = buffer.size();
-   if (iRight < 1)
-   {
-      return -1;
-   }
-
-   while (iLeft <= iRight)
-   {
-      int middle = (iLeft + iRight) / 2;
-
-      if (middle < 0 || middle >= buffer.size())
-      {
-         return -1;
-      }
-
-      if (buffer[middle].first == aszName)
-         return middle;
-      else if (aszName.compare(buffer[middle].first) < 0)
-         iRight = middle - 1;
-      else
-         iLeft = middle + 1;
-   }
-
-   return -1;
-}
-
-void CollectionSource::import_AddSorted(std::vector<std::pair<std::string, CardAttributes*>>& buffer, std::pair<std::string, CardAttributes*>* element)
-{
-   std::string szName = element->first;
-
-   int iLastSpot = 0;
-   while (iLastSpot < buffer.size())
-   {
-      int iComparisonResult = buffer[iLastSpot].first.compare(szName);
-      if (iComparisonResult < 0)
-      {
-         iLastSpot++;
-      }
-      else
-      {
-         break;
-      }
-   }
-
-   std::vector<std::pair<std::string, CardAttributes*>>::iterator iter = buffer.begin() + iLastSpot;
-   buffer.insert(iter, *element);
-}
-

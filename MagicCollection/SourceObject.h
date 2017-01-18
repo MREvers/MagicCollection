@@ -1,17 +1,18 @@
 #pragma once
 #pragma message ("Starting SourceObject.h")
-#include <map>
+#include "IName.h"
 #include "CollectionObject.h"
+
+#include <map>
+
 
 class CollectionObject;
 
-class SourceObject
+class SourceObject : public IName
 {
 public:
    SourceObject(std::string aszName);
    ~SourceObject();
-
-   std::string GetName();
 
    // Used in building this object
    std::map<std::string, std::string> Attributes;
@@ -24,7 +25,6 @@ public:
 
 
 private:
-   std::string m_szName;
    bool m_bHasCO;
    CollectionObject* m_oCollectionObject;
 };

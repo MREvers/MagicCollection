@@ -20,11 +20,11 @@ class CollectionObject;
 class Collection;
 
 // CardAttributes is used to convert allsets json to xml.
-class CardAttributes
+class CardAttributes : public IName
 {
    public:
-      CardAttributes();
-      ~CardAttributes();
+      CardAttributes(std::string aszName) : IName(aszName){};
+      ~CardAttributes(){};
 
       std::string Keys[35];
       std::string Vals[35];
@@ -37,8 +37,6 @@ class CollectionSource
 public:
    CollectionSource();
    ~CollectionSource();
-
-   std::string ImportCollectionObject(std::string aszImportItem);
    
    // Database Functions
    void ConvertJSONCollection(std::string aszFileName);
@@ -53,14 +51,6 @@ private:
    std::vector<SourceObject*> m_lstCardBuffer;
    std::string str_trim(const std::string& srz, char removeChar);
    std::string str_clean(const std::string & src);
-
-   int load_Contains(std::string asName);
-   void load_AddSorted(SourceObject* aoNewObj);
-   
-
-   // Functions used in import from json to xml.
-   int import_Contains(std::vector<std::pair<std::string, CardAttributes*>>& buffer, std::string aszName);
-   void import_AddSorted(std::vector<std::pair<std::string, CardAttributes*>>& buffer, std::pair<std::string, CardAttributes*>* element);
 };
 
 #pragma message ("Finish CollectionSource.h")

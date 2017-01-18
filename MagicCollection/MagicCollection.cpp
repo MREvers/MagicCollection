@@ -6,11 +6,11 @@
 #include <iterator>
 #include <xmllite.h>
 
-#include "Collection.h"
 #include "json.hpp"
 #include "json/json.h"
 #include "rapidxml-1.13\rapidxml_print.hpp"
 #include "rapidxml-1.13\rapidxml.hpp"
+#include "CollectionSource.h"
 
 using json = nlohmann::json;
 
@@ -20,37 +20,7 @@ int main()
 {
    CollectionSource CS;
 
-   CS.LoadLib("AllCards.xml");
-
-   Collection TestCol(&CS);
-   Collection TestCol2(&CS);
-
-   TestCol.AddItem("Seeker of the Way");
-   TestCol.AddItem("Thing in the Ice");
-   TestCol.AddItem("Jace Beleren");
-   TestCol.AddItem("Seeker of the Way");
-   
-   std::vector<ICollectionObject*> lst = TestCol.GetList();
-   for (std::vector<ICollectionObject*>::iterator card_iter = lst.begin();
-    card_iter != lst.end();
-     ++card_iter)
-   {
-      std::cout << (*card_iter)->GetName() << std::endl;
-   }
-
-   TestCol2.AddItem("Seeker of the Way", &TestCol);
-
-   std::vector<ICollectionObject*> lstt = TestCol2.GetList();
-   for (std::vector<ICollectionObject*>::iterator card_iter = lstt.begin();
-      card_iter != lstt.end();
-      ++card_iter)
-   {
-      std::cout << (*card_iter)->GetName() << " Local: " 
-      << (*card_iter)->GetNumOfLocalCopies(&TestCol2) 
-      << " Total: " << (*card_iter)->GetNumberOfCopies(&TestCol2) << std::endl;
-   }
-
-   
+   CS.ConvertJSONCollection("AllSets.json");
 
    //CS.PrintAllWith("Ice", true);
    //CS.ConvertJSONCollection("AllSets.json");
