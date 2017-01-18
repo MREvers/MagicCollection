@@ -150,6 +150,7 @@ void CollectionSource::ConvertJSONCollection(std::string aszFileName)
    // IName will actually be "Card Attributes"
    std::vector<IName*>* lstCardNameNode
       = new std::vector<IName*>();
+   std::vector<std::string> lstNames;
 
    // Since rapid xml takes char* pointers, we don't want those strings deleted (thereby created hanging pointers)
    //  before the strings are saved off. We also don't want the strings moved for the same reason.
@@ -239,6 +240,8 @@ void CollectionSource::ConvertJSONCollection(std::string aszFileName)
             int iInsertPt = IName::FindInsertionPoint(szCardName, *lstCardNameNode);
             std::vector<IName*>::iterator insertion_iter = lstCardNameNode->begin() + iInsertPt;
             lstCardNameNode->insert(insertion_iter, oCA);
+            std::vector<std::string>::iterator ins_iter = lstNames.begin() + iInsertPt;
+            lstNames.insert(ins_iter, szCardName);
          } // End card not yet added
          else
          {

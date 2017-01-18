@@ -20,10 +20,9 @@ class IName
       {
          int iSize = aLstNames.size();
          int iIndex = 0;
-         std::vector<IName*>::const_iterator iter = aLstNames.begin();
          while (iIndex < iSize)
          {
-            std::string szOther = (*iter)->GetName();
+            std::string szOther = aLstNames.at(iIndex)->GetName();
             if (szOther.compare(aszInsert) < 0)
             {
                iIndex++;
