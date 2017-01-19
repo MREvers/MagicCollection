@@ -19,38 +19,27 @@
 class CollectionObject;
 class Collection;
 
-// CardAttributes is used to convert allsets json to xml.
-class CardAttributes : public IName
-{
-   public:
-      CardAttributes(std::string aszName) : IName(aszName){};
-      ~CardAttributes(){};
-
-      std::string Keys[35];
-      std::string Vals[35];
-      rapidxml::xml_node<>* XMLNode;
-      rapidxml::xml_node<>* XMLChildNodes[35];
-};
 
 class CollectionSource
 {
 public:
    CollectionSource();
    ~CollectionSource();
-   
+
    // Database Functions
-   void ConvertJSONCollection(std::string aszFileName);
    void LoadLib(std::string aszFileName);
 
-   // Service functions
-   bool GetCard(std::string aszName, CollectionObject& roCard, CollectionObject*& roRetCard);
-   void PrintAllWith(std::string aszMatch);
-   void PrintAllWith(std::string aszMatch, bool caseSensitive);
+   // Return the cache location if successful, -1 otherwise.
+   int LoadCard(std::string aszCardName);
+
+   // Expose the Collection Object to get copies etc..
+   CollectionObject* GetCardPrototype(int aiCacheIndex);
 
 private:
-   std::vector<SourceObject*> m_lstCardBuffer;
-   std::string str_trim(const std::string& srz, char removeChar);
-   std::string str_clean(const std::string & src);
+   std::vector<SourceObject> m_lstptCardBuffer;
+   std::vector<CollectionObject> m_lstoCardCache;
+
+   int findInBuffer(std::string aszName);
 };
 
 #pragma message ("Finish CollectionSource.h")

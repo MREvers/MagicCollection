@@ -1,14 +1,12 @@
 #pragma once
 #pragma message ("Starting SourceObject.h")
-#include "IName.h"
-#include "CollectionObject.h"
-
 #include <map>
 
+#include "CollectionObject.h"
 
 class CollectionObject;
 
-class SourceObject : public IName
+class SourceObject
 {
 public:
    SourceObject(std::string aszName);
@@ -17,16 +15,15 @@ public:
    // Used in building this object
    std::map<std::string, std::string> Attributes;
    bool AddAttribute(std::string key, std::string value);
-   bool HasAttribute(std::string aszname);
 
    // Used in loading from source DB.
-   bool GetCollectionObject(CollectionObject*& roColO);
-   void Cache(CollectionObject* roColO);
-
+   std::string GetName();
+   int GetCacheIndex();
+   void Cache(int aiCacheIndex);
 
 private:
-   bool m_bHasCO;
-   CollectionObject* m_oCollectionObject;
+   int m_iCachedIndex;
+   std::string m_szName;
 };
 
 #pragma message ("Finish SourceObject.h")

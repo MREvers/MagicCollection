@@ -39,6 +39,9 @@
     <ClCompile Include="MagicCardObject.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="JSONImporter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ICollection.h">
@@ -62,7 +65,7 @@
     <ClInclude Include="MagicCardObject.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="IName.h">
+    <ClInclude Include="JSONImporter.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -1,32 +1,15 @@
 #include "SourceObject.h"
 
 
-SourceObject::SourceObject(std::string aszName) : IName(aszName)
+SourceObject::SourceObject(std::string aszName)
 {
    AddAttribute("name", aszName);
+   m_iCachedIndex = -1;
+   m_szName = aszName;
 }
 
 SourceObject::~SourceObject()
 {
-}
-
-// This may be used in the future.. but not now.
-bool SourceObject::HasAttribute(std::string aszName)
-{
-   return false;
-   /* assume that the database is not redundant
-      bool bRetval = false;
-      for (auto keyVal : Attributes)
-      {
-         bRetval || keyVal.first == aszName;
-         if (bRetval)
-         {
-            break;
-         }
-      }
-
-      return bRetval;
-      */
 }
 
 bool SourceObject::AddAttribute(std::string key, std::string value)
@@ -46,22 +29,18 @@ bool SourceObject::AddAttribute(std::string key, std::string value)
    return false;
 }
 
-bool SourceObject::GetCollectionObject(CollectionObject*& roColO)
+std::string SourceObject::GetName()
 {
-   if (m_bHasCO)
-   {
-      roColO = m_oCollectionObject;
-      return true;
-   }
-   else
-   {
-      return false;
-   }
+   return m_szName;
 }
 
-void SourceObject::Cache(CollectionObject* aoColO)
+int SourceObject::GetCacheIndex()
 {
-   m_oCollectionObject = aoColO;
-   m_bHasCO = true;
+   return m_iCachedIndex;
+}
+
+void SourceObject::Cache(int aiCacheIndex)
+{
+   m_iCachedIndex = aiCacheIndex;
 }
 
