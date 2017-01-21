@@ -7,7 +7,8 @@ class ICollection
 {
 public:
    // Get from collection source.
-   virtual void AddItem(std::string aszNewItem) = 0;
+   virtual void AddItem(std::string aszNewItem, bool bFinal) = 0;
+   virtual void RemoveItem(std::string aszRemoveItem, bool bFinal) = 0;
    
 };
 

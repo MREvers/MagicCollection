@@ -30,6 +30,20 @@ CopyObject* CollectionObject::AddCopy(std::string aszCollectionName)
    return &m_lstCopies.at(m_lstCopies.size()-1);
 }
 
+void CollectionObject::RemoveCopy(std::string aszCollectionName)
+{
+   // In the future, we need to find the copy that matches the description.
+   // If more than one copy matches the description, remove any.
+   for (std::vector<CopyObject>::iterator iter = m_lstCopies.begin(); iter != m_lstCopies.end(); ++iter)
+   {
+      if (iter->ParentCollection == aszCollectionName)
+      {
+         m_lstCopies.erase(iter);
+         break;
+      }
+   }
+}
+
 std::vector<CopyObject*> CollectionObject::GetLocalCopies(std::string aszCollectionName)
 {
    std::vector<CopyObject*> rLstRetVal;

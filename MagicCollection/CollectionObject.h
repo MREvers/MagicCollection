@@ -14,6 +14,8 @@ class CopyObject
    public:
       std::string ParentCollection;
       std::vector<std::string> ResidentCollections;
+      std::map<std::string, std::string> UniqueTraits;
+      // Other analytics go here.
 };
 
 // Since this is a flyweight object, the interface should act as though it is 'in' the collection,
@@ -30,6 +32,8 @@ public:
    // Collection Interface
    std::string GetName();
    CopyObject* AddCopy(std::string aszCollectionName);
+   // The col children will have to match exactly... because copies are not identical.
+   void RemoveCopy(std::string aszCollectionName);
    std::vector<CopyObject*> GetLocalCopies(std::string aszCollectionName);
    std::vector<CopyObject*> GetCopies(std::string aszCollectionName);
 

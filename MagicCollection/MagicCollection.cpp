@@ -11,6 +11,7 @@
 #include "rapidxml-1.13\rapidxml_print.hpp"
 #include "rapidxml-1.13\rapidxml.hpp"
 #include "Collection.h"
+#include "JSONImporter.h"
 #include "CollectionSource.h"
 
 using json = nlohmann::json;
@@ -20,11 +21,13 @@ std::string escape(const std::string& str);
 int main()
 {
    CollectionSource CS;
-   CS.LoadLib("AllCards.xml");
+   CS.LoadLib("AllSets.json.out");
 
    Collection Col("Primary", &CS);
-   Col.AddItem("Thing in the Ice");
-   Col.AddItem("Thing in the Ice");
+   Col.LoadCollection("TestCollection.col");
+   Col.RemoveItem("Sylvan Advocate", false);
+   //Col.AddItem("Thing in the Ice");
+   //Col.AddItem("Thing in the Ice");
    Col.PrintList();
    
    //CS.PrintAllWith("Ice", true);

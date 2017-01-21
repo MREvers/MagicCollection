@@ -14,18 +14,7 @@ SourceObject::~SourceObject()
 
 bool SourceObject::AddAttribute(std::string key, std::string value)
 {
-   if (key == "set" ||
-      key == "power" ||
-      key == "toughness" ||
-      key == "manaCost" ||
-      key == "name" ||
-      key == "text" ||
-      key == "loyalty" ||
-      key == "colors")
-   {
-      Attributes.insert(std::make_pair(key, value));
-   }
-
+   Attributes.insert(std::make_pair(key, value));
    return false;
 }
 

@@ -104,20 +104,30 @@ void JSONImporter::ImportJSON(std::string aszFileName)
             {
                std::string szKey = iter_card.key();
 
-               std::stringstream ss;
-               ss << iter_card.value();
-               std::string szValue = ss.str();
+               if (szKey == "set" ||
+                  szKey == "power" ||
+                  szKey == "toughness" ||
+                  szKey == "manaCost" ||
+                  szKey == "text" ||
+                  szKey == "loyalty" ||
+                  szKey == "name" ||
+                  szKey == "colors")
+               {
+                  std::stringstream ss;
+                  ss << iter_card.value();
+                  std::string szValue = ss.str();
 
-               oCA->Keys[iNumKeyValPair] = str_clean(szKey);
-               oCA->Vals[iNumKeyValPair] = str_clean(szValue);
+                  oCA->Keys[iNumKeyValPair] = str_clean(szKey);
+                  oCA->Vals[iNumKeyValPair] = str_clean(szValue);
 
-               xmlNode_CardAttribute = xmlCardDoc->allocate_node(rapidxml::node_element,
-                  oCA->Keys[iNumKeyValPair].c_str(), oCA->Vals[iNumKeyValPair].c_str());
-               xmlNode_Card->append_node(xmlNode_CardAttribute);
+                  xmlNode_CardAttribute = xmlCardDoc->allocate_node(rapidxml::node_element,
+                     oCA->Keys[iNumKeyValPair].c_str(), oCA->Vals[iNumKeyValPair].c_str());
+                  xmlNode_Card->append_node(xmlNode_CardAttribute);
 
-               oCA->XMLChildNodes[iNumKeyValPair] = xmlNode_CardAttribute;
+                  oCA->XMLChildNodes[iNumKeyValPair] = xmlNode_CardAttribute;
 
-               iNumKeyValPair++;
+                  iNumKeyValPair++;
+               }
 
             } // End Card Attributes iterator
 

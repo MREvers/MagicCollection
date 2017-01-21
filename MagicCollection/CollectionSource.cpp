@@ -10,6 +10,9 @@ CollectionSource::~CollectionSource()
 
 void CollectionSource::LoadLib(std::string aszFileName)
 {
+   m_lstptCardBuffer.clear();
+   m_lstptCardBuffer.reserve(17000);
+
    rapidxml::xml_document<> doc;
    std::ifstream file(aszFileName);
    std::stringstream buffer;
@@ -36,21 +39,22 @@ void CollectionSource::LoadLib(std::string aszFileName)
       rapidxml::xml_node<> *xmlNode_CardName = xmlNode_Card->first_node("name");
 
       SourceObject* sO = new SourceObject(xmlNode_CardName->value());
+      m_lstptCardBuffer.push_back(*sO);
+      delete sO;
+      sO = &m_lstptCardBuffer.at(m_lstptCardBuffer.size()-1);
 
+      bool bHasAll = false;
       while (xmlNode_CardAttribute != 0)
       {
          std::string szCardKey = xmlNode_CardAttribute->name();
          
-         if (szCardKey != "name")
-         {
-            sO->AddAttribute(szCardKey, xmlNode_CardAttribute->value());
-         }
+         sO->AddAttribute(szCardKey, xmlNode_CardAttribute->value());
          
          xmlNode_CardAttribute = xmlNode_CardAttribute->next_sibling();
       }
 
       xmlNode_Card = xmlNode_Card->next_sibling();
-      m_lstptCardBuffer.push_back(*sO);
+      
    }
 
    // Mechanisms
