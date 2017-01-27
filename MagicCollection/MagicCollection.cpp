@@ -21,8 +21,8 @@ std::string escape(const std::string& str);
 
 int main()
 {
-   //JSONImporter JS;
-   //JS.ImportJSON("AllSets.json");
+   JSONImporter JS;
+   JS.ImportJSON("AllSets.json");
    CollectionSource CS;
    CS.LoadLib("AllSets.json.out");
 

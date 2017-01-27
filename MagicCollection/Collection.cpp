@@ -208,6 +208,61 @@ void Collection::removeItem(std::string aszRemoveItem, std::vector<std::pair<std
    }
 }
 
+void Collection::changeItemAttribute(std::string aszCardname, CopyObject* aoCO, std::string aszKey, std::string aszNewVal, bool bFinal)
+{
+   if (TransactionIntercept)
+   {
+      std::string szOldVal = "";
+      std::map<std::string, std::string>::iterator iter_attrs = aoCO->NonUniqueTraits.find(aszKey);
+      if (iter_attrs != aoCO->NonUniqueTraits.end())
+      {
+         szOldVal = iter_attrs->second;
+
+         int iCardProto = m_ColSource->LoadCard(aszCardname);
+
+         std::string szCard = "";
+         CopyObject oCO(*aoCO);
+         szCard += cardToString(iCardProto, &std::make_pair(&oCO, 1));
+
+         std::string szAfter = "";
+         changeItemAttrs(&oCO, aszKey, aszNewVal);
+         szAfter = cardToString(iCardProto, &std::make_pair(&oCO, 1));
+
+         // Store the action and how to undo it here.
+         Collection::Action oAction;
+         oAction.Identifier = "% " + szCard + " -> " + szAfter;
+         oAction.Do = std::bind(&Collection::changeItemAttrs, this, aoCO, aszKey, aszNewVal);
+         oAction.Undo = std::bind(&Collection::changeItemAttrs, this, aoCO, aszKey, szOldVal);
+
+         // Store the arguments
+         Collection::Transaction* oTrans = &m_lstTransactions.at(m_lstTransactions.size() - 1);
+         oTrans->AddAction(oAction);
+      }
+
+      TransactionIntercept = false;
+      return;
+   }
+
+   Collection::Transaction* oTrans = openTransaction();
+
+   (*oTrans)->changeItemAttribute(aszCardname, aoCO, aszKey, aszNewVal);
+
+   if (bFinal)
+   {
+      oTrans->Finalize();
+   }
+
+}
+
+void Collection::changeItemAttrs(CopyObject* aoCO ,std::string aszKey, std::string aszNewVal)
+{
+   std::map<std::string,std::string>::iterator iter_attrs = aoCO->NonUniqueTraits.find(aszKey);
+   if (iter_attrs != aoCO->NonUniqueTraits.end())
+   {
+      iter_attrs->second = aszNewVal;
+   }
+}
+
 void Collection::LoadCollection(std::string aszFileName)
 {
    std::ifstream in(aszFileName);
@@ -375,7 +430,7 @@ void Collection::LoadCollection(std::string aszFileName)
             std::vector<std::string>::iterator iter_collections = m_lstLoadedCollectionsBuffer->begin();
             for (; iter_collections != m_lstLoadedCollectionsBuffer->end(); ++iter_collections)
             {
-               if (*iter_collections == oCopy.ParentCollection)
+               if (oCopy.ParentCollection != m_szName && *iter_collections == oCopy.ParentCollection)
                {
                   bCollectionExists = true;
                   break;
@@ -395,12 +450,15 @@ void Collection::LoadCollection(std::string aszFileName)
                {
                   if (iter_keyvals->first == "Parent")
                   {
-                     iter_keyvals->second = "";
+                     AddItem(szName, false, lstKeyVals);
+                     CopyObject oCO;
+                     m_ColSource->GetCardPrototype(m_ColSource->LoadCard(szName))->GetCopy(m_szName, lstKeyVals, oCO);
+                     changeItemAttribute(szName, &oCO, "Parent", "", true);
                      break;
                   }
                }
 
-               AddItem(szName, false, lstKeyVals);
+               
             }
          }
 
@@ -424,7 +482,7 @@ void Collection::LoadCollection(std::string aszFileName)
 
             if (!bFoundParent)
             {
-               (*iter_ColOs)->ParentCollection = "";
+               changeItemAttribute(szName, (*iter_ColOs), "Parent", "", true);
             }
          }
       }

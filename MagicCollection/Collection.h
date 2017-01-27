@@ -62,6 +62,8 @@ public:
     bool bFinal = true,
     std::vector<std::pair<std::string, std::string>> alstAttrs = std::vector<std::pair<std::string, std::string>>()) override;
    
+   
+
    void RollbackTransaction();
 
    void LoadCollection(std::string aszCollectionFile);
@@ -86,6 +88,8 @@ private:
 
    void addItem(std::string aszNewItem, std::vector<std::pair<std::string, std::string>> alstAttrs);
    void removeItem(std::string aszItem, std::vector<std::pair<std::string, std::string>> alstAttrs);
+   void changeItemAttribute(std::string aszCardname, CopyObject* aoCO, std::string aszKey, std::string aszNewVal, bool bFinal = true);
+   void changeItemAttrs(CopyObject* aoCO, std::string aszKey, std::string aszNewVal);
 
    Transaction* openTransaction();
    void finalizeTransaction(bool abRecord = true);
