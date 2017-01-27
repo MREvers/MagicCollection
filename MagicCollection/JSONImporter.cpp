@@ -151,7 +151,7 @@ void JSONImporter::ImportJSON(std::string aszFileName)
             {
                // Update the string buffer
 
-               oCardNameNode->Vals[iSetKeyIndex] = oCardNameNode->Vals[iSetKeyIndex] + ", " + szSetName;
+               oCardNameNode->Vals[iSetKeyIndex] = oCardNameNode->Vals[iSetKeyIndex] + "::" + szSetName;
 
                // Update the node
                rapidxml::xml_node<>* xmlNode_RemoveNode = oCardNameNode->XMLChildNodes[iSetKeyIndex];
@@ -160,6 +160,7 @@ void JSONImporter::ImportJSON(std::string aszFileName)
                   oCardNameNode->Vals[iSetKeyIndex].c_str());
 
                // Swap out the old node for the new.
+               // Uncomment this line if "Set" is unique..
                oCardNameNode->XMLNode->remove_node(xmlNode_RemoveNode);
                oCardNameNode->XMLNode->append_node(xmlNode_NewNode);
 

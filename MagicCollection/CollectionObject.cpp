@@ -21,13 +21,31 @@ std::string CollectionObject::GetName()
    return m_szName;
 }
 
+// By default the parent is the collection that adds it.
 CopyObject* CollectionObject::AddCopy(std::string aszCollectionName)
 {
    CopyObject oNewCopy;
    oNewCopy.ParentCollection = aszCollectionName;
    oNewCopy.ResidentCollections.push_back(aszCollectionName);
    m_lstCopies.push_back(oNewCopy);
-   return &m_lstCopies.at(m_lstCopies.size()-1);
+   return &m_lstCopies[m_lstCopies.size()-1];
+}
+
+CopyObject CollectionObject::GenerateCopy(std::string aszCollectionName)
+{
+   CopyObject oNewCopy;
+   oNewCopy.ParentCollection = aszCollectionName;
+   oNewCopy.ResidentCollections.push_back(aszCollectionName);
+   return oNewCopy;
+}
+
+CopyObject CollectionObject::GenerateCopy(std::string aszCollectionName, std::vector<std::pair<std::string, std::string>> alstAttrs)
+{
+   CopyObject oNewCopy;
+   oNewCopy.ParentCollection = aszCollectionName;
+   oNewCopy.ResidentCollections.push_back(aszCollectionName);
+   ConstructCopy(oNewCopy, alstAttrs);
+   return oNewCopy;
 }
 
 void CollectionObject::RemoveCopy(std::string aszCollectionName)
@@ -79,4 +97,76 @@ std::vector<CopyObject*> CollectionObject::GetCopies(std::string aszCollectionNa
    }
 
    return rLstRetVal;
+}
+
+bool CollectionObject::GetCopy(std::string aszCollectionName, std::vector<std::pair<std::string, std::string>> alstAttrs, CopyObject& roCO, bool abExact)
+{
+   bool bFound = false;
+   CopyObject oCompare = GenerateCopy(aszCollectionName);
+   ConstructCopy(oCompare, alstAttrs);
+
+   std::vector<CopyObject*> lstCopies = GetLocalCopies(aszCollectionName);
+   std::vector<CopyObject*>::iterator iter_copies = lstCopies.begin();
+   for (; iter_copies != lstCopies.end(); ++iter_copies)
+   {
+      if (IsSameIdentity(&oCompare, *iter_copies))
+      {
+         bFound = true;
+         roCO = **iter_copies;
+         break;
+      }
+   }
+
+   return bFound;
+}
+
+void CollectionObject::ConstructCopy(CopyObject& roCO, std::vector<std::pair<std::string, std::string>> alstAttrs)
+{
+   for (int i = 0; i < alstAttrs.size(); i++)
+   {
+      std::pair<std::string, std::string> pszs = alstAttrs.at(i);
+      if (pszs.first == "Parent")
+      {
+         roCO.ParentCollection = pszs.second;
+      }
+      else
+      {
+         roCO.NonUniqueTraits.at(pszs.first) = pszs.second;
+      }
+
+   }
+}
+
+bool CollectionObject::IsSameIdentity(CopyObject* aoCOne, CopyObject* aoCTwo)
+{
+   bool bMatch = true;
+   bMatch &= aoCOne->ParentCollection == aoCTwo->ParentCollection;
+
+   if (bMatch)
+   {
+      std::map<std::string, std::string>::iterator iter_keyVals = aoCOne->NonUniqueTraits.begin();
+      for (; iter_keyVals != aoCOne->NonUniqueTraits.end(); ++iter_keyVals)
+      {
+
+         bool bFoundMatch = false;
+         std::map<std::string, std::string>::iterator iter_keyValsTwo = aoCTwo->NonUniqueTraits.begin();
+         for (; iter_keyValsTwo != aoCTwo->NonUniqueTraits.end(); ++iter_keyValsTwo)
+         {
+            if (iter_keyVals->first == iter_keyValsTwo->first)
+            {
+               if (bFoundMatch |= iter_keyVals->second == iter_keyValsTwo->second)
+               {
+                  break;
+               }
+            }
+         }
+
+         if (!(bMatch &= bFoundMatch))
+         {
+            break;
+         }
+      }
+
+      return bMatch;
+   }
 }

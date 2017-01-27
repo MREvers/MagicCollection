@@ -8,6 +8,7 @@
 #include "rapidxml-1.13\rapidxml_utils.hpp"
 #include "json.hpp"
 
+#define _ITERATOR_DEBUG_LEVEL 0  
 #include <string>
 #include <fstream>
 #include <iostream>
@@ -35,11 +36,16 @@ public:
    // Expose the Collection Object to get copies etc..
    CollectionObject* GetCardPrototype(int aiCacheIndex);
 
+   // Returns all copies with parent == name
+   std::vector<CopyObject*> GetCollection(std::string aszCollectionName);
+
 private:
    std::vector<SourceObject> m_lstptCardBuffer;
    std::vector<CollectionObject> m_lstoCardCache;
+   std::vector<std::string> m_lstNonUniqueKeys;
 
    int findInBuffer(std::string aszName);
+   bool isUnique(std::string aszUnique);
 };
 
 #pragma message ("Finish CollectionSource.h")

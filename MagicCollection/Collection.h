@@ -1,11 +1,14 @@
 #pragma once
 #pragma message ("Starting Collection.h")
-
+#define _ITERATOR_DEBUG_LEVEL 0  
 #include <vector>
 #include <map>
 #include <iterator>
 #include <string>
 #include <functional>
+#include <iostream>
+#include <fstream>
+#include <ctime>
 
 #include "ICollection.h"
 #include "ICollectionObject.h"
@@ -20,6 +23,7 @@ class Collection : public ICollection
    class Action
    {
    public:
+      std::string Identifier;
       std::function<void()> Do;
       std::function<void()> Undo;
    };
@@ -28,28 +32,42 @@ class Collection : public ICollection
    {
    public:
       Transaction(Collection* aoCol);
+      ~Transaction();
 
       Collection* operator-> ();
       void AddAction(Action& aoAct);
       void RemoveAction(int i);
-      void Finalize();
+      void Finalize(bool abRecordable = true);
+      void Rollback();
 
       bool IsOpen = true;
+      bool Recordable;
+      std::vector<Action> Actions;
+
    private:
       Collection* m_Col;
-      std::vector<Action> m_lstActions;
    };
 public:
-   Collection(std::string aszName, CollectionSource* aoSource);
+   Collection(std::string aszName, CollectionSource* aoSource, std::vector<std::string>* alstLoadedCollections);
    ~Collection();
 
    // Meta
    std::string GetName();
 
-   void AddItem(std::string aszNewItem, bool bFinal = true) override;
-   void RemoveItem(std::string aszNewItem, bool bFinal = true) override;
+   void AddItem(std::string aszNewItem,
+    bool bFinal = true,
+    std::vector<std::pair<std::string,std::string>> alstAttrs = std::vector<std::pair<std::string, std::string>>()) override;
+   
+   void RemoveItem(std::string aszNewItem,
+    bool bFinal = true,
+    std::vector<std::pair<std::string, std::string>> alstAttrs = std::vector<std::pair<std::string, std::string>>()) override;
+   
+   void RollbackTransaction();
 
    void LoadCollection(std::string aszCollectionFile);
+   void SaveCollection(std::string aszCollectionFileName);
+   // Clears the history file, then writes the baseline.
+   void CreateBaselineHistory();
 
    void PrintList();
 
@@ -63,12 +81,17 @@ private:
    std::vector<int> m_lstCollection;
    std::string m_szName;
    std::vector<Transaction> m_lstTransactions;
+   std::string m_szHistoryFileName;
+   std::vector<std::string>* m_lstLoadedCollectionsBuffer;
 
-   void addItem(std::string aszNewItem);
-   void removeItem(std::string aszItem);
+   void addItem(std::string aszNewItem, std::vector<std::pair<std::string, std::string>> alstAttrs);
+   void removeItem(std::string aszItem, std::vector<std::pair<std::string, std::string>> alstAttrs);
 
    Transaction* openTransaction();
-   void finalizeTransaction();
+   void finalizeTransaction(bool abRecord = true);
+   std::vector<std::string> getCollectionString();
+
+   std::string cardToString(int aiCardFlyweight, std::pair<CopyObject*, int>* aoCopy);
 };
 
 #pragma message ("Finish Collection.h")

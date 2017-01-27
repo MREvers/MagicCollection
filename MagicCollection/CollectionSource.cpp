@@ -2,6 +2,7 @@
 #include "CollectionSource.h"
 CollectionSource::CollectionSource()
 {
+   m_lstNonUniqueKeys.push_back("set");
 }
 
 CollectionSource::~CollectionSource()
@@ -41,20 +42,27 @@ void CollectionSource::LoadLib(std::string aszFileName)
       SourceObject* sO = new SourceObject(xmlNode_CardName->value());
       m_lstptCardBuffer.push_back(*sO);
       delete sO;
-      sO = &m_lstptCardBuffer.at(m_lstptCardBuffer.size()-1);
+      sO = &m_lstptCardBuffer[m_lstptCardBuffer.size() - 1];
 
       bool bHasAll = false;
+
       while (xmlNode_CardAttribute != 0)
       {
          std::string szCardKey = xmlNode_CardAttribute->name();
+         if (isUnique(szCardKey))
+         {
+            sO->AddAttribute(szCardKey, xmlNode_CardAttribute->value());
+         }
+         else
+         {
+            sO->AddNonUniqueAttribute(szCardKey, xmlNode_CardAttribute->value());//->AddAttribute(szCardKey, xmlNode_CardAttribute->value());
+         }
          
-         sO->AddAttribute(szCardKey, xmlNode_CardAttribute->value());
-         
+
          xmlNode_CardAttribute = xmlNode_CardAttribute->next_sibling();
       }
 
       xmlNode_Card = xmlNode_Card->next_sibling();
-      
    }
 
    // Mechanisms
@@ -110,6 +118,23 @@ CollectionObject* CollectionSource::GetCardPrototype(int aiCacheIndex)
    }
 }
 
+std::vector<CopyObject*> CollectionSource::GetCollection(std::string aszCollectionName)
+{
+   std::vector<CopyObject*> lstCopies;
+   std::vector<CollectionObject>::iterator iter_colObjs = m_lstoCardCache.begin();
+   for (; iter_colObjs != m_lstoCardCache.end(); ++iter_colObjs)
+   {
+      std::vector<CopyObject*> lstFoundCopies = iter_colObjs->GetLocalCopies(aszCollectionName);
+      std::vector<CopyObject*>::iterator iter_copies = lstFoundCopies.begin();
+      for (; iter_copies != lstFoundCopies.end(); ++iter_copies)
+      {
+         lstCopies.push_back(*iter_copies);
+      }
+   }
+
+   return lstCopies;
+}
+
 int CollectionSource::findInBuffer(std::string aszCardName)
 {
    int iSize = m_lstptCardBuffer.size();
@@ -140,4 +165,16 @@ int CollectionSource::findInBuffer(std::string aszCardName)
    }
 
    return -1;
+}
+
+bool CollectionSource::isUnique(std::string aszFind)
+{
+   for (auto sz : m_lstNonUniqueKeys)
+   {
+      if (aszFind == sz)
+      {
+         return false;
+      }
+   }
+   return true;
 }

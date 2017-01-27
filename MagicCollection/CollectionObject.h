@@ -2,7 +2,7 @@
 #pragma message ("Starting CollectionObject.h")
 #include "ICollectionObject.h"
 #include "ICollection.h"
-
+#define _ITERATOR_DEBUG_LEVEL 0  
 #include <string>
 #include <vector>
 #include <map>
@@ -14,7 +14,9 @@ class CopyObject
    public:
       std::string ParentCollection;
       std::vector<std::string> ResidentCollections;
-      std::map<std::string, std::string> UniqueTraits;
+
+      // Non-unique in the sense that the trait itself can have more than one value.
+      std::map<std::string, std::string> NonUniqueTraits;
       // Other analytics go here.
 };
 
@@ -32,10 +34,20 @@ public:
    // Collection Interface
    std::string GetName();
    CopyObject* AddCopy(std::string aszCollectionName);
+
    // The col children will have to match exactly... because copies are not identical.
    void RemoveCopy(std::string aszCollectionName);
    std::vector<CopyObject*> GetLocalCopies(std::string aszCollectionName);
+   // Gets all resi copies.
    std::vector<CopyObject*> GetCopies(std::string aszCollectionName);
+   // Gets a copy with matching attrs
+   bool GetCopy(std::string aszCollectionName, std::vector<std::pair<std::string,std::string>> alstAttrs, CopyObject& roCO, bool abExact = true);
+   // Used in building a printable structure
+   static CopyObject GenerateCopy(std::string aszCollectionName);
+   // Used in building a printable structure
+   static CopyObject GenerateCopy(std::string aszCollectionName, std::vector<std::pair<std::string, std::string>> alstAttrs);
+   static void ConstructCopy(CopyObject& roCO, std::vector<std::pair<std::string, std::string>> alstAttrs);
+   static bool IsSameIdentity(CopyObject* aoCOne, CopyObject* aoCTwo);
 
 private:
    int m_iAllCopies; // Used in assigning IDs.

@@ -72,7 +72,7 @@ license you like.
 
 
 
-
+#define _ITERATOR_DEBUG_LEVEL 0  
 #include "json/json.h"
 
 #ifndef JSON_IS_AMALGAMATION

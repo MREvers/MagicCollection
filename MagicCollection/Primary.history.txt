@@ -1,0 +1,7 @@
+[Thu Jan 26 22:57:58 2017] 
++ 4x Thing in the Ice { Parent="Main" }
++ 4x Seeker of the Way 
++ 2x Gideon, Ally of Zendikar 
++ 3x Forest 
++ 3x Tireless Tracker 
++ 2x Sylvan Advocate 
