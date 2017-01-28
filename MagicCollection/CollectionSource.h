@@ -37,7 +37,7 @@ public:
    CollectionObject* GetCardPrototype(int aiCacheIndex);
 
    // Returns all copies with parent == name
-   std::vector<CopyObject*> GetCollection(std::string aszCollectionName);
+   std::vector<std::pair<std::string, CopyObject*>> GetCollection(std::string aszCollectionName);
 
 private:
    std::vector<SourceObject> m_lstptCardBuffer;

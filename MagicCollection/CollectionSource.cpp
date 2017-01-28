@@ -118,9 +118,9 @@ CollectionObject* CollectionSource::GetCardPrototype(int aiCacheIndex)
    }
 }
 
-std::vector<CopyObject*> CollectionSource::GetCollection(std::string aszCollectionName)
+std::vector<std::pair<std::string, CopyObject*>> CollectionSource::GetCollection(std::string aszCollectionName)
 {
-   std::vector<CopyObject*> lstCopies;
+   std::vector<std::pair<std::string, CopyObject*>>  lstCopies;
    std::vector<CollectionObject>::iterator iter_colObjs = m_lstoCardCache.begin();
    for (; iter_colObjs != m_lstoCardCache.end(); ++iter_colObjs)
    {
@@ -128,7 +128,7 @@ std::vector<CopyObject*> CollectionSource::GetCollection(std::string aszCollecti
       std::vector<CopyObject*>::iterator iter_copies = lstFoundCopies.begin();
       for (; iter_copies != lstFoundCopies.end(); ++iter_copies)
       {
-         lstCopies.push_back(*iter_copies);
+         lstCopies.push_back(std::make_pair(iter_colObjs->GetName(), *iter_copies));
       }
    }
 

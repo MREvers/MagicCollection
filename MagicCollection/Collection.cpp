@@ -172,17 +172,7 @@ void Collection::addItem(std::string aszNewItem, std::vector<std::pair<std::stri
    int iCard = m_ColSource->LoadCard(aszNewItem);
    if (iCard != -1)
    {
-      // Make sure we don't already 'have' this card.
-      bool bNewCard = true;
-      for (int i = 0; i < m_lstCollection.size(); i++)
-      {
-         bNewCard &= m_lstCollection.at(i) != iCard;
-      }
-
-      if (bNewCard)
-      {
-         m_lstCollection.push_back(iCard);
-      }
+      registerItem(iCard);
 
       // Get a copy of this card.
       CollectionObject* oCard = m_ColSource->GetCardPrototype(iCard);
@@ -191,8 +181,45 @@ void Collection::addItem(std::string aszNewItem, std::vector<std::pair<std::stri
       CopyObject* oCO = oCard->AddCopy(m_szName);
 
       CollectionObject::ConstructCopy(*oCO, alstAttrs);
+
    }
 
+}
+
+CopyObject* Collection::forceAdd(std::string aszNewItem, std::vector<std::pair<std::string, std::string>> alstAttrs)
+{
+   int iCard = m_ColSource->LoadCard(aszNewItem);
+   if (iCard != -1)
+   {
+      registerItem(iCard);
+
+      // Get a copy of this card.
+      CollectionObject* oCard = m_ColSource->GetCardPrototype(iCard);
+
+      // Add a copy of this card. Save the reference if we need to add unique traits.
+      CopyObject* oCO = oCard->AddCopy(m_szName);
+
+      CollectionObject::ConstructCopy(*oCO, alstAttrs);
+
+      return oCO;
+
+   }
+
+}
+
+void Collection::registerItem(int aiItem)
+{
+   // Make sure we don't already 'have' this card.
+   bool bNewCard = true;
+   for (int i = 0; i < m_lstCollection.size(); i++)
+   {
+      bNewCard &= m_lstCollection.at(i) != aiItem;
+   }
+
+   if (bNewCard)
+   {
+      m_lstCollection.push_back(aiItem);
+   }
 }
 
 void Collection::removeItem(std::string aszRemoveItem, std::vector<std::pair<std::string, std::string>> alstAttrs)
@@ -208,29 +235,34 @@ void Collection::removeItem(std::string aszRemoveItem, std::vector<std::pair<std
    }
 }
 
+std::string Collection::changeItemAttribute_string(std::string aszCardname, CopyObject* aoCO, std::string aszKey, std::string aszNewVal, bool bIsParentCol)
+{
+   int iCardProto = m_ColSource->LoadCard(aszCardname);
+
+   std::string szCard = "";
+   CopyObject oCO(*aoCO);
+   szCard += cardToString(iCardProto, &std::make_pair(&oCO, 1), !bIsParentCol);
+
+   std::string szAfter = "";
+   changeItemAttrs(&oCO, aszKey, aszNewVal);
+   szAfter = cardToString(iCardProto, &std::make_pair(&oCO, 1), !bIsParentCol);
+
+   return "% " + szCard + " -> " + szAfter;
+}
+
 void Collection::changeItemAttribute(std::string aszCardname, CopyObject* aoCO, std::string aszKey, std::string aszNewVal, bool bFinal)
 {
    if (TransactionIntercept)
    {
       std::string szOldVal = "";
       std::map<std::string, std::string>::iterator iter_attrs = aoCO->NonUniqueTraits.find(aszKey);
-      if (iter_attrs != aoCO->NonUniqueTraits.end())
+      if (iter_attrs != aoCO->NonUniqueTraits.end() || aszKey == "Parent")
       {
          szOldVal = iter_attrs->second;
 
-         int iCardProto = m_ColSource->LoadCard(aszCardname);
-
-         std::string szCard = "";
-         CopyObject oCO(*aoCO);
-         szCard += cardToString(iCardProto, &std::make_pair(&oCO, 1));
-
-         std::string szAfter = "";
-         changeItemAttrs(&oCO, aszKey, aszNewVal);
-         szAfter = cardToString(iCardProto, &std::make_pair(&oCO, 1));
-
          // Store the action and how to undo it here.
          Collection::Action oAction;
-         oAction.Identifier = "% " + szCard + " -> " + szAfter;
+         oAction.Identifier = changeItemAttribute_string(aszCardname, aoCO, aszKey, aszNewVal);
          oAction.Do = std::bind(&Collection::changeItemAttrs, this, aoCO, aszKey, aszNewVal);
          oAction.Undo = std::bind(&Collection::changeItemAttrs, this, aoCO, aszKey, szOldVal);
 
@@ -256,14 +288,22 @@ void Collection::changeItemAttribute(std::string aszCardname, CopyObject* aoCO, 
 
 void Collection::changeItemAttrs(CopyObject* aoCO ,std::string aszKey, std::string aszNewVal)
 {
-   std::map<std::string,std::string>::iterator iter_attrs = aoCO->NonUniqueTraits.find(aszKey);
-   if (iter_attrs != aoCO->NonUniqueTraits.end())
+   if (aszKey == "Parent")
    {
-      iter_attrs->second = aszNewVal;
+      aoCO->ParentCollection = aszNewVal;
    }
+   else
+   {
+      std::map<std::string, std::string>::iterator iter_attrs = aoCO->NonUniqueTraits.find(aszKey);
+      if (iter_attrs != aoCO->NonUniqueTraits.end())
+      {
+         iter_attrs->second = aszNewVal;
+      }
+   }
+
 }
 
-void Collection::LoadCollection(std::string aszFileName)
+void Collection::LoadCollection(std::string aszFileName, std::vector<std::pair<std::string, std::string>>& alstOutsideForcedChanges)
 {
    std::ifstream in(aszFileName);
    std::stringstream buffer;
@@ -399,14 +439,43 @@ void Collection::LoadCollection(std::string aszFileName)
                std::vector<CopyObject*>::iterator iter_possible_dups = lstCopies.begin();
                for (; iter_possible_dups != lstCopies.end(); ++iter_possible_dups)
                {
-                  if (CollectionObject::IsSameIdentity(&oCopy, *iter_possible_dups))
+                  // The only way a card could have this col in its resis if this col created it.
+                  bool bIsResi = false;
+                  std::vector<std::string>::iterator iter_resi = (*iter_possible_dups)->ResidentCollections.begin();
+                  for (; iter_resi != (*iter_possible_dups)->ResidentCollections.end(); ++iter_resi)
                   {
+                     if (*iter_resi == m_szName)
+                     {
+                        bIsResi = true;
+                        bool bAlreadyRecorded = false;
+                        for (int q = 0; q < lstUsedCopies.size(); q++)
+                        {
+                           if ((int)(lstUsedCopies[q]) == (int)*iter_possible_dups)
+                           {
+                              bAlreadyRecorded = true;
+                              break;
+                           }
+                           
+                        }
+                        if (!bAlreadyRecorded)
+                        {
+                           lstUsedCopies.push_back(*iter_possible_dups);
+                        }
+                        
+                        break;
+                     }
+                  }
+
+                  // Only check if the identity is the same if it's not already in this set.
+                  if (!bIsResi && CollectionObject::IsSameIdentity(&oCopy, *iter_possible_dups))
+                  {
+
                      // Check if it is used already
                      bool bIsAlreadyUsed = false;
                      std::vector<CopyObject*>::iterator iter_already_used = lstUsedCopies.begin();
                      for (; iter_already_used != lstUsedCopies.end(); ++iter_already_used)
                      {
-                        if (*iter_already_used == *iter_possible_dups)
+                        if ((int)*iter_already_used == (int)*iter_possible_dups)
                         {
                            bIsAlreadyUsed = true;
                            break;
@@ -416,6 +485,7 @@ void Collection::LoadCollection(std::string aszFileName)
                      // Use this copy, register this col with the copy.
                      if (!bIsAlreadyUsed)
                      {
+                        registerItem(iCardIndex);
                         (*iter_possible_dups)->ResidentCollections.push_back(m_szName);
                         lstUsedCopies.push_back(*iter_possible_dups);
                         bNeedNewCopy = false;
@@ -444,47 +514,27 @@ void Collection::LoadCollection(std::string aszFileName)
             }
             else if (bNeedNewCopy && bCollectionExists)
             {
+               std::vector<std::pair<std::string, std::string>> lstDupList(lstKeyVals);
                // Set the parent collection = "" because that card no longer exists in that collection
-               std::vector<std::pair<std::string,std::string>>::iterator iter_keyvals = lstKeyVals.begin();
-               for (; iter_keyvals != lstKeyVals.end(); ++iter_keyvals)
+               std::vector<std::pair<std::string,std::string>>::iterator iter_keyvals = lstDupList.begin();
+               for (; iter_keyvals != lstDupList.end(); ++iter_keyvals)
                {
                   if (iter_keyvals->first == "Parent")
                   {
-                     AddItem(szName, false, lstKeyVals);
-                     CopyObject oCO;
-                     m_ColSource->GetCardPrototype(m_ColSource->LoadCard(szName))->GetCopy(m_szName, lstKeyVals, oCO);
-                     changeItemAttribute(szName, &oCO, "Parent", "", true);
+                     iter_keyvals->second = "";
+                     AddItem(szName, false, lstDupList);
+
+                     // Record somewhere that this change was made.
+                     m_lstUnreversibleChanges.push_back(changeItemAttribute_string(szName, &oCopy, "Parent", ""));
                      break;
                   }
                }
 
                
-            }
-         }
+            } // End if (bNeedNewCopy && !bCollectionExists)
+         } // End for Card name in file
 
-         // Now that the collection is loaded, if there are cards with parent collection == this but
-         // this is not in their residents, then that copy no longer exists.
-         std::vector<CopyObject*> lstFullCol = m_ColSource->GetCollection(m_szName);
-         std::vector<CopyObject*>::iterator iter_ColOs = lstFullCol.begin();
-         for (; iter_ColOs != lstFullCol.end(); ++iter_ColOs)
-         {
-            std::vector<std::string> lstResis = (*iter_ColOs)->ResidentCollections;
-            std::vector<std::string>::iterator iter_resi = lstResis.begin();
-            bool bFoundParent = false;
-            for (; iter_resi != lstResis.end(); ++iter_resi)
-            {
-               if (*iter_resi == m_szName)
-               {
-                  bFoundParent = true;
-                  break;
-               }
-            }
 
-            if (!bFoundParent)
-            {
-               changeItemAttribute(szName, (*iter_ColOs), "Parent", "", true);
-            }
-         }
       }
       catch (...)
       {
@@ -494,42 +544,94 @@ void Collection::LoadCollection(std::string aszFileName)
    }
 
    finalizeTransaction(false);
+
+   // Now that the collection is loaded, if there are cards with parent collection == this but
+   // this is not in their residents, then that copy no longer exists.
+   std::vector<std::pair<std::string, CopyObject*>> lstFullCol = m_ColSource->GetCollection(m_szName);
+   std::vector<std::pair<std::string, CopyObject*>> ::iterator iter_ColOs = lstFullCol.begin();
+   for (; iter_ColOs != lstFullCol.end(); ++iter_ColOs)
+   {
+      std::vector<std::string> lstResis = (*iter_ColOs).second->ResidentCollections;
+      std::vector<std::string>::iterator iter_resi = lstResis.begin();
+      bool bFoundParent = false;
+      for (; iter_resi != lstResis.end(); ++iter_resi)
+      {
+         if (*iter_resi == m_szName)
+         {
+            bFoundParent = true;
+            break;
+         }
+      }
+
+      if (!bFoundParent)
+      {
+         std::vector<std::string> lstAffectedCols = (*iter_ColOs).second->ResidentCollections;
+         std::vector<std::string>::iterator iter_affected_col = lstAffectedCols.begin();
+         for (; iter_affected_col != lstAffectedCols.end(); ++iter_affected_col)
+         {
+            alstOutsideForcedChanges.push_back(std::make_pair(*iter_affected_col, changeItemAttribute_string((*iter_ColOs).first, (*iter_ColOs).second, "Parent", "", false)));
+         }
+         (*iter_ColOs).second->ParentCollection = "";
+      }
+   }
 }
 
 void Collection::SaveCollection(std::string aszFileName)
 {
    std::vector<std::string> lstLines = getCollectionString();
 
-   std::string szTimeString = "";
-   time_t now = time(0);
-   struct tm timeinfo;
-   localtime_s(&timeinfo, &now);
-   char str[26];
-   asctime_s(str, sizeof str, &timeinfo);
-   str[strlen(str) - 1] = 0;
-
-   std::ofstream oHistFile;
-   oHistFile.open(m_szHistoryFileName + ".txt", std::ios_base::app);
-
-   oHistFile << "[" << str << "] " << std::endl;
-
-   std::vector<Transaction>::iterator iter_transactions = m_lstTransactions.begin();
-   for (; iter_transactions != m_lstTransactions.end(); ++iter_transactions)
+   if (m_lstUnreversibleChanges.size() > 0 || m_lstTransactions.size() > 0)
    {
-      if (iter_transactions->Recordable)
+      std::string szTimeString = "";
+      time_t now = time(0);
+      struct tm timeinfo;
+      localtime_s(&timeinfo, &now);
+      char str[26];
+      asctime_s(str, sizeof str, &timeinfo);
+      str[strlen(str) - 1] = 0;
+
+      
+      std::vector<std::string> lstHistoryLines;
+
+      std::vector<std::string>::iterator iter_addit = m_lstUnreversibleChanges.begin();
+      for (; iter_addit != m_lstUnreversibleChanges.end(); ++iter_addit)
       {
-         std::vector<Action>::iterator iter_actions = iter_transactions->Actions.begin();
-         for (; iter_actions != iter_transactions->Actions.end(); ++iter_actions)
+         lstHistoryLines.push_back(*iter_addit);
+      }
+
+      std::vector<Transaction>::iterator iter_transactions = m_lstTransactions.begin();
+      for (; iter_transactions != m_lstTransactions.end(); ++iter_transactions)
+      {
+         if (iter_transactions->Recordable)
          {
-            oHistFile << iter_actions->Identifier << std::endl;
+            std::vector<Action>::iterator iter_actions = iter_transactions->Actions.begin();
+            for (; iter_actions != iter_transactions->Actions.end(); ++iter_actions)
+            {
+               lstHistoryLines.push_back(iter_actions->Identifier);
+            }
          }
+      }
+
+      if (lstHistoryLines.size() > 0)
+      {
+         std::ofstream oHistFile;
+         oHistFile.open(m_szHistoryFileName + ".txt", std::ios_base::app);
+
+         oHistFile << "[" << str << "] " << std::endl;
+
+         std::vector<std::string>::iterator iter_histLines = lstHistoryLines.begin();
+         for (; iter_histLines != lstHistoryLines.end(); ++iter_histLines)
+         {
+            oHistFile << *iter_histLines << std::endl;
+         }
+
+         oHistFile.close();
+         m_lstUnreversibleChanges.clear();
       }
    }
 
-   oHistFile.close();
-
    std::ofstream oColFile;
-   oColFile.open(aszFileName + ".col");
+   oColFile.open(aszFileName);
 
    for (int i = 0; i < lstLines.size(); i++)
    {
@@ -538,6 +640,11 @@ void Collection::SaveCollection(std::string aszFileName)
    }
 
    oColFile.close();
+}
+
+void Collection::RecordForcedTransaction(std::string aszTransactionString)
+{
+   m_lstUnreversibleChanges.push_back(aszTransactionString);
 }
 
 void Collection::CreateBaselineHistory()
@@ -592,7 +699,7 @@ Collection::Transaction* Collection::openTransaction()
 
 void Collection::finalizeTransaction(bool abRecord)
 {
-   if (m_lstTransactions.at(m_lstTransactions.size() - 1).IsOpen)
+   if (m_lstTransactions.size() > 0 && m_lstTransactions.at(m_lstTransactions.size() - 1).IsOpen)
    {
       m_lstTransactions.at(m_lstTransactions.size() - 1).Finalize(abRecord);
    }
@@ -660,7 +767,7 @@ void Collection::RollbackTransaction()
 }
 
 
-std::string Collection::cardToString(int aiCardProto, std::pair<CopyObject*, int>* aoCopy)
+std::string Collection::cardToString(int aiCardProto, std::pair<CopyObject*, int>* aoCopy, bool bFullDets)
 {
    std::string szLine = "";
    if (aoCopy->second > 1)
@@ -673,10 +780,10 @@ std::string Collection::cardToString(int aiCardProto, std::pair<CopyObject*, int
    szLine += " ";
 
    if (aoCopy->first->NonUniqueTraits.size() > 0 ||
-      aoCopy->first->ParentCollection != m_szName)
+      (aoCopy->first->ParentCollection != m_szName) || bFullDets)
    {
       szLine += "{ ";
-      if (aoCopy->first->ParentCollection != m_szName)
+      if (aoCopy->first->ParentCollection != m_szName || bFullDets)
       {
          szLine += "Parent=\"";
          szLine += aoCopy->first->ParentCollection;

@@ -10,6 +10,7 @@ public:
    CollectionFactory(CollectionSource* aoColSource);
    ~CollectionFactory();
 
+   Collection* LoadCollection(std::string aszCollectionName, std::string aszColFile);
    Collection* GetCollection(std::string aszCollectionName);
    bool CollectionExists(std::string aszCollectionName);
 

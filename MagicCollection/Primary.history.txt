@@ -1,7 +1,13 @@
-[Thu Jan 26 23:57:50 2017] 
+[Sat Jan 28 12:22:59 2017] 
 + 4x Thing in the Ice { Parent="Main" }
-+ 4x Seeker of the Way 
++ 4x Seeker of the Way { Parent="Main" }
 + 2x Gideon, Ally of Zendikar 
 + 3x Forest 
 + 3x Tireless Tracker 
 + 2x Sylvan Advocate 
+[Sat Jan 28 12:22:59 2017] 
+% Seeker of the Way { Parent="Main" } -> Seeker of the Way { Parent="" }
+% Seeker of the Way { Parent="Main" } -> Seeker of the Way { Parent="" }
+% Seeker of the Way { Parent="Main" } -> Seeker of the Way { Parent="" }
+% Seeker of the Way { Parent="Main" } -> Seeker of the Way { Parent="" }
+- Sylvan Advocate 

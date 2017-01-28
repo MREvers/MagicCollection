@@ -5,11 +5,32 @@
 CollectionFactory::CollectionFactory(CollectionSource* aoColSource)
 {
    m_ColSource = aoColSource;
+   m_lstCollections.reserve(10);
 }
 
 
 CollectionFactory::~CollectionFactory()
 {
+}
+
+Collection* CollectionFactory::LoadCollection(std::string aszCollectionName, std::string aszFileName)
+{
+   std::vector<std::pair<std::string, std::string>> lstForcedChanges;
+
+   Collection* oCol = GetCollection(aszCollectionName);
+   oCol->LoadCollection(aszFileName, lstForcedChanges);
+
+   std::vector<std::pair<std::string, std::string>>::iterator iter_change = lstForcedChanges.begin();
+   for (; iter_change != lstForcedChanges.end(); ++iter_change)
+   {
+      if (CollectionExists(iter_change->first))
+      {
+         Collection* oChangedCol = GetCollection(iter_change->first);
+         oChangedCol->RecordForcedTransaction(iter_change->second);
+      }
+   }
+
+   return oCol;
 }
 
 Collection* CollectionFactory::GetCollection(std::string aszCollectionName)

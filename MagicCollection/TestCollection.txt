@@ -1,5 +1,5 @@
 4x Thing in the Ice { Parent="Main" }
-4x Seeker of the Way
+4x Seeker of the Way { Parent="Main" }
 2x Gideon, Ally of Zendikar
 3x Forest
 3x Tireless Tracker

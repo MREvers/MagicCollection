@@ -66,10 +66,11 @@ public:
 
    void RollbackTransaction();
 
-   void LoadCollection(std::string aszCollectionFile);
+   void LoadCollection(std::string aszCollectionFile, std::vector<std::pair<std::string, std::string>>& alstOutsideForcedChanges);
    void SaveCollection(std::string aszCollectionFileName);
    // Clears the history file, then writes the baseline.
    void CreateBaselineHistory();
+   void RecordForcedTransaction(std::string aszTransactionString);
 
    void PrintList();
 
@@ -83,19 +84,25 @@ private:
    std::vector<int> m_lstCollection;
    std::string m_szName;
    std::vector<Transaction> m_lstTransactions;
+   std::vector<std::string> m_lstUnreversibleChanges;
    std::string m_szHistoryFileName;
    std::vector<std::string>* m_lstLoadedCollectionsBuffer;
 
    void addItem(std::string aszNewItem, std::vector<std::pair<std::string, std::string>> alstAttrs);
+   CopyObject* forceAdd(std::string aszNewItem, std::vector<std::pair<std::string, std::string>> alstAttrs);
+   // Only adds the collection object cache locations
+   void registerItem(int aiItem);
    void removeItem(std::string aszItem, std::vector<std::pair<std::string, std::string>> alstAttrs);
+
    void changeItemAttribute(std::string aszCardname, CopyObject* aoCO, std::string aszKey, std::string aszNewVal, bool bFinal = true);
+   std::string changeItemAttribute_string(std::string aszCardname, CopyObject* aoCO, std::string aszKey, std::string aszNewVal, bool bIsParentCol = true);
    void changeItemAttrs(CopyObject* aoCO, std::string aszKey, std::string aszNewVal);
 
    Transaction* openTransaction();
    void finalizeTransaction(bool abRecord = true);
    std::vector<std::string> getCollectionString();
 
-   std::string cardToString(int aiCardFlyweight, std::pair<CopyObject*, int>* aoCopy);
+   std::string cardToString(int aiCardFlyweight, std::pair<CopyObject*, int>* aoCopy, bool bFullDets = false);
 };
 
 #pragma message ("Finish Collection.h")

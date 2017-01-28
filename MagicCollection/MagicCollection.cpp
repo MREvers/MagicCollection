@@ -21,17 +21,21 @@ std::string escape(const std::string& str);
 
 int main()
 {
-   JSONImporter JS;
-   JS.ImportJSON("AllSets.json");
    CollectionSource CS;
    CS.LoadLib("AllSets.json.out");
 
    CollectionFactory CF(&CS);
 
-   Collection* Col = CF.GetCollection("Primary");
-   Col->LoadCollection("TestCollection.col");
+   Collection* Col = CF.LoadCollection("Primary", "TestCollection.txt");
    Col->CreateBaselineHistory();
    Col->RemoveItem("Sylvan Advocate");
+   
+   
+
+   Collection* ColM = CF.LoadCollection("Main", "TestCollectionTwo.txt");
+   ColM->CreateBaselineHistory();
+   Col->SaveCollection("ColOut.txt");
+   ColM->SaveCollection("ColTwoOut.txt");
    Col->PrintList();
    std::cin.get();
 
