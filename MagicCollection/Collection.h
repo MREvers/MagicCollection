@@ -1,6 +1,6 @@
 #pragma once
 #pragma message ("Starting Collection.h")
-#define _ITERATOR_DEBUG_LEVEL 0  
+
 #include <vector>
 #include <map>
 #include <iterator>

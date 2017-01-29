@@ -1,6 +1,6 @@
 #pragma once
 #pragma message ("Starting SourceObject.h")
-#define _ITERATOR_DEBUG_LEVEL 0  
+
 #include <map>
 #include <vector>
 

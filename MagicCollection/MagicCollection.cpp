@@ -1,26 +1,42 @@
 // MagicCollection.cpp : Defines the entry point for the console application.
 //
-#define _ITERATOR_DEBUG_LEVEL 0  
+
 #include <iostream>
 #include <fstream>
 #include <iterator>
-#include <xmllite.h>
+#include <process.h>
 
-#include "json.hpp"
-#include "json/json.h"
-#include "rapidxml-1.13\rapidxml_print.hpp"
-#include "rapidxml-1.13\rapidxml.hpp"
 #include "Collection.h"
 #include "JSONImporter.h"
 #include "CollectionSource.h"
 #include "CollectionFactory.h"
 
-using json = nlohmann::json;
+#include "ServerIFace\ClientSocket.h"
+#include "ServerIFace\Server.h"
 
-std::string escape(const std::string& str);
+
+void serverLoop(void *);
+void clientLoop(void);
+
+ClientSocket * client;
+Server * server;
 
 int main()
 {
+
+	// initialize the server
+	server = new Server();
+
+	// create thread with arbitrary argument for the run function
+	_beginthread(serverLoop, 0, (void*)12);
+
+	// initialize the client 
+	client = new ClientSocket();
+	client->BeginConnect();
+
+
+	clientLoop();
+	/*
    CollectionSource CS;
    CS.LoadLib("AllSets.json.out");
 
@@ -38,7 +54,7 @@ int main()
    ColM->SaveCollection("ColTwoOut.txt");
    Col->PrintList();
    std::cin.get();
-
+   */
     return 0;
 }
 
@@ -61,3 +77,29 @@ std::string escape(const std::string& src)
 }
 
 
+
+void serverLoop(void * arg)
+{
+
+	while (true)
+	{
+		server->AcceptConnections();
+		server->SendToAll("What");
+		server->RecvFromClient(0);
+	}
+}
+
+void clientLoop()
+{
+	char* recvBuf = new char[10000];
+	int iBitsReceived = 0;
+	while (true)
+	{
+		if (iBitsReceived = client->ReceiveData(recvBuf) > 0)
+		{
+			std::cout << recvBuf << std::endl;
+			client->SendData("HEY");
+		}
+		
+	}
+}

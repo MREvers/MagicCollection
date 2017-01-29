@@ -1,6 +1,6 @@
 #pragma once
 #pragma message ("Starting ICollectionObject.h")
-#define _ITERATOR_DEBUG_LEVEL 0  
+
 #include <string>
 #include <vector>
 

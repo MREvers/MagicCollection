@@ -154,6 +154,12 @@
     <ClCompile Include="JSONImporter.cpp" />
     <ClCompile Include="MagicCardObject.cpp" />
     <ClCompile Include="MagicCollection.cpp" />
+    <ClCompile Include="ServerIFace\ClientSocket.cpp" />
+    <ClCompile Include="ServerIFace\ProgramServer.cpp" />
+    <ClCompile Include="ServerIFace\Server.cpp" />
+    <ClCompile Include="ServerIFace\WinAPINetworkServices.cpp" />
+    <ClCompile Include="ServerIFace\WinSocket.cpp" />
+    <ClCompile Include="ServerIFace\WinSocketListener.cpp" />
     <ClCompile Include="SourceObject.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -165,6 +171,12 @@
     <ClInclude Include="ICollectionObject.h" />
     <ClInclude Include="JSONImporter.h" />
     <ClInclude Include="MagicCardObject.h" />
+    <ClInclude Include="ServerIFace\ClientSocket.h" />
+    <ClInclude Include="ServerIFace\ProgramServer.h" />
+    <ClInclude Include="ServerIFace\Server.h" />
+    <ClInclude Include="ServerIFace\WinAPINetworkServices.h" />
+    <ClInclude Include="ServerIFace\WinSocket.h" />
+    <ClInclude Include="ServerIFace\WinSocketListener.h" />
     <ClInclude Include="SourceObject.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

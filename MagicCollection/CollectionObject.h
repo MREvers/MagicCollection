@@ -2,7 +2,7 @@
 #pragma message ("Starting CollectionObject.h")
 #include "ICollectionObject.h"
 #include "ICollection.h"
-#define _ITERATOR_DEBUG_LEVEL 0  
+
 #include <string>
 #include <vector>
 #include <map>

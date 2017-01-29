@@ -83,8 +83,8 @@ std::string Collection::GetName()
 }
 
 void Collection::AddItem(std::string aszNewItem,
- bool bFinal,
- std::vector<std::pair<std::string, std::string>> alstAttrs)
+   bool bFinal,
+   std::vector<std::pair<std::string, std::string>> alstAttrs)
 {
    // If we are in the midst of a transaction
    if (TransactionIntercept)
@@ -118,17 +118,15 @@ void Collection::AddItem(std::string aszNewItem,
    {
       oTrans->Finalize();
    }
-
 }
 
 void Collection::RemoveItem(std::string aszRemoveItem,
- bool bFinal,
- std::vector<std::pair<std::string, std::string>> alstAttrs)
+   bool bFinal,
+   std::vector<std::pair<std::string, std::string>> alstAttrs)
 {
    // If we are in the midst of a transaction
    if (TransactionIntercept)
    {
-      
       int iCardProto = m_ColSource->LoadCard(aszRemoveItem);
 
       CopyObject oCO;
@@ -159,7 +157,6 @@ void Collection::RemoveItem(std::string aszRemoveItem,
    {
       oTrans->Finalize();
    }
-
 }
 
 // Looks up from the source collection then adds it.
@@ -181,9 +178,7 @@ void Collection::addItem(std::string aszNewItem, std::vector<std::pair<std::stri
       CopyObject* oCO = oCard->AddCopy(m_szName);
 
       CollectionObject::ConstructCopy(*oCO, alstAttrs);
-
    }
-
 }
 
 CopyObject* Collection::forceAdd(std::string aszNewItem, std::vector<std::pair<std::string, std::string>> alstAttrs)
@@ -202,9 +197,7 @@ CopyObject* Collection::forceAdd(std::string aszNewItem, std::vector<std::pair<s
       CollectionObject::ConstructCopy(*oCO, alstAttrs);
 
       return oCO;
-
    }
-
 }
 
 void Collection::registerItem(int aiItem)
@@ -286,7 +279,7 @@ void Collection::changeItemAttribute(std::string aszCardname, CopyObject* aoCO, 
 
 }
 
-void Collection::changeItemAttrs(CopyObject* aoCO ,std::string aszKey, std::string aszNewVal)
+void Collection::changeItemAttrs(CopyObject* aoCO, std::string aszKey, std::string aszNewVal)
 {
    if (aszKey == "Parent")
    {
@@ -367,7 +360,7 @@ void Collection::LoadCollection(std::string aszFileName, std::vector<std::pair<s
          szName = szName + iter->at(i);
          i++;
       }
-      
+
       while (i < iter_size && (iter->at(i) == ' ' || iter->at(i) != '{'))
       {
          i++;
@@ -382,7 +375,7 @@ void Collection::LoadCollection(std::string aszFileName, std::vector<std::pair<s
          }
       }
 
-      std::vector<std::pair<std::string,std::string>> lstKeyVals;
+      std::vector<std::pair<std::string, std::string>> lstKeyVals;
       std::string szParentAttr;
       if (i < iter_size && hasDets)
       {
@@ -393,7 +386,7 @@ void Collection::LoadCollection(std::string aszFileName, std::vector<std::pair<s
             i++;
          }
 
-         std::vector<std::string> lstDetails = SourceObject::Str_Split(szDetails," ");
+         std::vector<std::string> lstDetails = SourceObject::Str_Split(szDetails, " ");
          for (std::vector<std::string>::iterator iter_attrs = lstDetails.begin(); iter_attrs != lstDetails.end(); ++iter_attrs)
          {
             std::vector<std::string> lstPairs = SourceObject::Str_Split(*iter_attrs, "=");
@@ -418,24 +411,26 @@ void Collection::LoadCollection(std::string aszFileName, std::vector<std::pair<s
          szName.erase(0, szName.find_first_not_of(' '));
          szName.erase(szName.find_last_not_of(' ') + 1);
 
+         // lstUsedCopies keeps track of copies that have alrea
          std::vector<CopyObject*> lstUsedCopies;
          for (int i = 0; i < iNum; i++)
          {
-            // Create a temporary copy.
-            CopyObject oCopy = CollectionObject::GenerateCopy(m_szName, lstKeyVals);
-
-            // Check if a copy already exists.
-
-            // If so, is it used already.
-
-            // If not, use it.
-
-            // Otherwise, keep going checking.
             bool bNeedNewCopy = true;
             int iCardIndex = m_ColSource->LoadCard(szName);
             if (iCardIndex != -1)
             {
-              std::vector<CopyObject*> lstCopies = m_ColSource->GetCardPrototype(iCardIndex)->GetLocalCopies(oCopy.ParentCollection);
+               // Create a temporary copy.
+               CopyObject oCopy = CollectionObject::GenerateCopy(m_szName, lstKeyVals);
+
+               // Check if a copy already exists.
+
+               // If so, is it used already.
+
+               // If not, use it.
+
+               // Otherwise, keep going checking.
+
+               std::vector<CopyObject*> lstCopies = m_ColSource->GetCardPrototype(iCardIndex)->GetLocalCopies(oCopy.ParentCollection);
                std::vector<CopyObject*>::iterator iter_possible_dups = lstCopies.begin();
                for (; iter_possible_dups != lstCopies.end(); ++iter_possible_dups)
                {
@@ -455,13 +450,13 @@ void Collection::LoadCollection(std::string aszFileName, std::vector<std::pair<s
                               bAlreadyRecorded = true;
                               break;
                            }
-                           
+
                         }
                         if (!bAlreadyRecorded)
                         {
                            lstUsedCopies.push_back(*iter_possible_dups);
                         }
-                        
+
                         break;
                      }
                   }
@@ -493,45 +488,52 @@ void Collection::LoadCollection(std::string aszFileName, std::vector<std::pair<s
                      }
                   }
                }
-            }
 
-            bool bCollectionExists = false;
-            // Check if a collection exists
-            std::vector<std::string>::iterator iter_collections = m_lstLoadedCollectionsBuffer->begin();
-            for (; iter_collections != m_lstLoadedCollectionsBuffer->end(); ++iter_collections)
-            {
-               if (oCopy.ParentCollection != m_szName && *iter_collections == oCopy.ParentCollection)
+               bool bCollectionExists = false;
+               // Check if a collection exists
+               std::vector<std::string>::iterator iter_collections = m_lstLoadedCollectionsBuffer->begin();
+               for (; iter_collections != m_lstLoadedCollectionsBuffer->end(); ++iter_collections)
                {
-                  bCollectionExists = true;
-                  break;
-               }
-            }
-            
-            // If card copy does not exist, create a new one.
-            if (bNeedNewCopy && !bCollectionExists)
-            {
-               AddItem(szName, false, lstKeyVals);
-            }
-            else if (bNeedNewCopy && bCollectionExists)
-            {
-               std::vector<std::pair<std::string, std::string>> lstDupList(lstKeyVals);
-               // Set the parent collection = "" because that card no longer exists in that collection
-               std::vector<std::pair<std::string,std::string>>::iterator iter_keyvals = lstDupList.begin();
-               for (; iter_keyvals != lstDupList.end(); ++iter_keyvals)
-               {
-                  if (iter_keyvals->first == "Parent")
+                  if (oCopy.ParentCollection != m_szName && *iter_collections == oCopy.ParentCollection)
                   {
-                     iter_keyvals->second = "";
-                     AddItem(szName, false, lstDupList);
-
-                     // Record somewhere that this change was made.
-                     m_lstUnreversibleChanges.push_back(changeItemAttribute_string(szName, &oCopy, "Parent", ""));
+                     bCollectionExists = true;
                      break;
                   }
                }
 
-               
-            } // End if (bNeedNewCopy && !bCollectionExists)
+               // If card copy does not exist, create a new one.
+               if (bNeedNewCopy && !bCollectionExists)
+               {
+                  AddItem(szName, false, lstKeyVals);
+               }
+               else if (bNeedNewCopy && bCollectionExists)
+               {
+                  std::vector<std::pair<std::string, std::string>> lstDupList(lstKeyVals);
+                  // Set the parent collection = "" because that card no longer exists in that collection
+                  std::vector<std::pair<std::string, std::string>>::iterator iter_keyvals = lstDupList.begin();
+                  for (; iter_keyvals != lstDupList.end(); ++iter_keyvals)
+                  {
+                     if (iter_keyvals->first == "Parent")
+                     {
+                        iter_keyvals->second = "";
+                        AddItem(szName, false, lstDupList);
+
+                        // Record somewhere that this change was made.
+                        m_lstUnreversibleChanges.push_back(changeItemAttribute_string(szName, &oCopy, "Parent", ""));
+                        break;
+                     }
+                  }
+
+
+               } // End if (bNeedNewCopy && !bCollectionExists)
+            } // End card name exists
+            else
+            {
+               // Can't find the card... PANIC
+               m_lstUnreversibleChanges.push_back("Could Not Find Card \"" + szName + "\"");
+            }
+
+
          } // End for Card name in file
 
 
@@ -590,7 +592,7 @@ void Collection::SaveCollection(std::string aszFileName)
       asctime_s(str, sizeof str, &timeinfo);
       str[strlen(str) - 1] = 0;
 
-      
+
       std::vector<std::string> lstHistoryLines;
 
       std::vector<std::string>::iterator iter_addit = m_lstUnreversibleChanges.begin();
@@ -687,8 +689,8 @@ void Collection::PrintList()
 
 Collection::Transaction* Collection::openTransaction()
 {
-// Currently, all i can think of is add/remove item, change/unchange attr of card.
-   if ((m_lstTransactions.size() > 0 && !m_lstTransactions.at(m_lstTransactions.size() - 1).IsOpen) || 
+   // Currently, all i can think of is add/remove item, change/unchange attr of card.
+   if ((m_lstTransactions.size() > 0 && !m_lstTransactions.at(m_lstTransactions.size() - 1).IsOpen) ||
       !(m_lstTransactions.size() > 0))
    {
 
@@ -775,7 +777,7 @@ std::string Collection::cardToString(int aiCardProto, std::pair<CopyObject*, int
       szLine += std::to_string(aoCopy->second);
       szLine += "x ";
    }
-   
+
    szLine += m_ColSource->GetCardPrototype(aiCardProto)->GetName();
    szLine += " ";
 

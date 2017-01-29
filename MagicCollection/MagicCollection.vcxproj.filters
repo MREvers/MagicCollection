@@ -13,6 +13,12 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="ServerIFace">
+      <UniqueIdentifier>{ce578a7d-7d0d-4ea6-95dc-66065f825216}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Importer">
+      <UniqueIdentifier>{e7ff58c1-f859-45a4-b5f0-105fedff968a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -39,11 +45,29 @@
     <ClCompile Include="MagicCardObject.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="JSONImporter.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="CollectionFactory.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="JSONImporter.cpp">
+      <Filter>Importer</Filter>
+    </ClCompile>
+    <ClCompile Include="ServerIFace\ClientSocket.cpp">
+      <Filter>ServerIFace</Filter>
+    </ClCompile>
+    <ClCompile Include="ServerIFace\ProgramServer.cpp">
+      <Filter>ServerIFace</Filter>
+    </ClCompile>
+    <ClCompile Include="ServerIFace\Server.cpp">
+      <Filter>ServerIFace</Filter>
+    </ClCompile>
+    <ClCompile Include="ServerIFace\WinAPINetworkServices.cpp">
+      <Filter>ServerIFace</Filter>
+    </ClCompile>
+    <ClCompile Include="ServerIFace\WinSocket.cpp">
+      <Filter>ServerIFace</Filter>
+    </ClCompile>
+    <ClCompile Include="ServerIFace\WinSocketListener.cpp">
+      <Filter>ServerIFace</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -68,11 +92,29 @@
     <ClInclude Include="MagicCardObject.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="JSONImporter.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="CollectionFactory.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="JSONImporter.h">
+      <Filter>Importer</Filter>
+    </ClInclude>
+    <ClInclude Include="ServerIFace\ClientSocket.h">
+      <Filter>ServerIFace</Filter>
+    </ClInclude>
+    <ClInclude Include="ServerIFace\ProgramServer.h">
+      <Filter>ServerIFace</Filter>
+    </ClInclude>
+    <ClInclude Include="ServerIFace\Server.h">
+      <Filter>ServerIFace</Filter>
+    </ClInclude>
+    <ClInclude Include="ServerIFace\WinAPINetworkServices.h">
+      <Filter>ServerIFace</Filter>
+    </ClInclude>
+    <ClInclude Include="ServerIFace\WinSocket.h">
+      <Filter>ServerIFace</Filter>
+    </ClInclude>
+    <ClInclude Include="ServerIFace\WinSocketListener.h">
+      <Filter>ServerIFace</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

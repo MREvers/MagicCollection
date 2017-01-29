@@ -1,6 +1,6 @@
 #pragma once
 #pragma message ("Starting MagicCardObject.h")
-#define _ITERATOR_DEBUG_LEVEL 0  
+
 #include "CollectionObject.h"
 
 
