@@ -3,7 +3,7 @@
 #include "WinAPINetworkServices.h"
 #include <iostream>
 
-class Server
+class __declspec(dllexport) Server
 {
 public:
    Server();

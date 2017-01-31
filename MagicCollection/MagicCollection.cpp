@@ -1,6 +1,7 @@
 // MagicCollection.cpp : Defines the entry point for the console application.
 //
-
+#pragma once
+#define DLLEXP   __declspec( dllexport )
 #include <iostream>
 #include <fstream>
 #include <iterator>
@@ -28,14 +29,14 @@ int main()
 	server = new Server();
 
 	// create thread with arbitrary argument for the run function
-	_beginthread(serverLoop, 0, (void*)12);
+	serverLoop(NULL);
 
 	// initialize the client 
-	client = new ClientSocket();
-	client->BeginConnect();
+	//client = new ClientSocket();
+	//client->BeginConnect();
 
 
-	clientLoop();
+	//clientLoop();
 	/*
    CollectionSource CS;
    CS.LoadLib("AllSets.json.out");

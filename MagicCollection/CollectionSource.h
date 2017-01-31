@@ -8,7 +8,6 @@
 #include "rapidxml-1.13\rapidxml_utils.hpp"
 #include "json.hpp"
 
-#define _ITERATOR_DEBUG_LEVEL 0  
 #include <string>
 #include <fstream>
 #include <iostream>

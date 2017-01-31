@@ -69,6 +69,9 @@
     <ClCompile Include="ServerIFace\WinSocketListener.cpp">
       <Filter>ServerIFace</Filter>
     </ClCompile>
+    <ClCompile Include="ServerIFace.cpp">
+      <Filter>ServerIFace</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ICollection.h">
@@ -114,6 +117,9 @@
       <Filter>ServerIFace</Filter>
     </ClInclude>
     <ClInclude Include="ServerIFace\WinSocketListener.h">
+      <Filter>ServerIFace</Filter>
+    </ClInclude>
+    <ClInclude Include="ServerIFace.h">
       <Filter>ServerIFace</Filter>
     </ClInclude>
   </ItemGroup>
