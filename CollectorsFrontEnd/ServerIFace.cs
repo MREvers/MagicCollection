@@ -12,7 +12,7 @@ namespace CollectorsFrontEnd
     {
         public ServerIFace()
         {
-            ServerSocket();
+           
         }
 
         List<string> GetCollection(string aszCollectionName)

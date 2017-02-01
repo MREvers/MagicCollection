@@ -19,6 +19,9 @@
     <Filter Include="Importer">
       <UniqueIdentifier>{e7ff58c1-f859-45a4-b5f0-105fedff968a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="CollectorsBackEnd">
+      <UniqueIdentifier>{67651209-ffdb-4fb7-84f1-c576c189d19f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -72,6 +75,9 @@
     <ClCompile Include="ServerIFace.cpp">
       <Filter>ServerIFace</Filter>
     </ClCompile>
+    <ClCompile Include="StoreFrontBackEnd.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ICollection.h">
@@ -122,5 +128,11 @@
     <ClInclude Include="ServerIFace.h">
       <Filter>ServerIFace</Filter>
     </ClInclude>
+    <ClInclude Include="StoreFrontBackEnd.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="AllSets.json.out" />
   </ItemGroup>
 </Project>

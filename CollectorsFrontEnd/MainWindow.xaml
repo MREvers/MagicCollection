@@ -7,6 +7,7 @@
         mc:Ignorable="d"
         Title="Collector Front End" Height="350" Width="525">
     <Grid>
-        
+        <TextBox x:Name="tbPrimaryTest" HorizontalAlignment="Left" Height="319" TextWrapping="Wrap" Text="TextBox" VerticalAlignment="Top" Width="517"/>
+
     </Grid>
 </Window>

@@ -11,7 +11,11 @@ public:
    ~CollectionFactory();
 
    Collection* LoadCollection(std::string aszCollectionName, std::string aszColFile);
+
+   // Returns the collection if loaded. Returns an empty collection otherwise.
    Collection* GetCollection(std::string aszCollectionName);
+
+   // Returns true if the collection is loaded into memory.
    bool CollectionExists(std::string aszCollectionName);
 
    std::vector<std::string> LoadedCollections;

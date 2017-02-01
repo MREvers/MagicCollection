@@ -71,6 +71,7 @@ public:
    // Clears the history file, then writes the baseline.
    void CreateBaselineHistory();
    void RecordForcedTransaction(std::string aszTransactionString);
+   std::vector<std::string> GetCollectionList();
 
    void PrintList();
 
@@ -100,7 +101,7 @@ private:
 
    Transaction* openTransaction();
    void finalizeTransaction(bool abRecord = true);
-   std::vector<std::string> getCollectionString();
+
 
    std::string cardToString(int aiCardFlyweight, std::pair<CopyObject*, int>* aoCopy, bool bFullDets = false);
 };

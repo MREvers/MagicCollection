@@ -16,6 +16,10 @@ void CollectionSource::LoadLib(std::string aszFileName)
 
    rapidxml::xml_document<> doc;
    std::ifstream file(aszFileName);
+   if (!file.good())
+   {
+	   return;
+   }
    std::stringstream buffer;
    buffer << file.rdbuf();
    file.close();

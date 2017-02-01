@@ -6,6 +6,9 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MagicCollection", "MagicCollection\MagicCollection.vcxproj", "{D6BC9C69-9220-4F9A-A83B-31C7B97EA5D4}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CollectorsFrontEnd", "CollectorsFrontEnd\CollectorsFrontEnd.csproj", "{A557C722-029A-47B3-B86E-308878641289}"
+	ProjectSection(ProjectDependencies) = postProject
+		{D6BC9C69-9220-4F9A-A83B-31C7B97EA5D4} = {D6BC9C69-9220-4F9A-A83B-31C7B97EA5D4}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ServerInterface", "ServerInterface\ServerInterface.vcxproj", "{B3E17E4D-3395-42FB-BF66-0AF21C59DB36}"
 EndProject

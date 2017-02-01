@@ -83,7 +83,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>..\CollectorsFrontEnd\bin\x64\Debug</OutDir>
+    <OutDir>..\CollectorsFrontEnd\bin\x64\Release</OutDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -133,12 +133,13 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
-      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
+      <PrecompiledHeaderFile />
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -167,6 +168,7 @@
     <ClCompile Include="ServerIFace\WinSocket.cpp" />
     <ClCompile Include="ServerIFace\WinSocketListener.cpp" />
     <ClCompile Include="SourceObject.cpp" />
+    <ClCompile Include="StoreFrontBackEnd.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Collection.h" />
@@ -185,6 +187,12 @@
     <ClInclude Include="ServerIFace\WinSocket.h" />
     <ClInclude Include="ServerIFace\WinSocketListener.h" />
     <ClInclude Include="SourceObject.h" />
+    <ClInclude Include="StoreFrontBackEnd.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="AllSets.json.out">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

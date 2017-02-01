@@ -328,6 +328,18 @@ void Collection::LoadCollection(std::string aszFileName, std::vector<std::pair<s
    for (std::vector<std::string>::iterator iter = lstLines.begin(); iter != lstLines.end(); ++iter)
    {
       int i = 0;
+
+	  // Get the name of the collection
+	  if (iter->size() > 0 && iter->at(0) == ':')
+	  {
+		  std::string szPreprocess = "";
+		  std::string szNoColon = SourceObject::Str_Split(*iter, ":")[1];
+		  std::vector<std::string> lstPair = SourceObject::Str_Split(*iter, "=");
+		  std::string szColName = SourceObject::Str_Split(lstPair[1], "\"")[1];
+		  m_szName = szColName;
+		  continue;
+	  }
+
       std::string szNum = "";
       while (i < iter->size() && (*iter).at(i) < '9' && (*iter).at(i) > '0')
       {
@@ -580,7 +592,7 @@ void Collection::LoadCollection(std::string aszFileName, std::vector<std::pair<s
 
 void Collection::SaveCollection(std::string aszFileName)
 {
-   std::vector<std::string> lstLines = getCollectionString();
+   std::vector<std::string> lstLines = GetCollectionList();
 
    if (m_lstUnreversibleChanges.size() > 0 || m_lstTransactions.size() > 0)
    {
@@ -651,7 +663,7 @@ void Collection::RecordForcedTransaction(std::string aszTransactionString)
 
 void Collection::CreateBaselineHistory()
 {
-   std::vector<std::string> lstLines = getCollectionString();
+   std::vector<std::string> lstLines = GetCollectionList();
 
    std::string szTimeString = "";
    time_t now = time(0);
@@ -707,7 +719,7 @@ void Collection::finalizeTransaction(bool abRecord)
    }
 }
 
-std::vector<std::string> Collection::getCollectionString()
+std::vector<std::string> Collection::GetCollectionList()
 {
    // Now look for all cards with resident col == this
    std::vector<std::string> lstLines;

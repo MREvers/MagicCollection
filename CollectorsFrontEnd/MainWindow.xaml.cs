@@ -26,6 +26,7 @@ namespace CollectorsFrontEnd
             InitializeComponent();
             this.Loaded += MainWindow_Loaded;
             
+
             //Client.ServerInterface WSI = new Client.ServerInterface();
             
         }
@@ -33,7 +34,15 @@ namespace CollectorsFrontEnd
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
             ServerClientInterface SCI = new ServerClientInterface();
-            new ServerIFace();
+            SCI.LoadCollection("TestCollection.txt");
+            SCI.LoadCollection("TestCollectionTwo.txt");
+            tbPrimaryTest.Text = "";
+            List<string> lstCards = SCI.GetCollectionList("Primary");
+            foreach (string szCard in lstCards)
+            {
+                tbPrimaryTest.Text += szCard + Environment.NewLine;
+            }
+
         }
     }
 }

@@ -1,7 +1,6 @@
 // MagicCollection.cpp : Defines the entry point for the console application.
 //
 #pragma once
-#define DLLEXP   __declspec( dllexport )
 #include <iostream>
 #include <fstream>
 #include <iterator>
