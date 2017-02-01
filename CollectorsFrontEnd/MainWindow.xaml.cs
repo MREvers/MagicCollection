@@ -13,6 +13,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Diagnostics;
+using System.Threading;
 
 namespace CollectorsFrontEnd
 {
@@ -33,6 +34,7 @@ namespace CollectorsFrontEnd
 
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
+            Ttt.MouseEnter += Ttt_MouseEnter;
             ServerClientInterface SCI = new ServerClientInterface();
             SCI.LoadCollection("TestCollection.txt");
             SCI.LoadCollection("TestCollectionTwo.txt");
@@ -43,6 +45,11 @@ namespace CollectorsFrontEnd
                 tbPrimaryTest.Text += szCard + Environment.NewLine;
             }
 
+        }
+
+        private void Ttt_MouseEnter(object sender, MouseEventArgs e)
+        {
+            Ttt.Text = "YoDDog";
         }
     }
 }
