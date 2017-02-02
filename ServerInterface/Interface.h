@@ -21,7 +21,8 @@ public:
 
 	// Eventually Add file name arg.
 	void SaveCollection(System::String^ aszCollectionName);
-	void LoadCollection(System::String^ aszCollectionName);
+	// Returns the collection name
+	System::String^ LoadCollection(System::String^ aszCollectionName);
 	System::Collections::Generic::List<System::String^>^ GetCollectionList(System::String^ ahszCollectionName);
 
 private:

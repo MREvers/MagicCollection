@@ -20,11 +20,24 @@ namespace CollectorsFrontEnd
     /// </summary>
     public partial class CollectionViewer : UserControl
     {
+        private string ActiveCollection = "";
+
         public CollectionViewer()
         {
             InitializeComponent();
             BtnAddItem.Click += eAddItem;
             BtnSaveCollection.Click += eSaveCollection;
+            BtnLoadCollection.Click += eLoadCollection;
+        }
+
+        public void RefreshCollectionView()
+        {
+            ClearText();
+            List<string> lstCards = MainWindow.SCI.GetCollectionList(ActiveCollection);
+            foreach (string szCard in lstCards)
+            {
+                AppendText(szCard + Environment.NewLine);
+            }
         }
 
         public void AppendText(string aszText)
@@ -39,18 +52,42 @@ namespace CollectorsFrontEnd
 
         public void eAddItem(object sender, RoutedEventArgs e)
         {
-            MainWindow.SCI.AddItem("Primary", "Sylvan Advocate");
-            ClearText();
-            List<string> lstCards = MainWindow.SCI.GetCollectionList("Primary");
-            foreach (string szCard in lstCards)
+            if (ActiveCollection != "")
             {
-                AppendText(szCard + Environment.NewLine);
+                MainWindow.SCI.AddItem(ActiveCollection, "Sylvan Advocate");
+                RefreshCollectionView();
             }
         }
 
         public void eSaveCollection(object sender, RoutedEventArgs e)
         {
-            MainWindow.SCI.SaveCollection("Primary");
+            if (ActiveCollection != "")
+            {
+                MainWindow.SCI.SaveCollection(ActiveCollection);
+            }
+            
+        }
+
+        public void eLoadCollection(object sender, RoutedEventArgs e)
+        {
+            // Create OpenFileDialog 
+            Microsoft.Win32.OpenFileDialog dlg = new Microsoft.Win32.OpenFileDialog();
+
+            // Set filter for file extension and default file extension 
+            dlg.DefaultExt = ".txt";
+            dlg.Filter = "Text Files (*.txt)|*.txt";
+
+            // Display OpenFileDialog by calling ShowDialog method 
+            Nullable<bool> result = dlg.ShowDialog();
+
+
+            // Get the selected file name and display in a TextBox 
+            if (result == true)
+            {
+                // Open document 
+                ActiveCollection = MainWindow.SCI.LoadCollection(dlg.FileName);
+                RefreshCollectionView();
+            }
         }
     }
 }

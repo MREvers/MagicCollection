@@ -30,10 +30,11 @@ void ServerClientInterface::SaveCollection(System::String^ ahszCollectionName)
 	m_StoreFrontBackEnd->SaveCollection(szCollectionName);
 }
 
-void ServerClientInterface::LoadCollection(System::String^ ahszCollectionName)
+System::String^ ServerClientInterface::LoadCollection(System::String^ ahszCollectionFileName)
 {
-	std::string szCollectionName = msclr::interop::marshal_as<std::string>(ahszCollectionName);
-	m_StoreFrontBackEnd->LoadCollection(szCollectionName);
+	std::string szCollectionFileName = msclr::interop::marshal_as<std::string>(ahszCollectionFileName);
+	std::string szCollectionName = m_StoreFrontBackEnd->LoadCollection(szCollectionFileName);
+	return gcnew System::String(szCollectionName.c_str());
 }
 
 System::Collections::Generic::List<System::String^>^ ServerClientInterface::GetCollectionList(System::String^ ahszCollectionName)

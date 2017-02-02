@@ -39,7 +39,7 @@ namespace CollectorsFrontEnd
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
             SCI = new ServerClientInterface();
-            SCI.LoadCollection("TestCollection.txt");
+
             SCI.LoadCollection("TestCollectionTwo.txt");
 
             List<string> lstCards = MainWindow.SCI.GetCollectionList("Primary");

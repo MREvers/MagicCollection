@@ -48,14 +48,14 @@ void CStoreFrontBackEnd::SaveCollection(std::string aszCollectionName)
 	}
 }
 
-void CStoreFrontBackEnd::LoadCollection(std::string aszCollection)
+std::string CStoreFrontBackEnd::LoadCollection(std::string aszCollection)
 {
 	// Check if the file exists.
 	std::ifstream f(aszCollection.c_str());
 	if (f.good())
 	{
 		// If it does, continue.
-		m_ColFactory->LoadCollection("Name Not Found", aszCollection);
+		return m_ColFactory->LoadCollection("Name Not Found", aszCollection)->GetName();
 	}
 }
 

@@ -162,7 +162,7 @@ void Collection::RemoveItem(std::string aszRemoveItem,
 void Collection::setName(std::string aszName)
 {
 	m_szName = aszName;
-	m_szHistoryFileName = aszName + ".history.txt";
+	m_szHistoryFileName = aszName + ".history";
 }
 
 // Looks up from the source collection then adds it.
@@ -614,6 +614,7 @@ void Collection::SaveCollection(std::string aszFileName)
 				{
 					lstHistoryLines.push_back(iter_actions->Identifier);
 				}
+				iter_transactions->Recordable = false;
 			}
 		}
 
@@ -637,7 +638,7 @@ void Collection::SaveCollection(std::string aszFileName)
 
 	std::ofstream oColFile;
 	oColFile.open(aszFileName);
-
+	oColFile << ": Name=\"" + m_szName + "\" \n";
 	for (int i = 0; i < lstLines.size(); i++)
 	{
 		std::cout << lstLines[i] << std::endl;

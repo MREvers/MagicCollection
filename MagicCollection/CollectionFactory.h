@@ -17,6 +17,7 @@ public:
 
    // Returns true if the collection is loaded into memory.
    bool CollectionExists(std::string aszCollectionName);
+   std::string GetCollectionNameFromFile(std::string aszCollectionFileName);
 
    std::vector<std::string> LoadedCollections;
 private:

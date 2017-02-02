@@ -20,7 +20,7 @@ public:
 	void AddItem(std::string aszCollection, std::string aszItem);
 	void RemoveItem(std::string aszCollection, std::string aszItem);
 	void SaveCollection(std::string aszCollectionToSave);
-	void LoadCollection(std::string aszCollectionToLoad);
+	std::string LoadCollection(std::string aszCollectionToLoad);
 	std::vector<std::string> GetCollectionList(std::string aszCollection);
 
 private:
