@@ -22,34 +22,33 @@ namespace CollectorsFrontEnd
     /// </summary>
     public partial class MainWindow : Window
     {
+        static public ServerClientInterface SCI;
+
+        CollectionViewer m_ColViewer;
+
         public MainWindow()
         {
             InitializeComponent();
             this.Loaded += MainWindow_Loaded;
-            
 
-            //Client.ServerInterface WSI = new Client.ServerInterface();
-            
+            m_ColViewer = new CollectionViewer();
+
+            grdPrimaryView.Children.Add(m_ColViewer);
         }
 
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
-            Ttt.MouseEnter += Ttt_MouseEnter;
-            ServerClientInterface SCI = new ServerClientInterface();
+            SCI = new ServerClientInterface();
             SCI.LoadCollection("TestCollection.txt");
             SCI.LoadCollection("TestCollectionTwo.txt");
-            tbPrimaryTest.Text = "";
-            List<string> lstCards = SCI.GetCollectionList("Primary");
+
+            List<string> lstCards = MainWindow.SCI.GetCollectionList("Primary");
             foreach (string szCard in lstCards)
             {
-                tbPrimaryTest.Text += szCard + Environment.NewLine;
+                m_ColViewer.AppendText(szCard + Environment.NewLine);
             }
-
         }
 
-        private void Ttt_MouseEnter(object sender, MouseEventArgs e)
-        {
-            Ttt.Text = "YoDDog";
-        }
+
     }
 }

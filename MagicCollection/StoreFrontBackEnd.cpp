@@ -15,6 +15,39 @@ CStoreFrontBackEnd::~CStoreFrontBackEnd()
 {
 }
 
+void CStoreFrontBackEnd::AddItem(std::string aszCollectionName, std::string aszCardName)
+{
+	if (m_ColFactory->CollectionExists(aszCollectionName))
+	{
+		Collection* oCol = m_ColFactory->GetCollection(aszCollectionName);
+		std::vector<std::string> lstCardNameAttrs = SourceObject::Str_Split(aszCardName, "{");
+		std::string szCardName = lstCardNameAttrs[0];
+		std::vector<std::pair<std::string, std::string>> lstCardAttrs;
+		if (lstCardNameAttrs.size() > 1)
+		{
+			lstCardAttrs = Collection::ParseAttrs(lstCardNameAttrs[1]);
+		}
+		oCol->AddItem(aszCardName, true, lstCardAttrs);
+	}
+}
+
+void CStoreFrontBackEnd::RemoveItem(std::string aszCollectionName, std::string aszCardName)
+{
+	if (m_ColFactory->CollectionExists(aszCollectionName))
+	{
+		
+	}
+}
+
+void CStoreFrontBackEnd::SaveCollection(std::string aszCollectionName)
+{
+	if (m_ColFactory->CollectionExists(aszCollectionName))
+	{
+		Collection* oCol = m_ColFactory->GetCollection(aszCollectionName);
+		oCol->SaveCollection(oCol->GetName() + ".txt");
+	}
+}
+
 void CStoreFrontBackEnd::LoadCollection(std::string aszCollection)
 {
 	// Check if the file exists.

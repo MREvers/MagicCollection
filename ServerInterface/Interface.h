@@ -13,6 +13,14 @@ public:
 	ServerClientInterface();
 	~ServerClientInterface();
 
+	// Make the client calculate differences
+	
+	// These also takes "Fancy Cards" i.e. "Seeker of the Way { Set="blah" }
+	void AddItem(System::String^ aszCollectionName, System::String^ aszCardName);
+	void RemoveItem(System::String^ aszCollectionName, System::String^ aszCardName);
+
+	// Eventually Add file name arg.
+	void SaveCollection(System::String^ aszCollectionName);
 	void LoadCollection(System::String^ aszCollectionName);
 	System::Collections::Generic::List<System::String^>^ GetCollectionList(System::String^ ahszCollectionName);
 

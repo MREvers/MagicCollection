@@ -128,9 +128,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="ClientCollectionObject.h" />
     <ClInclude Include="Interface.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="ClientCollectionObject.cpp" />
     <ClCompile Include="Interface.cpp" />
   </ItemGroup>
   <ItemGroup>

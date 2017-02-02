@@ -73,6 +73,8 @@ public:
    void RecordForcedTransaction(std::string aszTransactionString);
    std::vector<std::string> GetCollectionList();
 
+   static std::vector<std::pair<std::string, std::string>> ParseAttrs(std::string aszAttrs);
+
    void PrintList();
 
    bool TransactionIntercept;
@@ -88,6 +90,8 @@ private:
    std::vector<std::string> m_lstUnreversibleChanges;
    std::string m_szHistoryFileName;
    std::vector<std::string>* m_lstLoadedCollectionsBuffer;
+
+   void setName(std::string aszName);
 
    void addItem(std::string aszNewItem, std::vector<std::pair<std::string, std::string>> alstAttrs);
    CopyObject* forceAdd(std::string aszNewItem, std::vector<std::pair<std::string, std::string>> alstAttrs);

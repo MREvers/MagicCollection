@@ -7,16 +7,11 @@
         mc:Ignorable="d"
         Title="Collector Front End" Height="350" Width="525">
     <Grid>
-        <TextBox x:Name="tbPrimaryTest" HorizontalAlignment="Left" Height="231" TextWrapping="Wrap" Text="TextBox" VerticalAlignment="Top" Width="199"/>
-        <RichTextBox x:Name="richTextBox" HorizontalAlignment="Left" Height="300" VerticalAlignment="Top" Width="300">
-            <FlowDocument>
-                <Paragraph x:Name="parat">
-                    <Run x:Name="Ttt" Text="ggggggggggggggggggggggggggggggggggggggggggggggggRichTextBox"/>
-
-                    <Paragraph.ToolTip>Hey</Paragraph.ToolTip>
-                </Paragraph>
-
-            </FlowDocument>
-        </RichTextBox>
+        <Grid.RowDefinitions>
+            <RowDefinition/>
+            <RowDefinition Height="24"/>
+        </Grid.RowDefinitions>
+        <Grid x:Name="grdPrimaryView">
+        </Grid>
     </Grid>
 </Window>

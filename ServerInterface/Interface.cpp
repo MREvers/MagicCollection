@@ -10,6 +10,26 @@ ServerClientInterface::~ServerClientInterface()
 
 }
 
+void ServerClientInterface::AddItem(System::String^ ahszCollectionName, System::String^ ahszCardName)
+{
+	std::string szCollectionName = msclr::interop::marshal_as<std::string>(ahszCollectionName);
+	std::string szCardName = msclr::interop::marshal_as<std::string>(ahszCardName);
+	m_StoreFrontBackEnd->AddItem(szCollectionName, szCardName);
+}
+
+void ServerClientInterface::RemoveItem(System::String^ ahszCollectionName, System::String^ ahszCardName)
+{
+	std::string szCollectionName = msclr::interop::marshal_as<std::string>(ahszCollectionName);
+	std::string szCardName = msclr::interop::marshal_as<std::string>(ahszCardName);
+	m_StoreFrontBackEnd->RemoveItem(szCollectionName, szCardName);
+}
+
+void ServerClientInterface::SaveCollection(System::String^ ahszCollectionName)
+{
+	std::string szCollectionName = msclr::interop::marshal_as<std::string>(ahszCollectionName);
+	m_StoreFrontBackEnd->SaveCollection(szCollectionName);
+}
+
 void ServerClientInterface::LoadCollection(System::String^ ahszCollectionName)
 {
 	std::string szCollectionName = msclr::interop::marshal_as<std::string>(ahszCollectionName);

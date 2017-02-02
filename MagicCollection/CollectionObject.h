@@ -22,7 +22,7 @@ class CopyObject
 
 // Since this is a flyweight object, the interface should act as though it is 'in' the collection,
 //  but functionaly it should be a flyweight.
-class CollectionObject : public ICollectionObject
+class __declspec(dllexport) CollectionObject : public ICollectionObject
 {
 public:
    CollectionObject(std::string aszName);
@@ -30,6 +30,8 @@ public:
 
    // Gets called by the collection Source. Implement in base class to get needed attributes.
    virtual bool MapAttributes(std::string aszName, std::string aszValue);
+   std::string GetAttribute(std::string aszAttr);
+   std::map<std::string, std::string>  GetAttributesMap();
 
    // Collection Interface
    std::string GetName();
@@ -53,7 +55,7 @@ private:
    int m_iAllCopies; // Used in assigning IDs.
 
    std::vector<CopyObject> m_lstCopies;
-
+   std::map<std::string, std::string> m_mapAttributes;
    std::string m_szName;
 
 };
