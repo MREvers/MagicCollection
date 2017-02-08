@@ -5,13 +5,24 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CollectorsFrontEnd"
         mc:Ignorable="d"
-        Title="Collector Front End" Height="350" Width="525">
-    <Grid>
+        Title="Collector Front End" Height="480" Width="620">
+    <Grid x:Name="GrdMain">
         <Grid.RowDefinitions>
+            <RowDefinition Height="20"/>
             <RowDefinition/>
             <RowDefinition Height="24"/>
         </Grid.RowDefinitions>
-        <Grid x:Name="grdPrimaryView">
-        </Grid>
+        <DockPanel Grid.Row="0" >
+            <Border BorderBrush="Black" BorderThickness="1">
+                <Menu DockPanel.Dock="Top" Height="20">
+                    <MenuItem Header="_File" Height="20">
+                        <MenuItem x:Name="FileMICollectionsOverview" Header="Collections Overview"/>
+                        <Separator></Separator>
+                        <MenuItem Header="Close"/>
+                    </MenuItem>
+                </Menu>
+            </Border>
+        </DockPanel>
+
     </Grid>
 </Window>

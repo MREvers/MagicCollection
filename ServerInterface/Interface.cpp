@@ -24,6 +24,40 @@ void ServerClientInterface::RemoveItem(System::String^ ahszCollectionName, Syste
 	m_StoreFrontBackEnd->RemoveItem(szCollectionName, szCardName);
 }
 
+MCopyObject^ ServerClientInterface::ConvertItemToCopyObject(System::String^ ahszCard)
+{
+	std::string szCard = msclr::interop::marshal_as<std::string>(ahszCard);
+
+	int iCount = 0;
+	std::string szCardName = "";
+	std::string szDetails = "";
+	bool success = m_StoreFrontBackEnd->ParseCardString(szCard, iCount, szCardName, szDetails);
+
+	MCopyObject^ roCO = gcnew MCopyObject();
+	if (success)
+	{
+		std::vector<std::pair<std::string, std::string>> lstAttrs = m_StoreFrontBackEnd->ParseAttrs(szDetails);
+		System::Collections::Generic::Dictionary<System::String^, System::String^>^ mapAttrs =
+			gcnew System::Collections::Generic::Dictionary<System::String^, System::String^>();
+
+		std::vector<std::pair<std::string, std::string>>::iterator iter_attrs = lstAttrs.begin();
+		for (; iter_attrs != lstAttrs.end(); ++iter_attrs)
+		{
+			System::String^ hszVal = gcnew System::String(iter_attrs->second.c_str());
+			System::String^ hszKey = gcnew System::String(iter_attrs->first.c_str());
+			mapAttrs->Add(hszKey, hszVal);
+		}
+
+		System::String^ hszCardName = gcnew System::String(szCardName.c_str());
+		
+		roCO->Amount = iCount;
+		roCO->Name = hszCardName;
+		roCO->Attributes = mapAttrs;
+	}
+
+	return roCO;
+}
+
 void ServerClientInterface::SaveCollection(System::String^ ahszCollectionName)
 {
 	std::string szCollectionName = msclr::interop::marshal_as<std::string>(ahszCollectionName);
@@ -50,5 +84,18 @@ System::Collections::Generic::List<System::String^>^ ServerClientInterface::GetC
 		hlstRetval->Add(hszCard);
 	}
 
+	return hlstRetval;
+}
+
+System::Collections::Generic::List<System::String^>^ ServerClientInterface::GetLoadedCollections()
+{
+	System::Collections::Generic::List<System::String^>^ hlstRetval = gcnew System::Collections::Generic::List<System::String^>();
+	std::vector<std::string> lstColList = m_StoreFrontBackEnd->GetLoadedCollections();
+	std::vector<std::string>::iterator iter_colCards = lstColList.begin();
+	for (; iter_colCards != lstColList.end(); ++iter_colCards)
+	{
+		System::String^ hszCard = gcnew System::String(iter_colCards->c_str());
+		hlstRetval->Add(hszCard);
+	}
 	return hlstRetval;
 }

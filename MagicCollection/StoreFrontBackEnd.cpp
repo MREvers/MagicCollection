@@ -71,3 +71,27 @@ std::vector<std::string> CStoreFrontBackEnd::GetCollectionList(std::string aszCo
 		return lstEmpty;
 	}
 }
+
+std::vector<std::string> CStoreFrontBackEnd::GetLoadedCollections()
+{
+	return m_ColFactory->LoadedCollections;
+}
+
+std::vector<std::pair<std::string, std::string>> CStoreFrontBackEnd::ParseAttrs(std::string aszDetails)
+{
+	return Collection::ParseAttrs(aszDetails);
+}
+
+bool CStoreFrontBackEnd::ParseCardString(std::string aszCardString, int& riCount, std::string& rszName, std::string& rszDetails)
+{
+	int iNum = 0;
+	std::string szName = "";
+	std::string szDetails = "";
+	bool bRetVal = Collection::ParseCardLine(aszCardString, iNum, szName, szDetails);
+
+	riCount = iNum;
+	rszName = szName;
+	rszDetails = szDetails;
+
+	return bRetVal;
+}

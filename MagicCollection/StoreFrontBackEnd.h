@@ -22,6 +22,9 @@ public:
 	void SaveCollection(std::string aszCollectionToSave);
 	std::string LoadCollection(std::string aszCollectionToLoad);
 	std::vector<std::string> GetCollectionList(std::string aszCollection);
+	std::vector<std::string> GetLoadedCollections();
+	std::vector<std::pair<std::string, std::string>> ParseAttrs(std::string aszDetails);
+	bool ParseCardString(std::string aszCardString, int& riCount, std::string& rszName, std::string& rszDetails);
 
 private:
 	//ServerIFace* m_ServerIFace;

@@ -333,87 +333,20 @@ void Collection::LoadCollection(std::string aszFileName, std::vector<std::pair<s
 
 	for (std::vector<std::string>::iterator iter = lstLines.begin(); iter != lstLines.end(); ++iter)
 	{
-		int i = 0;
-
-		// Get the name of the collection
-		if (iter->size() > 0 && iter->at(0) == ':')
+		int iNum;
+		std::string szName;
+		std::string szDetails;
+		bool bSuccessfulParse = ParseCardLine(*iter, iNum, szName, szDetails);
+		if (!bSuccessfulParse)
 		{
-			std::string szPreprocess = "";
-			std::string szNoColon = SourceObject::Str_Split(*iter, ":")[1];
-			std::vector<std::string> lstPair = SourceObject::Str_Split(*iter, "=");
-			std::string szColName = SourceObject::Str_Split(lstPair[1], "\"")[1];
-			setName(szColName);
+			m_lstUnreversibleChanges.push_back("Could Not Parse Line \"" + *iter + "\"");
 			continue;
 		}
-
-		std::string szNum = "";
-		while (i < iter->size() && (*iter).at(i) < '9' && (*iter).at(i) > '0')
-		{
-			szNum = szNum + iter->at(i);
-			i++;
-		}
-
-		if (i >= iter->size())
-		{
-			return;
-		}
-
-		if (iter->at(i) == 'x')
-		{
-			i++;
-		}
-
-		if (i >= iter->size())
-		{
-			return;
-		}
-
-		std::string szName = "";
-		int iter_size = iter->size();
-		while (i < iter_size &&
-			((iter->at(i) >= 'a' && iter->at(i) <= 'z') ||
-			(iter->at(i) >= 'A' && iter->at(i) <= 'Z') ||
-				(iter->at(i) == ',' || iter->at(i) == ' ')))
-		{
-			szName = szName + iter->at(i);
-			i++;
-		}
-
-		while (i < iter_size && (iter->at(i) == ' ' || iter->at(i) != '{'))
-		{
-			i++;
-		}
-
-		bool hasDets = false;
-		if (i < iter_size)
-		{
-			if (iter->at(i) == '{')
-			{
-				hasDets = true;
-			}
-		}
-
-
-		std::string szDetails = "";
-		if (i < iter_size && hasDets)
-		{
-
-			while (i < iter_size)
-			{
-				szDetails += iter->at(i);
-				i++;
-			}
-		}
-
 		std::vector<std::pair<std::string, std::string>> lstKeyVals = ParseAttrs(szDetails);
 
 		// Check if cards with identical exist.
 		try
 		{
-			int iNum = std::stoi(szNum);
-			szName.erase(0, szName.find_first_not_of(' '));
-			szName.erase(szName.find_last_not_of(' ') + 1);
-
 			// lstUsedCopies keeps track of copies that have alrea
 			std::vector<CopyObject*> lstUsedCopies;
 			for (int i = 0; i < iNum; i++)
@@ -784,6 +717,93 @@ std::vector<std::pair<std::string, std::string>> Collection::ParseAttrs(std::str
 
 	}
 	return lstKeyVals;
+}
+
+bool Collection::ParseCardLine(std::string aszLine, int& riCount, std::string& rszName, std::string& rszDetails)
+{
+	int i = 0;
+	std::string szNum = "";
+	while (i < aszLine.size() && aszLine.at(i) < '9' && aszLine.at(i) > '0')
+	{
+		szNum = szNum + aszLine.at(i);
+		i++;
+	}
+
+	if (i >= aszLine.size())
+	{
+		return false;
+	}
+
+	if (szNum == "")
+	{
+		szNum = 1;
+	}
+
+	try
+	{
+		int iNum = std::stoi(szNum);
+		riCount = iNum;
+	}
+	catch (...)
+	{
+		return false;
+	}
+
+	if (aszLine.at(i) == 'x')
+	{
+		i++;
+	}
+
+	if (i >= aszLine.size())
+	{
+		return false;
+	}
+
+	std::string szName = "";
+	int iter_size = aszLine.size();
+	while (i < iter_size &&
+		((aszLine.at(i) >= 'a' && aszLine.at(i) <= 'z') ||
+		(aszLine.at(i) >= 'A' && aszLine.at(i) <= 'Z') ||
+			(aszLine.at(i) == ',' || aszLine.at(i) == ' ')))
+	{
+		szName = szName + aszLine.at(i);
+		i++;
+	}
+
+	szName.erase(0, szName.find_first_not_of(' '));
+	szName.erase(szName.find_last_not_of(' ') + 1);
+
+	// Output the name
+	rszName = szName;
+
+	while (i < iter_size && (aszLine.at(i) == ' ' || aszLine.at(i) != '{'))
+	{
+		i++;
+	}
+
+	bool hasDets = false;
+	if (i < iter_size)
+	{
+		if (aszLine.at(i) == '{')
+		{
+			hasDets = true;
+		}
+	}
+
+
+	std::string szDetails = "";
+	if (i < iter_size && hasDets)
+	{
+
+		while (i < iter_size)
+		{
+			szDetails += aszLine.at(i);
+			i++;
+		}
+	}
+
+	// Output the details
+	rszDetails = szDetails;
 }
 
 void Collection::RollbackTransaction()

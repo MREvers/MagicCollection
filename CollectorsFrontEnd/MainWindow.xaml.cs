@@ -24,31 +24,49 @@ namespace CollectorsFrontEnd
     {
         static public ServerClientInterface SCI;
 
-        CollectionViewer m_ColViewer;
-
         public MainWindow()
         {
             InitializeComponent();
             this.Loaded += MainWindow_Loaded;
-
-            m_ColViewer = new CollectionViewer();
-
-            grdPrimaryView.Children.Add(m_ColViewer);
+            FileMICollectionsOverview.Click += MI_CollectionOverview_Click;
         }
 
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
             SCI = new ServerClientInterface();
 
-            SCI.LoadCollection("TestCollectionTwo.txt");
+            SCI.LoadCollection("Primary.txt");
+            SCI.LoadCollection("Main.txt");
 
-            List<string> lstCards = MainWindow.SCI.GetCollectionList("Primary");
-            foreach (string szCard in lstCards)
-            {
-                m_ColViewer.AppendText(szCard + Environment.NewLine);
-            }
+            CollectionOverviewer cv = new CollectionOverviewer(this);
+            cv.SetValue(Grid.RowProperty, 1);
+            GrdMain.Children.Add(cv);
         }
 
+        #region Event Handler Wrappers
+        public void MI_CollectionOverview_Click(object sender, RoutedEventArgs e)
+        {
+            eGoToCollectionOverview();
+        }
+        #endregion
 
+        #region Window Interface
+        // I only need event handlers here if they open different "MainWindows"
+        public void eGoToViewCollection(string aszCollection)
+        {
+            GrdMain.Children.RemoveAt(1);
+            CollectionViewer cv = new CollectionViewer(this, aszCollection);
+            cv.SetValue(Grid.RowProperty, 1);
+            GrdMain.Children.Add(cv);
+        }
+
+        public void eGoToCollectionOverview()
+        {
+            GrdMain.Children.RemoveAt(1);
+            CollectionOverviewer cv = new CollectionOverviewer(this);
+            cv.SetValue(Grid.RowProperty, 1);
+            GrdMain.Children.Add(cv);
+        }
+        #endregion
     }
 }

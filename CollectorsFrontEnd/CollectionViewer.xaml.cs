@@ -21,40 +21,45 @@ namespace CollectorsFrontEnd
     public partial class CollectionViewer : UserControl
     {
         private string ActiveCollection = "";
+        private MainWindow m_Container;
 
-        public CollectionViewer()
+        public CollectionViewer(MainWindow aMW, string aszCollection)
         {
             InitializeComponent();
+            m_Container = aMW;
             BtnAddItem.Click += eAddItem;
-            BtnSaveCollection.Click += eSaveCollection;
-            BtnLoadCollection.Click += eLoadCollection;
+            ActiveCollection = aszCollection;
+
+            RefreshCollectionView();
         }
 
         public void RefreshCollectionView()
         {
-            ClearText();
             List<string> lstCards = MainWindow.SCI.GetCollectionList(ActiveCollection);
+            for (int i = 0; i < CObjectListDisplay.ColumnCount; i++)
+            {
+                GridViewColumn GVC = new GridViewColumn()
+                {
+                    Header = CObjectListDisplay.ListColumnHeaders[i],
+                    DisplayMemberBinding = new Binding("ListColumnItems[" + i + "]")
+                };
+
+                GVColumns.Columns.Add(GVC);
+            }
+            
             foreach (string szCard in lstCards)
             {
-                AppendText(szCard + Environment.NewLine);
+                CObjectListDisplay COListDisplay = new CObjectListDisplay();
+                COListDisplay.SetCard(szCard);
+
+                LVItems.Items.Add(COListDisplay);
             }
-        }
-
-        public void AppendText(string aszText)
-        {
-            tbPrimaryTest.Text += aszText;
-        }
-
-        public void ClearText()
-        {
-            tbPrimaryTest.Text = "";
         }
 
         public void eAddItem(object sender, RoutedEventArgs e)
         {
             if (ActiveCollection != "")
             {
-                MainWindow.SCI.AddItem(ActiveCollection, "Sylvan Advocate");
                 RefreshCollectionView();
             }
         }
@@ -66,28 +71,6 @@ namespace CollectorsFrontEnd
                 MainWindow.SCI.SaveCollection(ActiveCollection);
             }
             
-        }
-
-        public void eLoadCollection(object sender, RoutedEventArgs e)
-        {
-            // Create OpenFileDialog 
-            Microsoft.Win32.OpenFileDialog dlg = new Microsoft.Win32.OpenFileDialog();
-
-            // Set filter for file extension and default file extension 
-            dlg.DefaultExt = ".txt";
-            dlg.Filter = "Text Files (*.txt)|*.txt";
-
-            // Display OpenFileDialog by calling ShowDialog method 
-            Nullable<bool> result = dlg.ShowDialog();
-
-
-            // Get the selected file name and display in a TextBox 
-            if (result == true)
-            {
-                // Open document 
-                ActiveCollection = MainWindow.SCI.LoadCollection(dlg.FileName);
-                RefreshCollectionView();
-            }
         }
     }
 }

@@ -74,6 +74,7 @@ public:
    std::vector<std::string> GetCollectionList();
 
    static std::vector<std::pair<std::string, std::string>> ParseAttrs(std::string aszAttrs);
+   static bool ParseCardLine(std::string aszLine, int& riCount, std::string& rszName, std::string& rszDetails);
 
    void PrintList();
 

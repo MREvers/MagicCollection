@@ -4,33 +4,43 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:CollectorsFrontEnd"
-             mc:Ignorable="d" 
-             d:DesignHeight="300" d:DesignWidth="300">
+             mc:Ignorable="d" d:DesignWidth="620" d:DesignHeight="380">
     <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition/>
-            <RowDefinition Height="24"/>
-        </Grid.RowDefinitions>
-        <ContentControl Name="WindowContent" Content="{Binding}" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch" />
-        <TextBox Grid.Row="0"  x:Name="tbPrimaryTest" HorizontalAlignment="Stretch" TextWrapping="Wrap" VerticalAlignment="Stretch"/>
-        <Grid Grid.Row="1">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="5*"/>
+            <ColumnDefinition Width="3*"/>
+        </Grid.ColumnDefinitions>
+        <Border  Grid.Column="1" BorderBrush="Black" BorderThickness="1">
+        </Border>
+        <ListView x:Name="LVItems">
+            <ListView.View>
+                <GridView x:Name="GVColumns"/>
+            </ListView.View>
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <local:CObjectListDisplay></local:CObjectListDisplay>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+        <Grid Grid.Row="0" Grid.Column="1">
+            <Grid.RowDefinitions>
+                <RowDefinition/>
+                <RowDefinition Height="24"/>
+                <RowDefinition Height="24"/>
+                <RowDefinition Height="24"/>
+                <RowDefinition Height="24"/>
+            </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition/>
-                <ColumnDefinition/>
-                <ColumnDefinition Width="2*"/>
-                <ColumnDefinition Width="2*"/>
             </Grid.ColumnDefinitions>
-            <Button x:Name="BtnAddItem" Grid.Column="0" HorizontalAlignment="Stretch">
+            <Button x:Name="BtnAddItem" Grid.Row="1" HorizontalAlignment="Stretch">
                 <TextBlock>Add Item</TextBlock>
             </Button>
-            <Button x:Name="BtnBulkEdit" Grid.Column="1"  HorizontalAlignment="Stretch">
+            <Button x:Name="BtnBulkAdd"  Grid.Row="2"  HorizontalAlignment="Stretch">
+                <TextBlock>Bulk Add</TextBlock>
+            </Button>
+            <Button x:Name="BtnBulkEdit" Grid.Row="3"  HorizontalAlignment="Stretch">
                 <TextBlock>Bulk Edit</TextBlock>
-            </Button>
-            <Button x:Name="BtnLoadCollection" Grid.Column="3"  HorizontalAlignment="Stretch">
-                <TextBlock>Load Collection</TextBlock>
-            </Button>
-            <Button x:Name="BtnSaveCollection" Grid.Column="2"  HorizontalAlignment="Stretch">
-                <TextBlock>Save Collection</TextBlock>
             </Button>
         </Grid>
 
