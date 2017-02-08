@@ -24,7 +24,14 @@ namespace CollectorsFrontEnd
         public ItemInterchanger()
         {
             InitializeComponent();
+            CBCardSearch.AddHandler(System.Windows.Controls.Primitives.TextBoxBase.TextChangedEvent,
+                      new System.Windows.Controls.TextChangedEventHandler(eCBTextChanged));
 
+            CBCardSearch.Items.Add("Hey");
+
+            CBCardSearch.Items.Add("Hey2");
+            CBCardSearch.Items.Add("Hey3");
+            CBCardSearch.IsDropDownOpen = true;
         }
 
         private void BtnRemoveCard_Click(object sender, RoutedEventArgs e)
@@ -37,7 +44,7 @@ namespace CollectorsFrontEnd
 
         private void eTBTextChanged(object sender, TextChangedEventArgs e)
         {
-            string szTypedText = TbAddCard.Text;
+            string szTypedText = CBCardSearch.Text;
 
             List<string> lstSuggestions = new List<string>() { "Dog" };
 
@@ -49,6 +56,11 @@ namespace CollectorsFrontEnd
             codePopup.Child = popupText;
             codePopup.Visibility = Visibility.Visible;
             Grd.Children.Add(codePopup);
+        }
+
+        private void eCBTextChanged(object sender, TextChangedEventArgs e)
+        {
+            CBCardSearch.Text = "Hey";
         }
     }
 }

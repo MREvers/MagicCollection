@@ -84,7 +84,7 @@ namespace CollectorsFrontEnd
                 ItemInterchanger ITI = new ItemInterchanger();
                 Panel.SetZIndex(CenterPanel, 2);
                 CenterPanel.Children.Add(ITI);
-                RefreshCollectionView();
+                //RefreshCollectionView();
                 LVItems.IsEnabled = false;
             }
         }
