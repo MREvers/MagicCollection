@@ -4,29 +4,84 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:CollectorsFrontEnd"
-             mc:Ignorable="d" 
-             d:DesignHeight="80" d:DesignWidth="300">
+             mc:Ignorable="d" Height="186" Width="190">
     <Grid x:Name="Grd">
         <Grid.ColumnDefinitions>
             <ColumnDefinition/>
-            <ColumnDefinition/>
+
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
-            <RowDefinition/>
-            <RowDefinition/>
-            <RowDefinition/>
+            <RowDefinition Height="1*"/>
+            <RowDefinition Height="1*"/>
+            <RowDefinition Height="4*"/>
         </Grid.RowDefinitions>
-        <TextBox  Grid.Row="1" Grid.Column="0" x:Name="TbAddCard"  VerticalContentAlignment="Center" HorizontalAlignment="Stretch" TextWrapping="Wrap" Text="" VerticalAlignment="Stretch">
-            
-        </TextBox>
-        <Label  Grid.Row="0" Grid.Column="1" x:Name="LblRemoveCard" HorizontalAlignment="Left" VerticalAlignment="Top">
-            <TextBlock Margin="-5">Remove Card:</TextBlock>
+        <Label Grid.Row="0" Grid.Column="0" x:Name="LblAddCard"  HorizontalAlignment="Center" VerticalAlignment="Top">
+            <TextBlock FontSize="15">Add Card:</TextBlock>
         </Label>
-        <Button  Grid.Row="2" Grid.Column="0" x:Name="BtnAddCard" Content="Add" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
-        <Button  Grid.Row="2" Grid.Column="1" x:Name="BtnRemoveCard" Content="Remove/Replace" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Click="BtnRemoveCard_Click"/>
-        <Label Grid.Row="0" Grid.Column="0" x:Name="LblAddCard"  HorizontalAlignment="Left" VerticalAlignment="Top">
-            <TextBlock Margin="-5">Add Card:</TextBlock>
-        </Label>
-        <TextBox  Grid.Row="1" Grid.Column="1" x:Name="TbRemoveCard" VerticalContentAlignment="Center" HorizontalAlignment="Stretch"  TextWrapping="Wrap" Text="" VerticalAlignment="Stretch"/>
+        <ComboBox  Grid.Row="1" Grid.Column="0"
+                   x:Name="TbAddCard"  VerticalContentAlignment="Center"
+                   HorizontalAlignment="Stretch"
+                   IsEditable="True" Margin="10,2" VerticalAlignment="Stretch">
+            <ComboBox.Style>
+                <Style TargetType="{x:Type ComboBox}">
+                    <Setter Property="FrameworkElement.OverridesDefaultStyle" Value="True" />
+                    <Setter Property="Control.Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="ComboBox">
+                                <Grid>
+                                    <ToggleButton>
+                                        <ToggleButton.Template>
+                                            <ControlTemplate TargetType="ToggleButton">
+                                                <Grid>
+                                                    <Border Name="Border" />
+                                                    <Border Name="SmallBorder" />
+                                                    <Path Name="Arrow" />
+                                                </Grid>
+                                            </ControlTemplate>
+                                        </ToggleButton.Template>
+                                    </ToggleButton>
+                                    
+                                    <ContentPresenter />
+                                    <TextBox />
+                                    <Popup>
+                                        <Grid>
+                                            <Border>
+                                                <ScrollViewer>
+                                                    <ItemsPresenter />
+                                                </ScrollViewer>
+                                            </Border>
+                                        </Grid>
+                                    </Popup>
+                                </Grid>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </Style>
+            </ComboBox.Style>
+        </ComboBox>
+        <Popup Grid.Row="1"/>
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition/>
+                <RowDefinition/>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+            <Button  Grid.Row="2" Grid.Column="0"
+                     x:Name="BtnAddCard" Content="Add"
+                     HorizontalAlignment="Stretch" VerticalAlignment="Stretch" 
+                     Margin="3,8"/>
+            <Button  Grid.Row="2" Grid.Column="1"
+                     x:Name="BtnRemoveCard" Content="Cancel"
+                     HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                     Click="BtnRemoveCard_Click"
+                     Margin="3,8"/>
+
+
+        </Grid>
+        
     </Grid>
 </UserControl>

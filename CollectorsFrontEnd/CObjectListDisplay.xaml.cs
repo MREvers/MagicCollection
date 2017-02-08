@@ -46,10 +46,7 @@ namespace CollectorsFrontEnd
                     ListColumnItems.Add(oParsed.Amount.ToString());
                     ListColumnItems.Add(oParsed.Name.ToString());
                 }
-                catch
-                {
-
-                }
+                catch {}
                 
             }
             

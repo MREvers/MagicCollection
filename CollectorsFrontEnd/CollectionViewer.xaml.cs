@@ -15,6 +15,23 @@ using System.Windows.Shapes;
 
 namespace CollectorsFrontEnd
 {
+    public class CollectionViewerDataSelector : DataTemplateSelector
+    {
+
+        public override DataTemplate SelectTemplate(object item, DependencyObject container)
+        {
+            FrameworkElement elemnt = container as FrameworkElement;
+            if (item is CObjectListDisplay)
+            {
+                return elemnt.FindResource("COLDisplayTemplate") as DataTemplate;
+            }
+            else
+            {
+                return elemnt.FindResource("SeparatorTemplate") as DataTemplate;
+            }
+        }
+    }
+
     /// <summary>
     /// Interaction logic for CollectionViewer.xaml
     /// </summary>
@@ -31,10 +48,14 @@ namespace CollectorsFrontEnd
             ActiveCollection = aszCollection;
 
             RefreshCollectionView();
+
         }
 
         public void RefreshCollectionView()
         {
+            LVItems.ItemTemplateSelector = new CollectionViewerDataSelector();
+
+            GVColumns.Columns.Clear();
             List<string> lstCards = MainWindow.SCI.GetCollectionList(ActiveCollection);
             for (int i = 0; i < CObjectListDisplay.ColumnCount; i++)
             {
@@ -46,7 +67,7 @@ namespace CollectorsFrontEnd
 
                 GVColumns.Columns.Add(GVC);
             }
-            
+            LVItems.Items.Clear();
             foreach (string szCard in lstCards)
             {
                 CObjectListDisplay COListDisplay = new CObjectListDisplay();
@@ -60,7 +81,11 @@ namespace CollectorsFrontEnd
         {
             if (ActiveCollection != "")
             {
+                ItemInterchanger ITI = new ItemInterchanger();
+                Panel.SetZIndex(CenterPanel, 2);
+                CenterPanel.Children.Add(ITI);
                 RefreshCollectionView();
+                LVItems.IsEnabled = false;
             }
         }
 

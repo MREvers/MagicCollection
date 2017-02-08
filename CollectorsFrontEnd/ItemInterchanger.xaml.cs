@@ -25,7 +25,6 @@ namespace CollectorsFrontEnd
         {
             InitializeComponent();
 
-            TbAddCard.TextChanged += eTBTextChanged;
         }
 
         private void BtnRemoveCard_Click(object sender, RoutedEventArgs e)
