@@ -136,7 +136,10 @@
         <ComboBox  Grid.Row="1" Grid.Column="0"
                    x:Name="CBCardSearch"  VerticalContentAlignment="Center"
                    HorizontalAlignment="Stretch"
-                   IsEditable="True" Margin="10,2,10,0" Style="{StaticResource ComboBoxFlatStyle}" VerticalAlignment="Top" Height="27" >
+                   IsEditable="True" Margin="10,2,10,0" 
+                   IsReadOnly="False"
+                   Style="{StaticResource ComboBoxFlatStyle}"
+                   VerticalAlignment="Top" Height="27" >
         </ComboBox>
         <Grid Grid.Row="2">
             <Grid.ColumnDefinitions>

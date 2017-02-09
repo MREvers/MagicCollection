@@ -99,3 +99,18 @@ System::Collections::Generic::List<System::String^>^ ServerClientInterface::GetL
 	}
 	return hlstRetval;
 }
+
+System::Collections::Generic::List<System::String^>^ ServerClientInterface::GetAllCardsStartingWith(System::String^ ahszText)
+{
+	std::string szText = msclr::interop::marshal_as<std::string>(ahszText);
+	std::vector<std::string> lstCardList = m_StoreFrontBackEnd->GetAllCardsStartingWith(szText);
+	System::Collections::Generic::List<System::String^>^ hlstCardList = gcnew System::Collections::Generic::List<System::String^>();
+	
+	std::vector<std::string>::iterator iter_Cards = lstCardList.begin();
+	for (; iter_Cards != lstCardList.end(); ++iter_Cards)
+	{
+		System::String^ hszCard = gcnew System::String(iter_Cards->c_str());
+		hlstCardList->Add(hszCard);
+	}
+	return hlstCardList;
+}

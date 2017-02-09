@@ -33,6 +33,8 @@ public:
 	System::String^ LoadCollection(System::String^ aszCollectionName);
 	System::Collections::Generic::List<System::String^>^ GetCollectionList(System::String^ ahszCollectionName);
 	System::Collections::Generic::List<System::String^>^ GetLoadedCollections();
+	System::Collections::Generic::List<System::String^>^ GetAllCardsStartingWith(System::String^ ahszText);
+
 
 private:
 	CStoreFrontBackEnd* m_StoreFrontBackEnd;

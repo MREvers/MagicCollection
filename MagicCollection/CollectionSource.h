@@ -38,6 +38,8 @@ public:
    // Returns all copies with parent == name
    std::vector<std::pair<std::string, CopyObject*>> GetCollection(std::string aszCollectionName);
 
+   std::vector<std::string> GetAllCardsStartingWith(std::string aszText);
+
 private:
    std::vector<SourceObject> m_lstptCardBuffer;
    std::vector<CollectionObject> m_lstoCardCache;

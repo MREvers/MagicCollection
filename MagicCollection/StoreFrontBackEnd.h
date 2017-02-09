@@ -25,6 +25,7 @@ public:
 	std::vector<std::string> GetLoadedCollections();
 	std::vector<std::pair<std::string, std::string>> ParseAttrs(std::string aszDetails);
 	bool ParseCardString(std::string aszCardString, int& riCount, std::string& rszName, std::string& rszDetails);
+	std::vector<std::string> GetAllCardsStartingWith(std::string aszText);
 
 private:
 	//ServerIFace* m_ServerIFace;

@@ -95,3 +95,8 @@ bool CStoreFrontBackEnd::ParseCardString(std::string aszCardString, int& riCount
 
 	return bRetVal;
 }
+
+std::vector<std::string> CStoreFrontBackEnd::GetAllCardsStartingWith(std::string aszText)
+{
+	return m_ColSource->GetAllCardsStartingWith(aszText);
+}

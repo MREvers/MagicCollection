@@ -21,17 +21,24 @@ namespace CollectorsFrontEnd
     /// </summary>
     public partial class ItemInterchanger : UserControl
     {
+        private TextBox TBInCombo; 
+
         public ItemInterchanger()
         {
             InitializeComponent();
             CBCardSearch.AddHandler(System.Windows.Controls.Primitives.TextBoxBase.TextChangedEvent,
                       new System.Windows.Controls.TextChangedEventHandler(eCBTextChanged));
 
-            CBCardSearch.Items.Add("Hey");
-
-            CBCardSearch.Items.Add("Hey2");
-            CBCardSearch.Items.Add("Hey3");
             CBCardSearch.IsDropDownOpen = true;
+            CBCardSearch.Focus();
+            CBCardSearch.Loaded += CBCardSearch_Loaded;
+            CBCardSearch.IsTextSearchEnabled = false;
+        }
+
+        private void CBCardSearch_Loaded(object sender, RoutedEventArgs e)
+        {
+            TBInCombo = (TextBox)CBCardSearch.Template.FindName("PART_EditableTextBox", CBCardSearch);
+            TBInCombo.Focus();
         }
 
         private void BtnRemoveCard_Click(object sender, RoutedEventArgs e)
@@ -60,7 +67,22 @@ namespace CollectorsFrontEnd
 
         private void eCBTextChanged(object sender, TextChangedEventArgs e)
         {
-            CBCardSearch.Text = "Hey";
+            CBCardSearch.IsDropDownOpen = true;
+            string szDropDownText = CBCardSearch.Text;
+
+            if (szDropDownText.Length > 3)
+            {
+                TBInCombo.SelectionLength = 0;
+                CBCardSearch.SelectedIndex = -1;
+                CBCardSearch.Items.Clear();
+
+                List<string> lstCards = MainWindow.SCI.GetAllCardsStartingWith(szDropDownText.ToLower());
+                foreach(string szCard in lstCards)
+                {
+                    CBCardSearch.Items.Add(szCard);
+                }
+            }
+
         }
     }
 }
