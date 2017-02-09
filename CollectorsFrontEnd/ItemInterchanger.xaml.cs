@@ -21,7 +21,9 @@ namespace CollectorsFrontEnd
     /// </summary>
     public partial class ItemInterchanger : UserControl
     {
-        private TextBox TBInCombo; 
+        private TextBox TBInCombo;
+
+        public string ComboText { get; set; }
 
         public ItemInterchanger()
         {
@@ -29,7 +31,6 @@ namespace CollectorsFrontEnd
             CBCardSearch.AddHandler(System.Windows.Controls.Primitives.TextBoxBase.TextChangedEvent,
                       new System.Windows.Controls.TextChangedEventHandler(eCBTextChanged));
 
-            CBCardSearch.IsDropDownOpen = true;
             CBCardSearch.Focus();
             CBCardSearch.Loaded += CBCardSearch_Loaded;
             CBCardSearch.IsTextSearchEnabled = false;
@@ -41,7 +42,7 @@ namespace CollectorsFrontEnd
             TBInCombo.Focus();
         }
 
-        private void BtnRemoveCard_Click(object sender, RoutedEventArgs e)
+        private void BtnCancel_Click(object sender, RoutedEventArgs e)
         {
             if ((this.Parent as Window) != null)
             {
@@ -69,7 +70,7 @@ namespace CollectorsFrontEnd
         {
             CBCardSearch.IsDropDownOpen = true;
             string szDropDownText = CBCardSearch.Text;
-
+            ComboText = szDropDownText;
             if (szDropDownText.Length > 3)
             {
                 TBInCombo.SelectionLength = 0;

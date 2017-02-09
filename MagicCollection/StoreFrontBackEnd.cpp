@@ -17,7 +17,7 @@ CStoreFrontBackEnd::~CStoreFrontBackEnd()
 
 void CStoreFrontBackEnd::AddItem(std::string aszCollectionName, std::string aszCardName)
 {
-	if (m_ColFactory->CollectionExists(aszCollectionName))
+	if (m_ColFactory->CollectionExists(aszCollectionName) && m_ColSource->LoadCard(aszCardName) != -1)
 	{
 		Collection* oCol = m_ColFactory->GetCollection(aszCollectionName);
 		std::vector<std::string> lstCardNameAttrs = SourceObject::Str_Split(aszCardName, "{");

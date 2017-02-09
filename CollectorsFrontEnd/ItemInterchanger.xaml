@@ -156,9 +156,9 @@
                      HorizontalAlignment="Stretch" VerticalAlignment="Stretch" 
                      Margin="3,8"/>
             <Button  Grid.Row="2" Grid.Column="1"
-                     x:Name="BtnRemoveCard" Content="Cancel"
+                     x:Name="BtnCancel" Content="Cancel"
                      HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
-                     Click="BtnRemoveCard_Click"
+                     Click="BtnCancel_Click"
                      Margin="3,8"/>
 
 

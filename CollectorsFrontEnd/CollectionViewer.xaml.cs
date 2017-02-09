@@ -39,12 +39,13 @@ namespace CollectorsFrontEnd
     {
         private string ActiveCollection = "";
         private MainWindow m_Container;
+        private ItemInterchanger m_CurrentAddItemWindow;
 
         public CollectionViewer(MainWindow aMW, string aszCollection)
         {
             InitializeComponent();
             m_Container = aMW;
-            BtnAddItem.Click += eAddItem;
+            BtnAddItem.Click += eAddItemWindowButton;
             ActiveCollection = aszCollection;
 
             RefreshCollectionView();
@@ -77,17 +78,43 @@ namespace CollectorsFrontEnd
             }
         }
 
-        public void eAddItem(object sender, RoutedEventArgs e)
+        public void eAddItemWindowButton(object sender, RoutedEventArgs e)
         {
             if (ActiveCollection != "")
             {
                 ItemInterchanger ITI = new ItemInterchanger();
+                ITI.BtnAddCard.Click += eAddItem;
+                ITI.BtnCancel.Click += eAddItemWindowCancelButton;
+                m_CurrentAddItemWindow = ITI;
                 Panel.SetZIndex(CenterPanel, 2);
                 CenterPanel.Children.Add(ITI);
-                //RefreshCollectionView();
                 LVItems.IsEnabled = false;
             }
         }
+
+        public void eAddItemWindowClose()
+        {
+            m_CurrentAddItemWindow.BtnAddCard.Click -= eAddItem;
+            m_CurrentAddItemWindow.BtnCancel.Click -= eAddItemWindowCancelButton;
+            CenterPanel.Children.Remove(m_CurrentAddItemWindow);
+            m_CurrentAddItemWindow = null;
+            LVItems.IsEnabled = true;
+        }
+
+        public void eAddItem(object sender, RoutedEventArgs e)
+        {
+            MainWindow.SCI.AddItem(ActiveCollection, m_CurrentAddItemWindow.ComboText);
+
+            eAddItemWindowClose();
+
+            RefreshCollectionView();
+        }
+
+        public void eAddItemWindowCancelButton(object sender, RoutedEventArgs e)
+        {
+            eAddItemWindowClose();
+        }
+
 
         public void eSaveCollection(object sender, RoutedEventArgs e)
         {

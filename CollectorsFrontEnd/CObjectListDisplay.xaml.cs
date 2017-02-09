@@ -39,15 +39,15 @@ namespace CollectorsFrontEnd
         public void SetCard(string aszCollectionObjectString)
         {
             MCopyObject oParsed = MainWindow.SCI.ConvertItemToCopyObject(aszCollectionObjectString);
-            if (oParsed.Amount != 0 && oParsed.Attributes != null && oParsed.Name != null)
+            if (oParsed.Attributes != null && oParsed.Name != null)
             {
                 try
                 {
                     ListColumnItems.Add(oParsed.Amount.ToString());
-                    ListColumnItems.Add(oParsed.Name.ToString());
+                    
                 }
                 catch {}
-                
+                ListColumnItems.Add(oParsed.Name.ToString());
             }
             
         }

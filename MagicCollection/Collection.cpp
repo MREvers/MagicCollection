@@ -736,7 +736,7 @@ bool Collection::ParseCardLine(std::string aszLine, int& riCount, std::string& r
 
 	if (szNum == "")
 	{
-		szNum = 1;
+		szNum = "1";
 	}
 
 	try
