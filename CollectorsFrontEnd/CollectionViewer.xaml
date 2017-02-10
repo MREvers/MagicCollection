@@ -14,16 +14,16 @@
         </Border>
         <Grid x:Name="CenterPanel" Grid.ZIndex="0">
         </Grid>
-        <ListView x:Name="LVItems" Grid.ZIndex="1">
-            <ListView.View>
-                <GridView x:Name="GVColumns"/>
-            </ListView.View>
-            <ListView.ItemTemplate>
-                <DataTemplate>
-                    <local:CObjectListDisplay></local:CObjectListDisplay>
-                </DataTemplate>
-            </ListView.ItemTemplate>
-        </ListView>
+        <StackPanel x:Name="SPDisplay">
+            <ItemsControl>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <local:CollectionViewGeneralization/>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </StackPanel>
+
         <Grid Grid.Row="0" Grid.Column="1">
             <Grid.RowDefinitions>
                 <RowDefinition/>
@@ -41,7 +41,7 @@
             <Button x:Name="BtnBulkAdd"  Grid.Row="2"  HorizontalAlignment="Stretch">
                 <TextBlock>Bulk Add</TextBlock>
             </Button>
-            <Button x:Name="BtnBulkEdit" Grid.Row="3"  HorizontalAlignment="Stretch">
+            <Button x:Name="BtnBulkEdit" Grid.Row="3"  HorizontalAlignment="Stretch" Click="BtnBulkEdit_Click">
                 <TextBlock>Bulk Edit</TextBlock>
             </Button>
             <Button x:Name="BtnSaveCollection" Grid.Row="4"  HorizontalAlignment="Stretch">

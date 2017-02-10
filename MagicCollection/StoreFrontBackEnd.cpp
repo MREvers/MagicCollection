@@ -101,20 +101,24 @@ std::vector<std::string> CStoreFrontBackEnd::GetAllCardsStartingWith(std::string
 	return m_ColSource->GetAllCardsStartingWith(aszText);
 }
 
-int CStoreFrontBackEnd::CountCopiesInCollection(std::string aszCollection, std::string aszLongCardName)
+void CStoreFrontBackEnd::AddMetaTag(std::string aszCollectionName, std::string aszLongName, std::string aszKey, std::string aszValue,
+	std::vector<std::pair<std::string, std::string>> alstMatchMeta)
 {
-	std::string szName;
-	int iCount;
-	std::string szDetails;
-	if (ParseCardString(aszLongCardName, iCount, szName, szDetails))
+	if (m_ColFactory->CollectionExists(aszCollectionName))
 	{
-		int iCacheIndex;
-		if (iCacheIndex = m_ColSource->LoadCard(aszLongCardName) != -1)
-		{
-			CollectionObject* oCO = m_ColSource->GetCardPrototype(iCacheIndex);
-			return oCO->GetLocalCopiesWith(aszCollection, ParseAttrs(szDetails)).size();
-		}
-			
+		Collection* oCol = m_ColFactory->GetCollection(aszCollectionName);
+		oCol->AddMetaTag( aszLongName, aszKey, aszValue, alstMatchMeta);
 	}
-	return 0;
+}
+
+std::vector < std::vector<std::pair<std::string, std::string>>> CStoreFrontBackEnd::GetMetaTags(std::string aszCollectionName, std::string aszLongName)
+{
+	if (m_ColFactory->CollectionExists(aszCollectionName))
+	{
+		Collection* oCol = m_ColFactory->GetCollection(aszCollectionName);
+		return oCol->GetMetaTags(aszLongName);
+	}
+
+	std::vector < std::vector<std::pair<std::string, std::string>>> lstno;
+	return lstno;
 }

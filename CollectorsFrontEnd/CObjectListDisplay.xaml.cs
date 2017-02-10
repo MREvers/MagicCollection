@@ -20,17 +20,18 @@ namespace CollectorsFrontEnd
     /// </summary>
     public partial class CObjectListDisplay : UserControl
     {
-        public static int ColumnCount = 2;
-        public static List<string> ListColumnHeaders { get; set; } = new List<string>() { "Amount", "Name" };
-        public List<string> ListColumnItems { get; set; } = new List<string>();
-        public string CardString;
-
         public class COListItem
         {
             public int Amount { get; set; }
             public string Name { get; set; }
             public string Field_3 { get; set; }
         }
+
+        public static int ColumnCount = 2;
+        public static List<string> ListColumnHeaders { get; set; } = new List<string>() { "Amount", "Name" };
+        public List<string> ListColumnItems { get; set; } = new List<string>();
+        public string CardString;
+        public int iCount = 0;
 
         public CObjectListDisplay()
         {
@@ -45,6 +46,7 @@ namespace CollectorsFrontEnd
             {
                 try
                 {
+                    iCount = oParsed.Amount;
                     ListColumnItems.Add(oParsed.Amount.ToString());
                     
                 }

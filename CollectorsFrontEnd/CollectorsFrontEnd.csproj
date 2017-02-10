@@ -107,6 +107,9 @@
     <Compile Include="CollectionViewer.xaml.cs">
       <DependentUpon>CollectionViewer.xaml</DependentUpon>
     </Compile>
+    <Compile Include="CollectionViewGeneralization.xaml.cs">
+      <DependentUpon>CollectionViewGeneralization.xaml</DependentUpon>
+    </Compile>
     <Compile Include="ItemAmountInterchanger.xaml.cs">
       <DependentUpon>ItemAmountInterchanger.xaml</DependentUpon>
     </Compile>
@@ -127,6 +130,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="CollectionViewer.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="CollectionViewGeneralization.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

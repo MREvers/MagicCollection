@@ -20,95 +20,107 @@
 
 class Collection : public ICollection
 {
-   class Action
-   {
-   public:
-      std::string Identifier;
-      std::function<void()> Do;
-      std::function<void()> Undo;
-   };
+	struct CardTags
+	{
+		std::vector<std::pair<std::string, std::string>> Attrs; //Attributes
+		std::vector<std::pair<std::string, std::string>> Tags; //Metatags
+	};
 
-   class Transaction
-   {
-   public:
-      Transaction(Collection* aoCol);
-      ~Transaction();
+	class Action
+	{
+	public:
+		std::string Identifier;
+		std::function<void()> Do;
+		std::function<void()> Undo;
+	};
 
-      Collection* operator-> ();
-      void AddAction(Action& aoAct);
-      void RemoveAction(int i);
-      void Finalize(bool abRecordable = true);
-      void Rollback();
+	class Transaction
+	{
+	public:
+		Transaction(Collection* aoCol);
+		~Transaction();
 
-      bool IsOpen = true;
-      bool Recordable;
-      std::vector<Action> Actions;
+		Collection* operator-> ();
+		void AddAction(Action& aoAct);
+		void RemoveAction(int i);
+		void Finalize(bool abRecordable = true);
+		void Rollback();
 
-   private:
-      Collection* m_Col;
-   };
+		bool IsOpen = true;
+		bool Recordable;
+		std::vector<Action> Actions;
+
+	private:
+		Collection* m_Col;
+	};
 public:
-   Collection(std::string aszName, CollectionSource* aoSource, std::vector<std::string>* alstLoadedCollections);
-   ~Collection();
+	Collection(std::string aszName, CollectionSource* aoSource, std::vector<std::string>* alstLoadedCollections);
+	~Collection();
 
-   // Meta
-   std::string GetName();
+	// Meta
+	std::string GetName();
 
-   void AddItem(std::string aszNewItem,
-    bool bFinal = true,
-    std::vector<std::pair<std::string,std::string>> alstAttrs = std::vector<std::pair<std::string, std::string>>()) override;
-   
-   void RemoveItem(std::string aszNewItem,
-    bool bFinal = true,
-    std::vector<std::pair<std::string, std::string>> alstAttrs = std::vector<std::pair<std::string, std::string>>()) override;
-   
-   
+	void AddItem(std::string aszNewItem,
+		bool bFinal = true,
+		std::vector<std::pair<std::string, std::string>> alstAttrs = std::vector<std::pair<std::string, std::string>>()) override;
 
-   void RollbackTransaction();
+	void RemoveItem(std::string aszNewItem,
+		bool bFinal = true,
+		std::vector<std::pair<std::string, std::string>> alstAttrs = std::vector<std::pair<std::string, std::string>>()) override;
 
-   void LoadCollection(std::string aszCollectionFile, std::vector<std::pair<std::string, std::string>>& alstOutsideForcedChanges);
-   void SaveCollection(std::string aszCollectionFileName);
-   // Clears the history file, then writes the baseline.
-   void CreateBaselineHistory();
-   void RecordForcedTransaction(std::string aszTransactionString);
-   std::vector<std::string> GetCollectionList();
+	void AddMetaTag(std::string aszLongName, std::string aszKey, std::string aszValue,
+		std::vector<std::pair<std::string, std::string>> alstMatchMeta = std::vector<std::pair<std::string, std::string>>());
 
-   static std::vector<std::pair<std::string, std::string>> ParseAttrs(std::string aszAttrs);
-   static bool ParseCardLine(std::string aszLine, int& riCount, std::string& rszName, std::string& rszDetails);
+	std::vector < std::vector<std::pair<std::string, std::string>>> GetMetaTags(std::string aszLongName);
+	std::vector < std::vector<std::pair<std::string, std::string>>> GetMetaTags(std::string aszLongName, std::vector<std::pair<std::string, std::string>> alstMatchMeta);
+	void RollbackTransaction();
 
-   void PrintList();
+	void LoadCollection(std::string aszCollectionFile, std::vector<std::pair<std::string, std::string>>& alstOutsideForcedChanges);
+	void SaveCollection(std::string aszCollectionFileName);
+	// Clears the history file, then writes the baseline.
+	void CreateBaselineHistory();
+	void RecordForcedTransaction(std::string aszTransactionString);
+	std::vector<std::string> GetCollectionList();
 
-   bool TransactionIntercept;
+	static std::vector<std::pair<std::string, std::string>> ParseAttrs(std::string aszAttrs);
+	static bool ParseCardLine(std::string aszLine, int& riCount, std::string& rszName, std::string& rszDetails);
+	static bool CompareKeyValPairList(std::vector<std::pair<std::string, std::string>> alstFirst, std::vector<std::pair<std::string, std::string>> alstSecond);
+
+	void PrintList();
+
+	bool TransactionIntercept;
 
 private:
-   CollectionSource* m_ColSource;
+	CollectionSource* m_ColSource;
 
-   // Collections just know that they have AT LEAST a copy of a card. It has to access
-   //  the Col object to see how many copies.
-   std::vector<int> m_lstCollection;
-   std::string m_szName;
-   std::vector<Transaction> m_lstTransactions;
-   std::vector<std::string> m_lstUnreversibleChanges;
-   std::string m_szHistoryFileName;
-   std::vector<std::string>* m_lstLoadedCollectionsBuffer;
+	// Collections just know that they have AT LEAST a copy of a card. It has to access
+	//  the Col object to see how many copies.
+	std::vector<int> m_lstCollection;
+	std::string m_szName;
+	std::vector<Transaction> m_lstTransactions;
+	std::vector<std::string> m_lstUnreversibleChanges;
+	std::string m_szHistoryFileName;
+	std::vector<std::string>* m_lstLoadedCollectionsBuffer;
+	// { card cache id,  [ list of key val pairs ] }
+	std::vector<std::pair<int, CardTags>> m_lstMetaTags;
 
-   void setName(std::string aszName);
+	void setName(std::string aszName);
 
-   void addItem(std::string aszNewItem, std::vector<std::pair<std::string, std::string>> alstAttrs);
-   CopyObject* forceAdd(std::string aszNewItem, std::vector<std::pair<std::string, std::string>> alstAttrs);
-   // Only adds the collection object cache locations
-   void registerItem(int aiItem);
-   void removeItem(std::string aszItem, std::vector<std::pair<std::string, std::string>> alstAttrs);
+	void addItem(std::string aszNewItem, std::vector<std::pair<std::string, std::string>> alstAttrs);
+	CopyObject* forceAdd(std::string aszNewItem, std::vector<std::pair<std::string, std::string>> alstAttrs);
+	// Only adds the collection object cache locations
+	void registerItem(int aiItem);
+	void removeItem(std::string aszItem, std::vector<std::pair<std::string, std::string>> alstAttrs);
 
-   void changeItemAttribute(std::string aszCardname, CopyObject* aoCO, std::string aszKey, std::string aszNewVal, bool bFinal = true);
-   std::string changeItemAttribute_string(std::string aszCardname, CopyObject* aoCO, std::string aszKey, std::string aszNewVal, bool bIsParentCol = true);
-   void changeItemAttrs(CopyObject* aoCO, std::string aszKey, std::string aszNewVal);
+	void changeItemAttribute(std::string aszCardname, CopyObject* aoCO, std::string aszKey, std::string aszNewVal, bool bFinal = true);
+	std::string changeItemAttribute_string(std::string aszCardname, CopyObject* aoCO, std::string aszKey, std::string aszNewVal, bool bIsParentCol = true);
+	void changeItemAttrs(CopyObject* aoCO, std::string aszKey, std::string aszNewVal);
 
-   Transaction* openTransaction();
-   void finalizeTransaction(bool abRecord = true);
+	Transaction* openTransaction();
+	void finalizeTransaction(bool abRecord = true);
 
 
-   std::string cardToString(int aiCardFlyweight, std::pair<CopyObject*, int>* aoCopy, bool bFullDets = false);
+	std::string cardToString(int aiCardFlyweight, std::pair<CopyObject*, int>* aoCopy, bool bFullDets = false);
 };
 
 #pragma message ("Finish Collection.h")

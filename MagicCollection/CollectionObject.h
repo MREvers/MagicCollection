@@ -53,6 +53,7 @@ public:
    // Used in building a printable structure
    static CopyObject GenerateCopy(std::string aszCollectionName, std::vector<std::pair<std::string, std::string>> alstAttrs);
    static void ConstructCopy(CopyObject& roCO, std::vector<std::pair<std::string, std::string>> alstAttrs);
+   // Keep in mind that this does not compare names because the name of the card is not known by the copy object.
    static bool IsSameIdentity(CopyObject* aoCOne, CopyObject* aoCTwo, bool bMatchParent = true);
 
 private:

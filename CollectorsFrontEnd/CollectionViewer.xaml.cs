@@ -55,27 +55,79 @@ namespace CollectorsFrontEnd
 
         public void RefreshCollectionView()
         {
-            LVItems.ItemTemplateSelector = new CollectionViewerDataSelector();
-
-            GVColumns.Columns.Clear();
+            // THis gives the long name
             List<string> lstCards = MainWindow.SCI.GetCollectionList(ActiveCollection);
-            for (int i = 0; i < CObjectListDisplay.ColumnCount; i++)
-            {
-                GridViewColumn GVC = new GridViewColumn()
-                {
-                    Header = CObjectListDisplay.ListColumnHeaders[i],
-                    DisplayMemberBinding = new Binding("ListColumnItems[" + i + "]")
-                };
-
-                GVColumns.Columns.Add(GVC);
-            }
-            LVItems.Items.Clear();
+            Dictionary<string, CollectionViewGeneralization> genMap = new Dictionary<string, CollectionViewGeneralization>();
+            SPDisplay.Children.Clear();
             foreach (string szCard in lstCards)
             {
-                CObjectListDisplay COListDisplay = new CObjectListDisplay();
-                COListDisplay.SetCard(szCard);
+                Dictionary<string, int> GeneralizationsList = new Dictionary<string, int>();
+                
+                List<List<Tuple<string,string>>> lstTags = MainWindow.SCI.GetMetaTags(ActiveCollection, szCard);
+                int iCopyCount = 0;
+                // Go through and look for generalizations on this copy.
+                foreach(List<Tuple<string,string>> TagList in lstTags)
+                {
+                    foreach (Tuple<string,string> Tuple in TagList)
+                    {
+                        if (Tuple.Item1 == "Generalization")
+                        {
+                            if (GeneralizationsList.ContainsKey(Tuple.Item2))
+                            {
+                                GeneralizationsList[Tuple.Item2] += 1;
+                            }
+                            else
+                            {
+                                GeneralizationsList[Tuple.Item2] = 1;
+                            }
+                            if (Tuple.Item2.ToLower() != "main")
+                            {
+                                iCopyCount++;
+                            }
+                            
+                        }
+                    }
+                } // End Sort generalizations
+                CObjectListDisplay COCardParse = new CObjectListDisplay();
+                COCardParse.SetCard(szCard);
 
-                LVItems.Items.Add(COListDisplay);
+                GeneralizationsList["Main"] = COCardParse.iCount - iCopyCount;
+
+                foreach (string szGeneralization in GeneralizationsList.Keys)
+                {
+                    if (GeneralizationsList[szGeneralization] > 0)
+                    {
+                        CollectionViewGeneralization CVG;
+                        if (genMap.ContainsKey(szGeneralization))
+                        {
+                            CVG = genMap[szGeneralization];
+                        }
+                        else
+                        {
+                            CVG = new CollectionViewGeneralization();
+                            SPDisplay.Children.Add(CVG);
+                            genMap[szGeneralization] = CVG;
+                        }
+
+
+                        CVG.GVColumns.Columns.Clear();
+                        for (int i = 0; i < CObjectListDisplay.ColumnCount; i++)
+                        {
+                            GridViewColumn GVC = new GridViewColumn()
+                            {
+                                Header = CObjectListDisplay.ListColumnHeaders[i],
+                                DisplayMemberBinding = new Binding("ListColumnItems[" + i + "]")
+                            };
+
+                            CVG.GVColumns.Columns.Add(GVC);
+                        }
+
+                        CObjectListDisplay COListDisplay = new CObjectListDisplay();
+                        COListDisplay.SetCard(szCard);
+                        COListDisplay.ListColumnItems[0] = GeneralizationsList[szGeneralization].ToString();
+                        CVG.LVItems.Items.Add(COListDisplay);
+                    }
+                }
             }
         }
 
@@ -89,7 +141,7 @@ namespace CollectorsFrontEnd
                 m_CurrentAddItemWindow = ITI;
                 Panel.SetZIndex(CenterPanel, 2);
                 CenterPanel.Children.Add(ITI);
-                LVItems.IsEnabled = false;
+                SPDisplay.IsEnabled = false;
             }
         }
 
@@ -99,7 +151,7 @@ namespace CollectorsFrontEnd
             m_CurrentAddItemWindow.BtnCancel.Click -= eAddItemWindowCancelButton;
             CenterPanel.Children.Remove(m_CurrentAddItemWindow);
             m_CurrentAddItemWindow = null;
-            LVItems.IsEnabled = true;
+            SPDisplay.IsEnabled = true;
         }
 
         public void eAddItem(object sender, RoutedEventArgs e)
@@ -124,6 +176,13 @@ namespace CollectorsFrontEnd
                 MainWindow.SCI.SaveCollection(ActiveCollection);
             }
             
+        }
+
+        private void BtnBulkEdit_Click(object sender, RoutedEventArgs e)
+        {
+            string szName = "1x Thraben Inspector";
+            MainWindow.SCI.AddMetaTag(ActiveCollection, szName, "Generalization", "Sideboard", new List<Tuple<string, string>>());
+            RefreshCollectionView();
         }
     }
 }

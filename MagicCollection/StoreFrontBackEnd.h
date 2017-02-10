@@ -34,7 +34,9 @@ public:
 	// Returns list of all cards containing aszText
 	std::vector<std::string> GetAllCardsStartingWith(std::string aszText);
 
-	int CountCopiesInCollection(std::string aszCollection, std::string aszLongCardName);
+	std::vector < std::vector<std::pair<std::string, std::string>>> GetMetaTags(std::string aszCollection, std::string aszLongName);
+	void AddMetaTag(std::string aszCollection, std::string aszLongName, std::string aszKey, std::string aszValue,
+		std::vector<std::pair<std::string, std::string>> alstMatchMeta);
 
 	// For parsing long names
 	std::vector<std::pair<std::string, std::string>> ParseAttrs(std::string aszDetails);

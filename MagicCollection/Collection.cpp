@@ -159,6 +159,158 @@ void Collection::RemoveItem(std::string aszRemoveItem,
 	}
 }
 
+void Collection::AddMetaTag(std::string aszLongName, std::string aszKey, std::string aszValue,
+	std::vector<std::pair<std::string, std::string>> alstMatchMeta)
+{
+	//std::map<std::string, std::map<std::string, std::string>>::iterator iter_Tags = m_mapMetaTags.begin();
+	std::string szCardName;
+	int iAmount;
+	std::string szDetails;
+	if (Collection::ParseCardLine(aszLongName, iAmount, szCardName, szDetails))
+	{
+		bool bAlreadyTagged = false;
+		int iCardCacheIndex = m_ColSource->LoadCard(szCardName);
+		if (iCardCacheIndex != -1)
+		{
+			std::vector<std::pair<std::string, std::string>> lstTargetAttrs = ParseAttrs(szDetails);
+			// See if there is a card of this type already tagged
+			// If so, see if it matches.
+			std::vector<std::pair<int, CardTags>>::iterator iter_TaggedCards = m_lstMetaTags.begin();
+			for (; iter_TaggedCards != m_lstMetaTags.end(); ++iter_TaggedCards)
+			{
+				if (iter_TaggedCards->first == iCardCacheIndex)
+				{
+
+					// Check if attrs match
+					if (CompareKeyValPairList(lstTargetAttrs, iter_TaggedCards->second.Attrs))
+					{
+						if (CompareKeyValPairList(alstMatchMeta, iter_TaggedCards->second.Tags))
+						{
+							// MATCH
+							bAlreadyTagged = true;
+							iter_TaggedCards->second.Tags.push_back(std::make_pair(aszKey, aszValue));
+						}
+					}
+				}
+			}
+
+			if (!bAlreadyTagged)
+			{
+				CardTags CT;
+				CT.Attrs = lstTargetAttrs;
+				CT.Tags.push_back(std::make_pair(aszKey, aszValue));
+				// add it then
+				m_lstMetaTags.push_back(std::make_pair(iCardCacheIndex, CT));
+			}
+
+		} // end found in cache
+		else
+		{
+			// PANIC@@@!@@! card name not found in cache
+		}
+
+
+	}
+}
+
+std::vector<std::vector<std::pair<std::string, std::string>>> Collection::GetMetaTags(std::string aszLongName)
+{
+	std::vector<std::vector<std::pair<std::string, std::string>>> lstRetVal;
+	//std::map<std::string, std::map<std::string, std::string>>::iterator iter_Tags = m_mapMetaTags.begin();
+	std::string szCardName;
+	int iAmount;
+	std::string szDetails;
+	if (Collection::ParseCardLine(aszLongName, iAmount, szCardName, szDetails))
+	{
+		int iCardCacheIndex = m_ColSource->LoadCard(szCardName);
+		if (iCardCacheIndex != -1)
+		{
+			std::vector<std::pair<int, CardTags>>::iterator iter_TaggedCards = m_lstMetaTags.begin();
+			for (; iter_TaggedCards != m_lstMetaTags.end(); ++iter_TaggedCards)
+			{
+				if (iter_TaggedCards->first == iCardCacheIndex)
+				{
+					if (CompareKeyValPairList(ParseAttrs(szDetails), iter_TaggedCards->second.Attrs))
+					{
+						lstRetVal.push_back(iter_TaggedCards->second.Tags);
+					}
+				}
+			}
+		}
+	}
+
+	return lstRetVal;
+}
+
+
+std::vector<std::vector<std::pair<std::string, std::string>>> Collection::GetMetaTags(std::string aszLongName, std::vector<std::pair<std::string, std::string>> alstMatchMeta)
+{
+	std::vector<std::vector<std::pair<std::string, std::string>>> lstRetVal;
+	//std::map<std::string, std::map<std::string, std::string>>::iterator iter_Tags = m_mapMetaTags.begin();
+	std::string szCardName;
+	int iAmount;
+	std::string szDetails;
+	if (Collection::ParseCardLine(aszLongName, iAmount, szCardName, szDetails))
+	{
+		int iCardCacheIndex = m_ColSource->LoadCard(szCardName);
+		if (iCardCacheIndex != -1)
+		{
+			std::vector<std::pair<int, CardTags>>::iterator iter_TaggedCards = m_lstMetaTags.begin();
+			for (; iter_TaggedCards != m_lstMetaTags.end(); ++iter_TaggedCards)
+			{
+				if (iter_TaggedCards->first == iCardCacheIndex)
+				{
+					if (CompareKeyValPairList(ParseAttrs(szDetails), iter_TaggedCards->second.Attrs))
+					{
+						// Now check it it contains AT LEAST the argument tags
+						std::vector<std::pair<std::string, std::string>>::iterator iter_RequiredTags = alstMatchMeta.begin();
+						bool bAllFound = true;
+						for (; iter_RequiredTags != alstMatchMeta.end(); ++iter_RequiredTags)
+						{
+							// See if we can find this tag
+							bool bFound = false;
+							std::vector<std::pair<std::string, std::string>>::iterator iter_CompareTags = iter_TaggedCards->second.Tags.begin();
+							for (; iter_CompareTags != iter_TaggedCards->second.Tags.end(); ++iter_CompareTags)
+							{
+								if (iter_CompareTags->first == iter_RequiredTags->first)
+								{
+									if (iter_CompareTags->second == iter_RequiredTags->second)
+									{
+										bFound = true;
+									}
+								}
+							}
+							bAllFound &= bFound;
+							if (!bFound)
+							{
+								break;
+							}
+						}
+						if (bAllFound)
+						{
+							// They can only be off by 1 tag otherwise we cant tell overspecified cards apart
+							/*
+							if (iter_TaggedCards->second.Tags.size() == alstMatchMeta.size())
+							{
+								//EXACT MATCH
+								lstRetVal.clear();
+								lstRetVal.push_back(iter_TaggedCards->second.Tags);
+								break;
+							}
+							*/
+							lstRetVal.push_back(iter_TaggedCards->second.Tags);
+							//MATCH
+							
+						}
+					}
+				}
+			}
+		}
+	}
+
+	return lstRetVal;
+}
+
 void Collection::setName(std::string aszName)
 {
 	m_szName = aszName;
@@ -711,7 +863,7 @@ std::vector<std::pair<std::string, std::string>> Collection::ParseAttrs(std::str
 				std::string szVal = lstVal[1];
 				lstKeyVals.push_back(std::make_pair(lstPairs[0], szVal));
 			}
-			
+
 		}
 
 
@@ -804,6 +956,46 @@ bool Collection::ParseCardLine(std::string aszLine, int& riCount, std::string& r
 
 	// Output the details
 	rszDetails = szDetails;
+}
+
+bool Collection::CompareKeyValPairList(std::vector<std::pair<std::string, std::string>> alstFirst,
+	std::vector<std::pair<std::string, std::string>> alstSecond)
+{
+	bool bMatch = true;
+
+	if (bMatch = (alstFirst.size() == alstSecond.size()))
+	{
+		std::vector<std::pair<std::string, std::string>>::iterator iter_First = alstFirst.begin();
+		std::vector<std::pair<std::string, std::string>>::iterator iter_Second = alstSecond.begin();
+
+		for (; iter_First != alstFirst.end(); ++iter_First)
+		{
+			bool bFoundMatch = false;
+			for (; iter_Second != alstSecond.end(); ++iter_Second)
+			{
+				if (iter_First->first == iter_Second->first)
+				{
+					if (iter_First->second == iter_Second->second)
+					{
+						bFoundMatch = true;
+						break;
+					}
+				}
+			}
+
+			if (!bFoundMatch)
+			{
+				bMatch = false;
+				break;
+			}
+		}
+	}
+
+
+
+
+
+	return bMatch;
 }
 
 void Collection::RollbackTransaction()

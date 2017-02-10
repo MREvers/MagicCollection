@@ -71,14 +71,6 @@ System::String^ ServerClientInterface::LoadCollection(System::String^ ahszCollec
 	return gcnew System::String(szCollectionName.c_str());
 }
 
-System::Int32^ ServerClientInterface::GetCopyCountInCollection(System::String^ ahszCollectionName, System::String^ ahszLongCardName)
-{
-	std::string szCollectionName = msclr::interop::marshal_as<std::string>(ahszCollectionName);
-	std::string szLongCardName = msclr::interop::marshal_as<std::string>(ahszLongCardName);
-	int iCount = m_StoreFrontBackEnd->CountCopiesInCollection(szCollectionName, szLongCardName);
-	return gcnew System::Int32(iCount);
-}
-
 System::Collections::Generic::Dictionary<System::String^, System::String^>^ ServerClientInterface::GetCopyLocations(System::String^ ahszCollectionName, System::String^ ahszLongCardName)
 {
 	System::Collections::Generic::Dictionary<System::String^, System::String^>^ hlstRetval = gcnew System::Collections::Generic::Dictionary<System::String^, System::String^>();
@@ -138,4 +130,55 @@ System::Collections::Generic::List<System::String^>^ ServerClientInterface::GetA
 		hlstCardList->Add(hszCard);
 	}
 	return hlstCardList;
+}
+
+System::Collections::Generic::List<System::Collections::Generic::List<System::Tuple<System::String^, System::String^>^>^>^
+ServerClientInterface::GetMetaTags(System::String^ ahszCollectionName, System::String^ ahszLongName)
+{
+	std::string szCollectionName = msclr::interop::marshal_as<std::string>(ahszCollectionName);
+	std::string szLongCardName = msclr::interop::marshal_as<std::string>(ahszLongName);
+	std::vector<std::vector<std::pair<std::string, std::string>>> lstTagListList = m_StoreFrontBackEnd->GetMetaTags(szCollectionName, szLongCardName);
+	System::Collections::Generic::List<System::Collections::Generic::List<System::Tuple<System::String^, System::String^>^>^>^
+		hlstRetVal = gcnew
+		System::Collections::Generic::List<System::Collections::Generic::List<System::Tuple<System::String^, System::String^>^>^>();
+	std::vector<std::vector<std::pair<std::string, std::string>>>::iterator iter_MetaTags = lstTagListList.begin();
+	for (; iter_MetaTags != lstTagListList.end(); ++iter_MetaTags)
+	{
+		System::Collections::Generic::List<System::Tuple<System::String^, System::String^>^>^
+			hlstMetaTags = gcnew
+			System::Collections::Generic::List<System::Tuple<System::String^, System::String^>^>();
+		std::vector<std::pair<std::string, std::string>>::iterator iter_MetaTagList = iter_MetaTags->begin();
+		for (; iter_MetaTagList != iter_MetaTags->end(); ++iter_MetaTagList)
+		{
+			System::String^ hszKey = gcnew System::String(iter_MetaTagList->first.c_str());
+			System::String^ hszVal = gcnew System::String(iter_MetaTagList->second.c_str());
+			System::Tuple<System::String^, System::String^>^ hPair =
+				gcnew System::Tuple<System::String^, System::String^>(hszKey, hszVal);
+			hlstMetaTags->Add(hPair);
+		}
+		hlstRetVal->Add(hlstMetaTags);
+	}
+
+	return hlstRetVal;
+}
+
+void ServerClientInterface::AddMetaTag(System::String^ ahszCollectionName, System::String^ ahszLongName, System::String^ ahszKey, System::String^ ahszVal,
+	System::Collections::Generic::List<System::Tuple<System::String^, System::String^>^>^ hlstMetaTags)
+{
+	std::string szCollectionName = msclr::interop::marshal_as<std::string>(ahszCollectionName);
+	std::string szLongCardName = msclr::interop::marshal_as<std::string>(ahszLongName);
+	std::string szKey = msclr::interop::marshal_as<std::string>(ahszKey);
+	std::string szVal = msclr::interop::marshal_as<std::string>(ahszVal);
+	std::vector<std::pair<std::string, std::string>> lstMetaTagPairs;
+	for (int i = 0; i < hlstMetaTags->Count; i++)
+	{
+		std::pair<std::string, std::string> pair;
+		std::string szFirst = msclr::interop::marshal_as<std::string>(hlstMetaTags[i]->Item1);
+		std::string szSecond = msclr::interop::marshal_as<std::string>(hlstMetaTags[i]->Item2);
+		pair.first = szFirst;
+		pair.second = szSecond;
+		lstMetaTagPairs.push_back(pair);
+	}
+
+	m_StoreFrontBackEnd->AddMetaTag(szCollectionName, szLongCardName, szKey, szVal, lstMetaTagPairs);
 }
