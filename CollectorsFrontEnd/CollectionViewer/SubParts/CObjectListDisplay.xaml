@@ -6,8 +6,10 @@
              xmlns:local="clr-namespace:CollectorsFrontEnd"
              mc:Ignorable="d" 
              
-             d:DesignHeight="24" d:DesignWidth="300" HorizontalAlignment="Stretch">
+             d:DesignHeight="24" d:DesignWidth="80" HorizontalAlignment="Stretch">
     <Grid>
-        <TextBox>HEY:S</TextBox>
+        <Button x:Name="BtnAmountInterchanger">
+            <Label Content="=="></Label>
+        </Button>
     </Grid>
 </UserControl>

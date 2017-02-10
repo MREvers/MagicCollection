@@ -9,7 +9,8 @@
     <Grid>
         <ListView x:Name="LVItems" Grid.ZIndex="1">
             <ListView.View>
-                <GridView x:Name="GVColumns"/>
+                <GridView x:Name="GVColumns">
+                </GridView>
             </ListView.View>
             <ListView.ItemTemplate>
                 <DataTemplate>

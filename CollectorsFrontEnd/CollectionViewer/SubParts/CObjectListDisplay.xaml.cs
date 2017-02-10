@@ -33,19 +33,16 @@ namespace CollectorsFrontEnd
         public string CardString;
         public Dictionary<string, string> MapOfAttrs;
         public int iCount = 0;
-        public bool HasControl = true;
-        public CObjectListDisplay GetThis { get
-            {
-                return this;
-            } }
-
+        public CObjectListDisplay GetThis { get; set; }
         public CObjectListDisplay()
         {
             InitializeComponent();
+            GetThis = this;
         }
 
         public void SetCard(string aszCollectionObjectString)
         {
+
             CardString = aszCollectionObjectString;
             MCopyObject oParsed = MainWindow.SCI.ConvertItemToCopyObject(aszCollectionObjectString);
             if (oParsed.Attributes != null && oParsed.Name != null)
@@ -60,12 +57,6 @@ namespace CollectorsFrontEnd
                 ListColumnItems.Add(oParsed.Name.ToString());
             }
             MapOfAttrs = oParsed.Attributes;
-
-        }
-
-        public void LstViewMain_OnPreviewMouseDown(object sender, MouseButtonEventArgs e)
-        {
-            e.Handled = true;
         }
     }
 }

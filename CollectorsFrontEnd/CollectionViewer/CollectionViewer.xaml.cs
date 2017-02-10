@@ -12,6 +12,9 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.IO;
+using System.Windows.Markup;
+using System.Xml;
 
 namespace CollectorsFrontEnd
 {
@@ -40,6 +43,7 @@ namespace CollectorsFrontEnd
         private string ActiveCollection = "";
         private MainWindow m_Container;
         private ItemInterchanger m_CurrentAddItemWindow;
+        private ItemAmountInterchanger m_CurrentAmountInterchangerWindow;
 
         public CollectionViewer(MainWindow aMW, string aszCollection)
         {
@@ -105,7 +109,7 @@ namespace CollectorsFrontEnd
                         else
                         {
                             CVG = new CollectionViewGeneralization();
-                            CVG.GVColumns.Columns.Clear();
+                            //CVG.GVColumns.Columns.Clear();
                             for (int i = 0; i < CObjectListDisplay.ColumnCount; i++)
                             {
                                 GridViewColumn GVC = new GridViewColumn()
@@ -116,14 +120,17 @@ namespace CollectorsFrontEnd
 
                                 CVG.GVColumns.Columns.Add(GVC);
                             }
-                            var COFrameworkFactory = new FrameworkElementFactory(typeof(CObjectListDisplay));
+                            StringReader sR = new StringReader(
+                                @"<DataTemplate xmlns=""http://schemas.microsoft.com/winfx/2006/xaml/presentation"">"+
+                                "<ContentControl Content=\"{Binding}\"/>"+
+                                "</DataTemplate>"
+                                );
+                            XmlReader xR = XmlReader.Create(sR);
+                            DataTemplate DT = XamlReader.Load(xR) as DataTemplate;
                             GridViewColumn GVCBind = new GridViewColumn()
                             {
                                 Header = "",
-                                CellTemplate = new DataTemplate
-                                {
-                                    VisualTree = COFrameworkFactory,
-                                }
+                                CellTemplate = DT
                             };
 
                             CVG.GVColumns.Columns.Add(GVCBind);
@@ -131,18 +138,20 @@ namespace CollectorsFrontEnd
                             genMap[szGeneralization] = CVG;
                         }
 
-
-                        
-
                         CObjectListDisplay COListDisplay = new CObjectListDisplay();
+                        
                         COListDisplay.SetCard(szCard);
+
                         COListDisplay.ListColumnItems[0] = GeneralizationsList[szGeneralization].ToString();
+
+                        COListDisplay.BtnAmountInterchanger.Click += eAmountInterchangeWindowOpen;
+
                         CVG.LVItems.Items.Add(COListDisplay);
                     }
                 }
             }
         }
-
+        #region AddItem Window
         public void eAddItemWindowButton(object sender, RoutedEventArgs e)
         {
             if (ActiveCollection != "")
@@ -179,7 +188,22 @@ namespace CollectorsFrontEnd
         {
             eAddItemWindowClose();
         }
+        #endregion AddItem Window
 
+        #region AmountChanger Window
+        public void eAmountInterchangeWindowOpen(object sender, RoutedEventArgs e)
+        {
+            ItemAmountInterchanger IAI = new ItemAmountInterchanger();
+            CObjectListDisplay Source = (CObjectListDisplay)sender;
+            IAI.SetCard(ActiveCollection, Source.CardString);
+            //ITI.BtnAddCard.Click += eAddItem;
+            //ITI.BtnCancel.Click += eAddItemWindowCancelButton;
+            m_CurrentAmountInterchangerWindow = IAI;
+            Panel.SetZIndex(CenterPanel, 2);
+            CenterPanel.Children.Add(IAI);
+            SPDisplay.IsEnabled = false;
+        }
+        #endregion
 
         public void eSaveCollection(object sender, RoutedEventArgs e)
         {

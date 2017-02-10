@@ -22,21 +22,20 @@ namespace CollectorsFrontEnd
     {
         public string ActiveCard { get; set; }
         public string ActiveCollection { get; set; }
-        public int ICountOf = 0;
 
         public ItemAmountInterchanger()
         {
             InitializeComponent();
         }
 
-        public void SetCard(string aszCollection, string aszCard, int iCount)
+        public void SetCard(string aszCollection, string aszCard)
         {
             LblCardName.Content = aszCard;
 
             ActiveCard = aszCard;
             ActiveCollection = aszCollection;
-            ICountOf = iCount;
             PopulateColCounts();
+
         }
 
         public void PopulateColCounts()
@@ -80,7 +79,7 @@ namespace CollectorsFrontEnd
             {
                 AmountInterchanger AI = new AmountInterchanger();
                 AI.SetName(szGeneralization);
-                AI.TBAMount.Text = ICountOf.ToString();
+                AI.TBAMount.Text = GeneralizationsList[szGeneralization].ToString();
                 SPCollections.Children.Add(AI);
             }
         }
