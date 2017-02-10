@@ -15,6 +15,7 @@ public:
 // This class is how the C# client will access the native c++ code.
 // There is a native ServerIFace class that exposes members for this class.
 // This "Wraps" the native Server IFace Class.
+// THIS NEEDS TO IMPLEMENT IDISPOSABLE
 public ref class ServerClientInterface
 {
 public:
@@ -31,6 +32,8 @@ public:
 	void SaveCollection(System::String^ aszCollectionName);
 	// Returns the collection name
 	System::String^ LoadCollection(System::String^ aszCollectionName);
+	System::Int32^ GetCopyCountInCollection(System::String^ ahszCollectionName, System::String^ ahszLongCardName);
+	System::Collections::Generic::Dictionary<System::String^, System::String^>^ GetCopyLocations(System::String^ ahszCollectionName, System::String^ ahszLongCardName);
 	System::Collections::Generic::List<System::String^>^ GetCollectionList(System::String^ ahszCollectionName);
 	System::Collections::Generic::List<System::String^>^ GetLoadedCollections();
 	System::Collections::Generic::List<System::String^>^ GetAllCardsStartingWith(System::String^ ahszText);

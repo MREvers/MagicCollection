@@ -100,3 +100,21 @@ std::vector<std::string> CStoreFrontBackEnd::GetAllCardsStartingWith(std::string
 {
 	return m_ColSource->GetAllCardsStartingWith(aszText);
 }
+
+int CStoreFrontBackEnd::CountCopiesInCollection(std::string aszCollection, std::string aszLongCardName)
+{
+	std::string szName;
+	int iCount;
+	std::string szDetails;
+	if (ParseCardString(aszLongCardName, iCount, szName, szDetails))
+	{
+		int iCacheIndex;
+		if (iCacheIndex = m_ColSource->LoadCard(aszLongCardName) != -1)
+		{
+			CollectionObject* oCO = m_ColSource->GetCardPrototype(iCacheIndex);
+			return oCO->GetLocalCopiesWith(aszCollection, ParseAttrs(szDetails)).size();
+		}
+			
+	}
+	return 0;
+}

@@ -40,8 +40,12 @@ public:
    // The col children will have to match exactly... because copies are not identical.
    void RemoveCopy(std::string aszCollectionName);
    std::vector<CopyObject*> GetLocalCopies(std::string aszCollectionName);
+   std::vector<CopyObject*> GetLocalCopiesWith(std::string aszCollectionName, std::vector<std::pair<std::string, std::string>> alstAttrs);
+
    // Gets all resi copies.
    std::vector<CopyObject*> GetCopies(std::string aszCollectionName);
+   // Gets all resi copies resident in aszCollectionName, located in aszParent, with the correct attributes.
+   std::vector<CopyObject*> GetCopiesWith(std::string aszCollectionName, std::string aszParent, std::vector<std::pair<std::string, std::string>> alstAttrs);
    // Gets a copy with matching attrs
    bool GetCopy(std::string aszCollectionName, std::vector<std::pair<std::string,std::string>> alstAttrs, CopyObject& roCO, bool abExact = true);
    // Used in building a printable structure
@@ -49,7 +53,7 @@ public:
    // Used in building a printable structure
    static CopyObject GenerateCopy(std::string aszCollectionName, std::vector<std::pair<std::string, std::string>> alstAttrs);
    static void ConstructCopy(CopyObject& roCO, std::vector<std::pair<std::string, std::string>> alstAttrs);
-   static bool IsSameIdentity(CopyObject* aoCOne, CopyObject* aoCTwo);
+   static bool IsSameIdentity(CopyObject* aoCOne, CopyObject* aoCTwo, bool bMatchParent = true);
 
 private:
    int m_iAllCopies; // Used in assigning IDs.

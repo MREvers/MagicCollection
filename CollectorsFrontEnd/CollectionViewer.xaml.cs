@@ -46,6 +46,7 @@ namespace CollectorsFrontEnd
             InitializeComponent();
             m_Container = aMW;
             BtnAddItem.Click += eAddItemWindowButton;
+            BtnSaveCollection.Click += eSaveCollection;
             ActiveCollection = aszCollection;
 
             RefreshCollectionView();

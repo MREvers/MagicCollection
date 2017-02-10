@@ -71,19 +71,20 @@ namespace CollectorsFrontEnd
             CBCardSearch.IsDropDownOpen = true;
             string szDropDownText = CBCardSearch.Text;
             ComboText = szDropDownText;
+            CBCardSearch.Items.Clear();
+            TBInCombo.SelectionLength = 0;
+
             if (szDropDownText.Length > 3)
             {
-                TBInCombo.SelectionLength = 0;
-                CBCardSearch.SelectedIndex = -1;
-                CBCardSearch.Items.Clear();
-
                 List<string> lstCards = MainWindow.SCI.GetAllCardsStartingWith(szDropDownText.ToLower());
                 foreach(string szCard in lstCards)
                 {
                     CBCardSearch.Items.Add(szCard);
                 }
             }
-
+            TBInCombo.SelectionStart = ComboText.Length; // THIS IS NECESSARY
+            TBInCombo.SelectionLength = 0;
+            
         }
     }
 }

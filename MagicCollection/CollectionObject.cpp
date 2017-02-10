@@ -76,6 +76,28 @@ void CollectionObject::RemoveCopy(std::string aszCollectionName)
 	}
 }
 
+std::vector<CopyObject*> CollectionObject::GetLocalCopiesWith(std::string aszParent, std::vector<std::pair<std::string, std::string>> alstAttrs)
+{
+	std::vector<CopyObject*> rLstRetVal;
+	std::vector<CopyObject>::iterator card_iter = m_lstCopies.begin();
+	for (; card_iter != m_lstCopies.end(); ++card_iter)
+	{
+		if (card_iter->ParentCollection == aszParent)
+		{
+			CopyObject oCOID = GenerateCopy(aszParent, alstAttrs);
+			CopyObject* oFoundCard = card_iter._Ptr;
+			if (IsSameIdentity(&oCOID, oFoundCard, true))
+			{
+				rLstRetVal.push_back(oFoundCard);
+			}
+			break;
+		}
+		
+	}
+
+	return rLstRetVal;
+}
+
 std::vector<CopyObject*> CollectionObject::GetLocalCopies(std::string aszCollectionName)
 {
 	std::vector<CopyObject*> rLstRetVal;
@@ -105,6 +127,31 @@ std::vector<CopyObject*> CollectionObject::GetCopies(std::string aszCollectionNa
 			{
 				CopyObject* oFoundCard = card_iter._Ptr;
 				rLstRetVal.push_back(oFoundCard);
+				break;
+			}
+		}
+	}
+
+	return rLstRetVal;
+}
+
+std::vector<CopyObject*> CollectionObject::GetCopiesWith(std::string aszCollectionName, std::string aszCardParent, std::vector<std::pair<std::string, std::string>> alstAttrs)
+{
+	std::vector<CopyObject*> rLstRetVal;
+	std::vector<CopyObject>::iterator card_iter = m_lstCopies.begin();
+	for (; card_iter != m_lstCopies.end(); ++card_iter)
+	{
+		std::vector<std::string>::iterator resi_iter = card_iter->ResidentCollections.begin();
+		for (; resi_iter != card_iter->ResidentCollections.end(); ++resi_iter)
+		{
+			if (*resi_iter == aszCollectionName)
+			{
+				CopyObject oCOID = GenerateCopy(aszCardParent, alstAttrs);
+				CopyObject* oFoundCard = card_iter._Ptr;
+				if (IsSameIdentity(&oCOID, oFoundCard, true))
+				{
+					rLstRetVal.push_back(oFoundCard);
+				}
 				break;
 			}
 		}
@@ -151,10 +198,11 @@ void CollectionObject::ConstructCopy(CopyObject& roCO, std::vector<std::pair<std
 	}
 }
 
-bool CollectionObject::IsSameIdentity(CopyObject* aoCOne, CopyObject* aoCTwo)
+bool CollectionObject::IsSameIdentity(CopyObject* aoCOne, CopyObject* aoCTwo, bool bMatchParent)
 {
 	bool bMatch = true;
-	bMatch &= aoCOne->ParentCollection == aoCTwo->ParentCollection;
+	
+	bMatch &= (aoCOne->ParentCollection == aoCTwo->ParentCollection) || !bMatchParent;
 
 	if (bMatch)
 	{

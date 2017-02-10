@@ -71,6 +71,31 @@ System::String^ ServerClientInterface::LoadCollection(System::String^ ahszCollec
 	return gcnew System::String(szCollectionName.c_str());
 }
 
+System::Int32^ ServerClientInterface::GetCopyCountInCollection(System::String^ ahszCollectionName, System::String^ ahszLongCardName)
+{
+	std::string szCollectionName = msclr::interop::marshal_as<std::string>(ahszCollectionName);
+	std::string szLongCardName = msclr::interop::marshal_as<std::string>(ahszLongCardName);
+	int iCount = m_StoreFrontBackEnd->CountCopiesInCollection(szCollectionName, szLongCardName);
+	return gcnew System::Int32(iCount);
+}
+
+System::Collections::Generic::Dictionary<System::String^, System::String^>^ ServerClientInterface::GetCopyLocations(System::String^ ahszCollectionName, System::String^ ahszLongCardName)
+{
+	System::Collections::Generic::Dictionary<System::String^, System::String^>^ hlstRetval = gcnew System::Collections::Generic::Dictionary<System::String^, System::String^>();
+	std::string szCollectionName = msclr::interop::marshal_as<std::string>(ahszCollectionName);
+	std::string szLongCardName = msclr::interop::marshal_as<std::string>(ahszLongCardName);
+	/*
+	std::vector<std::string> lstLocations = m_StoreFrontBackEnd->GetCardLocations(szCollectionName, szLongCardName);
+	std::vector<std::string>::iterator iter_Locations = lstLocations.begin();
+	for (; iter_Locations != lstLocations.end(); ++iter_Locations)
+	{
+		System::String^ hszLocations = gcnew System::String(iter_Locations->c_str());
+		hlstRetval->Add(hszLocations);
+	}
+	*/
+	return hlstRetval;
+}
+
 System::Collections::Generic::List<System::String^>^ ServerClientInterface::GetCollectionList(System::String^ ahszCollectionName)
 {
 	System::Collections::Generic::List<System::String^>^ hlstRetval = gcnew System::Collections::Generic::List<System::String^>();

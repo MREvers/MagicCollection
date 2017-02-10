@@ -95,6 +95,9 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="AmountInterchanger.xaml.cs">
+      <DependentUpon>AmountInterchanger.xaml</DependentUpon>
+    </Compile>
     <Compile Include="CObjectListDisplay.xaml.cs">
       <DependentUpon>CObjectListDisplay.xaml</DependentUpon>
     </Compile>
@@ -104,10 +107,17 @@
     <Compile Include="CollectionViewer.xaml.cs">
       <DependentUpon>CollectionViewer.xaml</DependentUpon>
     </Compile>
+    <Compile Include="ItemAmountInterchanger.xaml.cs">
+      <DependentUpon>ItemAmountInterchanger.xaml</DependentUpon>
+    </Compile>
     <Compile Include="ItemInterchanger.xaml.cs">
       <DependentUpon>ItemInterchanger.xaml</DependentUpon>
     </Compile>
     <Compile Include="ServerIFace.cs" />
+    <Page Include="AmountInterchanger.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="CObjectListDisplay.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -117,6 +127,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="CollectionViewer.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="ItemAmountInterchanger.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

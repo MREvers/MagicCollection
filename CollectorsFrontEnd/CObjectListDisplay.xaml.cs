@@ -23,6 +23,7 @@ namespace CollectorsFrontEnd
         public static int ColumnCount = 2;
         public static List<string> ListColumnHeaders { get; set; } = new List<string>() { "Amount", "Name" };
         public List<string> ListColumnItems { get; set; } = new List<string>();
+        public string CardString;
 
         public class COListItem
         {
@@ -38,6 +39,7 @@ namespace CollectorsFrontEnd
 
         public void SetCard(string aszCollectionObjectString)
         {
+            CardString = aszCollectionObjectString;
             MCopyObject oParsed = MainWindow.SCI.ConvertItemToCopyObject(aszCollectionObjectString);
             if (oParsed.Attributes != null && oParsed.Name != null)
             {

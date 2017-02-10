@@ -142,17 +142,38 @@ std::vector<std::pair<std::string, CopyObject*>> CollectionSource::GetCollection
 std::vector<std::string> CollectionSource::GetAllCardsStartingWith(std::string aszText)
 {
 	std::vector<std::string> lstCards;
+	std::vector<std::string> lstStartCards;
+	std::vector<std::string> lstOthers;
 
 	std::vector<SourceObject>::iterator iter_Cards = m_lstptCardBuffer.begin();
 	for (; iter_Cards != m_lstptCardBuffer.end(); ++iter_Cards)
 	{
 		std::string szCard = iter_Cards->GetName();
 		std::transform(szCard.begin(), szCard.end(), szCard.begin(), ::tolower);
-		if (szCard.find(aszText) != -1)
+		size_t iFindIndex = 0;
+		iFindIndex = szCard.find(aszText);
+		if (iFindIndex != std::string::npos)
 		{
-			lstCards.push_back(iter_Cards->GetName());
+			if (iFindIndex == 0)
+			{
+				lstStartCards.push_back(iter_Cards->GetName());
+			}
+			else
+			{
+				lstOthers.push_back(iter_Cards->GetName());
+			}
 		}
 	}
+
+	for (std::string sz : lstStartCards)
+	{
+		lstCards.push_back(sz);
+	}
+	for (std::string sz : lstOthers)
+	{
+		lstCards.push_back(sz);
+	}
+
 
 	return lstCards;
 }
