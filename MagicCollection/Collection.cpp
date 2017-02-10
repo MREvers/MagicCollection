@@ -196,11 +196,28 @@ void Collection::AddMetaTag(std::string aszLongName, std::string aszKey, std::st
 
 			if (!bAlreadyTagged)
 			{
+				// Make sure there are untagged cards available.
+
 				CardTags CT;
 				CT.Attrs = lstTargetAttrs;
 				CT.Tags.push_back(std::make_pair(aszKey, aszValue));
 				// add it then
-				m_lstMetaTags.push_back(std::make_pair(iCardCacheIndex, CT));
+				int iCountOfTagged = 0;
+				std::vector<std::pair<int, CardTags>>::iterator iter_TaggedCards = m_lstMetaTags.begin();
+				for (; iter_TaggedCards != m_lstMetaTags.end(); ++iter_TaggedCards)
+				{
+					if (iter_TaggedCards->first == iCardCacheIndex)
+					{
+						iCountOfTagged++;
+					}
+				}
+				CollectionObject* oColO = m_ColSource->GetCardPrototype(iCardCacheIndex);
+				int iAvailableCopies = oColO->GetLocalCopies(m_szName).size();
+				if (iAvailableCopies > iCountOfTagged)
+				{
+					m_lstMetaTags.push_back(std::make_pair(iCardCacheIndex, CT));
+				}
+				
 			}
 
 		} // end found in cache

@@ -105,22 +105,34 @@ namespace CollectorsFrontEnd
                         else
                         {
                             CVG = new CollectionViewGeneralization();
+                            CVG.GVColumns.Columns.Clear();
+                            for (int i = 0; i < CObjectListDisplay.ColumnCount; i++)
+                            {
+                                GridViewColumn GVC = new GridViewColumn()
+                                {
+                                    Header = CObjectListDisplay.ListColumnHeaders[i],
+                                    DisplayMemberBinding = new Binding("ListColumnItems[" + i + "]")
+                                };
+
+                                CVG.GVColumns.Columns.Add(GVC);
+                            }
+                            var COFrameworkFactory = new FrameworkElementFactory(typeof(CObjectListDisplay));
+                            GridViewColumn GVCBind = new GridViewColumn()
+                            {
+                                Header = "",
+                                CellTemplate = new DataTemplate
+                                {
+                                    VisualTree = COFrameworkFactory,
+                                }
+                            };
+
+                            CVG.GVColumns.Columns.Add(GVCBind);
                             SPDisplay.Children.Add(CVG);
                             genMap[szGeneralization] = CVG;
                         }
 
 
-                        CVG.GVColumns.Columns.Clear();
-                        for (int i = 0; i < CObjectListDisplay.ColumnCount; i++)
-                        {
-                            GridViewColumn GVC = new GridViewColumn()
-                            {
-                                Header = CObjectListDisplay.ListColumnHeaders[i],
-                                DisplayMemberBinding = new Binding("ListColumnItems[" + i + "]")
-                            };
-
-                            CVG.GVColumns.Columns.Add(GVC);
-                        }
+                        
 
                         CObjectListDisplay COListDisplay = new CObjectListDisplay();
                         COListDisplay.SetCard(szCard);

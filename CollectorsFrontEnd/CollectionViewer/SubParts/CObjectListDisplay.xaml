@@ -8,6 +8,6 @@
              
              d:DesignHeight="24" d:DesignWidth="300" HorizontalAlignment="Stretch">
     <Grid>
-        
+        <TextBox>HEY:S</TextBox>
     </Grid>
 </UserControl>

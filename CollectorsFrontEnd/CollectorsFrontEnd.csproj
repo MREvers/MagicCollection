@@ -95,33 +95,33 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="AmountInterchanger.xaml.cs">
+    <Compile Include="CollectionViewer\Windows\SharedSubParts\AmountInterchanger.xaml.cs">
       <DependentUpon>AmountInterchanger.xaml</DependentUpon>
     </Compile>
-    <Compile Include="CObjectListDisplay.xaml.cs">
+    <Compile Include="CollectionViewer\SubParts\CObjectListDisplay.xaml.cs">
       <DependentUpon>CObjectListDisplay.xaml</DependentUpon>
     </Compile>
     <Compile Include="CollectionOverviewer.xaml.cs">
       <DependentUpon>CollectionOverviewer.xaml</DependentUpon>
     </Compile>
-    <Compile Include="CollectionViewer.xaml.cs">
+    <Compile Include="CollectionViewer\CollectionViewer.xaml.cs">
       <DependentUpon>CollectionViewer.xaml</DependentUpon>
     </Compile>
-    <Compile Include="CollectionViewGeneralization.xaml.cs">
+    <Compile Include="CollectionViewer\SubParts\CollectionViewGeneralization.xaml.cs">
       <DependentUpon>CollectionViewGeneralization.xaml</DependentUpon>
     </Compile>
-    <Compile Include="ItemAmountInterchanger.xaml.cs">
+    <Compile Include="CollectionViewer\Windows\ItemAmountInterChanger\ItemAmountInterchanger.xaml.cs">
       <DependentUpon>ItemAmountInterchanger.xaml</DependentUpon>
     </Compile>
-    <Compile Include="ItemInterchanger.xaml.cs">
+    <Compile Include="CollectionViewer\Windows\ItemInterchanger.xaml.cs">
       <DependentUpon>ItemInterchanger.xaml</DependentUpon>
     </Compile>
     <Compile Include="ServerIFace.cs" />
-    <Page Include="AmountInterchanger.xaml">
+    <Page Include="CollectionViewer\Windows\SharedSubParts\AmountInterchanger.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="CObjectListDisplay.xaml">
+    <Page Include="CollectionViewer\SubParts\CObjectListDisplay.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -129,19 +129,19 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="CollectionViewer.xaml">
+    <Page Include="CollectionViewer\CollectionViewer.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="CollectionViewGeneralization.xaml">
+    <Page Include="CollectionViewer\SubParts\CollectionViewGeneralization.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="ItemAmountInterchanger.xaml">
+    <Page Include="CollectionViewer\Windows\ItemAmountInterChanger\ItemAmountInterchanger.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="ItemInterchanger.xaml">
+    <Page Include="CollectionViewer\Windows\ItemInterchanger.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

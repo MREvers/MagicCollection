@@ -31,7 +31,13 @@ namespace CollectorsFrontEnd
         public static List<string> ListColumnHeaders { get; set; } = new List<string>() { "Amount", "Name" };
         public List<string> ListColumnItems { get; set; } = new List<string>();
         public string CardString;
+        public Dictionary<string, string> MapOfAttrs;
         public int iCount = 0;
+        public bool HasControl = true;
+        public CObjectListDisplay GetThis { get
+            {
+                return this;
+            } }
 
         public CObjectListDisplay()
         {
@@ -53,7 +59,8 @@ namespace CollectorsFrontEnd
                 catch {}
                 ListColumnItems.Add(oParsed.Name.ToString());
             }
-            
+            MapOfAttrs = oParsed.Attributes;
+
         }
 
         public void LstViewMain_OnPreviewMouseDown(object sender, MouseButtonEventArgs e)
