@@ -18,22 +18,6 @@ using System.Xml;
 
 namespace CollectorsFrontEnd
 {
-    public class CollectionViewerDataSelector : DataTemplateSelector
-    {
-
-        public override DataTemplate SelectTemplate(object item, DependencyObject container)
-        {
-            FrameworkElement elemnt = container as FrameworkElement;
-            if (item is CObjectListDisplay)
-            {
-                return elemnt.FindResource("COLDisplayTemplate") as DataTemplate;
-            }
-            else
-            {
-                return elemnt.FindResource("SeparatorTemplate") as DataTemplate;
-            }
-        }
-    }
 
     /// <summary>
     /// Interaction logic for CollectionViewer.xaml
@@ -44,6 +28,7 @@ namespace CollectorsFrontEnd
         private MainWindow m_Container;
         private ItemInterchanger m_CurrentAddItemWindow;
         private ItemAmountInterchanger m_CurrentAmountInterchangerWindow;
+        public List<CollectionViewGeneralization> ListGeneralizations { get; set; } = new List<CollectionViewGeneralization>();
 
         public CollectionViewer(MainWindow aMW, string aszCollection)
         {
@@ -52,6 +37,8 @@ namespace CollectorsFrontEnd
             BtnAddItem.Click += eAddItemWindowButton;
             BtnSaveCollection.Click += eSaveCollection;
             ActiveCollection = aszCollection;
+
+            SPItemsControl.ItemsSource = ListGeneralizations;
 
             RefreshCollectionView();
 
@@ -62,28 +49,28 @@ namespace CollectorsFrontEnd
             // THis gives the long name
             List<Tuple<string, List<Tuple<string, string>>>> lstCards = MainWindow.SCI.GetCollectionListWithMeta(ActiveCollection);
             Dictionary<string, CollectionViewGeneralization> genMap = new Dictionary<string, CollectionViewGeneralization>();
-            SPDisplay.Children.Clear();
+            ListGeneralizations.Clear();
             foreach (var otCardTagPair in lstCards)
             {
-                Dictionary<string, List<Tuple<string, List<Tuple<string, string>>>>> GeneralizationsList
+                Dictionary<string, List<Tuple<string, List<Tuple<string, string>>>>> GeneralizationsListOfCards
                     = new Dictionary<string, List<Tuple<string, List<Tuple<string, string>>>>>();
-                GeneralizationsList["Main"] = new List<Tuple<string, List<Tuple<string, string>>>>();
+                GeneralizationsListOfCards["Main"] = new List<Tuple<string, List<Tuple<string, string>>>>();
                 //Find the generalization it belongs to
                 bool bFoundGen = false;
                 foreach (var szTag in otCardTagPair.Item2)
                 {
                     if (szTag.Item1 == "Generalization")
                     {
-                        if (!GeneralizationsList.Keys.Contains(szTag.Item2))
+                        if (!GeneralizationsListOfCards.Keys.Contains(szTag.Item2))
                         {
-                            GeneralizationsList[szTag.Item2] = new List<Tuple<string, List<Tuple<string, string>>>>()
+                            GeneralizationsListOfCards[szTag.Item2] = new List<Tuple<string, List<Tuple<string, string>>>>()
                             {
                                 otCardTagPair
                             };
                         }
                         else
                         {
-                            GeneralizationsList[szTag.Item2].Add(otCardTagPair);
+                            GeneralizationsListOfCards[szTag.Item2].Add(otCardTagPair);
                         }
                         bFoundGen = true;
                         break;
@@ -92,16 +79,17 @@ namespace CollectorsFrontEnd
 
                 if (!bFoundGen)
                 {
-                    GeneralizationsList["Main"].Add(otCardTagPair);
+                    GeneralizationsListOfCards["Main"].Add(otCardTagPair);
                 }
 
-                foreach (string szGen in GeneralizationsList.Keys)
+                foreach (string szGen in GeneralizationsListOfCards.Keys)
                 {
                     // Create or get the generalization view.
                     CollectionViewGeneralization CVG;
                     if (genMap.ContainsKey(szGen))
                     {
                         CVG = genMap[szGen];
+                        
                     }
                     else
                     {
@@ -131,11 +119,12 @@ namespace CollectorsFrontEnd
                         };
 
                         CVG.GVColumns.Columns.Add(GVCBind);
-                        SPDisplay.Children.Add(CVG);
                         genMap[szGen] = CVG;
+                        ListGeneralizations.Add(CVG);
+                        SPItemsControl.Items.Refresh();
                     }
 
-                    foreach (var oCardTemp in GeneralizationsList[szGen])
+                    foreach (var oCardTemp in GeneralizationsListOfCards[szGen])
                     {
                         CObjectListDisplay COListDisplay = new CObjectListDisplay();
 
@@ -145,7 +134,7 @@ namespace CollectorsFrontEnd
 
                         COListDisplay.OpenInterchanger += eAmountInterchangeWindowOpen;
 
-                        CVG.LVItems.Items.Add(COListDisplay);
+                        CVG.Items.Add(COListDisplay);
                     }
                 }
             }
@@ -163,7 +152,7 @@ namespace CollectorsFrontEnd
                 m_CurrentAddItemWindow = ITI;
                 Panel.SetZIndex(CenterPanel, 2);
                 CenterPanel.Children.Add(ITI);
-                SPDisplay.IsEnabled = false;
+                SPItemsControl.IsEnabled = false;
             }
         }
 
@@ -173,7 +162,7 @@ namespace CollectorsFrontEnd
             m_CurrentAddItemWindow.BtnCancel.Click -= eAddItemWindowCancelButton;
             CenterPanel.Children.Remove(m_CurrentAddItemWindow);
             m_CurrentAddItemWindow = null;
-            SPDisplay.IsEnabled = true;
+            SPItemsControl.IsEnabled = true;
         }
 
         public void eAddItem(object sender, RoutedEventArgs e)
@@ -196,14 +185,14 @@ namespace CollectorsFrontEnd
         {
             ItemAmountInterchanger IAI = new ItemAmountInterchanger();
 
-            IAI.SetCard(ActiveCollection, aCOLD.CardString);
+            IAI.SetCard(ActiveCollection, aCOLD.CardString, ListGeneralizations);
             //Btn add and btn remove
             //ITI.BtnAddCard.Click += eAddItem;
             //ITI.BtnCancel.Click += eAddItemWindowCancelButton;
             m_CurrentAmountInterchangerWindow = IAI;
             Panel.SetZIndex(CenterPanel, 2);
             CenterPanel.Children.Add(IAI);
-            SPDisplay.IsEnabled = false;
+            SPItemsControl.IsEnabled = false;
         }
 
         public void eAIWRemoveItem(string aszName, List<string> alstMetaTags, List<string> alstAttrs)

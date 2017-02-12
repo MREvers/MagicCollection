@@ -1,5 +1,29 @@
 #include "CollectionObject.h"
 
+std::vector<std::pair<std::string, std::string>> CopyObject::GetMetaTags(std::string aszCollection)
+{
+	std::vector<std::pair<std::string, std::string>> lstRetVal;
+	if (MetaTags.find(aszCollection) != MetaTags.end())
+	{
+		lstRetVal = MetaTags[aszCollection];
+	}
+
+	return lstRetVal;
+}
+
+void CopyObject::AddMetaTag(std::string aszCollection, std::string aszKey, std::string aszVal)
+{
+	if (MetaTags.find(aszCollection) != MetaTags.end())
+	{
+		MetaTags[aszCollection].push_back(std::make_pair(aszKey,aszVal));
+	}
+	else
+	{
+		std::vector<std::pair<std::string, std::string>> lstNewCol;
+		lstNewCol.push_back(std::make_pair(aszKey, aszVal));
+		MetaTags[aszCollection] = lstNewCol;
+	}
+}
 
 CollectionObject::CollectionObject(std::string aszName)
 {

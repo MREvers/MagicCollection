@@ -14,15 +14,13 @@
         </Border>
         <Grid x:Name="CenterPanel" Grid.ZIndex="0">
         </Grid>
-        <StackPanel x:Name="SPDisplay">
-            <ItemsControl>
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate>
-                        <local:CollectionViewGeneralization/>
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
-        </StackPanel>
+        <ItemsControl x:Name="SPItemsControl">
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <local:CollectionViewGeneralization/>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
 
         <Grid Grid.Row="0" Grid.Column="1">
             <Grid.RowDefinitions>

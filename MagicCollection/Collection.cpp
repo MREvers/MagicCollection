@@ -189,11 +189,11 @@ void Collection::AddMetaTag(std::string aszLongName, std::string aszKey, std::st
 					CollectionObject::ConvertMapToList((*iter_Copies)->NonUniqueTraits))
 					)
 				{
-					if (CompareKeyValPairList(alstMatchMeta, (*iter_Copies)->MetaTags))
+					if (CompareKeyValPairList(alstMatchMeta, (*iter_Copies)->GetMetaTags(m_szName)))
 					{
 						// MATCH
 						bAlreadyTagged = true;
-						(*iter_Copies)->MetaTags.push_back(std::make_pair(aszKey, aszValue));
+						(*iter_Copies)->AddMetaTag(m_szName, aszKey, aszValue);
 					}
 				}
 			}
@@ -211,7 +211,7 @@ void Collection::AddMetaTag(std::string aszLongName, std::string aszKey, std::st
 				std::vector<CopyObject*>::iterator iter_TaggedCards = lstCopies.begin();
 				for (; iter_TaggedCards != lstCopies.end(); ++iter_TaggedCards)
 				{
-					if ((*iter_TaggedCards)->MetaTags.size() != 0)
+					if ((*iter_TaggedCards)->GetMetaTags(m_szName).size() != 0)
 					{
 						lstUntaggedCopies.push_back(*iter_TaggedCards);
 					}
@@ -220,7 +220,7 @@ void Collection::AddMetaTag(std::string aszLongName, std::string aszKey, std::st
 				int iAvailableCopies = oColO->GetLocalCopies(m_szName).size();
 				if (lstUntaggedCopies.size() > 0)
 				{
-					lstUntaggedCopies.front()->MetaTags.push_back(std::make_pair(aszKey, aszValue));
+					lstUntaggedCopies.front()->AddMetaTag(m_szName, aszKey, aszValue);
 				}
 
 			}
@@ -254,7 +254,7 @@ std::vector<std::vector<std::pair<std::string, std::string>>> Collection::GetMet
 					CollectionObject::FilterNonUniqueTraits(ParseAttrs(szDetails)),
 					CollectionObject::ConvertMapToList((*iter_Copies)->NonUniqueTraits)))
 				{
-					lstRetVal.push_back((*iter_Copies)->MetaTags);
+					lstRetVal.push_back((*iter_Copies)->GetMetaTags(m_szName));
 				}
 			}
 		}
@@ -828,7 +828,7 @@ Collection::GetCollectionListWithMeta()
 				if (bFound |= CollectionObject::IsSameIdentity(oCompareCard, oCurrentCard))
 				{
 					// The meta tags need also be the same
-					if (CompareKeyValPairList(oCompareCard->MetaTags, oCurrentCard->MetaTags))
+					if (CompareKeyValPairList(oCompareCard->GetMetaTags(m_szName), oCurrentCard->GetMetaTags(m_szName)))
 					{
 						iter_Bucket->second = iter_Bucket->second + 1;
 						break;
@@ -841,7 +841,7 @@ Collection::GetCollectionListWithMeta()
 			if (!bFound)
 			{
 				lstBuckets.push_back(std::make_pair(*iter_PossibleCopies, 1));
-				lstTagBucket.push_back(oCurrentCard->MetaTags);
+				lstTagBucket.push_back(oCurrentCard->GetMetaTags(m_szName));
 			}
 			else
 			{

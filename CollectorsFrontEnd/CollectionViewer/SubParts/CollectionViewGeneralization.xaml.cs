@@ -20,9 +20,12 @@ namespace CollectorsFrontEnd
     /// </summary>
     public partial class CollectionViewGeneralization : UserControl
     {
+        public List<CObjectListDisplay> Items = new List<CObjectListDisplay>();
+
         public CollectionViewGeneralization()
         {
             InitializeComponent();
+            LVItems.ItemsSource = Items;
         }
     }
 }

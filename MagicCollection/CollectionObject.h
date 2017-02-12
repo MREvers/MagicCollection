@@ -18,7 +18,9 @@ public:
 	// Non-unique in the sense that the trait itself can have more than one value.
 	std::map<std::string, std::string> NonUniqueTraits;
 	// Other analytics go here.
-	std::vector<std::pair<std::string, std::string>> MetaTags;
+	std::vector<std::pair<std::string, std::string>> GetMetaTags(std::string aszCollection);
+	void AddMetaTag(std::string aszCollection, std::string aszKey, std::string aszVal);
+	std::map<std::string,std::vector<std::pair<std::string, std::string>>> MetaTags;
 };
 
 // Since this is a flyweight object, the interface should act as though it is 'in' the collection,

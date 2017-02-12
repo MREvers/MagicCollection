@@ -28,22 +28,23 @@ namespace CollectorsFrontEnd
             InitializeComponent();
         }
 
-        public void SetCard(string aszCollection, string aszCard)
+        public void SetCard(string aszCollection, string aszCard, List<CollectionViewGeneralization> alstGeneralizations)
         {
             LblCardName.Content = aszCard;
 
             ActiveCard = aszCard;
             ActiveCollection = aszCollection;
-            PopulateColCounts();
+            PopulateColCounts(alstGeneralizations);
 
         }
 
-        public void PopulateColCounts()
+        public void PopulateColCounts(List<CollectionViewGeneralization> alstGeneralizations)
         {
-            Dictionary<string, int> GeneralizationsList = new Dictionary<string, int>();
-
             // Add code here to fetch generalization amounts. Until then...
-            
+            foreach(var oGen in alstGeneralizations)
+            {
+
+            }
         }
     }
 }
