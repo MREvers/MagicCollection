@@ -194,6 +194,7 @@ void Collection::AddMetaTag(std::string aszLongName, std::string aszKey, std::st
 						// MATCH
 						bAlreadyTagged = true;
 						(*iter_Copies)->AddMetaTag(m_szName, aszKey, aszValue);
+						break; // ONLY TAG THE FIRST MATCHING COPY.
 					}
 				}
 			}
@@ -825,10 +826,10 @@ Collection::GetCollectionListWithMeta()
 			for (; iter_Bucket != lstBuckets.end(); ++iter_Bucket)
 			{
 				CopyObject* oCompareCard = iter_Bucket->first;
-				if (bFound |= CollectionObject::IsSameIdentity(oCompareCard, oCurrentCard))
+				if (CollectionObject::IsSameIdentity(oCompareCard, oCurrentCard))
 				{
 					// The meta tags need also be the same
-					if (CompareKeyValPairList(oCompareCard->GetMetaTags(m_szName), oCurrentCard->GetMetaTags(m_szName)))
+					if (bFound |= CompareKeyValPairList(oCompareCard->GetMetaTags(m_szName), oCurrentCard->GetMetaTags(m_szName)))
 					{
 						iter_Bucket->second = iter_Bucket->second + 1;
 						break;
