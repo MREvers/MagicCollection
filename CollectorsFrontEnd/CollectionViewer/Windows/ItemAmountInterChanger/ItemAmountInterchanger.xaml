@@ -5,7 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:CollectorsFrontEnd"
              mc:Ignorable="d" 
-             d:DesignHeight="300" d:DesignWidth="300">
+             Height="186" Width="190">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition/>
@@ -14,7 +14,7 @@
         <Label x:Name="LblCardName"
                HorizontalContentAlignment="Center" 
                  VerticalContentAlignment="Center"
-               FontSize="30"></Label>
+               FontSize="16"></Label>
         <StackPanel x:Name="SPCollections" Grid.Row="1">
             <ItemsControl>
                 <ItemsControl.ItemTemplate>

@@ -72,7 +72,6 @@ public:
 		std::vector<std::pair<std::string, std::string>> alstMatchMeta = std::vector<std::pair<std::string, std::string>>());
 
 	std::vector < std::vector<std::pair<std::string, std::string>>> GetMetaTags(std::string aszLongName);
-	std::vector < std::vector<std::pair<std::string, std::string>>> GetMetaTags(std::string aszLongName, std::vector<std::pair<std::string, std::string>> alstMatchMeta);
 	void RollbackTransaction();
 
 	void LoadCollection(std::string aszCollectionFile, std::vector<std::pair<std::string, std::string>>& alstOutsideForcedChanges);
@@ -81,15 +80,20 @@ public:
 	void CreateBaselineHistory();
 	void RecordForcedTransaction(std::string aszTransactionString);
 	std::vector<std::string> GetCollectionList();
+	std::vector<std::pair<std::string, std::vector<std::pair<std::string, std::string>>>>
+		GetCollectionListWithMeta();
 
 	static std::vector<std::pair<std::string, std::string>> ParseAttrs(std::string aszAttrs);
 	static bool ParseCardLine(std::string aszLine, int& riCount, std::string& rszName, std::string& rszDetails);
 	static bool CompareKeyValPairList(std::vector<std::pair<std::string, std::string>> alstFirst, std::vector<std::pair<std::string, std::string>> alstSecond);
 
+
+
 	void PrintList();
 
 	bool TransactionIntercept;
 
+	static const char * const LstUniqueTraits[];
 private:
 	CollectionSource* m_ColSource;
 
@@ -101,8 +105,6 @@ private:
 	std::vector<std::string> m_lstUnreversibleChanges;
 	std::string m_szHistoryFileName;
 	std::vector<std::string>* m_lstLoadedCollectionsBuffer;
-	// { card cache id,  [ list of key val pairs ] }
-	std::vector<std::pair<int, CardTags>> m_lstMetaTags;
 
 	void setName(std::string aszName);
 

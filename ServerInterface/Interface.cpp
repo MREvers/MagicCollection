@@ -88,7 +88,8 @@ System::Collections::Generic::Dictionary<System::String^, System::String^>^ Serv
 	return hlstRetval;
 }
 
-System::Collections::Generic::List<System::String^>^ ServerClientInterface::GetCollectionList(System::String^ ahszCollectionName)
+System::Collections::Generic::List<System::String^>^ 
+ServerClientInterface::GetCollectionList(System::String^ ahszCollectionName)
 {
 	System::Collections::Generic::List<System::String^>^ hlstRetval = gcnew System::Collections::Generic::List<System::String^>();
 
@@ -104,7 +105,77 @@ System::Collections::Generic::List<System::String^>^ ServerClientInterface::GetC
 	return hlstRetval;
 }
 
-System::Collections::Generic::List<System::String^>^ ServerClientInterface::GetLoadedCollections()
+System::Collections::Generic::List<
+	System::Tuple<
+		System::String^,
+		System::Collections::Generic::List<
+			System::Tuple<
+				System::String^,
+				System::String^>^>^>^>^
+ServerClientInterface::GetCollectionListWithMeta(System::String^ ahszCollectionName)
+{
+	System::Collections::Generic::List<
+		System::Tuple<
+		System::String^,
+		System::Collections::Generic::List<
+		System::Tuple<
+		System::String^,
+		System::String^>^>^>^>^
+		
+		hlstRetval = gcnew System::Collections::Generic::List<
+
+		System::Tuple<
+		System::String^,
+		System::Collections::Generic::List<
+		System::Tuple<
+		System::String^,
+		System::String^>^>^>^>();
+
+	std::string szCollectionName = msclr::interop::marshal_as<std::string>(ahszCollectionName);
+	std::vector<std::pair<std::string, std::vector<std::pair<std::string, std::string>>>> 
+		lstColList = m_StoreFrontBackEnd->GetCollectionListWithMeta(szCollectionName);
+	std::vector<std::pair<std::string, std::vector<std::pair<std::string, std::string>>>>::iterator 
+		iter_colCards = lstColList.begin();
+	for (; iter_colCards != lstColList.end(); ++iter_colCards)
+	{
+		System::String^ hszCard = gcnew System::String(iter_colCards->first.c_str());
+	
+		System::Collections::Generic::List<System::Tuple<System::String^, System::String^>^>^
+			hlstMetaTags = gcnew
+			System::Collections::Generic::List<System::Tuple<System::String^, System::String^>^>();
+		std::vector<std::pair<std::string, std::string>> lstTags = iter_colCards->second;
+		std::vector<std::pair<std::string, std::string>>::iterator iter_Tags = lstTags.begin();
+		for (; iter_Tags != lstTags.end(); ++iter_Tags)
+		{
+			System::String^ hszKey = gcnew System::String(iter_Tags->first.c_str());
+			System::String^ hszVal = gcnew System::String(iter_Tags->second.c_str());
+			System::Tuple<System::String^, System::String^>^ hPair =
+				gcnew System::Tuple<System::String^, System::String^>(hszKey, hszVal);
+			hlstMetaTags->Add(hPair);
+		}
+		
+		System::Tuple<
+			System::String^,
+			System::Collections::Generic::List<
+			System::Tuple<
+			System::String^,
+			System::String^>^>^>^ hNameTagPair =
+			gcnew System::Tuple<
+			System::String^,
+			System::Collections::Generic::List<
+			System::Tuple<
+			System::String^,
+			System::String^>^>^>(hszCard, hlstMetaTags);
+
+		hlstRetval->Add(hNameTagPair);
+
+	}
+
+	return hlstRetval;
+}
+
+System::Collections::Generic::List<System::String^>^ 
+ServerClientInterface::GetLoadedCollections()
 {
 	System::Collections::Generic::List<System::String^>^ hlstRetval = gcnew System::Collections::Generic::List<System::String^>();
 	std::vector<std::string> lstColList = m_StoreFrontBackEnd->GetLoadedCollections();

@@ -11,57 +11,61 @@ class ICollection;
 
 class CopyObject
 {
-   public:
-      std::string ParentCollection;
-      std::vector<std::string> ResidentCollections;
+public:
+	std::string ParentCollection;
+	std::vector<std::string> ResidentCollections;
 
-      // Non-unique in the sense that the trait itself can have more than one value.
-      std::map<std::string, std::string> NonUniqueTraits;
-      // Other analytics go here.
+	// Non-unique in the sense that the trait itself can have more than one value.
+	std::map<std::string, std::string> NonUniqueTraits;
+	// Other analytics go here.
+	std::vector<std::pair<std::string, std::string>> MetaTags;
 };
 
 // Since this is a flyweight object, the interface should act as though it is 'in' the collection,
 //  but functionaly it should be a flyweight.
-class __declspec(dllexport) CollectionObject : public ICollectionObject
+class  CollectionObject : public ICollectionObject
 {
 public:
-   CollectionObject(std::string aszName);
-   ~CollectionObject();
+	CollectionObject(std::string aszName);
+	~CollectionObject();
 
-   // Gets called by the collection Source. Implement in base class to get needed attributes.
-   virtual bool MapAttributes(std::string aszName, std::string aszValue);
-   std::string GetAttribute(std::string aszAttr);
-   std::map<std::string, std::string>  GetAttributesMap();
+	// Gets called by the collection Source. Implement in base class to get needed attributes.
+	virtual bool MapAttributes(std::string aszName, std::string aszValue);
+	std::string GetAttribute(std::string aszAttr);
+	std::map<std::string, std::string>  GetAttributesMap();
 
-   // Collection Interface
-   std::string GetName();
-   CopyObject* AddCopy(std::string aszCollectionName);
+	// Collection Interface
+	std::string GetName();
+	CopyObject* AddCopy(std::string aszCollectionName);
 
-   // The col children will have to match exactly... because copies are not identical.
-   void RemoveCopy(std::string aszCollectionName);
-   std::vector<CopyObject*> GetLocalCopies(std::string aszCollectionName);
-   std::vector<CopyObject*> GetLocalCopiesWith(std::string aszCollectionName, std::vector<std::pair<std::string, std::string>> alstAttrs);
+	// The col children will have to match exactly... because copies are not identical.
+	void RemoveCopy(std::string aszCollectionName);
+	std::vector<CopyObject*> GetLocalCopies(std::string aszCollectionName);
+	std::vector<CopyObject*> GetLocalCopiesWith(std::string aszCollectionName, std::vector<std::pair<std::string, std::string>> alstAttrs);
 
-   // Gets all resi copies.
-   std::vector<CopyObject*> GetCopies(std::string aszCollectionName);
-   // Gets all resi copies resident in aszCollectionName, located in aszParent, with the correct attributes.
-   std::vector<CopyObject*> GetCopiesWith(std::string aszCollectionName, std::string aszParent, std::vector<std::pair<std::string, std::string>> alstAttrs);
-   // Gets a copy with matching attrs
-   bool GetCopy(std::string aszCollectionName, std::vector<std::pair<std::string,std::string>> alstAttrs, CopyObject& roCO, bool abExact = true);
-   // Used in building a printable structure
-   static CopyObject GenerateCopy(std::string aszCollectionName);
-   // Used in building a printable structure
-   static CopyObject GenerateCopy(std::string aszCollectionName, std::vector<std::pair<std::string, std::string>> alstAttrs);
-   static void ConstructCopy(CopyObject& roCO, std::vector<std::pair<std::string, std::string>> alstAttrs);
-   // Keep in mind that this does not compare names because the name of the card is not known by the copy object.
-   static bool IsSameIdentity(CopyObject* aoCOne, CopyObject* aoCTwo, bool bMatchParent = true);
-
+	// Gets all resi copies.
+	std::vector<CopyObject*> GetCopies(std::string aszCollectionName);
+	// Gets all resi copies resident in aszCollectionName, located in aszParent, with the correct attributes.
+	std::vector<CopyObject*> GetCopiesWith(std::string aszCollectionName, std::string aszParent, std::vector<std::pair<std::string, std::string>> alstAttrs);
+	// Gets a copy with matching attrs
+	bool GetCopy(std::string aszCollectionName, std::vector<std::pair<std::string, std::string>> alstAttrs, CopyObject& roCO, bool abExact = true);
+	// Used in building a printable structure
+	static CopyObject GenerateCopy(std::string aszCollectionName);
+	// Used in building a printable structure
+	static CopyObject GenerateCopy(std::string aszCollectionName, std::vector<std::pair<std::string, std::string>> alstAttrs);
+	static void ConstructCopy(CopyObject& roCO, std::vector<std::pair<std::string, std::string>> alstAttrs);
+	// Keep in mind that this does not compare names because the name of the card is not known by the copy object.
+	// Additionally, it assumes you are comparing two cards of the same type.
+	static bool IsSameIdentity(CopyObject* aoCOne, CopyObject* aoCTwo, bool bMatchParent = true);
+	static bool IsUniqueTrait(std::string aszTrait);
+	static std::vector<std::pair<std::string, std::string>> FilterNonUniqueTraits(std::vector<std::pair<std::string, std::string>> alstAttrs);
+	static std::vector<std::pair<std::string, std::string>> ConvertMapToList(std::map<std::string, std::string>  aMap);
 private:
-   int m_iAllCopies; // Used in assigning IDs.
+	int m_iAllCopies; // Used in assigning IDs.
 
-   std::vector<CopyObject> m_lstCopies;
-   std::map<std::string, std::string> m_mapAttributes;
-   std::string m_szName;
+	std::vector<CopyObject> m_lstCopies;
+	std::map<std::string, std::string> m_mapAttributes;
+	std::string m_szName;
 
 };
 

@@ -60,97 +60,98 @@ namespace CollectorsFrontEnd
         public void RefreshCollectionView()
         {
             // THis gives the long name
-            List<string> lstCards = MainWindow.SCI.GetCollectionList(ActiveCollection);
+            List<Tuple<string, List<Tuple<string, string>>>> lstCards = MainWindow.SCI.GetCollectionListWithMeta(ActiveCollection);
             Dictionary<string, CollectionViewGeneralization> genMap = new Dictionary<string, CollectionViewGeneralization>();
             SPDisplay.Children.Clear();
-            foreach (string szCard in lstCards)
+            foreach (var otCardTagPair in lstCards)
             {
-                Dictionary<string, int> GeneralizationsList = new Dictionary<string, int>();
-                
-                List<List<Tuple<string,string>>> lstTags = MainWindow.SCI.GetMetaTags(ActiveCollection, szCard);
-                int iCopyCount = 0;
-                // Go through and look for generalizations on this copy.
-                foreach(List<Tuple<string,string>> TagList in lstTags)
+                Dictionary<string, List<Tuple<string, List<Tuple<string, string>>>>> GeneralizationsList
+                    = new Dictionary<string, List<Tuple<string, List<Tuple<string, string>>>>>();
+                GeneralizationsList["Main"] = new List<Tuple<string, List<Tuple<string, string>>>>();
+                //Find the generalization it belongs to
+                bool bFoundGen = false;
+                foreach (var szTag in otCardTagPair.Item2)
                 {
-                    foreach (Tuple<string,string> Tuple in TagList)
+                    if (szTag.Item1 == "Generalization")
                     {
-                        if (Tuple.Item1 == "Generalization")
+                        if (!GeneralizationsList.Keys.Contains(szTag.Item2))
                         {
-                            if (GeneralizationsList.ContainsKey(Tuple.Item2))
+                            GeneralizationsList[szTag.Item2] = new List<Tuple<string, List<Tuple<string, string>>>>()
                             {
-                                GeneralizationsList[Tuple.Item2] += 1;
-                            }
-                            else
-                            {
-                                GeneralizationsList[Tuple.Item2] = 1;
-                            }
-                            if (Tuple.Item2.ToLower() != "main")
-                            {
-                                iCopyCount++;
-                            }
-                            
-                        }
-                    }
-                } // End Sort generalizations
-                CObjectListDisplay COCardParse = new CObjectListDisplay();
-                COCardParse.SetCard(szCard);
-
-                GeneralizationsList["Main"] = COCardParse.iCount - iCopyCount;
-
-                foreach (string szGeneralization in GeneralizationsList.Keys)
-                {
-                    if (GeneralizationsList[szGeneralization] > 0)
-                    {
-                        CollectionViewGeneralization CVG;
-                        if (genMap.ContainsKey(szGeneralization))
-                        {
-                            CVG = genMap[szGeneralization];
+                                otCardTagPair
+                            };
                         }
                         else
                         {
-                            CVG = new CollectionViewGeneralization();
-                            //CVG.GVColumns.Columns.Clear();
-                            for (int i = 0; i < CObjectListDisplay.ColumnCount; i++)
-                            {
-                                GridViewColumn GVC = new GridViewColumn()
-                                {
-                                    Header = CObjectListDisplay.ListColumnHeaders[i],
-                                    DisplayMemberBinding = new Binding("ListColumnItems[" + i + "]")
-                                };
+                            GeneralizationsList[szTag.Item2].Add(otCardTagPair);
+                        }
+                        bFoundGen = true;
+                        break;
+                    }
+                }
 
-                                CVG.GVColumns.Columns.Add(GVC);
-                            }
-                            StringReader sR = new StringReader(
-                                @"<DataTemplate xmlns=""http://schemas.microsoft.com/winfx/2006/xaml/presentation"">"+
-                                "<ContentControl Content=\"{Binding}\"/>"+
-                                "</DataTemplate>"
-                                );
-                            XmlReader xR = XmlReader.Create(sR);
-                            DataTemplate DT = XamlReader.Load(xR) as DataTemplate;
-                            GridViewColumn GVCBind = new GridViewColumn()
+                if (!bFoundGen)
+                {
+                    GeneralizationsList["Main"].Add(otCardTagPair);
+                }
+
+                foreach (string szGen in GeneralizationsList.Keys)
+                {
+                    // Create or get the generalization view.
+                    CollectionViewGeneralization CVG;
+                    if (genMap.ContainsKey(szGen))
+                    {
+                        CVG = genMap[szGen];
+                    }
+                    else
+                    {
+                        CVG = new CollectionViewGeneralization();
+                        //CVG.GVColumns.Columns.Clear();
+                        for (int i = 0; i < CObjectListDisplay.ColumnCount; i++)
+                        {
+                            GridViewColumn GVC = new GridViewColumn()
                             {
-                                Header = "",
-                                CellTemplate = DT
+                                Header = CObjectListDisplay.ListColumnHeaders[i],
+                                DisplayMemberBinding = new Binding("ListColumnItems[" + i + "]")
                             };
 
-                            CVG.GVColumns.Columns.Add(GVCBind);
-                            SPDisplay.Children.Add(CVG);
-                            genMap[szGeneralization] = CVG;
+                            CVG.GVColumns.Columns.Add(GVC);
                         }
+                        StringReader sR = new StringReader(
+                            @"<DataTemplate xmlns=""http://schemas.microsoft.com/winfx/2006/xaml/presentation"">" +
+                            "<ContentControl Content=\"{Binding}\"/>" +
+                            "</DataTemplate>"
+                            );
+                        XmlReader xR = XmlReader.Create(sR);
+                        DataTemplate DT = XamlReader.Load(xR) as DataTemplate;
+                        GridViewColumn GVCBind = new GridViewColumn()
+                        {
+                            Header = "",
+                            CellTemplate = DT
+                        };
 
+                        CVG.GVColumns.Columns.Add(GVCBind);
+                        SPDisplay.Children.Add(CVG);
+                        genMap[szGen] = CVG;
+                    }
+
+                    foreach (var oCardTemp in GeneralizationsList[szGen])
+                    {
                         CObjectListDisplay COListDisplay = new CObjectListDisplay();
-                        
-                        COListDisplay.SetCard(szCard);
 
-                        COListDisplay.ListColumnItems[0] = GeneralizationsList[szGeneralization].ToString();
+                        COListDisplay.SetCard(oCardTemp.Item1, oCardTemp.Item2);
 
-                        COListDisplay.BtnAmountInterchanger.Click += eAmountInterchangeWindowOpen;
+                        COListDisplay.ListColumnItems[0] = COListDisplay.iCount.ToString();
+
+                        COListDisplay.OpenInterchanger += eAmountInterchangeWindowOpen;
 
                         CVG.LVItems.Items.Add(COListDisplay);
                     }
                 }
             }
+
         }
+
         #region AddItem Window
         public void eAddItemWindowButton(object sender, RoutedEventArgs e)
         {
@@ -191,11 +192,12 @@ namespace CollectorsFrontEnd
         #endregion AddItem Window
 
         #region AmountChanger Window
-        public void eAmountInterchangeWindowOpen(object sender, RoutedEventArgs e)
+        public void eAmountInterchangeWindowOpen(CObjectListDisplay aCOLD)
         {
             ItemAmountInterchanger IAI = new ItemAmountInterchanger();
-            CObjectListDisplay Source = (CObjectListDisplay)sender;
-            IAI.SetCard(ActiveCollection, Source.CardString);
+
+            IAI.SetCard(ActiveCollection, aCOLD.CardString);
+            //Btn add and btn remove
             //ITI.BtnAddCard.Click += eAddItem;
             //ITI.BtnCancel.Click += eAddItemWindowCancelButton;
             m_CurrentAmountInterchangerWindow = IAI;
@@ -203,6 +205,12 @@ namespace CollectorsFrontEnd
             CenterPanel.Children.Add(IAI);
             SPDisplay.IsEnabled = false;
         }
+
+        public void eAIWRemoveItem(string aszName, List<string> alstMetaTags, List<string> alstAttrs)
+        {
+
+        }
+
         #endregion
 
         public void eSaveCollection(object sender, RoutedEventArgs e)
@@ -211,7 +219,7 @@ namespace CollectorsFrontEnd
             {
                 MainWindow.SCI.SaveCollection(ActiveCollection);
             }
-            
+
         }
 
         private void BtnBulkEdit_Click(object sender, RoutedEventArgs e)

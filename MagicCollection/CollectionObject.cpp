@@ -193,7 +193,12 @@ void CollectionObject::ConstructCopy(CopyObject& roCO, std::vector<std::pair<std
 		}
 		else
 		{
-			roCO.NonUniqueTraits.at(pszs.first) = pszs.second;
+			// Only if its a nonunique trait
+			if (!(CollectionObject::IsUniqueTrait(pszs.first)))
+			{
+				roCO.NonUniqueTraits.at(pszs.first) = pszs.second;
+			}
+			
 		}
 
 	}
@@ -233,4 +238,42 @@ bool CollectionObject::IsSameIdentity(CopyObject* aoCOne, CopyObject* aoCTwo, bo
 
 		return bMatch;
 	}
+}
+static const char * const LstUniqueTraits[] = { "manaCost", "colors", "name", "power",
+"toughness", "loyalty", "text" };
+bool CollectionObject::IsUniqueTrait(std::string aszTrait)
+{
+	for (int i = 0; i < 7; i++)
+	{
+		if (aszTrait == LstUniqueTraits[i])
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
+std::vector<std::pair<std::string, std::string>> CollectionObject::FilterNonUniqueTraits(std::vector<std::pair<std::string, std::string>> alstAttrs)
+{
+	std::vector<std::pair<std::string, std::string>> lstRetVal;
+	std::vector<std::pair<std::string, std::string>>::iterator iter_Traits = alstAttrs.begin();
+	for (; iter_Traits != alstAttrs.end(); ++iter_Traits)
+	{
+		if (!(IsUniqueTrait(iter_Traits->first)))
+		{
+			lstRetVal.push_back(*iter_Traits);
+		}
+	}
+	return lstRetVal;
+}
+
+std::vector<std::pair<std::string, std::string>> CollectionObject::ConvertMapToList(std::map<std::string, std::string>  aMap)
+{
+	std::vector<std::pair<std::string, std::string>> lstRetVal;
+	std::map<std::string, std::string>::iterator iter_Map = aMap.begin();
+	for (; iter_Map != aMap.end(); ++iter_Map)
+	{
+		lstRetVal.push_back(std::make_pair(iter_Map->first, iter_Map->second));
+	}
+	return lstRetVal;
 }

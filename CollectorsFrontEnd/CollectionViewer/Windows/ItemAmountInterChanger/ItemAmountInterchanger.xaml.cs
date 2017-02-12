@@ -43,45 +43,7 @@ namespace CollectorsFrontEnd
             Dictionary<string, int> GeneralizationsList = new Dictionary<string, int>();
 
             // Add code here to fetch generalization amounts. Until then...
-
-
-            List<List<Tuple<string, string>>> lstTags = MainWindow.SCI.GetMetaTags(ActiveCollection, ActiveCard);
-            int iCopyCount = 0;
-            // Go through and look for generalizations on this copy.
-            foreach (List<Tuple<string, string>> TagList in lstTags)
-            {
-                foreach (Tuple<string, string> Tuple in TagList)
-                {
-                    if (Tuple.Item1 == "Generalization")
-                    {
-                        if (GeneralizationsList.ContainsKey(Tuple.Item2))
-                        {
-                            GeneralizationsList[Tuple.Item2] += 1;
-                        }
-                        else
-                        {
-                            GeneralizationsList[Tuple.Item2] = 1;
-                        }
-                        if (Tuple.Item2.ToLower() != "main")
-                        {
-                            iCopyCount++;
-                        }
-
-                    }
-                }
-            } // End Sort generalizations
-            CObjectListDisplay COCardParse = new CObjectListDisplay();
-            COCardParse.SetCard(ActiveCard);
-
-            GeneralizationsList["Main"] = COCardParse.iCount - iCopyCount;
-
-            foreach (string szGeneralization in GeneralizationsList.Keys)
-            {
-                AmountInterchanger AI = new AmountInterchanger();
-                AI.SetName(szGeneralization);
-                AI.TBAMount.Text = GeneralizationsList[szGeneralization].ToString();
-                SPCollections.Children.Add(AI);
-            }
+            
         }
     }
 }

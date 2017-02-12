@@ -5,10 +5,10 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:CollectorsFrontEnd"
              mc:Ignorable="d" 
-             d:DesignHeight="60" d:DesignWidth="300">
+             Height="40" Width="190">
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="5*"/>
+            <ColumnDefinition Width="4*"/>
             <ColumnDefinition/>
             <ColumnDefinition Width="2*"/>
             <ColumnDefinition/>
@@ -16,8 +16,8 @@
         <Label x:Name="LblCollectionName"
                HorizontalContentAlignment="Center" 
                  VerticalContentAlignment="Center"
-               FontSize="24">Placeholder</Label>
-        <Button x:Name="BtnDecrement" Grid.Column="1" Width="20" Height="20" FontSize="16">
+               FontSize="16">Placeholder</Label>
+        <Button x:Name="BtnDecrement" Grid.Column="1" Width="15" Height="15" FontSize="16">
             <Path 
       Fill="Black"
       Stroke="{x:Null}"
@@ -25,11 +25,11 @@
 
       Data="M0,0 L9,0 9,2 0,2 0,0" />
         </Button>
-        <TextBox x:Name="TBAMount" Grid.Column="2" Width="40" Height="40"
+        <TextBox x:Name="TBAMount" Grid.Column="2" Width="30" Height="30"
                  HorizontalContentAlignment="Center" 
                  VerticalContentAlignment="Center"
-                 FontSize="28"></TextBox>
-        <Button x:Name="BtnIncrement" Grid.Column="3" Width="20" Height="20" FontSize="16">
+                 FontSize="14"></TextBox>
+        <Button x:Name="BtnIncrement" Grid.Column="3" Width="15" Height="15" FontSize="16">
             <Path 
       Fill="Black"
       Stroke="{x:Null}"

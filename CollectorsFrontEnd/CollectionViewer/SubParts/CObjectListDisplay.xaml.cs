@@ -33,16 +33,31 @@ namespace CollectorsFrontEnd
         public string CardString;
         public Dictionary<string, string> MapOfAttrs;
         public int iCount = 0;
+        List<Tuple<string, string>> MetaTags;
+
         public CObjectListDisplay GetThis { get; set; }
+
+        public delegate void OpenButton(CObjectListDisplay aCOLD);
+        public event OpenButton OpenInterchanger;
+
         public CObjectListDisplay()
         {
             InitializeComponent();
             GetThis = this;
+            BtnAmountInterchanger.Click += eOpenInterchangerWindow;
         }
 
-        public void SetCard(string aszCollectionObjectString)
+        public void eOpenInterchangerWindow(object sender, RoutedEventArgs e)
         {
+            if (OpenInterchanger != null)
+            {
+                OpenInterchanger(this);
+            }
+        }
 
+        public void SetCard(string aszCollectionObjectString, List<Tuple<string, string>> alstMetaTags)
+        {
+            MetaTags = alstMetaTags;
             CardString = aszCollectionObjectString;
             MCopyObject oParsed = MainWindow.SCI.ConvertItemToCopyObject(aszCollectionObjectString);
             if (oParsed.Attributes != null && oParsed.Name != null)

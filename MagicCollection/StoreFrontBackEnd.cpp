@@ -72,6 +72,21 @@ std::vector<std::string> CStoreFrontBackEnd::GetCollectionList(std::string aszCo
 	}
 }
 
+
+std::vector<std::pair<std::string, std::vector<std::pair<std::string, std::string>>>>
+CStoreFrontBackEnd::GetCollectionListWithMeta(std::string aszCollection)
+{
+	if (m_ColFactory->CollectionExists(aszCollection))
+	{
+		return m_ColFactory->GetCollection(aszCollection)->GetCollectionListWithMeta();
+	}
+	else
+	{
+		std::vector<std::pair<std::string, std::vector<std::pair<std::string, std::string>>>> lstEmpty;
+		return lstEmpty;
+	}
+}
+
 std::vector<std::string> CStoreFrontBackEnd::GetLoadedCollections()
 {
 	return m_ColFactory->LoadedCollections;

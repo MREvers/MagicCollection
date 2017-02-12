@@ -34,8 +34,17 @@ public:
 	System::String^ LoadCollection(System::String^ aszCollectionName);
 	System::Collections::Generic::Dictionary<System::String^, System::String^>^ GetCopyLocations(System::String^ ahszCollectionName, System::String^ ahszLongCardName);
 	System::Collections::Generic::List<System::String^>^ GetCollectionList(System::String^ ahszCollectionName);
+
 	System::Collections::Generic::List<System::String^>^ GetLoadedCollections();
 	System::Collections::Generic::List<System::String^>^ GetAllCardsStartingWith(System::String^ ahszText);
+	System::Collections::Generic::List<
+		System::Tuple<
+			System::String^,
+			System::Collections::Generic::List<
+				System::Tuple<
+					System::String^,
+					System::String^>^>^>^>^
+		GetCollectionListWithMeta(System::String^ ahszCollectionName);
 	System::Collections::Generic::List<System::Collections::Generic::List<System::Tuple<System::String^, System::String^>^>^>^
 		GetMetaTags(System::String^ ahszCollectionName, System::String^ ahszLongName);
 	void AddMetaTag(System::String^ ahszCollectionName, System::String^ ahszLongName, System::String^ ahszKey, System::String^ ahszVal,
