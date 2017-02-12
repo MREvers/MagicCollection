@@ -15,14 +15,12 @@
                HorizontalContentAlignment="Center" 
                  VerticalContentAlignment="Center"
                FontSize="16"></Label>
-        <StackPanel x:Name="SPCollections" Grid.Row="1">
-            <ItemsControl>
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate>
-                        <local:AmountInterchanger/>
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
-        </StackPanel>
+        <ItemsControl x:Name="SPCollections" Grid.Row="1">
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <local:AmountInterchanger/>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
     </Grid>
 </UserControl>

@@ -20,19 +20,23 @@ namespace CollectorsFrontEnd
     /// </summary>
     public partial class ItemAmountInterchanger : UserControl
     {
-        public string ActiveCard { get; set; }
+        public string ActiveCardLong { get; set; }
         public string ActiveCollection { get; set; }
+        public string CardName;
 
         public ItemAmountInterchanger()
         {
             InitializeComponent();
         }
 
-        public void SetCard(string aszCollection, string aszCard, List<CollectionViewGeneralization> alstGeneralizations)
+        public void SetCard(string aszCollection, string aszCardLong, List<CollectionViewGeneralization> alstGeneralizations)
         {
-            LblCardName.Content = aszCard;
+            CObjectListDisplay oParse = new CObjectListDisplay();
+            oParse.SetCard(aszCardLong, null);
+            CardName = oParse.CardName;
+            LblCardName.Content = oParse.CardName;
 
-            ActiveCard = aszCard;
+            ActiveCardLong = aszCardLong;
             ActiveCollection = aszCollection;
             PopulateColCounts(alstGeneralizations);
 
@@ -43,7 +47,25 @@ namespace CollectorsFrontEnd
             // Add code here to fetch generalization amounts. Until then...
             foreach(var oGen in alstGeneralizations)
             {
+                // Search through the generalizations for the desired card and grab the count.
+                int iCount = 0;
+                foreach(CObjectListDisplay oCOD in oGen.Items)
+                {
+                    if (oCOD.CardName == CardName)
+                    {
+                        if (MainWindow.SCI.IsSameIdentity(ActiveCardLong, oCOD.CardStringLong))
+                        {
+                            iCount = oCOD.iCount;
+                        }
+                    }
+                }
 
+                AmountInterchanger AI = new AmountInterchanger();
+                AI.LblCollectionName.Content = oGen.Name;
+
+                AI.TBAMount.Text = iCount.ToString();
+
+                SPCollections.Items.Add(AI);
             }
         }
     }

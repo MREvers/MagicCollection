@@ -253,3 +253,11 @@ void ServerClientInterface::AddMetaTag(System::String^ ahszCollectionName, Syste
 
 	m_StoreFrontBackEnd->AddMetaTag(szCollectionName, szLongCardName, szKey, szVal, lstMetaTagPairs);
 }
+
+System::Boolean ServerClientInterface::IsSameIdentity(System::String^ aszLongNameOne, System::String^ aszLongNameTwo)
+{
+	std::string szLongOne = msclr::interop::marshal_as<std::string>(aszLongNameOne);
+	std::string szLongTwo = msclr::interop::marshal_as<std::string>(aszLongNameTwo);
+	System::Boolean hbRetVal = System::Boolean(m_StoreFrontBackEnd->IsSameCard(szLongOne, szLongTwo));
+	return hbRetVal;
+}

@@ -49,7 +49,7 @@ public:
 		GetMetaTags(System::String^ ahszCollectionName, System::String^ ahszLongName);
 	void AddMetaTag(System::String^ ahszCollectionName, System::String^ ahszLongName, System::String^ ahszKey, System::String^ ahszVal,
 		System::Collections::Generic::List<System::Tuple<System::String^, System::String^>^>^ hlstMetaTags);
-
+	System::Boolean IsSameIdentity(System::String^ aszLongNameOne, System::String^ aszLongNameTwo);
 
 private:
 	CStoreFrontBackEnd* m_StoreFrontBackEnd;

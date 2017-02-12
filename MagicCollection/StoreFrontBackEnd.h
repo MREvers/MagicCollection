@@ -44,7 +44,7 @@ public:
 	std::vector<std::pair<std::string, std::string>> ParseAttrs(std::string aszDetails);
 	bool ParseCardString(std::string aszCardString, int& riCount, std::string& rszName, std::string& rszDetails);
 
-
+	bool IsSameCard(std::string aszLongOne, std::string aszLongTwo);
 private:
 	//ServerIFace* m_ServerIFace;
 	CollectionFactory* m_ColFactory; // This will be the main interaction.

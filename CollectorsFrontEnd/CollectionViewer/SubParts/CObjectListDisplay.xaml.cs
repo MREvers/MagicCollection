@@ -30,7 +30,8 @@ namespace CollectorsFrontEnd
         public static int ColumnCount = 2;
         public static List<string> ListColumnHeaders { get; set; } = new List<string>() { "Amount", "Name" };
         public List<string> ListColumnItems { get; set; } = new List<string>();
-        public string CardString;
+        public string CardStringLong;
+        public string CardName;
         public Dictionary<string, string> MapOfAttrs;
         public int iCount = 0;
         List<Tuple<string, string>> MetaTags;
@@ -58,8 +59,9 @@ namespace CollectorsFrontEnd
         public void SetCard(string aszCollectionObjectString, List<Tuple<string, string>> alstMetaTags)
         {
             MetaTags = alstMetaTags;
-            CardString = aszCollectionObjectString;
+            CardStringLong = aszCollectionObjectString;
             MCopyObject oParsed = MainWindow.SCI.ConvertItemToCopyObject(aszCollectionObjectString);
+            CardName = oParsed.Name;
             if (oParsed.Attributes != null && oParsed.Name != null)
             {
                 try
@@ -73,5 +75,6 @@ namespace CollectorsFrontEnd
             }
             MapOfAttrs = oParsed.Attributes;
         }
+
     }
 }

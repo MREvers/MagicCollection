@@ -21,11 +21,17 @@ namespace CollectorsFrontEnd
     public partial class CollectionViewGeneralization : UserControl
     {
         public List<CObjectListDisplay> Items = new List<CObjectListDisplay>();
+        public string Name;
 
         public CollectionViewGeneralization()
         {
             InitializeComponent();
             LVItems.ItemsSource = Items;
+        }
+
+        public void SetName(string aszName)
+        {
+            Name = aszName;
         }
     }
 }

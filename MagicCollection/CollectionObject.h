@@ -12,6 +12,7 @@ class ICollection;
 class CopyObject
 {
 public:
+	static std::vector<std::string> PerCollectionMetaTagNames;
 	std::string ParentCollection;
 	std::vector<std::string> ResidentCollections;
 
@@ -19,8 +20,13 @@ public:
 	std::map<std::string, std::string> NonUniqueTraits;
 	// Other analytics go here.
 	std::vector<std::pair<std::string, std::string>> GetMetaTags(std::string aszCollection);
+	bool IsPerCollectionTag(std::string aszKeyName);
 	void AddMetaTag(std::string aszCollection, std::string aszKey, std::string aszVal);
-	std::map<std::string,std::vector<std::pair<std::string, std::string>>> MetaTags;
+	bool HasMetaTag(std::string aszKey);
+	bool HasPerCollectionTag(std::string aszCollection, std::string aszKey);
+
+	std::map<std::string,std::vector<std::pair<std::string, std::string>>> PerCollectionMetaTags;
+	std::vector<std::pair<std::string, std::string>> MetaTags;
 };
 
 // Since this is a flyweight object, the interface should act as though it is 'in' the collection,

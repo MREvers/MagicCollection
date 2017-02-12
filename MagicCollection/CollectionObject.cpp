@@ -1,28 +1,94 @@
 #include "CollectionObject.h"
 
+std::vector<std::string> CopyObject::PerCollectionMetaTagNames({ "Generalization" });
+
 std::vector<std::pair<std::string, std::string>> CopyObject::GetMetaTags(std::string aszCollection)
 {
 	std::vector<std::pair<std::string, std::string>> lstRetVal;
-	if (MetaTags.find(aszCollection) != MetaTags.end())
+	if (PerCollectionMetaTags.find(aszCollection) != PerCollectionMetaTags.end())
 	{
-		lstRetVal = MetaTags[aszCollection];
+		lstRetVal = PerCollectionMetaTags[aszCollection];
+	}
+
+	std::vector<std::pair<std::string, std::string>>::iterator iter_NUTags = MetaTags.begin();
+	for (; iter_NUTags != MetaTags.end(); ++iter_NUTags)
+	{
+		lstRetVal.push_back(*iter_NUTags);
 	}
 
 	return lstRetVal;
 }
 
+bool CopyObject::IsPerCollectionTag(std::string aszKeyValName)
+{
+	std::vector<std::string>::iterator iter_KeyVals = PerCollectionMetaTagNames.begin();
+	for (; iter_KeyVals != PerCollectionMetaTagNames.end(); ++iter_KeyVals)
+	{
+		if ((*iter_KeyVals) == aszKeyValName)
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
 void CopyObject::AddMetaTag(std::string aszCollection, std::string aszKey, std::string aszVal)
 {
-	if (MetaTags.find(aszCollection) != MetaTags.end())
+	if (IsPerCollectionTag(aszKey))
 	{
-		MetaTags[aszCollection].push_back(std::make_pair(aszKey,aszVal));
+		if (!HasPerCollectionTag(aszCollection, aszKey))
+		{
+			if (PerCollectionMetaTags.find(aszCollection) != PerCollectionMetaTags.end())
+			{
+				PerCollectionMetaTags[aszCollection].push_back(std::make_pair(aszKey, aszVal));
+			}
+			else
+			{
+				std::vector<std::pair<std::string, std::string>> lstNewCol;
+				lstNewCol.push_back(std::make_pair(aszKey, aszVal));
+				PerCollectionMetaTags[aszCollection] = lstNewCol;
+			}
+		}
 	}
 	else
 	{
-		std::vector<std::pair<std::string, std::string>> lstNewCol;
-		lstNewCol.push_back(std::make_pair(aszKey, aszVal));
-		MetaTags[aszCollection] = lstNewCol;
+		if (!HasMetaTag(aszKey))
+		{
+
+			MetaTags.push_back(std::make_pair(aszKey, aszVal));
+		}
 	}
+
+}
+
+bool CopyObject::HasMetaTag(std::string aszKey)
+{
+	std::vector<std::pair<std::string, std::string>>::iterator iter_Tags = MetaTags.begin();
+	for (; iter_Tags != MetaTags.end(); ++iter_Tags)
+	{
+		if (iter_Tags->first == aszKey)
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
+bool CopyObject::HasPerCollectionTag(std::string aszCollection, std::string aszKey)
+{
+	if (PerCollectionMetaTags.find(aszCollection) != PerCollectionMetaTags.end())
+	{
+		std::vector<std::pair<std::string, std::string>>::iterator iter_Tags = PerCollectionMetaTags[aszCollection].begin();
+		for (; iter_Tags != PerCollectionMetaTags[aszCollection].end(); ++iter_Tags)
+		{
+			if (iter_Tags->first == aszKey)
+			{
+				return true;
+			}
+		}
+	}
+	return false;
+	
 }
 
 CollectionObject::CollectionObject(std::string aszName)
@@ -86,6 +152,7 @@ CopyObject CollectionObject::GenerateCopy(std::string aszCollectionName, std::ve
 	ConstructCopy(oNewCopy, alstAttrs);
 	return oNewCopy;
 }
+
 
 void CollectionObject::RemoveCopy(std::string aszCollectionName)
 {

@@ -120,6 +120,7 @@ namespace CollectorsFrontEnd
 
                         CVG.GVColumns.Columns.Add(GVCBind);
                         genMap[szGen] = CVG;
+                        CVG.Name = szGen;
                         ListGeneralizations.Add(CVG);
                         SPItemsControl.Items.Refresh();
                     }
@@ -185,7 +186,7 @@ namespace CollectorsFrontEnd
         {
             ItemAmountInterchanger IAI = new ItemAmountInterchanger();
 
-            IAI.SetCard(ActiveCollection, aCOLD.CardString, ListGeneralizations);
+            IAI.SetCard(ActiveCollection, aCOLD.CardStringLong, ListGeneralizations);
             //Btn add and btn remove
             //ITI.BtnAddCard.Click += eAddItem;
             //ITI.BtnCancel.Click += eAddItemWindowCancelButton;

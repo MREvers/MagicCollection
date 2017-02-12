@@ -126,7 +126,8 @@ void CStoreFrontBackEnd::AddMetaTag(std::string aszCollectionName, std::string a
 	}
 }
 
-std::vector < std::vector<std::pair<std::string, std::string>>> CStoreFrontBackEnd::GetMetaTags(std::string aszCollectionName, std::string aszLongName)
+std::vector < std::vector<std::pair<std::string, std::string>>> 
+CStoreFrontBackEnd::GetMetaTags(std::string aszCollectionName, std::string aszLongName)
 {
 	if (m_ColFactory->CollectionExists(aszCollectionName))
 	{
@@ -136,4 +137,30 @@ std::vector < std::vector<std::pair<std::string, std::string>>> CStoreFrontBackE
 
 	std::vector < std::vector<std::pair<std::string, std::string>>> lstno;
 	return lstno;
+}
+
+bool CStoreFrontBackEnd::IsSameCard(std::string aszLongOne, std::string aszLongTwo)
+{
+	std::string szName;
+	int iAmount;
+	std::string szDetails;
+	if (Collection::ParseCardLine(aszLongOne, iAmount, szName, szDetails))
+	{
+		
+		std::string szNameTwo;
+		int iAmountTwo;
+		std::string szDetailsTwo;
+		if (Collection::ParseCardLine(aszLongTwo, iAmountTwo, szNameTwo, szDetailsTwo))
+		{
+			std::vector<std::pair<std::string, std::string>> lstAttrs = Collection::ParseAttrs(szDetails);
+			std::vector<std::pair<std::string, std::string>> lstAttrsTwo = Collection::ParseAttrs(szDetailsTwo);
+			CopyObject oCop = CollectionObject::GenerateCopy(std::string("None"), lstAttrs);
+			CopyObject oCop2 = CollectionObject::GenerateCopy(std::string("None"), lstAttrsTwo);
+			if (CollectionObject::IsSameIdentity(&oCop, &oCop2))
+			{
+				return true;
+			}
+		}
+	}
+	return false;
 }
