@@ -23,6 +23,7 @@ namespace CollectorsFrontEnd
         public string ActiveCardLong { get; set; }
         public string ActiveCollection { get; set; }
         public string CardName;
+        public List<AmountInterchanger> ListInterchangers { get; set; }
 
         public ItemAmountInterchanger()
         {
@@ -35,7 +36,7 @@ namespace CollectorsFrontEnd
             oParse.SetCard(aszCardLong, null);
             CardName = oParse.CardName;
             LblCardName.Content = oParse.CardName;
-
+            SPCollections.ItemsSource = ListInterchangers;
             ActiveCardLong = aszCardLong;
             ActiveCollection = aszCollection;
             PopulateColCounts(alstGeneralizations);
@@ -48,6 +49,7 @@ namespace CollectorsFrontEnd
             foreach(var oGen in alstGeneralizations)
             {
                 // Search through the generalizations for the desired card and grab the count.
+                List<Tuple<string, string>> lstMetaTags = new List<Tuple<string, string>>();
                 int iCount = 0;
                 foreach(CObjectListDisplay oCOD in oGen.Items)
                 {
@@ -56,16 +58,18 @@ namespace CollectorsFrontEnd
                         if (MainWindow.SCI.IsSameIdentity(ActiveCardLong, oCOD.CardStringLong))
                         {
                             iCount = oCOD.iCount;
+                            lstMetaTags = oCOD.MetaTags;
                         }
                     }
                 }
 
                 AmountInterchanger AI = new AmountInterchanger();
                 AI.LblCollectionName.Content = oGen.Name;
+                AI.MetaTags = lstMetaTags;
+                AI.SetStartCount(iCount);
 
-                AI.TBAMount.Text = iCount.ToString();
-
-                SPCollections.Items.Add(AI);
+                ListInterchangers.Add(AI);
+                SPCollections.Items.Refresh();
             }
         }
     }

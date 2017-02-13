@@ -25,7 +25,8 @@
 
       Data="M0,0 L9,0 9,2 0,2 0,0" />
         </Button>
-        <TextBox x:Name="TBAMount" Grid.Column="2" Width="30" Height="30"
+        <TextBox x:Name="TBAMount" Text="5" 
+                 IsReadOnly="True" Grid.Column="2" Width="30" Height="30"
                  HorizontalContentAlignment="Center" 
                  VerticalContentAlignment="Center"
                  FontSize="14"></TextBox>

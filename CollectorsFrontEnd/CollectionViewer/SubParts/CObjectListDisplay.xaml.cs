@@ -34,7 +34,7 @@ namespace CollectorsFrontEnd
         public string CardName;
         public Dictionary<string, string> MapOfAttrs;
         public int iCount = 0;
-        List<Tuple<string, string>> MetaTags;
+        public List<Tuple<string, string>> MetaTags;
 
         public CObjectListDisplay GetThis { get; set; }
 

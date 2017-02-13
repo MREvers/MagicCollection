@@ -168,6 +168,32 @@ void CollectionObject::RemoveCopy(std::string aszCollectionName)
 	}
 }
 
+void CollectionObject::RemoveCopy(std::string aszCollectionName,
+	std::vector<std::pair<std::string, std::string>> alstAttrs,
+	std::vector<std::pair<std::string, std::string>> alstMeta)
+{
+	// In the future, we need to find the copy that matches the description.
+	// If more than one copy matches the description, remove any.
+	for (std::vector<CopyObject>::iterator iter = m_lstCopies.begin(); iter != m_lstCopies.end(); ++iter)
+	{
+		if (iter->ParentCollection == aszCollectionName)
+		{
+			if (CompareKeyValPairList(
+				ConvertMapToList(iter->NonUniqueTraits),
+				FilterNonUniqueTraits(alstAttrs)))
+			{
+				if (CompareKeyValPairList(iter->MetaTags, alstMeta))
+				{
+					m_lstCopies.erase(iter);
+					break;
+				}
+				
+			}
+	
+		}
+	}
+}
+
 std::vector<CopyObject*> CollectionObject::GetLocalCopiesWith(std::string aszParent, std::vector<std::pair<std::string, std::string>> alstAttrs)
 {
 	std::vector<CopyObject*> rLstRetVal;
@@ -285,7 +311,7 @@ void CollectionObject::ConstructCopy(CopyObject& roCO, std::vector<std::pair<std
 		else
 		{
 			// Only if its a nonunique trait
-			if (!(CollectionObject::IsUniqueTrait(pszs.first)))
+			if (!(IsUniqueTrait(pszs.first)))
 			{
 				roCO.NonUniqueTraits.at(pszs.first) = pszs.second;
 			}
@@ -330,19 +356,6 @@ bool CollectionObject::IsSameIdentity(CopyObject* aoCOne, CopyObject* aoCTwo, bo
 		return bMatch;
 	}
 }
-static const char * const LstUniqueTraits[] = { "manaCost", "colors", "name", "power",
-"toughness", "loyalty", "text" };
-bool CollectionObject::IsUniqueTrait(std::string aszTrait)
-{
-	for (int i = 0; i < 7; i++)
-	{
-		if (aszTrait == LstUniqueTraits[i])
-		{
-			return true;
-		}
-	}
-	return false;
-}
 
 std::vector<std::pair<std::string, std::string>> CollectionObject::FilterNonUniqueTraits(std::vector<std::pair<std::string, std::string>> alstAttrs)
 {
@@ -367,4 +380,54 @@ std::vector<std::pair<std::string, std::string>> CollectionObject::ConvertMapToL
 		lstRetVal.push_back(std::make_pair(iter_Map->first, iter_Map->second));
 	}
 	return lstRetVal;
+}
+
+const char * const CollectionObject::LstUniqueTraits[] = { "manaCost", "colors", "name", "power",
+"toughness", "loyalty", "text" };
+
+bool CollectionObject::IsUniqueTrait(std::string aszTrait)
+{
+	for (int i = 0; i < 0; i++)
+	{
+		if (aszTrait == LstUniqueTraits[i])
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
+bool CollectionObject::CompareKeyValPairList(std::vector<std::pair<std::string, std::string>> alstFirst,
+	std::vector<std::pair<std::string, std::string>> alstSecond)
+{
+	bool bMatch = true;
+
+	if (bMatch = (alstFirst.size() == alstSecond.size()))
+	{
+		std::vector<std::pair<std::string, std::string>>::iterator iter_First = alstFirst.begin();
+		std::vector<std::pair<std::string, std::string>>::iterator iter_Second = alstSecond.begin();
+
+		for (; iter_First != alstFirst.end(); ++iter_First)
+		{
+			bool bFoundMatch = false;
+			for (; iter_Second != alstSecond.end(); ++iter_Second)
+			{
+				if (iter_First->first == iter_Second->first)
+				{
+					if (iter_First->second == iter_Second->second)
+					{
+						bFoundMatch = true;
+						break;
+					}
+				}
+			}
+
+			if (!bFoundMatch)
+			{
+				bMatch = false;
+				break;
+			}
+		}
+	}
+	return bMatch;
 }

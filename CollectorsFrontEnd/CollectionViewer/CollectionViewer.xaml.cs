@@ -187,18 +187,48 @@ namespace CollectorsFrontEnd
             ItemAmountInterchanger IAI = new ItemAmountInterchanger();
 
             IAI.SetCard(ActiveCollection, aCOLD.CardStringLong, ListGeneralizations);
+            IAI.BtnOK.Click += eAIOK;
             //Btn add and btn remove
-            //ITI.BtnAddCard.Click += eAddItem;
-            //ITI.BtnCancel.Click += eAddItemWindowCancelButton;
+            IAI.BtnOK.Click += eAIOK;
+            IAI.BtnCancel.Click += eAIClose;
             m_CurrentAmountInterchangerWindow = IAI;
             Panel.SetZIndex(CenterPanel, 2);
             CenterPanel.Children.Add(IAI);
             SPItemsControl.IsEnabled = false;
         }
 
-        public void eAIWRemoveItem(string aszName, List<string> alstMetaTags, List<string> alstAttrs)
+        public void eAIOK(object sender, RoutedEventArgs e)
         {
+            // Go through each generalization and see if the current count is different from start
+            List<AmountInterchanger> ListChanges = m_CurrentAmountInterchangerWindow.ListInterchangers;
+            foreach(AmountInterchanger AI in ListChanges)
+            {
+                int iChangeCount = 0;
+                if ((iChangeCount = (AI.iStartingCount - AI.iCurrentCount)) > 0)
+                {
+                    for(int i = 0; i < iChangeCount; i++)
+                    {
+                        MainWindow.SCI.AddItem(ActiveCollection, m_CurrentAmountInterchangerWindow.ActiveCardLong);
+                    }
+                    
+                }
+                else
+                {
+                    iChangeCount = -iChangeCount;
+                    for (int i = 0; i < iChangeCount; i++)
+                    {
+                        MainWindow.SCI.RemoveItem(ActiveCollection, m_CurrentAmountInterchangerWindow.ActiveCardLong);
+                    }
+                }
+            }
+            eAIClose(null, null);
+        }
 
+        public void eAIClose(object sender, RoutedEventArgs e)
+        {
+            CenterPanel.Children.Remove(m_CurrentAmountInterchangerWindow);
+            m_CurrentAmountInterchangerWindow = null;
+            SPItemsControl.IsEnabled = true;
         }
 
         #endregion

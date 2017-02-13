@@ -1,13 +1,14 @@
 #pragma once
 #pragma message ("Starting CollectionObject.h")
+
 #include "ICollectionObject.h"
 #include "ICollection.h"
+
 
 #include <string>
 #include <vector>
 #include <map>
 
-class ICollection;
 
 class CopyObject
 {
@@ -48,6 +49,9 @@ public:
 
 	// The col children will have to match exactly... because copies are not identical.
 	void RemoveCopy(std::string aszCollectionName);
+	void RemoveCopy(std::string aszCollectionName,
+		std::vector<std::pair<std::string, std::string>> alstAttrs,
+		std::vector<std::pair<std::string, std::string>> alstMeta);
 	std::vector<CopyObject*> GetLocalCopies(std::string aszCollectionName);
 	std::vector<CopyObject*> GetLocalCopiesWith(std::string aszCollectionName, std::vector<std::pair<std::string, std::string>> alstAttrs);
 
@@ -65,9 +69,13 @@ public:
 	// Keep in mind that this does not compare names because the name of the card is not known by the copy object.
 	// Additionally, it assumes you are comparing two cards of the same type.
 	static bool IsSameIdentity(CopyObject* aoCOne, CopyObject* aoCTwo, bool bMatchParent = true);
-	static bool IsUniqueTrait(std::string aszTrait);
 	static std::vector<std::pair<std::string, std::string>> FilterNonUniqueTraits(std::vector<std::pair<std::string, std::string>> alstAttrs);
 	static std::vector<std::pair<std::string, std::string>> ConvertMapToList(std::map<std::string, std::string>  aMap);
+	static bool IsUniqueTrait(std::string aszTrait);
+	static bool CompareKeyValPairList(std::vector<std::pair<std::string, std::string>> alstFirst,
+		std::vector<std::pair<std::string, std::string>> alstSecond);
+
+	static const char * const LstUniqueTraits[];
 private:
 	int m_iAllCopies; // Used in assigning IDs.
 

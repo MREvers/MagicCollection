@@ -63,10 +63,13 @@ public:
 	void AddItem(std::string aszNewItem,
 		bool bFinal = true,
 		std::vector<std::pair<std::string, std::string>> alstAttrs = std::vector<std::pair<std::string, std::string>>()) override;
+	void AddItem(std::string aszNewItemLongName);
 
 	void RemoveItem(std::string aszNewItem,
 		bool bFinal = true,
-		std::vector<std::pair<std::string, std::string>> alstAttrs = std::vector<std::pair<std::string, std::string>>()) override;
+		std::vector<std::pair<std::string, std::string>> alstAttrs = std::vector<std::pair<std::string, std::string>>(),
+		std::vector<std::pair<std::string, std::string>> alstMeta = std::vector<std::pair<std::string, std::string>>()) override;
+	void RemoveItem(std::string aszRemoveItemLongName, std::vector<std::pair<std::string, std::string>> alstMeta);
 
 	void AddMetaTag(std::string aszLongName, std::string aszKey, std::string aszValue,
 		std::vector<std::pair<std::string, std::string>> alstMatchMeta = std::vector<std::pair<std::string, std::string>>());
@@ -85,15 +88,12 @@ public:
 
 	static std::vector<std::pair<std::string, std::string>> ParseAttrs(std::string aszAttrs);
 	static bool ParseCardLine(std::string aszLine, int& riCount, std::string& rszName, std::string& rszDetails);
-	static bool CompareKeyValPairList(std::vector<std::pair<std::string, std::string>> alstFirst, std::vector<std::pair<std::string, std::string>> alstSecond);
-
 
 
 	void PrintList();
 
 	bool TransactionIntercept;
 
-	static const char * const LstUniqueTraits[];
 private:
 	CollectionSource* m_ColSource;
 
