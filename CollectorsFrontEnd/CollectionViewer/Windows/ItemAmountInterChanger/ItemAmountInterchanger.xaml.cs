@@ -23,7 +23,7 @@ namespace CollectorsFrontEnd
         public string ActiveCardLong { get; set; }
         public string ActiveCollection { get; set; }
         public string CardName;
-        public List<AmountInterchanger> ListInterchangers { get; set; }
+        public List<AmountInterchanger> ListInterchangers { get; set; } = new List<AmountInterchanger>();
 
         public ItemAmountInterchanger()
         {
