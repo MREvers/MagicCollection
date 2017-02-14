@@ -15,27 +15,36 @@ CStoreFrontBackEnd::~CStoreFrontBackEnd()
 {
 }
 
-void CStoreFrontBackEnd::AddItem(std::string aszCollectionName, std::string aszCardName)
+void CStoreFrontBackEnd::AddItem(
+	std::string aszCollectionName,
+	std::string aszCardName,
+	std::vector<std::pair<std::string, std::string>> alstMeta)
 {
-	if (m_ColFactory->CollectionExists(aszCollectionName) && m_ColSource->LoadCard(aszCardName) != -1)
+	std::string szName;
+	int iCount;
+	std::string szDetails;
+	if (Collection::ParseCardLine(aszCardName, iCount, szName, szDetails))
 	{
-		Collection* oCol = m_ColFactory->GetCollection(aszCollectionName);
-		std::vector<std::string> lstCardNameAttrs = SourceObject::Str_Split(aszCardName, "{");
-		std::string szCardName = lstCardNameAttrs[0];
-		std::vector<std::pair<std::string, std::string>> lstCardAttrs;
-		if (lstCardNameAttrs.size() > 1)
+		if (m_ColFactory->CollectionExists(aszCollectionName) && m_ColSource->LoadCard(szName) != -1)
 		{
-			lstCardAttrs = Collection::ParseAttrs(lstCardNameAttrs[1]);
+			Collection* oCol = m_ColFactory->GetCollection(aszCollectionName);
+
+			std::vector<std::pair<std::string, std::string>> lstCardAttrs;
+			lstCardAttrs = Collection::ParseAttrs(szDetails);
+
+			oCol->AddItem(szName, true, lstCardAttrs, alstMeta);
 		}
-		oCol->AddItem(aszCardName, true, lstCardAttrs);
+
 	}
 }
 
-void CStoreFrontBackEnd::RemoveItem(std::string aszCollectionName, std::string aszCardName)
+void CStoreFrontBackEnd::RemoveItem(std::string aszCollectionName,
+	std::string aszCardLong,
+	std::vector<std::pair<std::string, std::string>> alstMeta)
 {
 	if (m_ColFactory->CollectionExists(aszCollectionName))
 	{
-		
+		m_ColFactory->GetCollection(aszCollectionName)->RemoveItem(aszCardLong, alstMeta);
 	}
 }
 
@@ -122,11 +131,11 @@ void CStoreFrontBackEnd::AddMetaTag(std::string aszCollectionName, std::string a
 	if (m_ColFactory->CollectionExists(aszCollectionName))
 	{
 		Collection* oCol = m_ColFactory->GetCollection(aszCollectionName);
-		oCol->AddMetaTag( aszLongName, aszKey, aszValue, alstMatchMeta);
+		oCol->AddMetaTag(aszLongName, aszKey, aszValue, alstMatchMeta);
 	}
 }
 
-std::vector < std::vector<std::pair<std::string, std::string>>> 
+std::vector < std::vector<std::pair<std::string, std::string>>>
 CStoreFrontBackEnd::GetMetaTags(std::string aszCollectionName, std::string aszLongName)
 {
 	if (m_ColFactory->CollectionExists(aszCollectionName))
@@ -146,7 +155,7 @@ bool CStoreFrontBackEnd::IsSameCard(std::string aszLongOne, std::string aszLongT
 	std::string szDetails;
 	if (Collection::ParseCardLine(aszLongOne, iAmount, szName, szDetails))
 	{
-		
+
 		std::string szNameTwo;
 		int iAmountTwo;
 		std::string szDetailsTwo;

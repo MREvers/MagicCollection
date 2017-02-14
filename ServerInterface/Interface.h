@@ -24,8 +24,12 @@ public:
 	// Make the client calculate differences
 	
 	// These also takes "Fancy Cards" i.e. "Seeker of the Way { Set="blah" }
-	void AddItem(System::String^ aszCollectionName, System::String^ aszCardName);
-	void RemoveItem(System::String^ aszCollectionName, System::String^ aszCardName);
+	void AddItem(System::String^ aszCollectionName,
+		System::String^ aszCardName,
+		System::Collections::Generic::List<System::Tuple<System::String^, System::String^>^>^ ahlstMeta);
+	void RemoveItem(System::String^ aszCollectionName,
+		System::String^ aszCardNameLong,
+		System::Collections::Generic::List<System::Tuple<System::String^, System::String^>^>^ ahlstMeta);
 	MCopyObject^ ConvertItemToCopyObject(System::String^ ahszCard);
 
 	// Eventually Add file name arg.

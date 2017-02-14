@@ -57,6 +57,11 @@ namespace CollectorsFrontEnd
             iCurrentCount = iCount;
         }
 
+        public void SetMetaTags(List<Tuple<string, string>> alstMeta)
+        {
+            MetaTags = alstMeta;
+        }
+
         private void eIncrement(object sender, RoutedEventArgs e)
         {
             iCurrentCount++;

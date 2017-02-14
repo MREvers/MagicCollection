@@ -74,6 +74,7 @@ public:
 	static bool IsUniqueTrait(std::string aszTrait);
 	static bool CompareKeyValPairList(std::vector<std::pair<std::string, std::string>> alstFirst,
 		std::vector<std::pair<std::string, std::string>> alstSecond);
+	static std::string str_trim( const std::string& aszTrim, char removeChar);
 
 	static const char * const LstUniqueTraits[];
 private:

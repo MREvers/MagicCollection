@@ -168,7 +168,7 @@ namespace CollectorsFrontEnd
 
         public void eAddItem(object sender, RoutedEventArgs e)
         {
-            MainWindow.SCI.AddItem(ActiveCollection, m_CurrentAddItemWindow.ComboText);
+            MainWindow.SCI.AddItem(ActiveCollection, m_CurrentAddItemWindow.ComboText, new List<Tuple<string, string>>());
 
             eAddItemWindowClose();
 
@@ -189,7 +189,6 @@ namespace CollectorsFrontEnd
             IAI.SetCard(ActiveCollection, aCOLD.CardStringLong, ListGeneralizations);
             IAI.BtnOK.Click += eAIOK;
             //Btn add and btn remove
-            IAI.BtnOK.Click += eAIOK;
             IAI.BtnCancel.Click += eAIClose;
             m_CurrentAmountInterchangerWindow = IAI;
             Panel.SetZIndex(CenterPanel, 2);
@@ -204,11 +203,13 @@ namespace CollectorsFrontEnd
             foreach(AmountInterchanger AI in ListChanges)
             {
                 int iChangeCount = 0;
-                if ((iChangeCount = (AI.iStartingCount - AI.iCurrentCount)) > 0)
+                if ((iChangeCount = (AI.iCurrentCount - AI.iStartingCount)) > 0)
                 {
                     for(int i = 0; i < iChangeCount; i++)
                     {
-                        MainWindow.SCI.AddItem(ActiveCollection, m_CurrentAmountInterchangerWindow.ActiveCardLong);
+                        MainWindow.SCI.AddItem(ActiveCollection,
+                            m_CurrentAmountInterchangerWindow.ActiveCardLong,
+                             AI.MetaTags);
                     }
                     
                 }
@@ -217,11 +218,16 @@ namespace CollectorsFrontEnd
                     iChangeCount = -iChangeCount;
                     for (int i = 0; i < iChangeCount; i++)
                     {
-                        MainWindow.SCI.RemoveItem(ActiveCollection, m_CurrentAmountInterchangerWindow.ActiveCardLong);
+                        MainWindow.SCI.RemoveItem(
+                            ActiveCollection,
+                            m_CurrentAmountInterchangerWindow.ActiveCardLong,
+                            AI.MetaTags
+                            );
                     }
                 }
             }
             eAIClose(null, null);
+            RefreshCollectionView();
         }
 
         public void eAIClose(object sender, RoutedEventArgs e)

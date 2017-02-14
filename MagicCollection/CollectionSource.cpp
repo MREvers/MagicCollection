@@ -80,7 +80,8 @@ void CollectionSource::LoadLib(std::string aszFileName)
 int CollectionSource::LoadCard(std::string aszCardName)
 {
 	int iCacheLocation = -1;
-	int iFound = findInBuffer(aszCardName, false);
+	std::string szCardName = CollectionObject::str_trim(aszCardName, ' ');
+	int iFound = findInBuffer(szCardName, false);
 	if (iFound != -1)
 	{
 		SourceObject* oSource = &m_lstptCardBuffer.at(iFound);

@@ -18,8 +18,9 @@ public:
 	~CStoreFrontBackEnd();
 
 	// Collection interface
-	void AddItem(std::string aszCollection, std::string aszItem);
-	void RemoveItem(std::string aszCollection, std::string aszItem);
+	void AddItem(std::string aszCollection, std::string aszItem,
+		std::vector<std::pair<std::string, std::string>> alstMeta);
+	void RemoveItem(std::string aszCollection, std::string aszItem, std::vector<std::pair<std::string, std::string>> alstMeta);
 	void SaveCollection(std::string aszCollectionToSave);
 
 	// Loads specified collection into memory by file name

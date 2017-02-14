@@ -62,8 +62,10 @@ public:
 
 	void AddItem(std::string aszNewItem,
 		bool bFinal = true,
-		std::vector<std::pair<std::string, std::string>> alstAttrs = std::vector<std::pair<std::string, std::string>>()) override;
-	void AddItem(std::string aszNewItemLongName);
+		std::vector<std::pair<std::string, std::string>> alstAttrs = std::vector<std::pair<std::string, std::string>>(),
+		std::vector<std::pair<std::string, std::string>> alstMetaTags = std::vector<std::pair<std::string, std::string>>()) override;
+	void AddItem(std::string aszNewItemLongName,
+		std::vector<std::pair<std::string, std::string>> alstMetaTags);
 
 	void RemoveItem(std::string aszNewItem,
 		bool bFinal = true,
@@ -108,11 +110,15 @@ private:
 
 	void setName(std::string aszName);
 
-	void addItem(std::string aszNewItem, std::vector<std::pair<std::string, std::string>> alstAttrs);
+	void addItem(std::string aszNewItem, std::vector<std::pair<std::string, std::string>> alstAttrs,
+		std::vector<std::pair<std::string, std::string>> alstMeta);
 	CopyObject* forceAdd(std::string aszNewItem, std::vector<std::pair<std::string, std::string>> alstAttrs);
 	// Only adds the collection object cache locations
 	void registerItem(int aiItem);
-	void removeItem(std::string aszItem, std::vector<std::pair<std::string, std::string>> alstAttrs);
+	void removeItem(
+		std::string aszItem,
+		std::vector<std::pair<std::string, std::string>> alstAttrs,
+		std::vector<std::pair<std::string, std::string>> alstMeta);
 
 	void changeItemAttribute(std::string aszCardname, CopyObject* aoCO, std::string aszKey, std::string aszNewVal, bool bFinal = true);
 	std::string changeItemAttribute_string(std::string aszCardname, CopyObject* aoCO, std::string aszKey, std::string aszNewVal, bool bIsParentCol = true);

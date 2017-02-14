@@ -431,3 +431,14 @@ bool CollectionObject::CompareKeyValPairList(std::vector<std::pair<std::string, 
 	}
 	return bMatch;
 }
+
+std::string CollectionObject::str_trim(const std::string& src, char removeChar)
+{
+	size_t first = src.find_first_not_of(' ');
+	if (std::string::npos == first)
+	{
+		return src;
+	}
+	size_t last = src.find_last_not_of(' ');
+	return src.substr(first, (last - first + 1));
+}

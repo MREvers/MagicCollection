@@ -10,18 +10,36 @@ ServerClientInterface::~ServerClientInterface()
 
 }
 
-void ServerClientInterface::AddItem(System::String^ ahszCollectionName, System::String^ ahszCardName)
+void ServerClientInterface::AddItem(System::String^ ahszCollectionName, System::String^ ahszCardName,
+	System::Collections::Generic::List<System::Tuple<System::String^, System::String^>^>^ ahlstMeta)
 {
 	std::string szCollectionName = msclr::interop::marshal_as<std::string>(ahszCollectionName);
 	std::string szCardName = msclr::interop::marshal_as<std::string>(ahszCardName);
-	m_StoreFrontBackEnd->AddItem(szCollectionName, szCardName);
+	std::vector<std::pair<std::string, std::string>> lstMeta;
+	for (int i = 0; i < ahlstMeta->Count; i++)
+	{
+		std::string szKey = msclr::interop::marshal_as<std::string>(ahlstMeta[i]->Item1);
+		std::string szValue = msclr::interop::marshal_as<std::string>(ahlstMeta[i]->Item2);
+		lstMeta.push_back(std::make_pair(szKey, szValue));
+	}
+	m_StoreFrontBackEnd->AddItem(szCollectionName, szCardName, lstMeta);
 }
 
-void ServerClientInterface::RemoveItem(System::String^ ahszCollectionName, System::String^ ahszCardName)
+void ServerClientInterface::RemoveItem(
+	System::String^ ahszCollectionName,
+	System::String^ ahszCardNameLong,
+	System::Collections::Generic::List<System::Tuple<System::String^,System::String^>^>^ ahlstMeta)
 {
 	std::string szCollectionName = msclr::interop::marshal_as<std::string>(ahszCollectionName);
-	std::string szCardName = msclr::interop::marshal_as<std::string>(ahszCardName);
-	m_StoreFrontBackEnd->RemoveItem(szCollectionName, szCardName);
+	std::string szCardName = msclr::interop::marshal_as<std::string>(ahszCardNameLong);
+	std::vector<std::pair<std::string, std::string>> lstMeta;
+	for (int i = 0; i < ahlstMeta->Count; i++)
+	{
+		std::string szKey = msclr::interop::marshal_as<std::string>(ahlstMeta[i]->Item1);
+		std::string szValue = msclr::interop::marshal_as<std::string>(ahlstMeta[i]->Item2);
+		lstMeta.push_back(std::make_pair(szKey, szValue));
+	}
+	m_StoreFrontBackEnd->RemoveItem(szCollectionName, szCardName, lstMeta);
 }
 
 MCopyObject^ ServerClientInterface::ConvertItemToCopyObject(System::String^ ahszCard)

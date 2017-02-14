@@ -65,6 +65,7 @@ namespace CollectorsFrontEnd
 
                 AmountInterchanger AI = new AmountInterchanger();
                 AI.LblCollectionName.Content = oGen.Name;
+               
                 AI.MetaTags = lstMetaTags;
                 AI.SetStartCount(iCount);
 

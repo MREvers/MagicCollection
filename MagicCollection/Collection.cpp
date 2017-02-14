@@ -86,7 +86,8 @@ std::string Collection::GetName()
 
 void Collection::AddItem(std::string aszNewItem,
 	bool bFinal,
-	std::vector<std::pair<std::string, std::string>> alstAttrs)
+	std::vector<std::pair<std::string, std::string>> alstAttrs,
+	std::vector<std::pair<std::string, std::string>> alstMeta)
 {
 	// If we are in the midst of a transaction
 	if (TransactionIntercept)
@@ -101,8 +102,8 @@ void Collection::AddItem(std::string aszNewItem,
 		// Store the action and how to undo it here.
 		Collection::Action oAction;
 		oAction.Identifier = "+ " + szCard;
-		oAction.Do = std::bind(&Collection::addItem, this, aszNewItem, alstAttrs);
-		oAction.Undo = std::bind(&Collection::removeItem, this, aszNewItem, alstAttrs);
+		oAction.Do = std::bind(&Collection::addItem, this, aszNewItem, alstAttrs, alstMeta);
+		oAction.Undo = std::bind(&Collection::removeItem, this, aszNewItem, alstAttrs, alstMeta);
 
 		// Store the arguments
 		Collection::Transaction* oTrans = &m_lstTransactions.at(m_lstTransactions.size() - 1);
@@ -114,7 +115,7 @@ void Collection::AddItem(std::string aszNewItem,
 
 	Collection::Transaction* oTrans = openTransaction();
 
-	(*oTrans)->AddItem(aszNewItem, true, alstAttrs);
+	(*oTrans)->AddItem(aszNewItem, true, alstAttrs, alstMeta);
 
 	if (bFinal)
 	{
@@ -122,7 +123,8 @@ void Collection::AddItem(std::string aszNewItem,
 	}
 }
 
-void Collection::AddItem(std::string aszNewItemLongName)
+void Collection::AddItem(std::string aszNewItemLongName,
+	std::vector<std::pair<std::string, std::string>> alstMetaTags)
 {
 	std::string szName;
 	int iCount;
@@ -130,7 +132,7 @@ void Collection::AddItem(std::string aszNewItemLongName)
 	if (Collection::ParseCardLine(aszNewItemLongName, iCount, szName, szDetails))
 	{
 		auto lstAttrs = Collection::ParseAttrs(szDetails);
-		AddItem(szName, true, lstAttrs);
+		AddItem(szName, true, lstAttrs, alstMetaTags);
 	}
 }
 
@@ -151,8 +153,8 @@ void Collection::RemoveItem(std::string aszRemoveItem,
 
 			Collection::Action oAction;
 			oAction.Identifier = "- " + szCard;
-			oAction.Do = std::bind(&Collection::removeItem, this, aszRemoveItem, alstAttrs);
-			oAction.Undo = std::bind(&Collection::addItem, this, aszRemoveItem, alstAttrs);
+			oAction.Do = std::bind(&Collection::removeItem, this, aszRemoveItem, alstAttrs, alstMeta);
+			oAction.Undo = std::bind(&Collection::addItem, this, aszRemoveItem, alstAttrs, alstMeta);
 
 			// Store the arguments
 			Collection::Transaction* oTrans = &m_lstTransactions.at(m_lstTransactions.size() - 1);
@@ -183,7 +185,7 @@ void Collection::RemoveItem(std::string aszNewItemLongName,
 	if (Collection::ParseCardLine(aszNewItemLongName, iCount, szName, szDetails))
 	{
 		auto lstAttrs = Collection::ParseAttrs(szDetails);
-		
+		RemoveItem(szName, true, lstAttrs, alstMetaTags);
 	}
 }
 
@@ -304,7 +306,8 @@ void Collection::setName(std::string aszName)
 // AddItem(AnotherCollection, name) -- from another collection.
 // AddItem(name) -- from source
 // This will also be fairly slow. In the future this should strictly be used for cards from source.
-void Collection::addItem(std::string aszNewItem, std::vector<std::pair<std::string, std::string>> alstAttrs)
+void Collection::addItem(std::string aszNewItem, std::vector<std::pair<std::string, std::string>> alstAttrs,
+	std::vector<std::pair<std::string, std::string>> alstMeta)
 {
 	int iCard = m_ColSource->LoadCard(aszNewItem);
 	if (iCard != -1)
@@ -318,6 +321,12 @@ void Collection::addItem(std::string aszNewItem, std::vector<std::pair<std::stri
 		CopyObject* oCO = oCard->AddCopy(m_szName);
 
 		CollectionObject::ConstructCopy(*oCO, alstAttrs);
+
+		std::vector<std::pair<std::string, std::string>>::iterator iter_Meta = alstMeta.begin();
+		for (; iter_Meta != alstMeta.end(); iter_Meta++)
+		{
+			oCO->AddMetaTag(m_szName, iter_Meta->first, iter_Meta->second);
+		}
 	}
 }
 
@@ -355,7 +364,9 @@ void Collection::registerItem(int aiItem)
 	}
 }
 
-void Collection::removeItem(std::string aszRemoveItem, std::vector<std::pair<std::string, std::string>> alstAttrs)
+void Collection::removeItem(std::string aszRemoveItem,
+	std::vector<std::pair<std::string, std::string>> alstAttrs,
+	std::vector<std::pair<std::string, std::string>> alstMeta)
 {
 	int iCard = m_ColSource->LoadCard(aszRemoveItem);
 	if (iCard != -1)
@@ -364,7 +375,7 @@ void Collection::removeItem(std::string aszRemoveItem, std::vector<std::pair<std
 		CollectionObject* oCard = m_ColSource->GetCardPrototype(iCard);
 
 		// Add a copy of this card.
-		oCard->RemoveCopy(m_szName);
+		oCard->RemoveCopy(m_szName, alstAttrs, alstMeta);
 	}
 }
 
