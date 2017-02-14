@@ -22,6 +22,7 @@ namespace CollectorsFrontEnd
     public partial class AmountInterchanger : UserControl
     {
         public int iStartingCount;
+        public string Generalization { get; set; }
         public List<Tuple<string, string>> MetaTags;
 
         public int _iCurrentCount = 1;
@@ -48,6 +49,7 @@ namespace CollectorsFrontEnd
 
         public void SetName(string aszCollection)
         {
+            Generalization = aszCollection;
             LblCollectionName.Content = aszCollection;
         }
 

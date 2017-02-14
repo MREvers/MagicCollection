@@ -205,8 +205,13 @@ namespace CollectorsFrontEnd
                 int iChangeCount = 0;
                 if ((iChangeCount = (AI.iCurrentCount - AI.iStartingCount)) > 0)
                 {
-                    for(int i = 0; i < iChangeCount; i++)
+                    if (AI.MetaTags.Count == 0)
                     {
+                        AI.MetaTags.Add(new Tuple<string, string>("Generalization", AI.Generalization.ToString()));
+                    }
+                    for (int i = 0; i < iChangeCount; i++)
+                    {
+
                         MainWindow.SCI.AddItem(ActiveCollection,
                             m_CurrentAmountInterchangerWindow.ActiveCardLong,
                              AI.MetaTags);
@@ -218,6 +223,7 @@ namespace CollectorsFrontEnd
                     iChangeCount = -iChangeCount;
                     for (int i = 0; i < iChangeCount; i++)
                     {
+                        
                         MainWindow.SCI.RemoveItem(
                             ActiveCollection,
                             m_CurrentAmountInterchangerWindow.ActiveCardLong,

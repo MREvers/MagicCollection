@@ -16,7 +16,7 @@
         <Label x:Name="LblCollectionName"
                HorizontalContentAlignment="Center" 
                  VerticalContentAlignment="Center"
-               FontSize="16">Placeholder</Label>
+               FontSize="16" Content="{Binding Generalization}"></Label>
         <Button x:Name="BtnDecrement" Grid.Column="1" Width="15" Height="15" FontSize="16">
             <Path 
       Fill="Black"
