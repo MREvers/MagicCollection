@@ -23,6 +23,8 @@ public:
 	void RemoveItem(std::string aszCollection, std::string aszItem, std::vector<std::pair<std::string, std::string>> alstMeta);
 	void SaveCollection(std::string aszCollectionToSave);
 
+	std::vector<std::pair<std::string, std::string>> GetCardAttributes(std::string aszCardNameLong);
+
 	// Loads specified collection into memory by file name
 	std::string LoadCollection(std::string aszCollectionToLoad);
 

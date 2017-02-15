@@ -28,6 +28,7 @@ namespace CollectorsFrontEnd
         private MainWindow m_Container;
         private ItemInterchanger m_CurrentAddItemWindow;
         private ItemAmountInterchanger m_CurrentAmountInterchangerWindow;
+        private ItemAttributesChanger m_CurrentAttrChangerWindow;
         public List<CollectionViewGeneralization> ListGeneralizations { get; set; } = new List<CollectionViewGeneralization>();
 
         public CollectionViewer(MainWindow aMW, string aszCollection)
@@ -134,7 +135,7 @@ namespace CollectorsFrontEnd
                         COListDisplay.ListColumnItems[0] = COListDisplay.iCount.ToString();
 
                         COListDisplay.OpenInterchanger += eAmountInterchangeWindowOpen;
-                        COListDisplay.BtnEditAttributes.Click += eAttrChangerWindow;
+                        COListDisplay.OpenAttrChanger += eAttrChangerWindow;
 
                         CVG.Items.Add(COListDisplay);
                     }
@@ -248,13 +249,36 @@ namespace CollectorsFrontEnd
 
         #region AttrChanger Window
 
-        public void eAttrChangerWindow(object sender, RoutedEventArgs e)
+        public void eAttrChangerWindow(CObjectListDisplay aCOLD)
         {
             ItemAttributesChanger IAI = new ItemAttributesChanger();
-            
+            IAI.CardNameShort = aCOLD.CardName;
+            IAI.ActiveCardLong = aCOLD.CardStringLong;
+            IAI.MetaTags = aCOLD.MetaTags;
+
+            IAI.LstAttrs = aCOLD.MapOfAttrs
+                .ToList()
+                .Select(x => new ItemAttributesChanger.ItemState { Key=x.Item1, Starting=x.Item2, Value=x.Item2 })
+                .ToList();
+            IAI.LstMetas = aCOLD.MetaTags
+                .Select(x => new ItemAttributesChanger.ItemState { Key = x.Item1, Starting = x.Item2, Value = x.Item2 })
+                .ToList();
+
+            m_CurrentAttrChangerWindow = IAI;
+
+            IAI.BtnCancel.Click += eAttrChangerClose;
+            IAI.BtnOK.Click += eAttrChangerClose;
+
             Panel.SetZIndex(CenterPanel, 2);
             CenterPanel.Children.Add(IAI);
             SPItemsControl.IsEnabled = false;
+        }
+
+        public void eAttrChangerClose(object sender, RoutedEventArgs e)
+        {
+            CenterPanel.Children.Remove(m_CurrentAttrChangerWindow);
+            m_CurrentAttrChangerWindow = null;
+            SPItemsControl.IsEnabled = true;
         }
 
         #endregion

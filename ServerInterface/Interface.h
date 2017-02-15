@@ -38,7 +38,9 @@ public:
 	System::String^ LoadCollection(System::String^ aszCollectionName);
 	System::Collections::Generic::Dictionary<System::String^, System::String^>^ GetCopyLocations(System::String^ ahszCollectionName, System::String^ ahszLongCardName);
 	System::Collections::Generic::List<System::String^>^ GetCollectionList(System::String^ ahszCollectionName);
-
+	System::Collections::Generic::List<
+		System::Tuple<
+		System::String^, System::String^>^>^ GetCardAttributes(System::String^ hszCardNameLong);
 	System::Collections::Generic::List<System::String^>^ GetLoadedCollections();
 	System::Collections::Generic::List<System::String^>^ GetAllCardsStartingWith(System::String^ ahszText);
 	System::Collections::Generic::List<

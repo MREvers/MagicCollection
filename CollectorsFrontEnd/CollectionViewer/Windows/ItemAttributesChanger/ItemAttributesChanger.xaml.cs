@@ -21,41 +21,26 @@ namespace CollectorsFrontEnd
     /// </summary>
     public partial class ItemAttributesChanger : UserControl
     {
-        public List<Tuple<string, string, string>> ListKeyInitCurrentAttrs { get; set; } = new List<Tuple<string, string, string>>();
-        public List<Tuple<string, string, string>> ListKeyInitCurrentMetas { get; set; } = new List<Tuple<string, string, string>>();
-        public IEnumerable<string> ListCurrentAttrs {
-            get
-            {
-                return ListKeyInitCurrentAttrs.Select(x => x.Item3);
-            }
-        }
-        public IEnumerable<string> ListCurrentNames
+        public class ItemState
         {
-            get
-            {
-                return ListKeyInitCurrentAttrs.Select(x => x.Item1);
-            }
+            public string Key { get; set; }
+            public string Starting { get; set; }
+            public string Value { get; set; }
         }
-        public IEnumerable<string> ListCurrentMetas
-        {
-            get
-            {
-                return ListKeyInitCurrentMetas.Select(x => x.Item3);
-            }
-        }
-        public IEnumerable<string> ListCurrentMetaNames
-        {
-            get
-            {
-                return ListKeyInitCurrentMetas.Select(x => x.Item1);
-            }
-        }
+        public List<ItemState> LstAttrs { get; set; } = new List<ItemState>();
+        public List<ItemState> LstMetas { get; set; } = new List<ItemState>();
+
+        public string CardNameShort { get; set; }
+        public string ActiveCardLong { get; set; }
+        public string ActiveCollection { get; set; }
+        public List<Tuple<string, string>> MetaTags;
+
+
         public ItemAttributesChanger()
         {
             InitializeComponent();
             DataContext = this;
-            //SPAttributes.ItemsSource = ListKeyInitCurrentAttrs;
-            ListKeyInitCurrentAttrs.Add(new Tuple<string, string, string>("Cat", "Dog", "Meow"));
+            LstAttrs.Add(new ItemState { Key = "Key1", Starting = "Start", Value = "Val" });
         }
     }
 }

@@ -57,6 +57,43 @@ void CStoreFrontBackEnd::SaveCollection(std::string aszCollectionName)
 	}
 }
 
+std::vector<std::pair<std::string,std::string>> CStoreFrontBackEnd::GetCardAttributes(std::string aszCardNameLong)
+{
+	std::vector<std::pair<std::string, std::string>> LstRetVal;
+	std::string szName;
+	std::string szDetails;
+	int iCount;
+	if (ParseCardString(aszCardNameLong, iCount, szName, szDetails))
+	{
+		int iCacheIndex;
+		if ((iCacheIndex = m_ColSource->LoadCard(szName)) != -1)
+		{
+			std::map<std::string, std::string> mapAttrs = 
+				m_ColSource->GetCardPrototype(iCacheIndex)->GetAttributesMap();
+			std::map<std::string, std::string>::iterator iter_Attrs = mapAttrs.begin();
+			for (; iter_Attrs != mapAttrs.end(); ++iter_Attrs)
+			{
+				LstRetVal.push_back(std::make_pair(iter_Attrs->first, iter_Attrs->second));
+			}
+
+			std::vector<std::pair<std::string, std::string>> LstOverwriteAttrs = ParseAttrs(szDetails);
+			std::vector<std::pair<std::string, std::string>>::iterator iter_OverAttrs = LstOverwriteAttrs.begin();
+			iter_Attrs = mapAttrs.begin();
+			for (; iter_OverAttrs != LstOverwriteAttrs.end(); ++iter_OverAttrs)
+			{
+				for (; iter_Attrs != mapAttrs.end(); ++iter_Attrs)
+				{
+					if (iter_Attrs->first == iter_OverAttrs->first)
+					{
+						iter_Attrs->second = iter_OverAttrs->second;
+					}
+				}
+			}
+		}
+	}
+	return LstRetVal;
+}
+
 std::string CStoreFrontBackEnd::LoadCollection(std::string aszCollection)
 {
 	// Check if the file exists.

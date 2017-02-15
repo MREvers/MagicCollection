@@ -32,7 +32,7 @@ namespace CollectorsFrontEnd
         public List<string> ListColumnItems { get; set; } = new List<string>();
         public string CardStringLong;
         public string CardName;
-        public Dictionary<string, string> MapOfAttrs;
+        public List<Tuple<string, string>> MapOfAttrs;
         public int iCount = 0;
         public List<Tuple<string, string>> MetaTags;
 
@@ -40,12 +40,13 @@ namespace CollectorsFrontEnd
 
         public delegate void OpenButton(CObjectListDisplay aCOLD);
         public event OpenButton OpenInterchanger;
-
+        public event OpenButton OpenAttrChanger;
         public CObjectListDisplay()
         {
             InitializeComponent();
             GetThis = this;
             BtnAmountInterchanger.Click += eOpenInterchangerWindow;
+            BtnEditAttributes.Click += eOpenAttrChangerWindow;
         }
 
         public void eOpenInterchangerWindow(object sender, RoutedEventArgs e)
@@ -53,6 +54,14 @@ namespace CollectorsFrontEnd
             if (OpenInterchanger != null)
             {
                 OpenInterchanger(this);
+            }
+        }
+
+        public void eOpenAttrChangerWindow(object sender, RoutedEventArgs e)
+        {
+            if (OpenAttrChanger != null)
+            {
+                OpenAttrChanger(this);
             }
         }
 
@@ -73,7 +82,9 @@ namespace CollectorsFrontEnd
                 catch {}
                 ListColumnItems.Add(oParsed.Name.ToString());
             }
-            MapOfAttrs = oParsed.Attributes;
+            MapOfAttrs = MainWindow.SCI.GetCardAttributes(CardStringLong);
+
+            // Get the rest of the attributes
         }
 
     }

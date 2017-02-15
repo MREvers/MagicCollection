@@ -125,6 +125,31 @@ ServerClientInterface::GetCollectionList(System::String^ ahszCollectionName)
 
 System::Collections::Generic::List<
 	System::Tuple<
+	System::String^, System::String^>^>^ ServerClientInterface::GetCardAttributes(System::String^ hszCardNameLong)
+{
+	std::string szCardNameLong = msclr::interop::marshal_as<std::string>(hszCardNameLong);
+	std::vector<std::pair<std::string, std::string>> LstAttrs = m_StoreFrontBackEnd->GetCardAttributes(szCardNameLong);
+	System::Collections::Generic::List<
+		System::Tuple<
+		System::String^, System::String^>^>^ hlstRetVal = gcnew
+		System::Collections::Generic::List<
+		System::Tuple<
+		System::String^, System::String^>^>();
+	std::vector<std::pair<std::string, std::string>>::iterator iter_Attrs = LstAttrs.begin();
+	for (; iter_Attrs != LstAttrs.end(); ++iter_Attrs)
+	{
+		System::String^ hszKey = gcnew System::String(iter_Attrs->first.c_str());
+		System::String^ hszVal = gcnew System::String(iter_Attrs->second.c_str());
+
+		System::Tuple<System::String^, System::String^>^ hTuple = gcnew
+			System::Tuple<System::String^, System::String^>(hszKey, hszVal);
+		hlstRetVal->Add(hTuple);
+	}
+	return hlstRetVal;
+}
+
+System::Collections::Generic::List<
+	System::Tuple<
 		System::String^,
 		System::Collections::Generic::List<
 			System::Tuple<

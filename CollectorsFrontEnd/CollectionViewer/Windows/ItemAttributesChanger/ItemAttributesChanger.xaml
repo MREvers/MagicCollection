@@ -5,29 +5,54 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:CollectorsFrontEnd"
              mc:Ignorable="d" 
-             d:DesignHeight="300" d:DesignWidth="300">
+             d:DesignHeight="600" d:DesignWidth="300">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition/>
-            <RowDefinition/>
+            <RowDefinition Height="4*"/>
+            <RowDefinition Height="4*"/>
             <RowDefinition/>
         </Grid.RowDefinitions>
-        <ListView ItemsSource="{Binding ListKeyInitCurrentAttrs}">
-            <ListView.View>
-                <GridView>
-                    <GridViewColumn Header="Key" DisplayMemberBinding="{Binding Item1}"></GridViewColumn>
-                    <GridViewColumn Header="Val" DisplayMemberBinding="{Binding Item2}"></GridViewColumn>
-                </GridView>
-            </ListView.View>
-        </ListView>
-        <ListBox Grid.Row="1" ItemsSource="{Binding ListCurrentAttrs}">
-            <ListBox.ItemTemplate>
-                <DataTemplate>
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="{Binding}" />
-                    </StackPanel>
-                </DataTemplate>
-            </ListBox.ItemTemplate>
-        </ListBox>
+        <Label x:Name="LblTitle" Content ="{Binding CardNameShort}" FontSize="28" HorizontalAlignment="Center" VerticalAlignment="Center">
+            
+        </Label>
+        <DataGrid Margin="15, 0"
+                  Grid.Row="1"
+                  AutoGenerateColumns="False"
+                  ItemsSource="{Binding LstAttrs}"
+                  CanUserAddRows="false">
+
+            <DataGrid.Columns>
+                <DataGridTextColumn Binding="{Binding Key}" Header="Key" IsReadOnly="True" Width="*">
+                    
+                </DataGridTextColumn>
+                <DataGridTextColumn Binding="{Binding Value}" Header="Value" Width="*" >
+                </DataGridTextColumn>
+            
+            </DataGrid.Columns>
+        </DataGrid>
+        <DataGrid Margin="15, 0"
+                  Grid.Row="2"
+                  AutoGenerateColumns="False"
+                  ItemsSource="{Binding LstMetas}"
+                  CanUserAddRows="false">
+
+            <DataGrid.Columns>
+                <DataGridTextColumn Binding="{Binding Key}" Header="Key" IsReadOnly="True" Width="*">
+
+                </DataGridTextColumn>
+                <DataGridTextColumn Binding="{Binding Value}" Header="Value" Width="*" >
+                </DataGridTextColumn>
+
+            </DataGrid.Columns>
+        </DataGrid>
+        <Grid Grid.Row="3">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+            <Button Margin="5,5" Grid.Column="0" x:Name="BtnCancel">OK</Button>
+            <Button Margin="5,5" Grid.Column="1" x:Name="BtnOK">Cancel</Button>
+        </Grid>
     </Grid>
 </UserControl>
