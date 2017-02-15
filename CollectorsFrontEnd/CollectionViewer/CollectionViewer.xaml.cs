@@ -134,6 +134,7 @@ namespace CollectorsFrontEnd
                         COListDisplay.ListColumnItems[0] = COListDisplay.iCount.ToString();
 
                         COListDisplay.OpenInterchanger += eAmountInterchangeWindowOpen;
+                        COListDisplay.BtnEditAttributes.Click += eAttrChangerWindow;
 
                         CVG.Items.Add(COListDisplay);
                     }
@@ -205,7 +206,7 @@ namespace CollectorsFrontEnd
                 int iChangeCount = 0;
                 if ((iChangeCount = (AI.iCurrentCount - AI.iStartingCount)) > 0)
                 {
-                    if (AI.MetaTags.Count == 0)
+                    if (AI.MetaTags.Count == 0 && AI.Generalization != "Main")
                     {
                         AI.MetaTags.Add(new Tuple<string, string>("Generalization", AI.Generalization.ToString()));
                     }
@@ -241,6 +242,19 @@ namespace CollectorsFrontEnd
             CenterPanel.Children.Remove(m_CurrentAmountInterchangerWindow);
             m_CurrentAmountInterchangerWindow = null;
             SPItemsControl.IsEnabled = true;
+        }
+
+        #endregion
+
+        #region AttrChanger Window
+
+        public void eAttrChangerWindow(object sender, RoutedEventArgs e)
+        {
+            ItemAttributesChanger IAI = new ItemAttributesChanger();
+            
+            Panel.SetZIndex(CenterPanel, 2);
+            CenterPanel.Children.Add(IAI);
+            SPItemsControl.IsEnabled = false;
         }
 
         #endregion

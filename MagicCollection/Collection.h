@@ -75,6 +75,9 @@ public:
 
 	void AddMetaTag(std::string aszLongName, std::string aszKey, std::string aszValue,
 		std::vector<std::pair<std::string, std::string>> alstMatchMeta = std::vector<std::pair<std::string, std::string>>());
+	void AddMetaTags(std::string aszLongName, std::vector<std::pair<std::string,std::string>> alstKeyVals,
+		std::vector<std::pair<std::string, std::string>> alstMatchMeta = std::vector<std::pair<std::string, std::string>>());
+
 
 	std::vector < std::vector<std::pair<std::string, std::string>>> GetMetaTags(std::string aszLongName);
 	void RollbackTransaction();
@@ -106,6 +109,7 @@ private:
 	std::vector<Transaction> m_lstTransactions;
 	std::vector<std::string> m_lstUnreversibleChanges;
 	std::string m_szHistoryFileName;
+	std::string m_szMetaTagFileName;
 	std::vector<std::string>* m_lstLoadedCollectionsBuffer;
 
 	void setName(std::string aszName);
@@ -129,6 +133,7 @@ private:
 
 
 	std::string cardToString(int aiCardFlyweight, std::pair<CopyObject*, int>* aoCopy, bool bFullDets = false);
+	std::vector<std::string> splitIntoLines(std::string aszString);
 };
 
 #pragma message ("Finish Collection.h")
