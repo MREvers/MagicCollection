@@ -10,11 +10,11 @@ ServerClientInterface::~ServerClientInterface()
 
 }
 
-void ServerClientInterface::AddItem(System::String^ ahszCollectionName, System::String^ ahszCardName,
+void ServerClientInterface::AddItem(System::String^ ahszCollectionName, System::String^ ahszCardNameLong,
 	System::Collections::Generic::List<System::Tuple<System::String^, System::String^>^>^ ahlstMeta)
 {
 	std::string szCollectionName = msclr::interop::marshal_as<std::string>(ahszCollectionName);
-	std::string szCardName = msclr::interop::marshal_as<std::string>(ahszCardName);
+	std::string szCardName = msclr::interop::marshal_as<std::string>(ahszCardNameLong);
 	std::vector<std::pair<std::string, std::string>> lstMeta;
 	for (int i = 0; i < ahlstMeta->Count; i++)
 	{
@@ -148,6 +148,7 @@ System::Collections::Generic::List<
 	return hlstRetVal;
 }
 
+// [ { card name - long, [ <tags> ] }, ... }
 System::Collections::Generic::List<
 	System::Tuple<
 		System::String^,
@@ -303,4 +304,9 @@ System::Boolean ServerClientInterface::IsSameIdentity(System::String^ aszLongNam
 	std::string szLongTwo = msclr::interop::marshal_as<std::string>(aszLongNameTwo);
 	System::Boolean hbRetVal = System::Boolean(m_StoreFrontBackEnd->IsSameCard(szLongOne, szLongTwo));
 	return hbRetVal;
+}
+
+void ServerClientInterface::ImportCollection()
+{
+	m_StoreFrontBackEnd->ImportCollection();
 }

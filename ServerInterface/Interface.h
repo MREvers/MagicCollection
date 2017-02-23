@@ -56,7 +56,7 @@ public:
 	void AddMetaTag(System::String^ ahszCollectionName, System::String^ ahszLongName, System::String^ ahszKey, System::String^ ahszVal,
 		System::Collections::Generic::List<System::Tuple<System::String^, System::String^>^>^ hlstMetaTags);
 	System::Boolean IsSameIdentity(System::String^ aszLongNameOne, System::String^ aszLongNameTwo);
-
+	void ImportCollection();
 private:
 	CStoreFrontBackEnd* m_StoreFrontBackEnd;
 

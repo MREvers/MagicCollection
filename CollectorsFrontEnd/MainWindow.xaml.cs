@@ -29,6 +29,7 @@ namespace CollectorsFrontEnd
             InitializeComponent();
             this.Loaded += MainWindow_Loaded;
             FileMICollectionsOverview.Click += MI_CollectionOverview_Click;
+            ImportMTGCards.Click += MI_Import_Click;
         }
 
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
@@ -47,6 +48,10 @@ namespace CollectorsFrontEnd
         public void MI_CollectionOverview_Click(object sender, RoutedEventArgs e)
         {
             eGoToCollectionOverview();
+        }
+        public void MI_Import_Click(object sender, RoutedEventArgs e)
+        {
+            SCI.ImportCollection();
         }
         #endregion
 

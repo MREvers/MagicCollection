@@ -17,6 +17,10 @@ void JSONImporter::ImportJSON(std::string aszFileName)
    std::cout << "Load the JSON object. This may take a while." << std::endl;
 
    std::ifstream i(aszFileName);
+   if (!i.good())
+   {
+	   return;
+   }
    nlohmann::json j;
    i >> j;
 
@@ -111,7 +115,8 @@ void JSONImporter::ImportJSON(std::string aszFileName)
                   szKey == "text" ||
                   szKey == "loyalty" ||
                   szKey == "name" ||
-                  szKey == "colors")
+                  szKey == "colors" ||
+				   szKey == "multiverseid")
                {
                   std::stringstream ss;
                   ss << iter_card.value();

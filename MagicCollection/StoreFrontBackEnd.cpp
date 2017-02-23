@@ -17,13 +17,13 @@ CStoreFrontBackEnd::~CStoreFrontBackEnd()
 
 void CStoreFrontBackEnd::AddItem(
 	std::string aszCollectionName,
-	std::string aszCardName,
+	std::string aszCardNameLong,
 	std::vector<std::pair<std::string, std::string>> alstMeta)
 {
 	std::string szName;
 	int iCount;
 	std::string szDetails;
-	if (Collection::ParseCardLine(aszCardName, iCount, szName, szDetails))
+	if (Collection::ParseCardLine(aszCardNameLong, iCount, szName, szDetails))
 	{
 		if (m_ColFactory->CollectionExists(aszCollectionName) && m_ColSource->LoadCard(szName) != -1)
 		{
@@ -209,4 +209,11 @@ bool CStoreFrontBackEnd::IsSameCard(std::string aszLongOne, std::string aszLongT
 		}
 	}
 	return false;
+}
+
+void CStoreFrontBackEnd::ImportCollection()
+{
+	JSONImporter JI;
+	JI.ImportJSON("AllSets.json");
+
 }

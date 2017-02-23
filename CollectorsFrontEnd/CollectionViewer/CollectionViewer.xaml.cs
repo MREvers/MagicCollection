@@ -42,6 +42,12 @@ namespace CollectorsFrontEnd
             SPItemsControl.ItemsSource = ListGeneralizations;
 
             RefreshCollectionView();
+            BitmapImage bi3 = new BitmapImage();
+            bi3.BeginInit();
+            bi3.UriSource = new Uri(@"http://gatherer.wizards.com/Handlers/Image.ashx?multiverseid=414412&type=card", UriKind.RelativeOrAbsolute);
+            bi3.CacheOption = BitmapCacheOption.OnLoad;
+            bi3.EndInit();
+            ITest.Source = bi3;
 
         }
 
