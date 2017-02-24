@@ -54,21 +54,9 @@ namespace CollectorsFrontEnd.Interfaces
             buildListView();
         }
 
-        public void RouteReceivedUnhandledEvent(IDataModel aDataObject, string aszAction)
+        public IDataModel GetDataModel()
         {
-            if (aDataObject.GetType() == typeof(CompSubAddItemWindow.AddItemDataModel))
-            {
-                CompSubAddItemWindow.AddItemDataModel oDataModel =
-                    (CompSubAddItemWindow.AddItemDataModel)aDataObject;
-                if (aszAction == "AddItem")
-                {
-                    ecAddItem(oDataModel);
-                }
-                else if (aszAction == "Cancel")
-                {
-                    ecAddItemWindowClose();
-                }
-            }
+            return DataModel;
         }
         #endregion
 
@@ -100,8 +88,45 @@ namespace CollectorsFrontEnd.Interfaces
 
             foreach (string szGeneralization in mapGeneralizations.Keys)
             {
-                LstGeneralizations.Add(new CompSubGeneralization(mapGeneralizations[szGeneralization]));
+                CompSubGeneralization CSG = new CompSubGeneralization(mapGeneralizations[szGeneralization]);
+                CSG.UnhandledEvent += RouteReceivedUnhandledEvent;
+                LstGeneralizations.Add(CSG);
             }
+        }
+
+        private void showAddItemWindow()
+        {
+            showMainDisplay();
+            if (DataModel.CollectionName != "")
+            {
+                CompSubAddItemWindow ITI = new CompSubAddItemWindow();
+                m_OverlayControl = ITI;
+                ITI.UnhandledEvent += RouteReceivedUnhandledEvent;
+                Panel.SetZIndex(CenterPanel, 2);
+                CenterPanel.Children.Add(ITI);
+                SPItemsControl.IsEnabled = false;
+            }
+        }
+
+        private void showItemInterchangerWindow(List<CardModel> alstCardModels)
+        {
+            showMainDisplay();
+            if (DataModel.CollectionName != "")
+            {
+                CompSubAmountInterchanger ITI = new CompSubAmountInterchanger(alstCardModels);
+                m_OverlayControl = ITI;
+                ITI.UnhandledEvent += RouteReceivedUnhandledEvent;
+                Panel.SetZIndex(CenterPanel, 2);
+                CenterPanel.Children.Add(ITI);
+                SPItemsControl.IsEnabled = false;
+            }
+        }
+
+        private void showMainDisplay()
+        {
+            CenterPanel.Children.Remove(m_OverlayControl);
+            m_OverlayControl = null;
+            SPItemsControl.IsEnabled = true;
         }
 
         #endregion Private Functions
@@ -118,24 +143,106 @@ namespace CollectorsFrontEnd.Interfaces
 
         private void ecAddItemWindowClose()
         {
-            CenterPanel.Children.Remove(m_OverlayControl);
-            m_OverlayControl = null;
-            SPItemsControl.IsEnabled = true;
+            showMainDisplay();
+        }
+
+        private void ecAmountInterchangerWindowOpen(CardModel aDataObject)
+        {
+            List<CardModel> lstCards = new List<CardModel>();
+            List<string> lstGens = new List<string>();
+            foreach (CardModel CM in DataModel.LstCopyModels)
+            {
+                // Look for all the cards with matching "Long Name" then build an amount changer.
+                if (!lstGens.Contains(CM.GetMetaTag("Generalization")) && CM.IsSameAs(aDataObject))
+                {
+                    lstGens.Add(CM.GetMetaTag("Generalization"));
+                    lstCards.Add(CM);
+                }
+            }
+            showItemInterchangerWindow(lstCards);
+        }
+
+        private void ecAmountInterchangerWindowAccept(CompSubAmountInterchanger.AmountInterchangerModel aDataModel)
+        {
+            List<CompSubAmountChanger> ListChanges = aDataModel.LstGeneralizations;
+            
+            foreach (CompSubAmountChanger AI in ListChanges)
+            {
+                CompSubAmountChanger.CompSubAmountChangerModel oAmountChangerModel =
+                    (CompSubAmountChanger.CompSubAmountChangerModel) AI.GetDataModel();
+                int iChangeCount = 0;
+                if ((iChangeCount = (oAmountChangerModel.EndAmount - oAmountChangerModel.StartAmount)) > 0)
+                {
+                    if (aDataModel.Copies[0].LstMetaTags.Count == 0 && oAmountChangerModel.Title != "Main")
+                    {
+                        aDataModel.Copies[0].LstMetaTags.Add(new Tuple<string, string>("Generalization", oAmountChangerModel.Title));
+                    }
+                    for (int i = 0; i < iChangeCount; i++)
+                    {
+                        DataModel.AddItem(aDataModel.Copies[0].CardNameLong, aDataModel.Copies[0].LstMetaTags);
+                    }
+
+                }
+                else
+                {
+                    iChangeCount = -iChangeCount;
+                    for (int i = 0; i < iChangeCount; i++)
+                    {
+                        DataModel.RemoveItem(aDataModel.Copies[0].CardNameLong, aDataModel.Copies[0].LstMetaTags);
+                    }
+                }
+            }
+            showMainDisplay();
+        }
+
+        private void ecAmountInterchangerWindowClose()
+        {
+            showMainDisplay();
+        }
+
+        public void RouteReceivedUnhandledEvent(IDataModel aDataObject, string aszAction)
+        {
+            
+            if (aDataObject.GetType() == typeof(CompSubAddItemWindow.AddItemDataModel))
+            {
+                CompSubAddItemWindow.AddItemDataModel oDataModel =
+                    (CompSubAddItemWindow.AddItemDataModel)aDataObject;
+                if (aszAction == "AddItem")
+                {
+                    ecAddItem(oDataModel);
+                }
+                else if (aszAction == "Cancel")
+                {
+                    ecAddItemWindowClose();
+                }
+            }
+            // From One of the Entries in a Generalization (ItemDisplayer)
+            else if (aDataObject.GetType() == typeof(CardModel))
+            {
+                if (aszAction == "DeltaAmtOpen")
+                {
+                    ecAmountInterchangerWindowOpen((CardModel)aDataObject);
+                }
+            }
+            // From The AmountInterchanger
+            else if (aDataObject.GetType() == typeof(CompSubAmountInterchanger.AmountInterchangerModel))
+            {
+                if (aszAction == "Close")
+                {
+                    ecAmountInterchangerWindowClose();
+                }
+                else if (aszAction == "OK")
+                {
+                    ecAmountInterchangerWindowAccept((CompSubAmountInterchanger.AmountInterchangerModel)aDataObject);
+                }
+            }
         }
         #endregion
 
         #region UI Event Handlers
         public void eAddItemWindowButton_Click(object sender, RoutedEventArgs e)
         {
-            if (DataModel.CollectionName != "")
-            {
-                CompSubAddItemWindow ITI = new CompSubAddItemWindow();
-                m_OverlayControl = ITI;
-                ITI.UnhandledEvent += RouteReceivedUnhandledEvent;
-                Panel.SetZIndex(CenterPanel, 2);
-                CenterPanel.Children.Add(ITI);
-                SPItemsControl.IsEnabled = false;
-            }
+            showAddItemWindow();
         }
         #endregion
     }

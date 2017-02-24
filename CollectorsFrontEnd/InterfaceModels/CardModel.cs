@@ -47,5 +47,10 @@ namespace CollectorsFrontEnd.InterfaceModels
             }
             return szRetVal;
         }
+
+        public bool IsSameAs(CardModel aoCardModel)
+        {
+            return ServerInterfaceModel.CardClassInterfaceModel.AreCardsSame(this, aoCardModel);
+        }
     }
 }

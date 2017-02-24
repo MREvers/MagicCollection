@@ -37,6 +37,11 @@ namespace CollectorsFrontEnd.InterfaceModels
             ServerInterfaceModel.CollectionInterfaceModel.AddItem(CollectionName, aszCardNameLong, alstMeta);
         }
 
+        public void RemoveItem(string aszCardNameLong, List<Tuple<string, string>> alstMeta)
+        {
+            ServerInterfaceModel.CollectionInterfaceModel.RemoveItem(CollectionName, aszCardNameLong, alstMeta);
+        }
+
         public void Refresh()
         {
             ServerInterfaceModel.CollectionInterfaceModel.Refresh(CollectionName);

@@ -11,7 +11,7 @@
             <ColumnDefinition/>
             <ColumnDefinition/>
         </Grid.ColumnDefinitions>
-        <Button x:Name="BtnAmountInterchanger">
+        <Button x:Name="BtnAmountInterchanger" Click="BtnAmountInterchanger_Click">
             <Label Content="=="></Label>
         </Button>
         <Button Grid.Column="1" x:Name="BtnEditAttributes">

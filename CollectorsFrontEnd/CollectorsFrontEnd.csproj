@@ -136,6 +136,12 @@
     <Compile Include="Interfaces\Subs\CompSubAddItemWindow.xaml.cs">
       <DependentUpon>CompSubAddItemWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Interfaces\Subs\CompSubAmountChanger.xaml.cs">
+      <DependentUpon>CompSubAmountChanger.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Interfaces\Subs\CompSubAmountInterchanger.xaml.cs">
+      <DependentUpon>CompSubAmountInterchanger.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Interfaces\Subs\CompSubGeneralization.xaml.cs">
       <DependentUpon>CompSubGeneralization.xaml</DependentUpon>
     </Compile>
@@ -188,6 +194,14 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Interfaces\Subs\CompSubAddItemWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Interfaces\Subs\CompSubAmountChanger.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Interfaces\Subs\CompSubAmountInterchanger.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

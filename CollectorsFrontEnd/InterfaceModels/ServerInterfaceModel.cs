@@ -24,6 +24,11 @@ namespace CollectorsFrontEnd.InterfaceModels
                 SCI.AddItem(aszCollectionName, aszCardNameLong, lstMeta);
             }
 
+            public static void RemoveItem(string aszCollectionName, string aszCardNameLong, List<Tuple<string, string>> lstMeta)
+            {
+                SCI.RemoveItem(aszCollectionName, aszCardNameLong, lstMeta);
+            }
+
             /// <summary>
             /// Calls the server for the most up to date list of copies.
             /// </summary>
@@ -46,7 +51,11 @@ namespace CollectorsFrontEnd.InterfaceModels
 
         public static class CardClassInterfaceModel
         {
-
+            // Compares long name
+            public static bool AreCardsSame(CardModel aoCardOne, CardModel aoCardTwo)
+            {
+                return SCI.IsSameIdentity(aoCardOne.CardNameLong, aoCardTwo.CardNameLong);
+            }
         }
         #endregion
 

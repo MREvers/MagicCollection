@@ -49,6 +49,11 @@ namespace CollectorsFrontEnd.Interfaces.Subs
         {
             throw new NotImplementedException();
         }
+
+        public IDataModel GetDataModel()
+        {
+            return DataModel;
+        }
         #endregion PUblic Functions
         #region UI Event Handlers
         private void eBtnAddCard_Click(object sender, RoutedEventArgs e)
@@ -86,6 +91,8 @@ namespace CollectorsFrontEnd.Interfaces.Subs
             m_TBInCombo.SelectionStart = DataModel.ComboBoxText.Length; // THIS IS NECESSARY
             m_TBInCombo.SelectionLength = 0;
         }
+
+
         #endregion UI Event Handlers
 
     }

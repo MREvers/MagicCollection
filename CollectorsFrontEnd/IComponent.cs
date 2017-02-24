@@ -11,5 +11,6 @@ namespace CollectorsFrontEnd
     {
         event ComponentEvent UnhandledEvent;
         void RouteReceivedUnhandledEvent(IDataModel aDataObject, string aszAction);
+        IDataModel GetDataModel();
     }
 }

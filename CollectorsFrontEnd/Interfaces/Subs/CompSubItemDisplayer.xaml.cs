@@ -19,7 +19,7 @@ namespace CollectorsFrontEnd.Interfaces.Subs
     /// <summary>
     /// Interaction logic for CompSubItemDisplayer.xaml
     /// </summary>
-    public partial class CompSubItemDisplayer : UserControl
+    public partial class CompSubItemDisplayer : UserControl, IComponent
     {
         public CardModel DataModel { get; set; }
 
@@ -29,5 +29,24 @@ namespace CollectorsFrontEnd.Interfaces.Subs
             DataContext = this;
             DataModel = aCM;
         }
+
+        public event ComponentEvent UnhandledEvent;
+
+        public void RouteReceivedUnhandledEvent(IDataModel aDataObject, string aszAction)
+        {
+            throw new NotImplementedException();
+        }
+
+        public IDataModel GetDataModel()
+        {
+            return DataModel;
+        }
+
+        private void BtnAmountInterchanger_Click(object sender, RoutedEventArgs e)
+        {
+            UnhandledEvent(DataModel, "DeltaAmtOpen");
+        }
+
+
     }
 }

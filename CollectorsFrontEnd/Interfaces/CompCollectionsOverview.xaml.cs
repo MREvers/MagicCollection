@@ -98,6 +98,11 @@ namespace CollectorsFrontEnd.Interfaces
             throw new NotImplementedException();
         }
 
+        public IDataModel GetDataModel()
+        {
+            return DataModel;
+        }
+
         private void eBtnViewCollection_Click(object sender, RoutedEventArgs e)
         {
             if (LstBoxLoadedCollections.SelectedValue != null)

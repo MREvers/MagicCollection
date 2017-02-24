@@ -25,7 +25,7 @@ namespace CollectorsFrontEnd.Interfaces.Subs
     /// <summary>
     /// Interaction logic for CompSubGeneralization.xaml
     /// </summary>
-    public partial class CompSubGeneralization : UserControl, INotifyPropertyChanged
+    public partial class CompSubGeneralization : UserControl, INotifyPropertyChanged, IComponent
     {
         #region Bindings
         private ObservableCollection<CompSubItemDisplayer> _LstCardModels = new ObservableCollection<CompSubItemDisplayer>();
@@ -40,6 +40,7 @@ namespace CollectorsFrontEnd.Interfaces.Subs
 
         #region Property Change Notifiers
         public event PropertyChangedEventHandler PropertyChanged;
+        public event ComponentEvent UnhandledEvent;
 
         protected virtual void OnPropertyChanged(string propertyName = null)
         {
@@ -53,7 +54,9 @@ namespace CollectorsFrontEnd.Interfaces.Subs
             DataContext = this;
             foreach (CardModel CM in alstCardModels)
             {
-                LstCardModels.Add(new CompSubItemDisplayer(CM));
+                CompSubItemDisplayer CSID = new CompSubItemDisplayer(CM);
+                CSID.UnhandledEvent += RouteReceivedUnhandledEvent;
+                LstCardModels.Add(CSID);
             }
 
             buildTable();
@@ -93,5 +96,28 @@ namespace CollectorsFrontEnd.Interfaces.Subs
 
             GVColumns.Columns.Add(GVC);
         }
+
+        #region Event Handlers
+
+
+        public void RouteReceivedUnhandledEvent(IDataModel aDataObject, string aszAction)
+        {
+            // From CompSubItemDisplayer
+            if (aDataObject.GetType() == typeof(CardModel))
+            {
+                if (aszAction == "DeltaAmtOpen")
+                {
+                    // Explicitly Pass it up.
+                    UnhandledEvent(aDataObject, aszAction);
+                }
+            }
+        }
+
+        public IDataModel GetDataModel()
+        {
+            return DataModel;
+        }
+
+        #endregion
     }
 }
