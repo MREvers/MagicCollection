@@ -64,6 +64,11 @@ namespace CollectorsFrontEnd.Interfaces
 
             ecSwitchToCollectionOverview();
         }
+
+        public IDataModel GetDataModel()
+        {
+            throw new NotImplementedException();
+        }
         #endregion
 
         #region Default Functions (Component Functionality)
@@ -94,6 +99,8 @@ namespace CollectorsFrontEnd.Interfaces
                 }
             }
         }
+
+
 
         #endregion Default Functions (Component Functionality)
 

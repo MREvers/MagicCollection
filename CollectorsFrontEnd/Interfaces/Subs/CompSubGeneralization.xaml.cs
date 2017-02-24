@@ -28,12 +28,11 @@ namespace CollectorsFrontEnd.Interfaces.Subs
     public partial class CompSubGeneralization : UserControl, INotifyPropertyChanged, IComponent
     {
         #region Bindings
-        private ObservableCollection<CompSubItemDisplayer> _LstCardModels = new ObservableCollection<CompSubItemDisplayer>();
         public ObservableCollection<CompSubItemDisplayer> LstCardModels
         {
             get
             {
-                return _LstCardModels;
+                return DataModel.LstCardModels;
             }
         }
         #endregion
@@ -47,6 +46,15 @@ namespace CollectorsFrontEnd.Interfaces.Subs
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
         #endregion
+
+        public class CompSubGeneralizationModel : IDataModel
+        {
+            public ObservableCollection<CompSubItemDisplayer> LstCardModels = 
+                new ObservableCollection<CompSubItemDisplayer>();
+
+        }
+
+        public CompSubGeneralizationModel DataModel = new CompSubGeneralizationModel();
 
         public CompSubGeneralization(List<CardModel> alstCardModels)
         {

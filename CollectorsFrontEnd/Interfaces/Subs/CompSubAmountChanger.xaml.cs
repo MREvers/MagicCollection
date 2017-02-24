@@ -28,7 +28,7 @@ namespace CollectorsFrontEnd.Interfaces.Subs
             }
         }
 
-        public class CompSubAmountChangerModel
+        public class CompSubAmountChangerModel: IDataModel
         {
             public string Title;
             public int StartAmount;
