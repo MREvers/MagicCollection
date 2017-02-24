@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -20,33 +21,62 @@ namespace CollectorsFrontEnd.Interfaces.Subs
     /// <summary>
     /// Interaction logic for CompSubAmountChanger.xaml
     /// </summary>
-    public partial class CompSubAmountChanger : UserControl, IComponent
+    public partial class CompSubAmountChanger : UserControl, IComponent, INotifyPropertyChanged
     {
-        public string Title { get
+        #region Bindings
+        public string Title
+        {
+            get
             {
                 return DataModel.Title;
             }
         }
 
-        public class CompSubAmountChangerModel: IDataModel
+        public string Count
+        {
+            get
+            {
+                return DataModel.CurrentAmount.ToString();
+            }
+            set
+            {
+                int iNewVal;
+                if (int.TryParse(value, out iNewVal))
+                {
+                    DataModel.CurrentAmount = iNewVal;
+                    OnPropertyChanged("Count");
+                }
+
+            }
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+        protected virtual void OnPropertyChanged(string propertyName = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+        #endregion
+        public class CompSubAmountChangerModel : IDataModel
         {
             public string Title;
+            public int CurrentAmount;
             public int StartAmount;
-            public int EndAmount;
+            public List<Tuple<string, string>> LstMetaTags;
         }
 
         CompSubAmountChangerModel DataModel;
 
         public event ComponentEvent UnhandledEvent;
 
-        public CompSubAmountChanger(string aszTitle, int aiAmount)
+        public CompSubAmountChanger(string aszTitle, int aiAmount, List<Tuple<string, string>> alstMeta)
         {
             InitializeComponent();
             DataContext = this;
             DataModel = new CompSubAmountChangerModel();
             DataModel.Title = aszTitle;
-            DataModel.EndAmount = aiAmount;
+            DataModel.LstMetaTags = alstMeta;
             DataModel.StartAmount = aiAmount;
+            DataModel.CurrentAmount = aiAmount;
         }
 
         public void RouteReceivedUnhandledEvent(IDataModel aDataObject, string aszAction)
@@ -57,6 +87,18 @@ namespace CollectorsFrontEnd.Interfaces.Subs
         public IDataModel GetDataModel()
         {
             return DataModel;
+        }
+
+        private void eBtnDecrement_Click(object sender, RoutedEventArgs e)
+        {
+            DataModel.CurrentAmount = Math.Max(0, DataModel.CurrentAmount - 1);
+            OnPropertyChanged("Count");
+        }
+
+        private void eBtnIncrement_Click(object sender, RoutedEventArgs e)
+        {
+            DataModel.CurrentAmount++;
+            OnPropertyChanged("Count");
         }
     }
 }

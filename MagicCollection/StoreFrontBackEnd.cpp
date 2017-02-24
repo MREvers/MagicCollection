@@ -198,13 +198,16 @@ bool CStoreFrontBackEnd::IsSameCard(std::string aszLongOne, std::string aszLongT
 		std::string szDetailsTwo;
 		if (Collection::ParseCardLine(aszLongTwo, iAmountTwo, szNameTwo, szDetailsTwo))
 		{
-			std::vector<std::pair<std::string, std::string>> lstAttrs = Collection::ParseAttrs(szDetails);
-			std::vector<std::pair<std::string, std::string>> lstAttrsTwo = Collection::ParseAttrs(szDetailsTwo);
-			CopyObject oCop = CollectionObject::GenerateCopy(std::string("None"), lstAttrs);
-			CopyObject oCop2 = CollectionObject::GenerateCopy(std::string("None"), lstAttrsTwo);
-			if (CollectionObject::IsSameIdentity(&oCop, &oCop2))
+			if (szName == szNameTwo)
 			{
-				return true;
+				std::vector<std::pair<std::string, std::string>> lstAttrs = Collection::ParseAttrs(szDetails);
+				std::vector<std::pair<std::string, std::string>> lstAttrsTwo = Collection::ParseAttrs(szDetailsTwo);
+				CopyObject oCop = CollectionObject::GenerateCopy(std::string("None"), lstAttrs);
+				CopyObject oCop2 = CollectionObject::GenerateCopy(std::string("None"), lstAttrsTwo);
+				if (CollectionObject::IsSameIdentity(&oCop, &oCop2))
+				{
+					return true;
+				}
 			}
 		}
 	}

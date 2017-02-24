@@ -26,6 +26,12 @@ namespace CollectorsFrontEnd.InterfaceModels
             LstMetaTags = aLstMetaTags;
             LstSpecifiedAttrs = aLstSpecifiedAttrs;
             LstIdentifiedAttrs = aLstIdentifiedAttrs;
+            /*
+            if (LstMetaTags.FirstOrDefault(x => x.Item1 == "Generalization") == null)
+            {
+                LstMetaTags.Add(new Tuple<string, string>("Generalization", "Main"));
+            }
+            */
         }
 
         public void SetAuxData(int aiAmount, string aszCardNameLong)

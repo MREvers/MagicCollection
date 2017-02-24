@@ -155,7 +155,7 @@ namespace CollectorsFrontEnd.Interfaces
                 // Look for all the cards with matching "Long Name" then build an amount changer.
                 if (!lstGens.Contains(CM.GetMetaTag("Generalization")) && CM.IsSameAs(aDataObject))
                 {
-                    lstGens.Add(CM.GetMetaTag("Generalization"));
+                    lstGens.Insert(0, CM.GetMetaTag("Generalization"));
                     lstCards.Add(CM);
                 }
             }
@@ -171,15 +171,11 @@ namespace CollectorsFrontEnd.Interfaces
                 CompSubAmountChanger.CompSubAmountChangerModel oAmountChangerModel =
                     (CompSubAmountChanger.CompSubAmountChangerModel) AI.GetDataModel();
                 int iChangeCount = 0;
-                if ((iChangeCount = (oAmountChangerModel.EndAmount - oAmountChangerModel.StartAmount)) > 0)
+                if ((iChangeCount = (oAmountChangerModel.CurrentAmount - oAmountChangerModel.StartAmount)) > 0)
                 {
-                    if (aDataModel.Copies[0].LstMetaTags.Count == 0 && oAmountChangerModel.Title != "Main")
-                    {
-                        aDataModel.Copies[0].LstMetaTags.Add(new Tuple<string, string>("Generalization", oAmountChangerModel.Title));
-                    }
                     for (int i = 0; i < iChangeCount; i++)
                     {
-                        DataModel.AddItem(aDataModel.Copies[0].CardNameLong, aDataModel.Copies[0].LstMetaTags);
+                        DataModel.AddItem(aDataModel.Copies[0].CardNameLong, oAmountChangerModel.LstMetaTags);
                     }
 
                 }
@@ -188,10 +184,12 @@ namespace CollectorsFrontEnd.Interfaces
                     iChangeCount = -iChangeCount;
                     for (int i = 0; i < iChangeCount; i++)
                     {
-                        DataModel.RemoveItem(aDataModel.Copies[0].CardNameLong, aDataModel.Copies[0].LstMetaTags);
+                        DataModel.RemoveItem(aDataModel.Copies[0].CardNameLong, oAmountChangerModel.LstMetaTags);
                     }
                 }
             }
+            DataModel.Refresh();
+            buildListView();
             showMainDisplay();
         }
 

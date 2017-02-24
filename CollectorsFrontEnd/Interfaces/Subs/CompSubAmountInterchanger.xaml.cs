@@ -57,8 +57,8 @@ namespace CollectorsFrontEnd.Interfaces.Subs
             {
                 string szGeneralization = CM.GetMetaTag("Generalization");
                 szGeneralization = (szGeneralization == "" ? "Main" : szGeneralization);
-
-                CompSubAmountChanger oTemp = new CompSubAmountChanger(szGeneralization, CM.Amount);
+                
+                CompSubAmountChanger oTemp = new CompSubAmountChanger(szGeneralization, CM.Amount, CM.LstMetaTags);
                 DataModel.LstGeneralizations.Add(oTemp);
 
             }

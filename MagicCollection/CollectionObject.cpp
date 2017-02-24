@@ -321,6 +321,7 @@ void CollectionObject::ConstructCopy(CopyObject& roCO, std::vector<std::pair<std
 	}
 }
 
+// ASSUMES TWO CARDS OF THE SAME TYPE
 // Keep in mind that this does not compare names because the name of the card is not known by the copy object.
 bool CollectionObject::IsSameIdentity(CopyObject* aoCOne, CopyObject* aoCTwo, bool bMatchParent)
 {
