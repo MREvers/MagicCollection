@@ -113,7 +113,12 @@ namespace CollectorsFrontEnd.Interfaces.Subs
             // From CompSubItemDisplayer
             if (aDataObject.GetType() == typeof(CardModel))
             {
-                if (aszAction == "DeltaAmtOpen")
+                if (aszAction == "Gen.DeltaAmtOpen")
+                {
+                    // Explicitly Pass it up.
+                    UnhandledEvent(aDataObject, aszAction);
+                }
+                else if (aszAction == "Gen.AttrChangerOpen")
                 {
                     // Explicitly Pass it up.
                     UnhandledEvent(aDataObject, aszAction);

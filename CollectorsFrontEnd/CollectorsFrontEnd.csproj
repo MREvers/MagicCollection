@@ -142,6 +142,9 @@
     <Compile Include="Interfaces\Subs\CompSubAmountInterchanger.xaml.cs">
       <DependentUpon>CompSubAmountInterchanger.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Interfaces\Subs\CompSubAttributeChanger.xaml.cs">
+      <DependentUpon>CompSubAttributeChanger.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Interfaces\Subs\CompSubGeneralization.xaml.cs">
       <DependentUpon>CompSubGeneralization.xaml</DependentUpon>
     </Compile>
@@ -202,6 +205,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Interfaces\Subs\CompSubAmountInterchanger.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Interfaces\Subs\CompSubAttributeChanger.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

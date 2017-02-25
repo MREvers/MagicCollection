@@ -20,10 +20,11 @@
             <Border BorderBrush="Black" BorderThickness="1">
                 <Menu DockPanel.Dock="Top" Height="20">
                     <MenuItem Header="_File" Height="20">
-                        <MenuItem x:Name="FileMICollectionsOverview" Header="Collections Overview"/>
+                        <MenuItem x:Name="FileMICollectionsOverview" Header="Collections Overview"
+                                  Click="eViewCollectionsOverview_Click"/>
                         <MenuItem x:Name="ImportMTGCards" Header="Import MTG Cards"/>
                         <Separator></Separator>
-                        <MenuItem Header="Close"/>
+                        <MenuItem Header="Close" Click="eClose_Click"/>
                     </MenuItem>
                 </Menu>
             </Border>

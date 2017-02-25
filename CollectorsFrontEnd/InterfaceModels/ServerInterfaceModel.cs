@@ -1,13 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Media.Imaging;
 
 namespace CollectorsFrontEnd.InterfaceModels
 {
     public static class ServerInterfaceModel
     {
+        public const string SZ_IMAGE_CACHE_PATH = @"./Images/";
+
         private static ServerClientInterface SCI = new ServerClientInterface();
         private static List<CollectionModel> LstCollectionModels = new List<CollectionModel>();
 
@@ -51,10 +55,85 @@ namespace CollectorsFrontEnd.InterfaceModels
 
         public static class CardClassInterfaceModel
         {
+            private class ImageDownloadedEventArgs: EventArgs
+            {
+                public ImageDownloadedEventArgs(CardModel aDataModel, EventArgs ae)
+                {
+                    DataModel = aDataModel;
+                    e = ae;
+                }
+                public CardModel DataModel;
+                public EventArgs e;
+            }
+
             // Compares long name
             public static bool AreCardsSame(CardModel aoCardOne, CardModel aoCardTwo)
             {
                 return SCI.IsSameIdentity(aoCardOne.CardNameLong, aoCardTwo.CardNameLong);
+            }
+
+            // Passes the image to the callback.
+            public static void DownloadAndCacheImage(EventHandler aeHandlerCallback, CardModel aoCardModel)
+            {
+                // Save in set
+
+                string szMUID = aoCardModel.GetMetaTag("multiverseid");
+                BitmapImage bi3;
+                string szFilePath = SZ_IMAGE_CACHE_PATH + aoCardModel.CardName + ".jpg";
+                if (!File.Exists(szFilePath))
+                {
+                    bi3 = new BitmapImage();
+                    bi3.DownloadCompleted += aeHandlerCallback;
+                    bi3.DownloadFailed += eModelImage_DownloadFailed;
+                    bi3.BeginInit();
+                    bi3.DownloadCompleted +=
+                            ((object sender, EventArgs e) =>
+                            { eModelImage_DownloadCompleted(sender, new ImageDownloadedEventArgs(aoCardModel, e)); });
+                    if (!string.IsNullOrEmpty(szMUID))
+                    {
+                        bi3.UriSource =
+                            new Uri(@"http://gatherer.wizards.com/Handlers/Image.ashx?multiverseid=" +
+                            szMUID + @"&type=card", UriKind.RelativeOrAbsolute);
+                    }
+                    else
+                    {
+                        bi3.UriSource =
+                            new Uri(@"http://gatherer.wizards.com/Handlers/Image.ashx?name=" +
+                            aoCardModel.CardName + "&type=card", UriKind.RelativeOrAbsolute);
+                    }
+                    bi3.CacheOption = BitmapCacheOption.OnLoad;
+                    bi3.EndInit();
+                }
+                else
+                {
+                    bi3 = new BitmapImage(new Uri(szFilePath, UriKind.Relative));
+                    aeHandlerCallback(bi3, null);
+                    //bi3.UriSource =
+                    //        new Uri(szFilePath, UriKind.RelativeOrAbsolute);
+                }
+
+            }
+
+            private static void eModelImage_DownloadCompleted(object sender, ImageDownloadedEventArgs ie)
+            {
+                EventArgs e = ie.e;
+                CardModel cardModel = ie.DataModel;
+                JpegBitmapEncoder encoder = new JpegBitmapEncoder();
+                String photolocation = SZ_IMAGE_CACHE_PATH + cardModel.CardName + ".jpg";  //file name 
+                encoder.Frames.Add(BitmapFrame.Create((BitmapImage)sender));
+
+                if (!Directory.Exists(Path.GetDirectoryName(photolocation)))
+                {
+                    Directory.CreateDirectory(Path.GetDirectoryName(photolocation));
+                }
+
+                using (var filestream = new FileStream(photolocation, FileMode.Create))
+                    encoder.Save(filestream);
+            }
+
+            private static void eModelImage_DownloadFailed(object sender, EventArgs e)
+            {
+
             }
         }
         #endregion

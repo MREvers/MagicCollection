@@ -11,10 +11,10 @@
             <ColumnDefinition/>
             <ColumnDefinition/>
         </Grid.ColumnDefinitions>
-        <Button x:Name="BtnAmountInterchanger" Click="BtnAmountInterchanger_Click">
+        <Button x:Name="BtnAmountInterchanger" Click="eBtnAmountInterchanger_Click">
             <Label Content="=="></Label>
         </Button>
-        <Button Grid.Column="1" x:Name="BtnEditAttributes">
+        <Button Grid.Column="1" x:Name="BtnEditAttributes" Click="eBtnAttrChanger_Click">
             <Label Content="%" Height="24"></Label>
         </Button>
     </Grid>

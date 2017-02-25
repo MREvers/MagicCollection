@@ -74,12 +74,12 @@ namespace CollectorsFrontEnd.Interfaces.Subs
             return DataModel;
         }
 
-        private void BtnCancel_Click(object sender, RoutedEventArgs e)
+        private void eBtnCancel_Click(object sender, RoutedEventArgs e)
         {
             UnhandledEvent(DataModel, "Close");
         }
 
-        private void BtnOK_Click(object sender, RoutedEventArgs e)
+        private void eBtnOK_Click(object sender, RoutedEventArgs e)
         {
             UnhandledEvent(DataModel, "OK");
         }

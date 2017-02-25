@@ -122,6 +122,21 @@ namespace CollectorsFrontEnd.Interfaces
             }
         }
 
+        private void showAttrChangerWindow(CardModel aDataModel)
+        {
+            showMainDisplay();
+            if (DataModel.CollectionName != "")
+            {
+                CompSubAttributeChanger ITI = new CompSubAttributeChanger(aDataModel);
+                m_OverlayControl = ITI;
+                ITI.UnhandledEvent += RouteReceivedUnhandledEvent;
+                Panel.SetZIndex(CenterPanel, 2);
+                CenterPanel.Children.Add(ITI);
+                SPItemsControl.IsEnabled = false;
+            }
+        }
+
+
         private void showMainDisplay()
         {
             CenterPanel.Children.Remove(m_OverlayControl);
@@ -198,6 +213,16 @@ namespace CollectorsFrontEnd.Interfaces
             showMainDisplay();
         }
 
+        private void ecAttrChangerWindowOpen(CardModel aDataObject)
+        {
+            showAttrChangerWindow(aDataObject);
+        }
+
+        private void ecAttrChangerWindowClose()
+        {
+            showMainDisplay();
+        }
+
         public void RouteReceivedUnhandledEvent(IDataModel aDataObject, string aszAction)
         {
             
@@ -217,9 +242,17 @@ namespace CollectorsFrontEnd.Interfaces
             // From One of the Entries in a Generalization (ItemDisplayer)
             else if (aDataObject.GetType() == typeof(CardModel))
             {
-                if (aszAction == "DeltaAmtOpen")
+                if (aszAction == "Gen.DeltaAmtOpen")
                 {
                     ecAmountInterchangerWindowOpen((CardModel)aDataObject);
+                }
+                else if (aszAction == "Gen.AttrChangerOpen")
+                {
+                    ecAttrChangerWindowOpen((CardModel)aDataObject);
+                }
+                else if (aszAction == "AttrChanger.Close")
+                {
+                    ecAttrChangerWindowClose();
                 }
             }
             // From The AmountInterchanger

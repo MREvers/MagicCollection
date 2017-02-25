@@ -104,5 +104,14 @@ namespace CollectorsFrontEnd.Interfaces
 
         #endregion Default Functions (Component Functionality)
 
+        private void eClose_Click(object sender, RoutedEventArgs e)
+        {
+            Close();
+        }
+
+        private void eViewCollectionsOverview_Click(object sender, RoutedEventArgs e)
+        {
+            ecSwitchToCollectionOverview();
+        }
     }
 }

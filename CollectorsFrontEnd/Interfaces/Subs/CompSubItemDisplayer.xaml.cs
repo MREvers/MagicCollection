@@ -42,11 +42,14 @@ namespace CollectorsFrontEnd.Interfaces.Subs
             return DataModel;
         }
 
-        private void BtnAmountInterchanger_Click(object sender, RoutedEventArgs e)
+        private void eBtnAmountInterchanger_Click(object sender, RoutedEventArgs e)
         {
-            UnhandledEvent(DataModel, "DeltaAmtOpen");
+            UnhandledEvent(DataModel, "Gen.DeltaAmtOpen");
         }
 
-
+        private void eBtnAttrChanger_Click(object sender, RoutedEventArgs e)
+        {
+            UnhandledEvent(DataModel, "Gen.AttrChangerOpen");
+        }
     }
 }

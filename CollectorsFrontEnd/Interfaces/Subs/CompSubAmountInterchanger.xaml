@@ -33,12 +33,12 @@
                      x:Name="BtnOK" Content="OK"
                      HorizontalAlignment="Stretch" VerticalAlignment="Stretch" 
                      Margin="3,8"
-                      Click="BtnOK_Click"/>
+                      Click="eBtnOK_Click"/>
             <Button   Grid.Column="1"
                      x:Name="BtnCancel" Content="Cancel"
                      HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
                      Margin="3,8"
-                      Click="BtnCancel_Click"/>
+                      Click="eBtnCancel_Click"/>
         </Grid>
 
     </Grid>
