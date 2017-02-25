@@ -106,10 +106,9 @@ namespace CollectorsFrontEnd.InterfaceModels
                 }
                 else
                 {
-                    bi3 = new BitmapImage(new Uri(szFilePath, UriKind.Relative));
+                    string szFullPath = Path.GetFullPath(szFilePath);
+                    bi3 = new BitmapImage(new Uri(szFullPath, UriKind.RelativeOrAbsolute));
                     aeHandlerCallback(bi3, null);
-                    //bi3.UriSource =
-                    //        new Uri(szFilePath, UriKind.RelativeOrAbsolute);
                 }
 
             }

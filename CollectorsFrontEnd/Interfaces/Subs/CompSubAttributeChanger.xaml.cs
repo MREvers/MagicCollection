@@ -43,6 +43,8 @@ namespace CollectorsFrontEnd.Interfaces.Subs
         }
         #endregion
 
+        public event ComponentEvent UnhandledEvent;
+
         public CardModel DataModel;
 
         public CompSubAttributeChanger(CardModel aDataModel)
@@ -54,6 +56,11 @@ namespace CollectorsFrontEnd.Interfaces.Subs
             DataModel.GetImage();
         }
 
+        public IDataModel GetDataModel()
+        {
+            return DataModel;
+        }
+
         private void ImageLoaded(object sender, PropertyChangedEventArgs e)
         {
             if (e.PropertyName == "CardImage")
@@ -63,41 +70,9 @@ namespace CollectorsFrontEnd.Interfaces.Subs
             }
         }
 
-        public event ComponentEvent UnhandledEvent;
-
         public void RouteReceivedUnhandledEvent(IDataModel aDataObject, string aszAction)
         {
             throw new NotImplementedException();
-        }
-
-        public IDataModel GetDataModel()
-        {
-            return DataModel;
-        }
-
-        public void GetImage()
-        {
-            // At some point, add caching
-            /*
-            string szMUID = DataModel.GetMetaTag("multiverseid");
-            BitmapImage bi3 = new BitmapImage();
-            bi3.BeginInit();
-            if (!string.IsNullOrEmpty(szMUID ))
-            {
-                bi3.UriSource =
-                    new Uri(@"http://gatherer.wizards.com/Handlers/Image.ashx?multiverseid=" +
-                    szMUID + @"&type=card", UriKind.RelativeOrAbsolute);
-            }
-            else
-            {
-                bi3.UriSource =
-                    new Uri(@"http://gatherer.wizards.com/Handlers/Image.ashx?name=" +
-                    DataModel.CardName + "&type=card", UriKind.RelativeOrAbsolute);
-            }
-            bi3.CacheOption = BitmapCacheOption.OnLoad;
-            bi3.EndInit();
-            CardImage = bi3;
-            */
         }
 
         private void eOK_Click(object sender, RoutedEventArgs e)
