@@ -1,6 +1,7 @@
 ﻿using CollectorsFrontEnd.InterfaceModels;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Text;
@@ -24,7 +25,8 @@ namespace CollectorsFrontEnd.Interfaces.Subs
     {
         #region Data Binding
         private BitmapImage _CardImage;
-        public BitmapImage CardImage {
+        public BitmapImage CardImage
+        {
             get
             {
                 return _CardImage;
@@ -43,17 +45,41 @@ namespace CollectorsFrontEnd.Interfaces.Subs
         }
         #endregion
 
+        #region Sub Types
+        public class CompSubAttributeChangerModel: IDataModel
+        {
+            public CompSubAttributeChangerModel(CardModel aDataModel, List<Tuple<string, string>> aLstCurrentTags)
+            {
+                CardModelObject = aDataModel;
+                LstCurrentMetaTags = new List<Tuple<string, string>> (aLstCurrentTags);
+            }
+            public CardModel CardModelObject;
+            
+            public List<Tuple<string, string>> LstCurrentMetaTags { get; set; }
+        }
+        #endregion
+
+        #region Events
         public event ComponentEvent UnhandledEvent;
+        #endregion Events
 
-        public CardModel DataModel;
+        #region Public Fields
+        public CompSubAttributeChangerModel DataModel;
+        #endregion Public Fields
 
+        #region Private Fields
+        private UserControl m_OverlayControl;
+        #endregion
+
+        #region Public Methods
         public CompSubAttributeChanger(CardModel aDataModel)
         {
             InitializeComponent();
-            DataContext = this;
-            DataModel = aDataModel;
-            DataModel.PropertyChanged += ImageLoaded;
-            DataModel.GetImage();
+            
+            DataModel = new CompSubAttributeChangerModel(aDataModel, aDataModel.LstMetaTags);
+            DataModel.CardModelObject.PropertyChanged += eImageLoaded;
+            DataModel.CardModelObject.GetImage();
+            DataContext = DataModel;
         }
 
         public IDataModel GetDataModel()
@@ -61,7 +87,61 @@ namespace CollectorsFrontEnd.Interfaces.Subs
             return DataModel;
         }
 
-        private void ImageLoaded(object sender, PropertyChangedEventArgs e)
+        #endregion Public Methods
+
+        #region Private Methods
+        private void showKeyValCreaterWindow()
+        {
+            showMainDisplay();
+
+            CompSubKeyValCreater ITI = new CompSubKeyValCreater();
+            m_OverlayControl = ITI;
+            ITI.UnhandledEvent += RouteReceivedUnhandledEvent;
+            Panel.SetZIndex(GrdOverlay, 2);
+            GrdOverlay.Children.Add(ITI);
+            GrdMain.IsEnabled = false;
+        }
+
+
+        private void showMainDisplay()
+        {
+            GrdOverlay.Children.Remove(m_OverlayControl);
+            m_OverlayControl = null;
+            GrdMain.IsEnabled = true;
+        }
+        #endregion
+
+        #region Public Event Handlers
+        public void RouteReceivedUnhandledEvent(IDataModel aDataObject, string aszAction)
+        {
+            if (aDataObject.GetType() == typeof(CompSubKeyValCreater.CompSubKeyValCreaterModel))
+            {
+                CompSubKeyValCreater.CompSubKeyValCreaterModel oDataModel =
+                    (CompSubKeyValCreater.CompSubKeyValCreaterModel)aDataObject;
+                if (aszAction == "OK")
+                {
+                    ecAddMetaTag(oDataModel);
+                }
+                else if (aszAction == "Cancel")
+                {
+                    showMainDisplay();
+                }
+            }
+        }
+        #endregion Public EH
+
+        #region Private Event Handlers
+        private void ecAddMetaTag(CompSubKeyValCreater.CompSubKeyValCreaterModel aDataObject)
+        {
+            if (aDataObject.Key != "")
+            {
+                DataModel.LstCurrentMetaTags.Add(new Tuple<string, string>(aDataObject.Key, aDataObject.Value));
+                DGMetas.Items.Refresh();
+            }
+            showMainDisplay();
+        }
+
+        private void eImageLoaded(object sender, PropertyChangedEventArgs e)
         {
             if (e.PropertyName == "CardImage")
             {
@@ -69,20 +149,29 @@ namespace CollectorsFrontEnd.Interfaces.Subs
                 CardImage = (BitmapImage)dataModel.CardImage;
             }
         }
+        #endregion Private EH
 
-        public void RouteReceivedUnhandledEvent(IDataModel aDataObject, string aszAction)
-        {
-            throw new NotImplementedException();
-        }
-
+        #region GUI Event Handlers
         private void eOK_Click(object sender, RoutedEventArgs e)
         {
-            UnhandledEvent(DataModel, "AttrChanger.Close");
+            UnhandledEvent(DataModel, "OK");
         }
 
         private void eCancel_Click(object sender, RoutedEventArgs e)
         {
-            UnhandledEvent(DataModel, "AttrChanger.Close");
+            UnhandledEvent(DataModel, "Cancel");
         }
+
+        private void eAddTag_Click(object sender, RoutedEventArgs e)
+        {
+            showKeyValCreaterWindow();
+        }
+
+        private void eRemoveTag_Click(object sender, RoutedEventArgs e)
+        {
+            showMainDisplay();
+        }
+
+        #endregion GUI EH
     }
 }

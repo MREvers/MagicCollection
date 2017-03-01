@@ -105,3 +105,33 @@ std::vector<std::string> SourceObject::Str_Split(std::string aszSplit, std::stri
       return lstSZs;
    }
 }
+
+int SourceObject::List_Find(std::string aszFind, std::vector<std::string> alstFindList)
+{
+	std::vector<std::string>::iterator iter_list = alstFindList.begin();
+	int index = 0;
+	for (; iter_list != alstFindList.end(); iter_list++)
+	{
+		if (*iter_list == aszFind)
+		{
+			return index;
+		}
+		index++;
+	}
+	return -1;
+}
+
+int SourceObject::List_Find(std::string aszFind, std::vector<std::pair<std::string,std::string>> alstFindList)
+{
+	std::vector<std::pair<std::string, std::string>>::iterator iter_list = alstFindList.begin();
+	int index = 0;
+	for (; iter_list != alstFindList.end(); iter_list++)
+	{
+		if (iter_list->first == aszFind)
+		{
+			return index;
+		}
+		index++;
+	}
+	return -1;
+}

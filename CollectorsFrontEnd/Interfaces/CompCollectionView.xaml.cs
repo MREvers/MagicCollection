@@ -50,7 +50,7 @@ namespace CollectorsFrontEnd.Interfaces
             {
                 DataModel = ServerInterfaceModel.GenerateCollectionModel(aszCollectionName);
             }
-
+            
             buildListView();
         }
 
@@ -111,7 +111,7 @@ namespace CollectorsFrontEnd.Interfaces
         private void showItemInterchangerWindow(List<CardModel> alstCardModels)
         {
             showMainDisplay();
-            if (DataModel.CollectionName != "")
+            if (DataModel.CollectionName != "" && alstCardModels.Count > 0)
             {
                 CompSubAmountInterchanger ITI = new CompSubAmountInterchanger(alstCardModels);
                 m_OverlayControl = ITI;
@@ -167,8 +167,19 @@ namespace CollectorsFrontEnd.Interfaces
             List<string> lstGens = new List<string>();
             foreach (CardModel CM in DataModel.LstCopyModels)
             {
-                // Look for all the cards with matching "Long Name" then build an amount changer.
-                if (!lstGens.Contains(CM.GetMetaTag("Generalization")) && CM.IsSameAs(aDataObject))
+                List<Tuple<string, string>> LstIgnoreGeneralizationMetaTags = new List<Tuple<string, string>>()
+                {
+                    new Tuple<string, string>("_ignore","Generalization")
+                };
+                LstIgnoreGeneralizationMetaTags = LstIgnoreGeneralizationMetaTags.Concat(aDataObject.LstMetaTags).ToList();
+
+                List<Tuple<string, string>> LstIgnoreGeneralizationMetaTagsTwo = new List<Tuple<string, string>>()
+                {
+                    new Tuple<string, string>("_ignore","Generalization")
+                };
+                LstIgnoreGeneralizationMetaTagsTwo = LstIgnoreGeneralizationMetaTagsTwo.Concat(CM.LstMetaTags).ToList();
+                // Look for all the cards with matching "Long Name" and metatags then build an amount changer.
+                if (!lstGens.Contains(CM.GetMetaTag("Generalization")) && CM.IsSameAs(aDataObject) && CM.IsSameMetaTags(LstIgnoreGeneralizationMetaTagsTwo, LstIgnoreGeneralizationMetaTags))
                 {
                     lstGens.Insert(0, CM.GetMetaTag("Generalization"));
                     lstCards.Add(CM);
@@ -180,11 +191,11 @@ namespace CollectorsFrontEnd.Interfaces
         private void ecAmountInterchangerWindowAccept(CompSubAmountInterchanger.AmountInterchangerModel aDataModel)
         {
             List<CompSubAmountChanger> ListChanges = aDataModel.LstGeneralizations;
-            
+
             foreach (CompSubAmountChanger AI in ListChanges)
             {
                 CompSubAmountChanger.CompSubAmountChangerModel oAmountChangerModel =
-                    (CompSubAmountChanger.CompSubAmountChangerModel) AI.GetDataModel();
+                    (CompSubAmountChanger.CompSubAmountChangerModel)AI.GetDataModel();
                 int iChangeCount = 0;
                 if ((iChangeCount = (oAmountChangerModel.CurrentAmount - oAmountChangerModel.StartAmount)) > 0)
                 {
@@ -223,9 +234,71 @@ namespace CollectorsFrontEnd.Interfaces
             showMainDisplay();
         }
 
+        private void ecAttrChangerWindowAccept(CompSubAttributeChanger.CompSubAttributeChangerModel aDataModel)
+        {
+            // Calculate differences in meta tags
+            // Calculate added tags
+            List<Tuple<string, string>> LstAddedTags = new List<Tuple<string, string>>();
+            foreach (Tuple<string, string> NewTup in aDataModel.LstCurrentMetaTags)
+            {
+                bool bFound = false;
+                foreach (Tuple<string, string> Tup in aDataModel.CardModelObject.LstMetaTags)
+                {
+                    if (Tup.Item1 == NewTup.Item1)
+                    {
+                        bFound = true;
+                        break;
+                    }
+                }
+
+                if (!bFound)
+                {
+                    LstAddedTags.Add(NewTup);
+                }
+            }
+
+            // Calculate removed tags
+            List<Tuple<string, string>> LstRemovedTags = new List<Tuple<string, string>>();
+            foreach (Tuple<string, string> OldTup in aDataModel.CardModelObject.LstMetaTags)
+            {
+                bool bFound = false;
+                foreach (Tuple<string, string> Tup in aDataModel.LstCurrentMetaTags)
+                {
+                    if (Tup.Item1 == OldTup.Item1)
+                    {
+                        bFound = true;
+                        break;
+                    }
+                }
+
+                if (!bFound)
+                {
+                    LstRemovedTags.Add(OldTup);
+                }
+            }
+
+            foreach (Tuple<string, string> AddTag in LstAddedTags)
+            {
+                aDataModel.CardModelObject.AddMetaTag(AddTag);
+            }
+
+            foreach (Tuple<string, string> RemoveTag in LstRemovedTags)
+            {
+                aDataModel.CardModelObject.RemoveMetaTag(RemoveTag);
+            }
+
+            if (LstAddedTags.Count + LstRemovedTags.Count > 0)
+            {
+                DataModel.Refresh();
+                buildListView();
+            }
+           
+            showMainDisplay();
+        }
+
         public void RouteReceivedUnhandledEvent(IDataModel aDataObject, string aszAction)
         {
-            
+
             if (aDataObject.GetType() == typeof(CompSubAddItemWindow.AddItemDataModel))
             {
                 CompSubAddItemWindow.AddItemDataModel oDataModel =
@@ -250,9 +323,19 @@ namespace CollectorsFrontEnd.Interfaces
                 {
                     ecAttrChangerWindowOpen((CardModel)aDataObject);
                 }
-                else if (aszAction == "AttrChanger.Close")
+            }
+            // From the attr changer
+            else if (aDataObject.GetType() == typeof(CompSubAttributeChanger.CompSubAttributeChangerModel))
+            {
+                CompSubAttributeChanger.CompSubAttributeChangerModel oDataModel =
+                    (CompSubAttributeChanger.CompSubAttributeChangerModel)aDataObject;
+                if (aszAction == "Cancel")
                 {
                     ecAttrChangerWindowClose();
+                }
+                else if (aszAction == "OK")
+                {
+                    ecAttrChangerWindowAccept(oDataModel);
                 }
             }
             // From The AmountInterchanger

@@ -73,6 +73,8 @@ public:
 		std::vector<std::pair<std::string, std::string>> alstMeta = std::vector<std::pair<std::string, std::string>>()) override;
 	void RemoveItem(std::string aszRemoveItemLongName, std::vector<std::pair<std::string, std::string>> alstMeta);
 
+	void RemoveMetaTag(std::string aszLongName, std::string aszKey,
+		std::vector<std::pair<std::string, std::string>> alstMatchMeta = std::vector<std::pair<std::string, std::string>>());
 	void AddMetaTag(std::string aszLongName, std::string aszKey, std::string aszValue,
 		std::vector<std::pair<std::string, std::string>> alstMatchMeta = std::vector<std::pair<std::string, std::string>>());
 	void AddMetaTags(std::string aszLongName, std::vector<std::pair<std::string,std::string>> alstKeyVals,

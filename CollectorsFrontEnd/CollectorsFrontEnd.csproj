@@ -151,6 +151,9 @@
     <Compile Include="Interfaces\Subs\CompSubItemDisplayer.xaml.cs">
       <DependentUpon>CompSubItemDisplayer.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Interfaces\Subs\CompSubKeyValCreater.xaml.cs">
+      <DependentUpon>CompSubKeyValCreater.xaml</DependentUpon>
+    </Compile>
     <Compile Include="ServerIFace.cs" />
     <Page Include="CollectionViewer\Windows\ItemAttributesChanger\ItemAttributesChanger.xaml">
       <SubType>Designer</SubType>
@@ -217,6 +220,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Interfaces\Subs\CompSubItemDisplayer.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Interfaces\Subs\CompSubKeyValCreater.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

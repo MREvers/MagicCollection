@@ -3,6 +3,7 @@
 
 #include "ICollectionObject.h"
 #include "ICollection.h"
+#include "SourceObject.h"
 
 
 #include <string>
@@ -13,6 +14,7 @@
 class CopyObject
 {
 public:
+	// IDK why this is static
 	static std::vector<std::string> PerCollectionMetaTagNames;
 	std::string ParentCollection;
 	std::vector<std::string> ResidentCollections;
@@ -22,12 +24,20 @@ public:
 	// Other analytics go here.
 	std::vector<std::pair<std::string, std::string>> GetMetaTags(std::string aszCollection);
 	bool IsPerCollectionTag(std::string aszKeyName);
+	void RemoveMetaTag(std::string aszCollection, std::string aszKey);
 	void AddMetaTag(std::string aszCollection, std::string aszKey, std::string aszVal);
+	void AddMetaTag(std::string aszCollection, std::string aszKey, std::string aszSubKey, std::string aszVal);
 	bool HasMetaTag(std::string aszKey);
+	std::pair<std::string, std::string> GetMetaTag(std::string aszKey);
 	bool HasPerCollectionTag(std::string aszCollection, std::string aszKey);
 
 	std::map<std::string,std::vector<std::pair<std::string, std::string>>> PerCollectionMetaTags;
 	std::vector<std::pair<std::string, std::string>> MetaTags;
+
+	static bool IsSameMetaTags(CopyObject* aoCOne, CopyObject* aoCTwo, bool abUseIgnore = true);
+	static bool IsSameMetaTags(
+		std::vector<std::pair<std::string, std::string>> alstTagsOne,
+		std::vector<std::pair<std::string, std::string>> alstTagsTwo, bool abUseIgnore = true);
 };
 
 // Since this is a flyweight object, the interface should act as though it is 'in' the collection,

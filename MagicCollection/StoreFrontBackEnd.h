@@ -40,7 +40,23 @@ public:
 	std::vector<std::string> GetAllCardsStartingWith(std::string aszText);
 
 	std::vector < std::vector<std::pair<std::string, std::string>>> GetMetaTags(std::string aszCollection, std::string aszLongName);
-	void AddMetaTag(std::string aszCollection, std::string aszLongName, std::string aszKey, std::string aszValue,
+	void AddMetaTag(
+		std::string aszCollection,
+		std::string aszLongName,
+		std::string aszKey,
+		std::string aszValue,
+		std::vector<std::pair<std::string, std::string>> alstMatchMeta);
+	void AddMetaTag(
+		std::string aszCollection,
+		std::string aszLongName,
+		std::string aszKey,
+		std::string aszSubKey,
+		std::string aszValue,
+		std::vector<std::pair<std::string, std::string>> alstMatchMeta);
+	void RemoveMetaTag(
+		std::string aszCollection,
+		std::string aszLongName,
+		std::string aszKey,
 		std::vector<std::pair<std::string, std::string>> alstMatchMeta);
 
 	// For parsing long names
@@ -48,6 +64,7 @@ public:
 	bool ParseCardString(std::string aszCardString, int& riCount, std::string& rszName, std::string& rszDetails);
 
 	bool IsSameCard(std::string aszLongOne, std::string aszLongTwo);
+	bool IsSameMetaTags(std::vector<std::pair<std::string, std::string>> aLstOne, std::vector<std::pair<std::string, std::string>> aLstTwo);
 
 	void ImportCollection();
 private:

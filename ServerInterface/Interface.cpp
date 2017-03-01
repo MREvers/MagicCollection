@@ -298,6 +298,55 @@ void ServerClientInterface::AddMetaTag(System::String^ ahszCollectionName, Syste
 	m_StoreFrontBackEnd->AddMetaTag(szCollectionName, szLongCardName, szKey, szVal, lstMetaTagPairs);
 }
 
+void ServerClientInterface::AddMetaTag(
+	System::String^ ahszCollectionName,
+	System::String^ ahszLongName,
+	System::String^ ahszKey,
+	System::String^ ahszSubKey,
+	System::String^ ahszVal,
+	System::Collections::Generic::List<System::Tuple<System::String^, System::String^>^>^ hlstMetaTags)
+{
+	std::string szCollectionName = msclr::interop::marshal_as<std::string>(ahszCollectionName);
+	std::string szLongCardName = msclr::interop::marshal_as<std::string>(ahszLongName);
+	std::string szKey = msclr::interop::marshal_as<std::string>(ahszKey);
+	std::string szSubKey = msclr::interop::marshal_as<std::string>(ahszSubKey);
+	std::string szVal = msclr::interop::marshal_as<std::string>(ahszVal);
+	std::vector<std::pair<std::string, std::string>> lstMetaTagPairs;
+	for (int i = 0; i < hlstMetaTags->Count; i++)
+	{
+		std::pair<std::string, std::string> pair;
+		std::string szFirst = msclr::interop::marshal_as<std::string>(hlstMetaTags[i]->Item1);
+		std::string szSecond = msclr::interop::marshal_as<std::string>(hlstMetaTags[i]->Item2);
+		pair.first = szFirst;
+		pair.second = szSecond;
+		lstMetaTagPairs.push_back(pair);
+	}
+
+	m_StoreFrontBackEnd->AddMetaTag(szCollectionName, szLongCardName, szKey, szSubKey, szVal, lstMetaTagPairs);
+}
+
+void ServerClientInterface::RemoveMetaTag(System::String^ ahszCollectionName,
+	System::String^ ahszLongName,
+	System::String^ ahszKey,
+	System::Collections::Generic::List<System::Tuple<System::String^, System::String^>^>^ hlstMetaTags)
+{
+	std::string szCollectionName = msclr::interop::marshal_as<std::string>(ahszCollectionName);
+	std::string szLongCardName = msclr::interop::marshal_as<std::string>(ahszLongName);
+	std::string szKey = msclr::interop::marshal_as<std::string>(ahszKey);
+	std::vector<std::pair<std::string, std::string>> lstMetaTagPairs;
+	for (int i = 0; i < hlstMetaTags->Count; i++)
+	{
+		std::pair<std::string, std::string> pair;
+		std::string szFirst = msclr::interop::marshal_as<std::string>(hlstMetaTags[i]->Item1);
+		std::string szSecond = msclr::interop::marshal_as<std::string>(hlstMetaTags[i]->Item2);
+		pair.first = szFirst;
+		pair.second = szSecond;
+		lstMetaTagPairs.push_back(pair);
+	}
+
+	m_StoreFrontBackEnd->RemoveMetaTag(szCollectionName, szLongCardName, szKey, lstMetaTagPairs);
+}
+
 System::Boolean ServerClientInterface::IsSameIdentity(System::String^ aszLongNameOne, System::String^ aszLongNameTwo)
 {
 	std::string szLongOne = msclr::interop::marshal_as<std::string>(aszLongNameOne);
@@ -306,7 +355,34 @@ System::Boolean ServerClientInterface::IsSameIdentity(System::String^ aszLongNam
 	return hbRetVal;
 }
 
+System::Boolean ServerClientInterface::IsSameMetaTags(
+	System::Collections::Generic::List<System::Tuple<System::String^, System::String^>^>^ hlstMetaTagsOne,
+	System::Collections::Generic::List<System::Tuple<System::String^, System::String^>^>^ hlstMetaTagsTwo)
+{
+	std::vector<std::pair<std::string, std::string>> lstMetaOne = tupleListToVector(hlstMetaTagsOne);
+	std::vector<std::pair<std::string, std::string>> lstMetaTwo = tupleListToVector(hlstMetaTagsTwo);
+
+	System::Boolean hbRetVal = System::Boolean(m_StoreFrontBackEnd->IsSameMetaTags(lstMetaOne, lstMetaTwo));
+	return hbRetVal;
+}
+
 void ServerClientInterface::ImportCollection()
 {
 	m_StoreFrontBackEnd->ImportCollection();
+}
+
+std::vector<std::pair<std::string, std::string>> ServerClientInterface::tupleListToVector(
+	System::Collections::Generic::List<System::Tuple<System::String^, System::String^>^>^ hlstMetaTags)
+{
+	std::vector<std::pair<std::string, std::string>> lstMetaTagPairs;
+	for (int i = 0; i < hlstMetaTags->Count; i++)
+	{
+		std::pair<std::string, std::string> pair;
+		std::string szFirst = msclr::interop::marshal_as<std::string>(hlstMetaTags[i]->Item1);
+		std::string szSecond = msclr::interop::marshal_as<std::string>(hlstMetaTags[i]->Item2);
+		pair.first = szFirst;
+		pair.second = szSecond;
+		lstMetaTagPairs.push_back(pair);
+	}
+	return lstMetaTagPairs;
 }

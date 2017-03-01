@@ -63,11 +63,14 @@ std::vector<std::pair<std::string,std::string>> CStoreFrontBackEnd::GetCardAttri
 	std::string szName;
 	std::string szDetails;
 	int iCount;
+	// Parse the long name for the name
 	if (ParseCardString(aszCardNameLong, iCount, szName, szDetails))
 	{
+		// Get the cache index.
 		int iCacheIndex;
 		if ((iCacheIndex = m_ColSource->LoadCard(szName)) != -1)
 		{
+			//
 			std::map<std::string, std::string> mapAttrs = 
 				m_ColSource->GetCardPrototype(iCacheIndex)->GetAttributesMap();
 			std::map<std::string, std::string>::iterator iter_Attrs = mapAttrs.begin();
@@ -172,6 +175,34 @@ void CStoreFrontBackEnd::AddMetaTag(std::string aszCollectionName, std::string a
 	}
 }
 
+void CStoreFrontBackEnd::AddMetaTag(
+	std::string aszCollectionName,
+	std::string aszLongName,
+	std::string aszKey,
+	std::string aszSubKey,
+	std::string aszValue,
+	std::vector<std::pair<std::string, std::string>> alstMatchMeta)
+{
+	if (m_ColFactory->CollectionExists(aszCollectionName))
+	{
+		Collection* oCol = m_ColFactory->GetCollection(aszCollectionName);
+		oCol->AddMetaTag(aszLongName, aszKey + "." + aszSubKey, aszValue, alstMatchMeta);
+	}
+}
+
+void CStoreFrontBackEnd::RemoveMetaTag(
+	std::string aszCollection,
+	std::string aszLongName,
+	std::string aszKey,
+	std::vector<std::pair<std::string, std::string>> alstMatchMeta)
+{
+	if (m_ColFactory->CollectionExists(aszCollection))
+	{
+		Collection* oCol = m_ColFactory->GetCollection(aszCollection);
+		oCol->RemoveMetaTag(aszLongName, aszKey, alstMatchMeta);
+	}
+}
+
 std::vector < std::vector<std::pair<std::string, std::string>>>
 CStoreFrontBackEnd::GetMetaTags(std::string aszCollectionName, std::string aszLongName)
 {
@@ -212,6 +243,12 @@ bool CStoreFrontBackEnd::IsSameCard(std::string aszLongOne, std::string aszLongT
 		}
 	}
 	return false;
+}
+
+bool CStoreFrontBackEnd::IsSameMetaTags(std::vector<std::pair<std::string, std::string>> aLstOne,
+	std::vector<std::pair<std::string, std::string>> aLstTwo)
+{
+	return CopyObject::IsSameMetaTags(aLstOne, aLstTwo);
 }
 
 void CStoreFrontBackEnd::ImportCollection()

@@ -27,6 +27,8 @@ public:
    void Cache(int aiCacheIndex);
 
    static std::vector<std::string> Str_Split(std::string aszSplit, std::string aszDelim);
+   static int List_Find(std::string aszFind, std::vector<std::string> alstFindList);
+   static int List_Find(std::string aszFind, std::vector<std::pair<std::string, std::string>> alstFindList);
 
 private:
    int m_iCachedIndex;

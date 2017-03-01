@@ -11,9 +11,11 @@ namespace CollectorsFrontEnd.InterfaceModels
 {
     public class CardModel : IDataModel, INotifyPropertyChanged
     {
+
         public string CardName { get; set; }
         public int Amount { get; set; }
         public string CardNameLong;
+        public string TargetCollection;
 
         public List<Tuple<string, string>> LstMetaTags;
         public List<Tuple<string, string>> LstSpecifiedAttrs; // Attrs that can change between copy such as 'Set'
@@ -39,12 +41,13 @@ namespace CollectorsFrontEnd.InterfaceModels
             }
         }
 
-        public CardModel(string aszCardName,
+        public CardModel(string aszCardName, string aszTargetCollection,
             List<Tuple<string, string>> aLstSpecifiedAttrs,
             List<Tuple<string, string>> aLstIdentifiedAttrs,
             List<Tuple<string, string>> aLstMetaTags)
         {
             CardName = aszCardName;
+            TargetCollection = aszTargetCollection;
             LstMetaTags = aLstMetaTags;
             LstSpecifiedAttrs = aLstSpecifiedAttrs;
             LstIdentifiedAttrs = aLstIdentifiedAttrs;
@@ -62,6 +65,29 @@ namespace CollectorsFrontEnd.InterfaceModels
             CardNameLong = aszCardNameLong;
         }
 
+        public void AddMetaTag(Tuple<string,string> aTupKeyVal)
+        {
+            ServerInterfaceModel
+                .CardClassInterfaceModel
+                .AddMetaTag(
+                TargetCollection,
+                CardNameLong,
+                aTupKeyVal.Item1,
+                aTupKeyVal.Item2,
+                LstMetaTags);
+        }
+
+        public void RemoveMetaTag(Tuple<string, string> aTupKeyVal)
+        {
+            ServerInterfaceModel
+                .CardClassInterfaceModel
+                .RemoveMetaTag(
+                TargetCollection,
+                CardNameLong,
+                aTupKeyVal.Item1,
+                LstMetaTags);
+        }
+
         public string GetMetaTag(string aszKey)
         {
             string szRetVal = "";
@@ -76,9 +102,15 @@ namespace CollectorsFrontEnd.InterfaceModels
             return szRetVal;
         }
 
+        // Does not count meta tags
         public bool IsSameAs(CardModel aoCardModel)
         {
             return ServerInterfaceModel.CardClassInterfaceModel.AreCardsSame(this, aoCardModel);
+        }
+
+        public bool IsSameMetaTags(List<Tuple<string, string>> alstTupOne, List<Tuple<string, string>> alstTupTwo)
+        {
+            return ServerInterfaceModel.CardClassInterfaceModel.AreMetaTagsSame(alstTupOne, alstTupTwo);
         }
 
         public void GetImage()

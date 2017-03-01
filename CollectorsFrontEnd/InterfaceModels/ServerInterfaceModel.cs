@@ -53,6 +53,7 @@ namespace CollectorsFrontEnd.InterfaceModels
             }
         }
 
+        // Deals with all interface calls at the card class and copy level
         public static class CardClassInterfaceModel
         {
             private class ImageDownloadedEventArgs: EventArgs
@@ -70,6 +71,28 @@ namespace CollectorsFrontEnd.InterfaceModels
             public static bool AreCardsSame(CardModel aoCardOne, CardModel aoCardTwo)
             {
                 return SCI.IsSameIdentity(aoCardOne.CardNameLong, aoCardTwo.CardNameLong);
+            }
+
+            public static bool AreMetaTagsSame(List<Tuple<string,string>> alstTupOne, List<Tuple<string, string>> alstTupTwo)
+            {
+                return SCI.IsSameMetaTags(alstTupOne, alstTupTwo);
+            }
+
+            public static void AddMetaTag(string aszCollectionName,
+                string aszLongCardName,
+                string aszKey,
+                string aszVal,
+                List<Tuple<string,string>> aLstMatchMeta)
+            {
+                SCI.AddMetaTag(aszCollectionName, aszLongCardName, aszKey, aszVal, aLstMatchMeta);
+            }
+
+            public static void RemoveMetaTag(string aszCollectionName,
+                string aszLongCardName,
+                string aszKey,
+                List<Tuple<string, string>> aLstMatchMeta)
+            {
+                SCI.RemoveMetaTag(aszCollectionName, aszLongCardName, aszKey, aLstMatchMeta);
             }
 
             // Passes the image to the callback.
@@ -163,14 +186,16 @@ namespace CollectorsFrontEnd.InterfaceModels
             return CMNew;
         }
 
-        public static CardModel GenerateCopyModel(string aszCardNameLong, List<Tuple<string, string>> aLstMetaTags)
+        public static CardModel GenerateCopyModel(string aszCardNameLong, string aszCollectionName, List<Tuple<string, string>> aLstMetaTags)
         {
             // Really, this SCI function just parses the long name.
             MCopyObject oParsed = ServerInterfaceModel.SCI.ConvertItemToCopyObject(aszCardNameLong);
             List<Tuple<string, string>> lstIdentifiedAttrs =
                 ServerInterfaceModel.SCI.GetCardAttributes(aszCardNameLong);
+            // We also need the rest identified attrs
             CardModel CopyM = new CardModel(
                 oParsed.Name,
+                aszCollectionName,
                 oParsed.Attributes.Select(x => new Tuple<string, string>(x.Key,x.Value)).ToList(),
                 lstIdentifiedAttrs,
                 aLstMetaTags);

@@ -177,7 +177,8 @@ void Collection::RemoveItem(std::string aszRemoveItem,
 	}
 }
 
-void Collection::RemoveItem(std::string aszNewItemLongName,
+void
+Collection::RemoveItem(std::string aszNewItemLongName,
 	std::vector<std::pair<std::string, std::string>> alstMetaTags)
 {
 	std::string szName;
@@ -190,7 +191,55 @@ void Collection::RemoveItem(std::string aszNewItemLongName,
 	}
 }
 
+void
+Collection::RemoveMetaTag(
+	std::string aszLongName,
+	std::string aszKey,
+	std::vector<std::pair<std::string, std::string>> alstMatchMeta)
+{
+	//std::map<std::string, std::map<std::string, std::string>>::iterator iter_Tags = m_mapMetaTags.begin();
+	std::string szCardName;
+	int iAmount;
+	std::string szDetails;
+	if (Collection::ParseCardLine(aszLongName, iAmount, szCardName, szDetails))
+	{
+		int iCardCacheIndex = m_ColSource->LoadCard(szCardName);
+		if (iCardCacheIndex != -1)
+		{
+			std::vector<std::pair<std::string, std::string>> lstTargetAttrs = ParseAttrs(szDetails);
+			// Look at all the copies for a copy with matching tags.
 
+			CollectionObject* oCardClass = m_ColSource->GetCardPrototype(iCardCacheIndex);
+			std::vector<CopyObject*> lstCopies = oCardClass->GetCopies(m_szName);
+			std::vector<CopyObject*>::iterator iter_Copies = lstCopies.begin();
+			for (; iter_Copies != lstCopies.end(); ++iter_Copies)
+			{
+				// Check if the copy has maching tags
+				// Check if attrs match
+				if (CollectionObject::CompareKeyValPairList(
+					CollectionObject::FilterNonUniqueTraits(lstTargetAttrs),
+					CollectionObject::ConvertMapToList((*iter_Copies)->NonUniqueTraits))
+					)
+				{
+					if (CopyObject::IsSameMetaTags(alstMatchMeta, (*iter_Copies)->GetMetaTags(m_szName), false))
+					{
+						(*iter_Copies)->RemoveMetaTag(m_szName, aszKey);
+
+						break; // Only remove the first matching copy.
+					}
+				}
+			}
+
+		} // end found in cache
+		else
+		{
+			// PANIC@@@!@@! card name not found in cache
+		}
+
+
+	}
+
+}
 
 void Collection::AddMetaTag(std::string aszLongName, std::string aszKey, std::string aszValue,
 	std::vector<std::pair<std::string, std::string>> alstMatchMeta)
@@ -228,7 +277,7 @@ void Collection::AddMetaTags(std::string aszLongName, std::vector<std::pair<std:
 					CollectionObject::ConvertMapToList((*iter_Copies)->NonUniqueTraits))
 					)
 				{
-					if (CollectionObject::CompareKeyValPairList(alstMatchMeta, (*iter_Copies)->GetMetaTags(m_szName)))
+					if (CopyObject::IsSameMetaTags(alstMatchMeta, (*iter_Copies)->GetMetaTags(m_szName)))
 					{
 						// MATCH
 						bAlreadyTagged = true;
@@ -927,7 +976,7 @@ Collection::GetCollectionListWithMeta()
 				if (CollectionObject::IsSameIdentity(oCompareCard, oCurrentCard))
 				{
 					// The meta tags need also be the same
-					if (bFound |= CollectionObject::CompareKeyValPairList(oCompareCard->GetMetaTags(m_szName), oCurrentCard->GetMetaTags(m_szName)))
+					if (bFound |= CopyObject::IsSameMetaTags(oCompareCard->GetMetaTags(m_szName), oCurrentCard->GetMetaTags(m_szName)))
 					{
 						iter_Bucket->second = iter_Bucket->second + 1;
 						break;

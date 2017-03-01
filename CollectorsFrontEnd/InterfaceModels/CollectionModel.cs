@@ -27,7 +27,7 @@ namespace CollectorsFrontEnd.InterfaceModels
             LstCopyModels.Clear();
             foreach (var LongNameTagsPair in aLstCards)
             {
-                CardModel oCopy = ServerInterfaceModel.GenerateCopyModel(LongNameTagsPair.Item1, LongNameTagsPair.Item2);
+                CardModel oCopy = ServerInterfaceModel.GenerateCopyModel(LongNameTagsPair.Item1, CollectionName, LongNameTagsPair.Item2);
                 LstCopyModels.Add(oCopy);
             }
         }

@@ -53,12 +53,29 @@ public:
 		GetCollectionListWithMeta(System::String^ ahszCollectionName);
 	System::Collections::Generic::List<System::Collections::Generic::List<System::Tuple<System::String^, System::String^>^>^>^
 		GetMetaTags(System::String^ ahszCollectionName, System::String^ ahszLongName);
-	void AddMetaTag(System::String^ ahszCollectionName, System::String^ ahszLongName, System::String^ ahszKey, System::String^ ahszVal,
+	void AddMetaTag(System::String^ ahszCollectionName,
+		System::String^ ahszLongName,
+		System::String^ ahszKey,
+		System::String^ ahszVal,
+		System::Collections::Generic::List<System::Tuple<System::String^, System::String^>^>^ hlstMetaTags);
+	void AddMetaTag(System::String^ ahszCollectionName,
+		System::String^ ahszLongName,
+		System::String^ ahszKey,
+		System::String^ ahszSubKey,
+		System::String^ ahszVal,
+		System::Collections::Generic::List<System::Tuple<System::String^, System::String^>^>^ hlstMetaTags);
+	void RemoveMetaTag(System::String^ ahszCollectionName,
+		System::String^ ahszLongName,
+		System::String^ ahszKey,
 		System::Collections::Generic::List<System::Tuple<System::String^, System::String^>^>^ hlstMetaTags);
 	System::Boolean IsSameIdentity(System::String^ aszLongNameOne, System::String^ aszLongNameTwo);
+	System::Boolean IsSameMetaTags(
+		System::Collections::Generic::List<System::Tuple<System::String^, System::String^>^>^ hlstMetaTagsOne,
+		System::Collections::Generic::List<System::Tuple<System::String^, System::String^>^>^ hlstMetaTagsTwo);
 	void ImportCollection();
 private:
 	CStoreFrontBackEnd* m_StoreFrontBackEnd;
 
+	std::vector<std::pair<std::string, std::string>> tupleListToVector(System::Collections::Generic::List<System::Tuple<System::String^, System::String^>^>^ hlstMetaTagsOne);
 };
 
