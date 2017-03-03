@@ -239,12 +239,12 @@ namespace CollectorsFrontEnd.Interfaces
             // Calculate differences in meta tags
             // Calculate added tags
             List<Tuple<string, string>> LstAddedTags = new List<Tuple<string, string>>();
-            foreach (Tuple<string, string> NewTup in aDataModel.LstCurrentMetaTags)
+            foreach (var NewTup in aDataModel.LstCurrentMetaTags)
             {
                 bool bFound = false;
                 foreach (Tuple<string, string> Tup in aDataModel.CardModelObject.LstMetaTags)
                 {
-                    if (Tup.Item1 == NewTup.Item1)
+                    if (Tup.Item1 == NewTup.First)
                     {
                         bFound = true;
                         break;
@@ -253,7 +253,7 @@ namespace CollectorsFrontEnd.Interfaces
 
                 if (!bFound)
                 {
-                    LstAddedTags.Add(NewTup);
+                    LstAddedTags.Add(new Tuple<string, string>(NewTup.First, NewTup.Second));
                 }
             }
 
@@ -262,9 +262,9 @@ namespace CollectorsFrontEnd.Interfaces
             foreach (Tuple<string, string> OldTup in aDataModel.CardModelObject.LstMetaTags)
             {
                 bool bFound = false;
-                foreach (Tuple<string, string> Tup in aDataModel.LstCurrentMetaTags)
+                foreach (var Tup in aDataModel.LstCurrentMetaTags)
                 {
-                    if (Tup.Item1 == OldTup.Item1)
+                    if (Tup.First == OldTup.Item1)
                     {
                         bFound = true;
                         break;

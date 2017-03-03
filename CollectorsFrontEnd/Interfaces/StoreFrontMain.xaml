@@ -22,7 +22,7 @@
                     <MenuItem Header="_File" Height="20">
                         <MenuItem x:Name="FileMICollectionsOverview" Header="Collections Overview"
                                   Click="eViewCollectionsOverview_Click"/>
-                        <MenuItem x:Name="ImportMTGCards" Header="Import MTG Cards"/>
+                        <MenuItem x:Name="ImportMTGCards" Header="Import MTG Cards" Click="eImportCards_Click"/>
                         <Separator></Separator>
                         <MenuItem Header="Close" Click="eClose_Click"/>
                     </MenuItem>

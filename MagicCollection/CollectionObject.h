@@ -14,30 +14,35 @@
 class CopyObject
 {
 public:
-	// IDK why this is static
 	static std::vector<std::string> PerCollectionMetaTagNames;
 	std::string ParentCollection;
 	std::vector<std::string> ResidentCollections;
 
+	std::map<std::string, std::vector<std::pair<std::string, std::string>>> PerCollectionMetaTags;
+	std::vector<std::pair<std::string, std::string>> MetaTags;
+
 	// Non-unique in the sense that the trait itself can have more than one value.
 	std::map<std::string, std::string> NonUniqueTraits;
+	std::vector<std::pair<std::string, std::string>>* m_LstPairedTraits;
+	std::map<std::string, std::vector<std::string>>* m_mapNonUniqueAttributesRestrictions;
+
 	// Other analytics go here.
 	std::vector<std::pair<std::string, std::string>> GetMetaTags(std::string aszCollection);
 	bool IsPerCollectionTag(std::string aszKeyName);
 	void RemoveMetaTag(std::string aszCollection, std::string aszKey);
-	void AddMetaTag(std::string aszCollection, std::string aszKey, std::string aszVal);
-	void AddMetaTag(std::string aszCollection, std::string aszKey, std::string aszSubKey, std::string aszVal);
+	void SetMetaTag(std::string aszCollection, std::string aszKey, std::string aszVal);
+	void SetMetaTag(std::string aszCollection, std::string aszKey, std::string aszSubKey, std::string aszVal);
 	bool HasMetaTag(std::string aszKey);
 	std::pair<std::string, std::string> GetMetaTag(std::string aszKey);
 	bool HasPerCollectionTag(std::string aszCollection, std::string aszKey);
 
-	std::map<std::string,std::vector<std::pair<std::string, std::string>>> PerCollectionMetaTags;
-	std::vector<std::pair<std::string, std::string>> MetaTags;
+	void SetNonUniqueAttr(std::string aszKey, std::string aszValue);
 
 	static bool IsSameMetaTags(CopyObject* aoCOne, CopyObject* aoCTwo, bool abUseIgnore = true);
 	static bool IsSameMetaTags(
 		std::vector<std::pair<std::string, std::string>> alstTagsOne,
 		std::vector<std::pair<std::string, std::string>> alstTagsTwo, bool abUseIgnore = true);
+
 };
 
 // Since this is a flyweight object, the interface should act as though it is 'in' the collection,
@@ -51,6 +56,7 @@ public:
 	// Gets called by the collection Source. Implement in base class to get needed attributes.
 	virtual bool MapAttributes(std::string aszName, std::string aszValue);
 	std::string GetAttribute(std::string aszAttr);
+	std::vector<std::string> GetRestrictionListFor(std::string aszAttr);
 	std::map<std::string, std::string>  GetAttributesMap();
 
 	// Collection Interface
@@ -72,6 +78,10 @@ public:
 	// Gets a copy with matching attrs
 	bool GetCopy(std::string aszCollectionName, std::vector<std::pair<std::string, std::string>> alstAttrs, CopyObject& roCO, bool abExact = true);
 	// Used in building a printable structure
+	
+	std::map<std::string, std::vector<std::string>> GetNonUniqueAttributeRestrictions();
+	void SetNonUniqueAttributeRestrictions(std::map<std::string, std::vector<std::string>> aMapRestrictions);
+	
 	static CopyObject GenerateCopy(std::string aszCollectionName);
 	// Used in building a printable structure
 	static CopyObject GenerateCopy(std::string aszCollectionName, std::vector<std::pair<std::string, std::string>> alstAttrs);
@@ -92,6 +102,8 @@ private:
 
 	std::vector<CopyObject> m_lstCopies;
 	std::map<std::string, std::string> m_mapAttributes;
+	std::map<std::string, std::vector<std::string>> m_mapNonUniqueAttributesRestrictions;
+	std::vector<std::pair<std::string, std::string>> m_lstPairedAttributes;
 	std::string m_szName;
 
 };

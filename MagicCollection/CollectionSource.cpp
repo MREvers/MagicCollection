@@ -3,6 +3,12 @@
 CollectionSource::CollectionSource()
 {
 	m_lstNonUniqueKeys.push_back("set");
+	m_lstNonUniqueKeys.push_back("multiverseid");
+
+	// THESE ALSO HAVE TO BE ACCOUNTED FOR IN THE IMPORTER
+	//  TODO: Tie these together at some point.
+	m_lstPairedNonUniques.push_back("set");
+	m_lstPairedNonUniques.push_back("multiverseid");
 }
 
 CollectionSource::~CollectionSource()
@@ -98,6 +104,8 @@ int CollectionSource::LoadCard(std::string aszCardName)
 			{
 				bHasAllAttributes = oCard.MapAttributes(att_iter->first, att_iter->second);
 			}
+
+			oCard.SetNonUniqueAttributeRestrictions(oSource->NonUniqueAttributes);
 
 			// Store the location of the CollectionObject in the cache
 			iCacheLocation = m_lstoCardCache.size();

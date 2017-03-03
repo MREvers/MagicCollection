@@ -284,7 +284,7 @@ void Collection::AddMetaTags(std::string aszLongName, std::vector<std::pair<std:
 						std::vector<std::pair<std::string, std::string>>::iterator iter_NewMeta = alstKeyVals.begin();
 						for (; iter_NewMeta != alstKeyVals.end(); ++iter_NewMeta)
 						{
-							(*iter_Copies)->AddMetaTag(m_szName, iter_NewMeta->first, iter_NewMeta->second);
+							(*iter_Copies)->SetMetaTag(m_szName, iter_NewMeta->first, iter_NewMeta->second);
 						}
 						break; // ONLY TAG THE FIRST MATCHING COPY.
 					}
@@ -312,7 +312,7 @@ void Collection::AddMetaTags(std::string aszLongName, std::vector<std::pair<std:
 					std::vector<std::pair<std::string, std::string>>::iterator iter_NewMeta = alstKeyVals.begin();
 					for (; iter_NewMeta != alstKeyVals.end(); ++iter_NewMeta)
 					{
-						lstUntaggedCopies.front()->AddMetaTag(m_szName, iter_NewMeta->first, iter_NewMeta->second);
+						lstUntaggedCopies.front()->SetMetaTag(m_szName, iter_NewMeta->first, iter_NewMeta->second);
 					}
 				}
 
@@ -328,6 +328,92 @@ void Collection::AddMetaTags(std::string aszLongName, std::vector<std::pair<std:
 	}
 }
 
+void Collection::SetNonUniqueAttribute(std::string aszLongName, std::string aszKey, std::string aszValue,
+	std::vector<std::pair<std::string, std::string>> alstMatchMeta)
+{
+	std::vector<std::pair<std::string, std::string>> lstKeyVals;
+	lstKeyVals.push_back(std::make_pair(aszKey, aszValue));
+	SetNonUniqueAttributes(aszLongName, lstKeyVals, alstMatchMeta);
+}
+
+void Collection::SetNonUniqueAttributes(std::string aszLongName, std::vector<std::pair<std::string, std::string>> alstKeyVals,
+	std::vector<std::pair<std::string, std::string>> alstMatchMeta)
+{
+	//std::map<std::string, std::map<std::string, std::string>>::iterator iter_Tags = m_mapMetaTags.begin();
+	std::string szCardName;
+	int iAmount;
+	std::string szDetails;
+	if (Collection::ParseCardLine(aszLongName, iAmount, szCardName, szDetails))
+	{
+		bool bAlreadyTagged = false;
+		int iCardCacheIndex = m_ColSource->LoadCard(szCardName);
+		if (iCardCacheIndex != -1)
+		{
+			std::vector<std::pair<std::string, std::string>> lstTargetAttrs = ParseAttrs(szDetails);
+			// Look at all the copies for a copy with matching tags.
+
+			CollectionObject* oCardClass = m_ColSource->GetCardPrototype(iCardCacheIndex);
+			std::vector<CopyObject*> lstCopies = oCardClass->GetCopies(m_szName);
+			std::vector<CopyObject*>::iterator iter_Copies = lstCopies.begin();
+			for (; iter_Copies != lstCopies.end(); ++iter_Copies)
+			{
+				// Check if the copy has maching tags
+				// Check if attrs match
+				if (CollectionObject::CompareKeyValPairList(
+					CollectionObject::FilterNonUniqueTraits(lstTargetAttrs),
+					CollectionObject::ConvertMapToList((*iter_Copies)->NonUniqueTraits))
+					)
+				{
+					if (CopyObject::IsSameMetaTags(alstMatchMeta, (*iter_Copies)->GetMetaTags(m_szName)))
+					{
+						// MATCH
+						bAlreadyTagged = true;
+						std::vector<std::pair<std::string, std::string>>::iterator iter_NewMeta = alstKeyVals.begin();
+						for (; iter_NewMeta != alstKeyVals.end(); ++iter_NewMeta)
+						{
+							(*iter_Copies)->SetNonUniqueAttr(iter_NewMeta->first, iter_NewMeta->second);
+						}
+						break; // ONLY TAG THE FIRST MATCHING COPY.
+					}
+				}
+			}
+
+			if (!bAlreadyTagged && alstMatchMeta.size() == 0)
+			{
+				// Make sure there are untagged cards available.
+				// add it then
+				std::vector<CopyObject*> lstUntaggedCopies;
+				std::vector<CopyObject*> lstCopies = m_ColSource->GetCardPrototype(iCardCacheIndex)->GetCopies(m_szName);
+				std::vector<CopyObject*>::iterator iter_TaggedCards = lstCopies.begin();
+				for (; iter_TaggedCards != lstCopies.end(); ++iter_TaggedCards)
+				{
+					if ((*iter_TaggedCards)->GetMetaTags(m_szName).size() != 0)
+					{
+						lstUntaggedCopies.push_back(*iter_TaggedCards);
+					}
+				}
+				CollectionObject* oColO = m_ColSource->GetCardPrototype(iCardCacheIndex);
+				int iAvailableCopies = oColO->GetLocalCopies(m_szName).size();
+				if (lstUntaggedCopies.size() > 0)
+				{
+					std::vector<std::pair<std::string, std::string>>::iterator iter_NewMeta = alstKeyVals.begin();
+					for (; iter_NewMeta != alstKeyVals.end(); ++iter_NewMeta)
+					{
+						lstUntaggedCopies.front()->SetNonUniqueAttr(iter_NewMeta->first, iter_NewMeta->second);
+					}
+				}
+
+			}
+
+		} // end found in cache
+		else
+		{
+			// PANIC@@@!@@! card name not found in cache
+		}
+
+
+	}
+}
 
 std::vector<std::vector<std::pair<std::string, std::string>>> Collection::GetMetaTags(std::string aszLongName)
 {
@@ -388,7 +474,7 @@ void Collection::addItem(std::string aszNewItem, std::vector<std::pair<std::stri
 		std::vector<std::pair<std::string, std::string>>::iterator iter_Meta = alstMeta.begin();
 		for (; iter_Meta != alstMeta.end(); iter_Meta++)
 		{
-			oCO->AddMetaTag(m_szName, iter_Meta->first, iter_Meta->second);
+			oCO->SetMetaTag(m_szName, iter_Meta->first, iter_Meta->second);
 		}
 	}
 }

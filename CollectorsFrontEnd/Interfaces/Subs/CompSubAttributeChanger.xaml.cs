@@ -46,16 +46,45 @@ namespace CollectorsFrontEnd.Interfaces.Subs
         #endregion
 
         #region Sub Types
-        public class CompSubAttributeChangerModel: IDataModel
+        public class MutableTuple
+        {
+            public MutableTuple(string aszFirst, string aszSecond)
+            {
+                First = aszFirst;
+                Second = aszSecond;
+            }
+            public string First { get; set; }
+            public string Second { get; set; }
+        }
+
+        public class MutableRestrictedList
+        {
+            public string Key { get; set; }
+            public List<string> PossibleValues { get; set; }
+            public string Value { get; set; }
+        }
+
+        public class CompSubAttributeChangerModel : IDataModel
         {
             public CompSubAttributeChangerModel(CardModel aDataModel, List<Tuple<string, string>> aLstCurrentTags)
             {
                 CardModelObject = aDataModel;
-                LstCurrentMetaTags = new List<Tuple<string, string>> (aLstCurrentTags);
+                LstCurrentMetaTags = aLstCurrentTags.Select(x=>new MutableTuple(x.Item1, x.Item2)).ToList();
+            }
+
+            public void SetNonUniqueAttribute(string aszKey, string aszValue, List<string> alstPossibleVals)
+            {
+                MutableRestrictedList MRL = new MutableRestrictedList();
+                MRL.Key = aszKey;
+                MRL.Value = aszValue;
+                MRL.PossibleValues = alstPossibleVals;
+
+                LstNonUniqueAttrs.Add(MRL);
             }
             public CardModel CardModelObject;
-            
-            public List<Tuple<string, string>> LstCurrentMetaTags { get; set; }
+
+            public List<MutableTuple> LstCurrentMetaTags { get; set; }
+            public List<MutableRestrictedList> LstNonUniqueAttrs { get; set; }
         }
         #endregion
 
@@ -75,7 +104,7 @@ namespace CollectorsFrontEnd.Interfaces.Subs
         public CompSubAttributeChanger(CardModel aDataModel)
         {
             InitializeComponent();
-            
+
             DataModel = new CompSubAttributeChangerModel(aDataModel, aDataModel.LstMetaTags);
             DataModel.CardModelObject.PropertyChanged += eImageLoaded;
             DataModel.CardModelObject.GetImage();
@@ -135,7 +164,7 @@ namespace CollectorsFrontEnd.Interfaces.Subs
         {
             if (aDataObject.Key != "")
             {
-                DataModel.LstCurrentMetaTags.Add(new Tuple<string, string>(aDataObject.Key, aDataObject.Value));
+                DataModel.LstCurrentMetaTags.Add(new MutableTuple(aDataObject.Key, aDataObject.Value));
                 DGMetas.Items.Refresh();
             }
             showMainDisplay();

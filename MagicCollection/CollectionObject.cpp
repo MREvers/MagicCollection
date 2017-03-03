@@ -83,7 +83,7 @@ void CopyObject::RemoveMetaTag(std::string aszCollection, std::string aszKey)
 	}
 }
 
-void CopyObject::AddMetaTag(std::string aszCollection, std::string aszKey, std::string aszVal)
+void CopyObject::SetMetaTag(std::string aszCollection, std::string aszKey, std::string aszVal)
 {
 	// Ensure that this tag is not unique to a collection
 	if (IsPerCollectionTag(aszKey))
@@ -109,10 +109,10 @@ void CopyObject::AddMetaTag(std::string aszCollection, std::string aszKey, std::
 
 }
 
-void CopyObject::AddMetaTag(std::string aszCollection, std::string aszKey, std::string aszSubKey, std::string aszVal)
+void CopyObject::SetMetaTag(std::string aszCollection, std::string aszKey, std::string aszSubKey, std::string aszVal)
 {
 	std::string szFullKey = aszKey + "." + aszSubKey;
-	AddMetaTag(aszCollection, szFullKey, aszVal);
+	SetMetaTag(aszCollection, szFullKey, aszVal);
 }
 
 bool CopyObject::HasMetaTag(std::string aszKey)
@@ -158,6 +158,69 @@ bool CopyObject::HasPerCollectionTag(std::string aszCollection, std::string aszK
 	}
 	return false;
 
+}
+
+void CopyObject::SetNonUniqueAttr(std::string aszKey, std::string aszValue)
+{
+	bool bCheckPairedTraits = false;
+	int iIndexOfAllowedTrait = 0;
+	bool bRestrictedMatch = false;
+	// Already has a value.
+	auto lstRestrictions = m_mapNonUniqueAttributesRestrictions->find(aszKey);
+	if (lstRestrictions != m_mapNonUniqueAttributesRestrictions->end())
+	{
+		// Check to make sure that the attribute is restricted
+		// If it is, make sure the value is a legal value
+		if ((iIndexOfAllowedTrait = SourceObject::List_Find(aszValue, lstRestrictions->second)) != -1)
+		{
+			// It is a legal value
+			NonUniqueTraits[aszKey] = aszValue;
+			bCheckPairedTraits = true;
+			bRestrictedMatch = true;
+		}
+	}
+	else
+	{
+		// If not, just set the value
+		NonUniqueTraits[aszKey] = aszValue;
+		bCheckPairedTraits = true;
+	}
+
+	// Loop through and make sure all paired traits are set.
+	if (bCheckPairedTraits)
+	{
+		std::vector<std::string> lstSetTraits;
+		bool bAllSet = false;
+		while (!bAllSet)
+		{
+			bool bFoundAll = true;
+			std::vector<std::pair<std::string, std::string>>::iterator iter_PairedTraits = m_LstPairedTraits->begin();
+			for (; iter_PairedTraits != m_LstPairedTraits->end(); ++iter_PairedTraits)
+			{
+				if (iter_PairedTraits->first == aszKey)
+				{
+					if (!SourceObject::List_Find(iter_PairedTraits->second, lstSetTraits))
+					{
+						if (bRestrictedMatch)
+						{
+							NonUniqueTraits[iter_PairedTraits->second] =
+								(*m_mapNonUniqueAttributesRestrictions)[iter_PairedTraits->second][iIndexOfAllowedTrait];
+						}
+						else
+						{
+							NonUniqueTraits[iter_PairedTraits->second] = aszValue;
+						}
+						lstSetTraits.push_back(iter_PairedTraits->second);
+						bFoundAll == false;
+					}
+				}
+				
+			}
+
+			bAllSet |= bFoundAll;
+		}
+
+	}
 }
 
 bool CopyObject::IsSameMetaTags(CopyObject* aoCOne, CopyObject* aoCTwo, bool abUseIgnore)
@@ -240,6 +303,18 @@ std::string CollectionObject::GetAttribute(std::string aszAttr)
 	}
 }
 
+std::vector<std::string> CollectionObject::GetRestrictionListFor(std::string aszAttr)
+{
+	std::vector<std::string> lstRetVal;
+
+	if (m_mapNonUniqueAttributesRestrictions.find(aszAttr) != m_mapNonUniqueAttributesRestrictions.end())
+	{
+		lstRetVal == m_mapNonUniqueAttributesRestrictions[aszAttr];
+	}
+
+	return lstRetVal;
+}
+
 std::map<std::string, std::string> CollectionObject::GetAttributesMap()
 {
 	return m_mapAttributes;
@@ -256,6 +331,16 @@ CopyObject* CollectionObject::AddCopy(std::string aszCollectionName)
 	CopyObject oNewCopy;
 	oNewCopy.ParentCollection = aszCollectionName;
 	oNewCopy.ResidentCollections.push_back(aszCollectionName);
+	oNewCopy.m_mapNonUniqueAttributesRestrictions = &m_mapNonUniqueAttributesRestrictions;
+	oNewCopy.m_LstPairedTraits = &m_lstPairedAttributes;
+	
+	// Initialize the nonuniques.
+	std::map<std::string, std::vector<std::string>>::iterator iter_NonUniques = m_mapNonUniqueAttributesRestrictions.begin();
+	for (; iter_NonUniques != m_mapNonUniqueAttributesRestrictions.end(); ++iter_NonUniques)
+	{
+		oNewCopy.SetNonUniqueAttr(iter_NonUniques->first, iter_NonUniques->second.at(0));
+	}
+
 	m_lstCopies.push_back(oNewCopy);
 	return &m_lstCopies[m_lstCopies.size() - 1];
 }
@@ -422,6 +507,17 @@ bool CollectionObject::GetCopy(std::string aszCollectionName, std::vector<std::p
 	}
 
 	return bFound;
+}
+
+std::map<std::string, std::vector<std::string>> CollectionObject::GetNonUniqueAttributeRestrictions()
+{
+	return m_mapNonUniqueAttributesRestrictions;
+}
+
+// Sets and initializes nonunique attributes
+void CollectionObject::SetNonUniqueAttributeRestrictions(std::map<std::string, std::vector<std::string>> aMapRestrictions)
+{
+	m_mapNonUniqueAttributesRestrictions = aMapRestrictions;
 }
 
 void CollectionObject::ConstructCopy(CopyObject& roCO, std::vector<std::pair<std::string, std::string>> alstAttrs)

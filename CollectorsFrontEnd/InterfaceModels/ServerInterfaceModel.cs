@@ -223,5 +223,10 @@ namespace CollectorsFrontEnd.InterfaceModels
         {
             return SCI.GetAllCardsStartingWith(aszStart);
         }
+
+        public static void ImportJSONCollection()
+        {
+            SCI.ImportCollection();
+        }
     }
 }

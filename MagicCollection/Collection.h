@@ -80,6 +80,10 @@ public:
 	void AddMetaTags(std::string aszLongName, std::vector<std::pair<std::string,std::string>> alstKeyVals,
 		std::vector<std::pair<std::string, std::string>> alstMatchMeta = std::vector<std::pair<std::string, std::string>>());
 
+	void SetNonUniqueAttribute(std::string aszLongName, std::string aszKey, std::string aszValue,
+		std::vector<std::pair<std::string, std::string>> alstMatchMeta = std::vector<std::pair<std::string, std::string>>());
+	void SetNonUniqueAttributes(std::string aszLongName, std::vector<std::pair<std::string, std::string>> alstKeyVals,
+		std::vector<std::pair<std::string, std::string>> alstMatchMeta = std::vector<std::pair<std::string, std::string>>());
 
 	std::vector < std::vector<std::pair<std::string, std::string>>> GetMetaTags(std::string aszLongName);
 	void RollbackTransaction();

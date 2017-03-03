@@ -113,5 +113,10 @@ namespace CollectorsFrontEnd.Interfaces
         {
             ecSwitchToCollectionOverview();
         }
+
+        private void eImportCards_Click(object sender, RoutedEventArgs e)
+        {
+            ServerInterfaceModel.ImportJSONCollection();   
+        }
     }
 }

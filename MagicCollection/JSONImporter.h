@@ -37,5 +37,8 @@ private:
 
    std::string str_trim(const std::string& srz, char removeChar);
    std::string str_clean(const std::string & src);
+   int list_Find(std::string aszString, std::vector<std::string> alstSearch);
+   std::vector<std::string> m_NonUniqueKeys; // These grab all values whenever found.
+   std::vector<std::string> m_PairedKeys; // These will fill with a blank value if not found per card.
 };
 

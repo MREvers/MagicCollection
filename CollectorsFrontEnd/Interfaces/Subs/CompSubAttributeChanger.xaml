@@ -15,20 +15,18 @@
                 <RowDefinition/>
             </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="4*"/>
-                <ColumnDefinition Width="3*"/>
-                <ColumnDefinition Width="3*"/>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
             </Grid.ColumnDefinitions>
-            <Image Grid.Column="0" Source="{Binding CardImage}"></Image>
-            <Grid Grid.Column="1">
+            <Grid Grid.Column="0">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="9*"/>
                     <RowDefinition/>
                 </Grid.RowDefinitions>
                 <DataGrid x:Name="DGMetas" AutoGenerateColumns="False" IsReadOnly="True" ItemsSource="{Binding Path=LstCurrentMetaTags}">
                     <DataGrid.Columns>
-                        <DataGridTextColumn Header="Key" Binding="{Binding Item1}"/>
-                        <DataGridTextColumn Header="Value" Binding="{Binding Item2}"/>
+                        <DataGridTextColumn Width="1*" Header="Key" Binding="{Binding First}"/>
+                        <DataGridTextColumn Width="1*" Header="Value" Binding="{Binding Second}"/>
                     </DataGrid.Columns>
                 </DataGrid>
                 <Grid Grid.Row="1">
@@ -55,11 +53,17 @@ Data="M0,0 L9,0 9,2 0,2 0,0" />
                     </Button>
                 </Grid>
             </Grid>
-            <Grid Grid.Column="2">
+            <Grid Grid.Column="1">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="9*"/>
                     <RowDefinition/>
                 </Grid.RowDefinitions>
+                <DataGrid x:Name="DGAttrs" AutoGenerateColumns="False" IsReadOnly="True" ItemsSource="{Binding Path=LstNonUniqueAttrs}">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Width="1*" Header="Key" Binding="{Binding Item1}"/>
+                        <DataGridComboBoxColumn Width="1*" Header="Value"/>
+                    </DataGrid.Columns>
+                </DataGrid>
                 <Grid Grid.Row="1">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition/>
