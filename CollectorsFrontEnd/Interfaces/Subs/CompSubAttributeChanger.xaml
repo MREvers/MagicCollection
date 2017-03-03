@@ -8,7 +8,7 @@
              d:DesignHeight="300" d:DesignWidth="380">
     <Grid>
         <Grid x:Name="GrdOverlay">
-            
+
         </Grid>
         <Grid x:Name="GrdMain">
             <Grid.RowDefinitions>
@@ -58,10 +58,21 @@ Data="M0,0 L9,0 9,2 0,2 0,0" />
                     <RowDefinition Height="9*"/>
                     <RowDefinition/>
                 </Grid.RowDefinitions>
-                <DataGrid x:Name="DGAttrs" AutoGenerateColumns="False" IsReadOnly="True" ItemsSource="{Binding Path=LstNonUniqueAttrs}">
+                <DataGrid x:Name="DGAttrs" CanUserAddRows="false" AutoGenerateColumns="False" ItemsSource="{Binding Path=LstNonUniqueAttrs}">
                     <DataGrid.Columns>
-                        <DataGridTextColumn Width="1*" Header="Key" Binding="{Binding Item1}"/>
-                        <DataGridComboBoxColumn Width="1*" Header="Value"/>
+                        <DataGridTextColumn IsReadOnly="True" Width="1*" Header="Key" Binding="{Binding Key}"/>
+                        <DataGridTemplateColumn  Width="1*" Header="Value">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Path=Value}"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                            <DataGridTemplateColumn.CellEditingTemplate>
+                                <DataTemplate>
+                                    <ComboBox IsEditable="True"  ItemsSource="{Binding PossibleValues}" Text="{Binding Path=Value}" />
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellEditingTemplate>
+                        </DataGridTemplateColumn>
                     </DataGrid.Columns>
                 </DataGrid>
                 <Grid Grid.Row="1">

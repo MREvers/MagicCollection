@@ -97,6 +97,30 @@ std::vector<std::pair<std::string,std::string>> CStoreFrontBackEnd::GetCardAttri
 	return LstRetVal;
 }
 
+std::vector<std::string> CStoreFrontBackEnd::GetCardAttributeRestriction(std::string aszCardNameLong, std::string aszKey)
+{
+	std::string szCardName;
+	int iAmount;
+	std::string szDetails;
+	if (Collection::ParseCardLine(aszCardNameLong, iAmount, szCardName, szDetails))
+	{
+		bool bAlreadyTagged = false;
+		int iCardCacheIndex = m_ColSource->LoadCard(szCardName);
+		if (iCardCacheIndex != -1)
+		{
+			CollectionObject* oCardClass = m_ColSource->GetCardPrototype(iCardCacheIndex);
+			auto mapRestrictions = oCardClass->GetNonUniqueAttributeRestrictions();
+			if (mapRestrictions.find(aszKey) != mapRestrictions.end())
+			{
+				return mapRestrictions[aszKey];
+			}
+		}
+	}
+	std::vector<std::string> lstNullRetVal;
+	lstNullRetVal.push_back("*");
+	return lstNullRetVal;
+}
+
 std::string CStoreFrontBackEnd::LoadCollection(std::string aszCollection)
 {
 	// Check if the file exists.

@@ -70,6 +70,10 @@ namespace CollectorsFrontEnd.InterfaceModels
             // Compares long name
             public static bool AreCardsSame(CardModel aoCardOne, CardModel aoCardTwo)
             {
+                if (aoCardOne.CardNameLong == null || aoCardTwo.CardNameLong == null)
+                {
+                    return false;
+                }
                 return SCI.IsSameIdentity(aoCardOne.CardNameLong, aoCardTwo.CardNameLong);
             }
 
@@ -157,6 +161,12 @@ namespace CollectorsFrontEnd.InterfaceModels
             {
 
             }
+
+            // Use sparingly. Eventually include attributes in metatags?
+            public static List<string> GetCardAttributesRestrictions(string aszLongName, string aszKey)
+            {
+                return SCI.GetCardAttributeRestrictions(aszLongName, aszKey);
+            }
         }
         #endregion
 
@@ -223,6 +233,8 @@ namespace CollectorsFrontEnd.InterfaceModels
         {
             return SCI.GetAllCardsStartingWith(aszStart);
         }
+
+
 
         public static void ImportJSONCollection()
         {

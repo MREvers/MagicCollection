@@ -24,6 +24,8 @@ public:
 	void SaveCollection(std::string aszCollectionToSave);
 
 	std::vector<std::pair<std::string, std::string>> GetCardAttributes(std::string aszCardNameLong);
+	// Returns the list of restions if restrictions exist. * if none exist.
+	std::vector<std::string> GetCardAttributeRestriction(std::string aszCardNameLong, std::string aszKey);
 
 	// Loads specified collection into memory by file name
 	std::string LoadCollection(std::string aszCollectionToLoad);

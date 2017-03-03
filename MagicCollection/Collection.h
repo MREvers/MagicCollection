@@ -84,6 +84,8 @@ public:
 		std::vector<std::pair<std::string, std::string>> alstMatchMeta = std::vector<std::pair<std::string, std::string>>());
 	void SetNonUniqueAttributes(std::string aszLongName, std::vector<std::pair<std::string, std::string>> alstKeyVals,
 		std::vector<std::pair<std::string, std::string>> alstMatchMeta = std::vector<std::pair<std::string, std::string>>());
+	// Returns the list of restions if restrictions exist. * if none exist.
+	std::vector<std::string> GetNonUniqueAttributeRestrictions(std::string aszLongName, std::string aszKey);
 
 	std::vector < std::vector<std::pair<std::string, std::string>>> GetMetaTags(std::string aszLongName);
 	void RollbackTransaction();

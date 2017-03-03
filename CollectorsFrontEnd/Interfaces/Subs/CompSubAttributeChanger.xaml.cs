@@ -70,6 +70,18 @@ namespace CollectorsFrontEnd.Interfaces.Subs
             {
                 CardModelObject = aDataModel;
                 LstCurrentMetaTags = aLstCurrentTags.Select(x=>new MutableTuple(x.Item1, x.Item2)).ToList();
+                LstNonUniqueAttrs = new List<MutableRestrictedList>();
+                foreach (var aut in aDataModel.LstSpecifiedAttrs)
+                {
+                    List<string> lstRestrictedVals = aDataModel
+                        .LstSpecifiedAttrsRestrictions
+                        .Where(x => x.Item1 == aut.Item1)?.Select(x => x.Item2)?.FirstOrDefault();
+                    if (lstRestrictedVals == null)
+                    {
+                        lstRestrictedVals = new List<string>();
+                    }
+                    SetNonUniqueAttribute(aut.Item1, aut.Item2, lstRestrictedVals);
+                }
             }
 
             public void SetNonUniqueAttribute(string aszKey, string aszValue, List<string> alstPossibleVals)

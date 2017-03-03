@@ -536,6 +536,10 @@ void CollectionObject::ConstructCopy(CopyObject& roCO, std::vector<std::pair<std
 			{
 				roCO.NonUniqueTraits.at(pszs.first) = pszs.second;
 			}
+			else
+			{
+				roCO.SetNonUniqueAttr(pszs.first, pszs.second);
+			}
 
 		}
 
@@ -610,7 +614,7 @@ const char * const CollectionObject::LstUniqueTraits[] = { "manaCost", "colors",
 
 bool CollectionObject::IsUniqueTrait(std::string aszTrait)
 {
-	for (int i = 0; i < 0; i++)
+	for (int i = 0; i < 7; i++)
 	{
 		if (aszTrait == LstUniqueTraits[i])
 		{

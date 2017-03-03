@@ -415,6 +415,30 @@ void Collection::SetNonUniqueAttributes(std::string aszLongName, std::vector<std
 	}
 }
 
+std::vector<std::string> Collection::GetNonUniqueAttributeRestrictions(std::string aszLongName, std::string aszKey)
+{
+	std::string szCardName;
+	int iAmount;
+	std::string szDetails;
+	if (Collection::ParseCardLine(aszLongName, iAmount, szCardName, szDetails))
+	{
+		bool bAlreadyTagged = false;
+		int iCardCacheIndex = m_ColSource->LoadCard(szCardName);
+		if (iCardCacheIndex != -1)
+		{
+			CollectionObject* oCardClass = m_ColSource->GetCardPrototype(iCardCacheIndex);
+			auto mapRestrictions = oCardClass->GetNonUniqueAttributeRestrictions();
+			if (mapRestrictions.find(aszKey) != mapRestrictions.end())
+			{
+				return mapRestrictions[aszKey];
+			}
+		}
+	}
+	std::vector<std::string> lstNullRetVal;
+	lstNullRetVal.push_back("*");
+	return lstNullRetVal;
+}
+
 std::vector<std::vector<std::pair<std::string, std::string>>> Collection::GetMetaTags(std::string aszLongName)
 {
 	std::vector<std::vector<std::pair<std::string, std::string>>> lstRetVal;

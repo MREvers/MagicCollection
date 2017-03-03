@@ -20,6 +20,7 @@ namespace CollectorsFrontEnd.InterfaceModels
         public List<Tuple<string, string>> LstMetaTags;
         public List<Tuple<string, string>> LstSpecifiedAttrs; // Attrs that can change between copy such as 'Set'
         public List<Tuple<string, string>> LstIdentifiedAttrs; // Attrs that define a copy into a card class.
+        public List<Tuple<string, List<string>>> LstSpecifiedAttrsRestrictions;
 
         public event PropertyChangedEventHandler PropertyChanged;
         protected virtual void OnPropertyChanged(string propertyName)
@@ -51,6 +52,8 @@ namespace CollectorsFrontEnd.InterfaceModels
             LstMetaTags = aLstMetaTags;
             LstSpecifiedAttrs = aLstSpecifiedAttrs;
             LstIdentifiedAttrs = aLstIdentifiedAttrs;
+
+
             /*
             if (LstMetaTags.FirstOrDefault(x => x.Item1 == "Generalization") == null)
             {
@@ -63,6 +66,15 @@ namespace CollectorsFrontEnd.InterfaceModels
         {
             Amount = aiAmount;
             CardNameLong = aszCardNameLong;
+            LstSpecifiedAttrsRestrictions = new List<Tuple<string, List<string>>>();
+            foreach (Tuple<string, string> TupKeyVal in LstSpecifiedAttrs)
+            {
+                List<string> lstRestrictions = getCardAttributeRestrictions(TupKeyVal.Item1);
+                if (lstRestrictions[0] != "*")
+                {
+                    LstSpecifiedAttrsRestrictions.Add(new Tuple<string, List<string>>(TupKeyVal.Item1, lstRestrictions));
+                }
+            }
         }
 
         public void AddMetaTag(Tuple<string,string> aTupKeyVal)
@@ -128,6 +140,11 @@ namespace CollectorsFrontEnd.InterfaceModels
         private void ImageLoaded(object sender, EventArgs e)
         {
             CardImage = (BitmapImage)sender;
+        }
+
+        private List<string> getCardAttributeRestrictions(string aszKey)
+        {
+            return ServerInterfaceModel.CardClassInterfaceModel.GetCardAttributesRestrictions(CardNameLong, aszKey);
         }
     }
 }

@@ -219,6 +219,14 @@ ServerClientInterface::GetCollectionListWithMeta(System::String^ ahszCollectionN
 }
 
 System::Collections::Generic::List<System::String^>^ 
+ServerClientInterface::GetCardAttributeRestrictions(System::String^ ahszLongName, System::String^ ahszKey)
+{
+	std::string szKey = msclr::interop::marshal_as<std::string>(ahszKey);
+	std::string szLongCardName = msclr::interop::marshal_as<std::string>(ahszLongName);
+	return stringVectorToList(m_StoreFrontBackEnd->GetCardAttributeRestriction(szLongCardName, szKey));
+}
+
+System::Collections::Generic::List<System::String^>^ 
 ServerClientInterface::GetLoadedCollections()
 {
 	System::Collections::Generic::List<System::String^>^ hlstRetval = gcnew System::Collections::Generic::List<System::String^>();
@@ -369,6 +377,17 @@ System::Boolean ServerClientInterface::IsSameMetaTags(
 void ServerClientInterface::ImportCollection()
 {
 	m_StoreFrontBackEnd->ImportCollection();
+}
+System::Collections::Generic::List<System::String^>^ 
+ServerClientInterface::stringVectorToList(std::vector<std::string> alstTrans)
+{
+	System::Collections::Generic::List<System::String^>^ hlstRetVal = gcnew System::Collections::Generic::List<System::String^>();
+	std::vector<std::string>::iterator iter_stringList = alstTrans.begin();
+	for (; iter_stringList != alstTrans.end(); ++iter_stringList)
+	{
+		hlstRetVal->Add(gcnew System::String(iter_stringList->c_str()));
+	}
+	return hlstRetVal;
 }
 
 std::vector<std::pair<std::string, std::string>> ServerClientInterface::tupleListToVector(

@@ -51,6 +51,7 @@ public:
 					System::String^,
 					System::String^>^>^>^>^
 		GetCollectionListWithMeta(System::String^ ahszCollectionName);
+	System::Collections::Generic::List<System::String^>^ GetCardAttributeRestrictions(System::String^ ahszLongName, System::String^ ahszKey);
 	System::Collections::Generic::List<System::Collections::Generic::List<System::Tuple<System::String^, System::String^>^>^>^
 		GetMetaTags(System::String^ ahszCollectionName, System::String^ ahszLongName);
 	void AddMetaTag(System::String^ ahszCollectionName,
@@ -76,6 +77,7 @@ public:
 private:
 	CStoreFrontBackEnd* m_StoreFrontBackEnd;
 
+	System::Collections::Generic::List<System::String^>^ stringVectorToList(std::vector<std::string> alstTrans);
 	std::vector<std::pair<std::string, std::string>> tupleListToVector(System::Collections::Generic::List<System::Tuple<System::String^, System::String^>^>^ hlstMetaTagsOne);
 };
 
