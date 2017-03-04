@@ -284,7 +284,7 @@ namespace CollectorsFrontEnd.Interfaces
 
             foreach (Tuple<string, string> RemoveTag in LstRemovedTags)
             {
-                aDataModel.CardModelObject.RemoveMetaTag(RemoveTag);
+                aDataModel.CardModelObject.RemoveMetaTag(RemoveTag.Item1);
             }
 
             if (LstAddedTags.Count + LstRemovedTags.Count > 0)

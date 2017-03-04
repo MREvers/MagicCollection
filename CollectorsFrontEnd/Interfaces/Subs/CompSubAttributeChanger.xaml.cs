@@ -210,6 +210,11 @@ namespace CollectorsFrontEnd.Interfaces.Subs
 
         private void eRemoveTag_Click(object sender, RoutedEventArgs e)
         {
+            if (DGMetas.SelectedIndex != -1)
+            {
+                DataModel.LstCurrentMetaTags.Remove(DataModel.LstCurrentMetaTags[DGMetas.SelectedIndex]);
+                DGMetas.Items.Refresh();
+            }
             showMainDisplay();
         }
 

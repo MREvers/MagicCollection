@@ -85,18 +85,21 @@ public:
 	static CopyObject GenerateCopy(std::string aszCollectionName);
 	// Used in building a printable structure
 	static CopyObject GenerateCopy(std::string aszCollectionName, std::vector<std::pair<std::string, std::string>> alstAttrs);
-	static void ConstructCopy(CopyObject& roCO, std::vector<std::pair<std::string, std::string>> alstAttrs);
+	static void ConstructCopy(CopyObject& roCO,
+		std::vector<std::pair<std::string, std::string>> alstAttrs);
 	// Keep in mind that this does not compare names because the name of the card is not known by the copy object.
 	// Additionally, it assumes you are comparing two cards of the same type.
 	static bool IsSameIdentity(CopyObject* aoCOne, CopyObject* aoCTwo, bool bMatchParent = true);
-	static std::vector<std::pair<std::string, std::string>> FilterNonUniqueTraits(std::vector<std::pair<std::string, std::string>> alstAttrs);
+	static std::vector<std::pair<std::string, std::string>> FilterOutUniqueTraits(std::vector<std::pair<std::string, std::string>> alstAttrs);
 	static std::vector<std::pair<std::string, std::string>> ConvertMapToList(std::map<std::string, std::string>  aMap);
 	static bool IsUniqueTrait(std::string aszTrait);
+	static bool IsNonUniqueTrait(std::string aszTrait);
 	static bool CompareKeyValPairList(std::vector<std::pair<std::string, std::string>> alstFirst,
 		std::vector<std::pair<std::string, std::string>> alstSecond);
 	static std::string str_trim( const std::string& aszTrim, char removeChar);
 
 	static const char * const LstUniqueTraits[];
+	static const char * const LstNonUniqueTraits[];
 private:
 	int m_iAllCopies; // Used in assigning IDs.
 

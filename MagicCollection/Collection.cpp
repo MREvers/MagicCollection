@@ -217,7 +217,7 @@ Collection::RemoveMetaTag(
 				// Check if the copy has maching tags
 				// Check if attrs match
 				if (CollectionObject::CompareKeyValPairList(
-					CollectionObject::FilterNonUniqueTraits(lstTargetAttrs),
+					CollectionObject::FilterOutUniqueTraits(lstTargetAttrs),
 					CollectionObject::ConvertMapToList((*iter_Copies)->NonUniqueTraits))
 					)
 				{
@@ -273,7 +273,7 @@ void Collection::AddMetaTags(std::string aszLongName, std::vector<std::pair<std:
 				// Check if the copy has maching tags
 				// Check if attrs match
 				if (CollectionObject::CompareKeyValPairList(
-					CollectionObject::FilterNonUniqueTraits(lstTargetAttrs),
+					CollectionObject::FilterOutUniqueTraits(lstTargetAttrs),
 					CollectionObject::ConvertMapToList((*iter_Copies)->NonUniqueTraits))
 					)
 				{
@@ -360,7 +360,7 @@ void Collection::SetNonUniqueAttributes(std::string aszLongName, std::vector<std
 				// Check if the copy has maching tags
 				// Check if attrs match
 				if (CollectionObject::CompareKeyValPairList(
-					CollectionObject::FilterNonUniqueTraits(lstTargetAttrs),
+					CollectionObject::FilterOutUniqueTraits(lstTargetAttrs),
 					CollectionObject::ConvertMapToList((*iter_Copies)->NonUniqueTraits))
 					)
 				{
@@ -455,7 +455,7 @@ std::vector<std::vector<std::pair<std::string, std::string>>> Collection::GetMet
 			for (; iter_Copies != LstCopies.end(); ++iter_Copies)
 			{
 				if (CollectionObject::CompareKeyValPairList(
-					CollectionObject::FilterNonUniqueTraits(ParseAttrs(szDetails)),
+					CollectionObject::FilterOutUniqueTraits(ParseAttrs(szDetails)),
 					CollectionObject::ConvertMapToList((*iter_Copies)->NonUniqueTraits)))
 				{
 					lstRetVal.push_back((*iter_Copies)->GetMetaTags(m_szName));

@@ -162,11 +162,20 @@ bool CopyObject::HasPerCollectionTag(std::string aszCollection, std::string aszK
 
 void CopyObject::SetNonUniqueAttr(std::string aszKey, std::string aszValue)
 {
+	// The construct copy function is static, so I can't just grab the paired
+	//	traits from the collection obj. I need to overhaul the Construct Copy function.
+	//  It really can't be static because the copy now has dependencies on the CollectionObj.
+	// This really makes more sense, because the IsSameCopy function should really be on
+	//  the collectionobject level... maybe, idk.
+	// Or the SetNonUniqueAttr is on the collectionobj level... Idk, shit's broke.
+
+
 	bool bCheckPairedTraits = false;
 	int iIndexOfAllowedTrait = 0;
 	bool bRestrictedMatch = false;
 	// Already has a value.
-	auto lstRestrictions = m_mapNonUniqueAttributesRestrictions->find(aszKey);
+	std::map<std::string, std::vector<std::string>>::iterator lstRestrictions =
+		m_mapNonUniqueAttributesRestrictions->find(aszKey);
 	if (lstRestrictions != m_mapNonUniqueAttributesRestrictions->end())
 	{
 		// Check to make sure that the attribute is restricted
@@ -390,7 +399,7 @@ void CollectionObject::RemoveCopy(std::string aszCollectionName,
 		{
 			if (CompareKeyValPairList(
 				ConvertMapToList(iter->NonUniqueTraits),
-				FilterNonUniqueTraits(alstAttrs)))
+				FilterOutUniqueTraits(alstAttrs)))
 			{
 				if (CopyObject::IsSameMetaTags(iter->MetaTags, alstMeta))
 				{
@@ -531,19 +540,16 @@ void CollectionObject::ConstructCopy(CopyObject& roCO, std::vector<std::pair<std
 		}
 		else
 		{
-			// Only if its a nonunique trait
-			if (!(IsUniqueTrait(pszs.first)))
-			{
-				roCO.NonUniqueTraits.at(pszs.first) = pszs.second;
-			}
-			else
+			// We only need to store the non-unique traits.
+			//  All other traits are stored in the collectionobj.
+			if (IsNonUniqueTrait(pszs.first))
 			{
 				roCO.SetNonUniqueAttr(pszs.first, pszs.second);
 			}
-
 		}
 
 	}
+
 }
 
 // ASSUMES TWO CARDS OF THE SAME TYPE
@@ -584,13 +590,13 @@ bool CollectionObject::IsSameIdentity(CopyObject* aoCOne, CopyObject* aoCTwo, bo
 	}
 }
 
-std::vector<std::pair<std::string, std::string>> CollectionObject::FilterNonUniqueTraits(std::vector<std::pair<std::string, std::string>> alstAttrs)
+std::vector<std::pair<std::string, std::string>> CollectionObject::FilterOutUniqueTraits(std::vector<std::pair<std::string, std::string>> alstAttrs)
 {
 	std::vector<std::pair<std::string, std::string>> lstRetVal;
 	std::vector<std::pair<std::string, std::string>>::iterator iter_Traits = alstAttrs.begin();
 	for (; iter_Traits != alstAttrs.end(); ++iter_Traits)
 	{
-		if (!(IsUniqueTrait(iter_Traits->first)))
+		if (IsNonUniqueTrait(iter_Traits->first))
 		{
 			lstRetVal.push_back(*iter_Traits);
 		}
@@ -617,6 +623,18 @@ bool CollectionObject::IsUniqueTrait(std::string aszTrait)
 	for (int i = 0; i < 7; i++)
 	{
 		if (aszTrait == LstUniqueTraits[i])
+		{
+			return true;
+		}
+	}
+	return false;
+}
+const char * const CollectionObject::LstNonUniqueTraits[] = { "set", "multiverseid" };
+bool CollectionObject::IsNonUniqueTrait(std::string aszTrait)
+{
+	for (int i = 0; i < 2; i++)
+	{
+		if (aszTrait == LstNonUniqueTraits[i])
 		{
 			return true;
 		}

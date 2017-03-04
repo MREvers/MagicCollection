@@ -89,14 +89,14 @@ namespace CollectorsFrontEnd.InterfaceModels
                 LstMetaTags);
         }
 
-        public void RemoveMetaTag(Tuple<string, string> aTupKeyVal)
+        public void RemoveMetaTag(string aszKey)
         {
             ServerInterfaceModel
                 .CardClassInterfaceModel
                 .RemoveMetaTag(
                 TargetCollection,
                 CardNameLong,
-                aTupKeyVal.Item1,
+                aszKey,
                 LstMetaTags);
         }
 
