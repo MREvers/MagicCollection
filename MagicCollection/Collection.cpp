@@ -96,21 +96,24 @@ void Collection::AddItem(std::string aszNewItem,
 		// Construct a string for history.
 		std::string szCard = "";
 		int iCardProto = m_ColSource->LoadCard(aszNewItem);
-		CopyObject oCO = m_ColSource->GetCardPrototype(iCardProto)->GenerateCopy(m_szName);
-		CollectionObject::ConstructCopy(oCO, alstAttrs);
-		szCard += cardToString(iCardProto, &std::make_pair(&oCO, 1));
+		if (iCardProto != -1)
+		{
+			CollectionObject* oCardPrototype = m_ColSource->GetCardPrototype(iCardProto);
+			CopyObject oCO = oCardPrototype->GenerateCopy(m_szName, alstAttrs);
+			szCard += cardToString(iCardProto, &std::make_pair(&oCO, 1));
 
-		// Store the action and how to undo it here.
-		Collection::Action oAction;
-		oAction.Identifier = "+ " + szCard;
-		oAction.Do = std::bind(&Collection::addItem, this, aszNewItem, alstAttrs, alstMeta);
-		oAction.Undo = std::bind(&Collection::removeItem, this, aszNewItem, alstAttrs, alstMeta);
+			// Store the action and how to undo it here.
+			Collection::Action oAction;
+			oAction.Identifier = "+ " + szCard;
+			oAction.Do = std::bind(&Collection::addItem, this, aszNewItem, alstAttrs, alstMeta);
+			oAction.Undo = std::bind(&Collection::removeItem, this, aszNewItem, alstAttrs, alstMeta);
 
-		// Store the arguments
-		Collection::Transaction* oTrans = &m_lstTransactions.at(m_lstTransactions.size() - 1);
-		oTrans->AddAction(oAction);
+			// Store the arguments
+			Collection::Transaction* oTrans = &m_lstTransactions.at(m_lstTransactions.size() - 1);
+			oTrans->AddAction(oAction);
 
-		TransactionIntercept = false;
+			TransactionIntercept = false;
+		}
 		return;
 	}
 
@@ -146,24 +149,26 @@ void Collection::RemoveItem(std::string aszRemoveItem,
 	if (TransactionIntercept)
 	{
 		int iCardProto = m_ColSource->LoadCard(aszRemoveItem);
-
-		CopyObject oCO;
-		if (m_ColSource->GetCardPrototype(iCardProto)->GetCopy(m_szName, alstAttrs, oCO))
+		if (iCardProto != -1)
 		{
-			std::string szCard = cardToString(iCardProto, &std::make_pair(&oCO, 1));
+			CollectionObject* CardPrototype = m_ColSource->GetCardPrototype(iCardProto);
+			CopyObject* oCO;
+			if (CardPrototype->GetCopy(m_szName, alstAttrs, oCO))
+			{
+				std::string szCard = cardToString(iCardProto, &std::make_pair(oCO, 1));
 
-			Collection::Action oAction;
-			oAction.Identifier = "- " + szCard;
-			oAction.Do = std::bind(&Collection::removeItem, this, aszRemoveItem, alstAttrs, alstMeta);
-			oAction.Undo = std::bind(&Collection::addItem, this, aszRemoveItem, alstAttrs, alstMeta);
+				Collection::Action oAction;
+				oAction.Identifier = "- " + szCard;
+				oAction.Do = std::bind(&Collection::removeItem, this, aszRemoveItem, alstAttrs, alstMeta);
+				oAction.Undo = std::bind(&Collection::addItem, this, aszRemoveItem, alstAttrs, alstMeta);
 
-			// Store the arguments
-			Collection::Transaction* oTrans = &m_lstTransactions.at(m_lstTransactions.size() - 1);
-			oTrans->AddAction(oAction);
+				// Store the arguments
+				Collection::Transaction* oTrans = &m_lstTransactions.at(m_lstTransactions.size() - 1);
+				oTrans->AddAction(oAction);
 
-			TransactionIntercept = false;
+				TransactionIntercept = false;
+			}
 		}
-
 		return;
 	}
 
@@ -491,9 +496,7 @@ void Collection::addItem(std::string aszNewItem, std::vector<std::pair<std::stri
 		CollectionObject* oCard = m_ColSource->GetCardPrototype(iCard);
 
 		// Add a copy of this card. Save the reference if we need to add unique traits.
-		CopyObject* oCO = oCard->AddCopy(m_szName);
-
-		CollectionObject::ConstructCopy(*oCO, alstAttrs);
+		CopyObject* oCO = oCard->AddCopy(m_szName, alstAttrs);
 
 		std::vector<std::pair<std::string, std::string>>::iterator iter_Meta = alstMeta.begin();
 		for (; iter_Meta != alstMeta.end(); iter_Meta++)
@@ -514,9 +517,7 @@ CopyObject* Collection::forceAdd(std::string aszNewItem, std::vector<std::pair<s
 		CollectionObject* oCard = m_ColSource->GetCardPrototype(iCard);
 
 		// Add a copy of this card. Save the reference if we need to add unique traits.
-		CopyObject* oCO = oCard->AddCopy(m_szName);
-
-		CollectionObject::ConstructCopy(*oCO, alstAttrs);
+		CopyObject* oCO = oCard->AddCopy(m_szName, alstAttrs);
 
 		return oCO;
 	}
@@ -656,7 +657,8 @@ void Collection::LoadCollection(std::string aszFileName, std::vector<std::pair<s
 					if (iCardIndex != -1)
 					{
 						// Create a temporary copy.
-						CopyObject oCopy = CollectionObject::GenerateCopy(m_szName, lstKeyVals);
+						CollectionObject* ColPrototype = m_ColSource->GetCardPrototype(iCardIndex);
+						CopyObject oCopy = ColPrototype->GenerateCopy(m_szName, lstKeyVals);
 
 						// Check if a copy already exists.
 

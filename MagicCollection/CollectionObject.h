@@ -15,6 +15,10 @@ class CopyObject
 {
 public:
 	static std::vector<std::string> PerCollectionMetaTagNames;
+	CopyObject(
+		std::string aszParent,
+		std::vector<std::pair<std::string, std::string>>* alstPairedTags,
+		std::map<std::string, std::vector<std::string>>* alstRestrictions);
 	std::string ParentCollection;
 	std::vector<std::string> ResidentCollections;
 
@@ -23,10 +27,12 @@ public:
 
 	// Non-unique in the sense that the trait itself can have more than one value.
 	std::map<std::string, std::string> NonUniqueTraits;
-	std::vector<std::pair<std::string, std::string>>* m_LstPairedTraits;
-	std::map<std::string, std::vector<std::string>>* m_mapNonUniqueAttributesRestrictions;
 
-	// Other analytics go here.
+	// Attr Controlling Function
+	void SetPairedTraitsReference(std::vector<std::pair<std::string, std::string>>* aLstPairedTraits);
+	void SetNonUniqueAttributesRestrictionsReference(std::map<std::string, std::vector<std::string>>* aMapNonUAttrRestr);
+
+	// Meta Tag Controlling Functions
 	std::vector<std::pair<std::string, std::string>> GetMetaTags(std::string aszCollection);
 	bool IsPerCollectionTag(std::string aszKeyName);
 	void RemoveMetaTag(std::string aszCollection, std::string aszKey);
@@ -42,6 +48,10 @@ public:
 	static bool IsSameMetaTags(
 		std::vector<std::pair<std::string, std::string>> alstTagsOne,
 		std::vector<std::pair<std::string, std::string>> alstTagsTwo, bool abUseIgnore = true);
+
+private:
+	std::vector<std::pair<std::string, std::string>>* m_LstPairedTraits;
+	std::map<std::string, std::vector<std::string>>* m_mapNonUniqueAttributesRestrictions;
 
 };
 
@@ -62,9 +72,9 @@ public:
 	// Collection Interface
 	std::string GetName();
 	CopyObject* AddCopy(std::string aszCollectionName);
+	CopyObject* AddCopy(std::string aszCollectionName, std::vector<std::pair<std::string, std::string>> alstAttrs);
 
 	// The col children will have to match exactly... because copies are not identical.
-	void RemoveCopy(std::string aszCollectionName);
 	void RemoveCopy(std::string aszCollectionName,
 		std::vector<std::pair<std::string, std::string>> alstAttrs,
 		std::vector<std::pair<std::string, std::string>> alstMeta);
@@ -76,22 +86,22 @@ public:
 	// Gets all resi copies resident in aszCollectionName, located in aszParent, with the correct attributes.
 	std::vector<CopyObject*> GetCopiesWith(std::string aszCollectionName, std::string aszParent, std::vector<std::pair<std::string, std::string>> alstAttrs);
 	// Gets a copy with matching attrs
-	bool GetCopy(std::string aszCollectionName, std::vector<std::pair<std::string, std::string>> alstAttrs, CopyObject& roCO, bool abExact = true);
+	bool GetCopy(std::string aszCollectionName, std::vector<std::pair<std::string, std::string>> alstAttrs, CopyObject*& roCO, bool abExact = true);
 	// Used in building a printable structure
 	
 	std::map<std::string, std::vector<std::string>> GetNonUniqueAttributeRestrictions();
 	void SetNonUniqueAttributeRestrictions(std::map<std::string, std::vector<std::string>> aMapRestrictions);
 	
-	static CopyObject GenerateCopy(std::string aszCollectionName);
+	CopyObject GenerateCopy(std::string aszCollectionName);
 	// Used in building a printable structure
-	static CopyObject GenerateCopy(std::string aszCollectionName, std::vector<std::pair<std::string, std::string>> alstAttrs);
-	static void ConstructCopy(CopyObject& roCO,
-		std::vector<std::pair<std::string, std::string>> alstAttrs);
+	CopyObject GenerateCopy(std::string aszCollectionName, std::vector<std::pair<std::string, std::string>> alstAttrs);
 	// Keep in mind that this does not compare names because the name of the card is not known by the copy object.
 	// Additionally, it assumes you are comparing two cards of the same type.
 	static bool IsSameIdentity(CopyObject* aoCOne, CopyObject* aoCTwo, bool bMatchParent = true);
-	static std::vector<std::pair<std::string, std::string>> FilterOutUniqueTraits(std::vector<std::pair<std::string, std::string>> alstAttrs);
-	static std::vector<std::pair<std::string, std::string>> ConvertMapToList(std::map<std::string, std::string>  aMap);
+	static std::vector<std::pair<std::string, std::string>> 
+		FilterOutUniqueTraits(std::vector<std::pair<std::string, std::string>> alstAttrs);
+	static std::vector<std::pair<std::string, std::string>> 
+		ConvertMapToList(std::map<std::string, std::string>  aMap);
 	static bool IsUniqueTrait(std::string aszTrait);
 	static bool IsNonUniqueTrait(std::string aszTrait);
 	static bool CompareKeyValPairList(std::vector<std::pair<std::string, std::string>> alstFirst,

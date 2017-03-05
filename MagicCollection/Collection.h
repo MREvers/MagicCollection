@@ -14,7 +14,6 @@
 #include "ICollectionObject.h"
 #include "CollectionObject.h"
 // Just use magic card object for now
-#include "MagicCardObject.h"
 #include "CollectionSource.h"
 
 

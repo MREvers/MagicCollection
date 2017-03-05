@@ -2,6 +2,34 @@
 
 std::vector<std::string> CopyObject::PerCollectionMetaTagNames({ "Generalization" });
 
+CopyObject::CopyObject(
+	std::string aszParent,
+	std::vector<std::pair<std::string, std::string>>* alstPairedTags,
+	std::map<std::string, std::vector<std::string>>* alstRestrictions)
+{
+	ParentCollection = aszParent;
+	SetPairedTraitsReference(alstPairedTags);
+	SetNonUniqueAttributesRestrictionsReference(alstRestrictions);
+
+
+	// Initialize the nonuniques.
+	std::map<std::string, std::vector<std::string>>::iterator iter_NonUniques = m_mapNonUniqueAttributesRestrictions->begin();
+	for (; iter_NonUniques != m_mapNonUniqueAttributesRestrictions->end(); ++iter_NonUniques)
+	{
+		this->SetNonUniqueAttr(iter_NonUniques->first, iter_NonUniques->second.at(0));
+	}
+}
+
+void CopyObject::SetPairedTraitsReference(std::vector<std::pair<std::string, std::string>>* aLstPairedTraits)
+{
+	m_LstPairedTraits = aLstPairedTraits;
+}
+void CopyObject::SetNonUniqueAttributesRestrictionsReference(std::map<std::string, std::vector<std::string>>* aMapNonUAttrRestr)
+{
+	m_mapNonUniqueAttributesRestrictions = aMapNonUAttrRestr;
+}
+
+
 std::vector<std::pair<std::string, std::string>> CopyObject::GetMetaTags(std::string aszCollection)
 {
 	std::vector<std::pair<std::string, std::string>> lstRetVal;
@@ -337,18 +365,15 @@ std::string CollectionObject::GetName()
 // By default the parent is the collection that adds it.
 CopyObject* CollectionObject::AddCopy(std::string aszCollectionName)
 {
-	CopyObject oNewCopy;
-	oNewCopy.ParentCollection = aszCollectionName;
-	oNewCopy.ResidentCollections.push_back(aszCollectionName);
-	oNewCopy.m_mapNonUniqueAttributesRestrictions = &m_mapNonUniqueAttributesRestrictions;
-	oNewCopy.m_LstPairedTraits = &m_lstPairedAttributes;
+	CopyObject oNewCopy = GenerateCopy(aszCollectionName);
 	
-	// Initialize the nonuniques.
-	std::map<std::string, std::vector<std::string>>::iterator iter_NonUniques = m_mapNonUniqueAttributesRestrictions.begin();
-	for (; iter_NonUniques != m_mapNonUniqueAttributesRestrictions.end(); ++iter_NonUniques)
-	{
-		oNewCopy.SetNonUniqueAttr(iter_NonUniques->first, iter_NonUniques->second.at(0));
-	}
+	m_lstCopies.push_back(oNewCopy);
+	return &m_lstCopies[m_lstCopies.size() - 1];
+}
+
+CopyObject*  CollectionObject::AddCopy(std::string aszCollectionName, std::vector<std::pair<std::string, std::string>> alstAttrs)
+{
+	CopyObject oNewCopy = GenerateCopy(aszCollectionName, alstAttrs);
 
 	m_lstCopies.push_back(oNewCopy);
 	return &m_lstCopies[m_lstCopies.size() - 1];
@@ -356,8 +381,7 @@ CopyObject* CollectionObject::AddCopy(std::string aszCollectionName)
 
 CopyObject CollectionObject::GenerateCopy(std::string aszCollectionName)
 {
-	CopyObject oNewCopy;
-	oNewCopy.ParentCollection = aszCollectionName;
+	CopyObject oNewCopy(aszCollectionName, &m_lstPairedAttributes, &m_mapNonUniqueAttributesRestrictions);
 	oNewCopy.ResidentCollections.push_back(aszCollectionName);
 	return oNewCopy;
 }
@@ -365,34 +389,34 @@ CopyObject CollectionObject::GenerateCopy(std::string aszCollectionName)
 
 CopyObject CollectionObject::GenerateCopy(std::string aszCollectionName, std::vector<std::pair<std::string, std::string>> alstAttrs)
 {
-	CopyObject oNewCopy;
-	oNewCopy.ParentCollection = aszCollectionName;
-	oNewCopy.ResidentCollections.push_back(aszCollectionName);
-	ConstructCopy(oNewCopy, alstAttrs);
-	return oNewCopy;
-}
+	CopyObject oNewCopy = GenerateCopy(aszCollectionName);
 
-
-void CollectionObject::RemoveCopy(std::string aszCollectionName)
-{
-	// In the future, we need to find the copy that matches the description.
-	// If more than one copy matches the description, remove any.
-	for (std::vector<CopyObject>::iterator iter = m_lstCopies.begin(); iter != m_lstCopies.end(); ++iter)
+	for (int i = 0; i < alstAttrs.size(); i++)
 	{
-		if (iter->ParentCollection == aszCollectionName)
+		std::pair<std::string, std::string> pszs = alstAttrs.at(i);
+		if (pszs.first == "Parent")
 		{
-			m_lstCopies.erase(iter);
-			break;
+			oNewCopy.ParentCollection = pszs.second;
 		}
+		else
+		{
+			// We only need to store the non-unique traits.
+			//  All other traits are stored in the collectionobj.
+			if (IsNonUniqueTrait(pszs.first))
+			{
+				oNewCopy.SetNonUniqueAttr(pszs.first, pszs.second);
+			}
+		}
+
 	}
+
+	return oNewCopy;
 }
 
 void CollectionObject::RemoveCopy(std::string aszCollectionName,
 	std::vector<std::pair<std::string, std::string>> alstAttrs,
 	std::vector<std::pair<std::string, std::string>> alstMeta)
 {
-	// In the future, we need to find the copy that matches the description.
-	// If more than one copy matches the description, remove any.
 	for (std::vector<CopyObject>::iterator iter = m_lstCopies.begin(); iter != m_lstCopies.end(); ++iter)
 	{
 		if (iter->ParentCollection == aszCollectionName)
@@ -497,11 +521,10 @@ std::vector<CopyObject*> CollectionObject::GetCopiesWith(std::string aszCollecti
 	return rLstRetVal;
 }
 
-bool CollectionObject::GetCopy(std::string aszCollectionName, std::vector<std::pair<std::string, std::string>> alstAttrs, CopyObject& roCO, bool abExact)
+bool CollectionObject::GetCopy(std::string aszCollectionName, std::vector<std::pair<std::string, std::string>> alstAttrs, CopyObject*& roCO, bool abExact)
 {
 	bool bFound = false;
-	CopyObject oCompare = GenerateCopy(aszCollectionName);
-	ConstructCopy(oCompare, alstAttrs);
+	CopyObject oCompare = GenerateCopy(aszCollectionName, alstAttrs);
 
 	std::vector<CopyObject*> lstCopies = GetLocalCopies(aszCollectionName);
 	std::vector<CopyObject*>::iterator iter_copies = lstCopies.begin();
@@ -510,7 +533,7 @@ bool CollectionObject::GetCopy(std::string aszCollectionName, std::vector<std::p
 		if (IsSameIdentity(&oCompare, *iter_copies))
 		{
 			bFound = true;
-			roCO = **iter_copies;
+			roCO = *iter_copies;
 			break;
 		}
 	}
@@ -523,33 +546,10 @@ std::map<std::string, std::vector<std::string>> CollectionObject::GetNonUniqueAt
 	return m_mapNonUniqueAttributesRestrictions;
 }
 
-// Sets and initializes nonunique attributes
+// Sets nonunique attributes
 void CollectionObject::SetNonUniqueAttributeRestrictions(std::map<std::string, std::vector<std::string>> aMapRestrictions)
 {
 	m_mapNonUniqueAttributesRestrictions = aMapRestrictions;
-}
-
-void CollectionObject::ConstructCopy(CopyObject& roCO, std::vector<std::pair<std::string, std::string>> alstAttrs)
-{
-	for (int i = 0; i < alstAttrs.size(); i++)
-	{
-		std::pair<std::string, std::string> pszs = alstAttrs.at(i);
-		if (pszs.first == "Parent")
-		{
-			roCO.ParentCollection = pszs.second;
-		}
-		else
-		{
-			// We only need to store the non-unique traits.
-			//  All other traits are stored in the collectionobj.
-			if (IsNonUniqueTrait(pszs.first))
-			{
-				roCO.SetNonUniqueAttr(pszs.first, pszs.second);
-			}
-		}
-
-	}
-
 }
 
 // ASSUMES TWO CARDS OF THE SAME TYPE

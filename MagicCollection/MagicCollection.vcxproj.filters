@@ -45,9 +45,6 @@
     <ClCompile Include="SourceObject.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="MagicCardObject.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="CollectionFactory.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -96,9 +93,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="SourceObject.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="MagicCardObject.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="CollectionFactory.h">

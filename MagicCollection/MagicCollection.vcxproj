@@ -161,7 +161,6 @@
     <ClCompile Include="JSONImporter.cpp">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MaxSpeed</Optimization>
     </ClCompile>
-    <ClCompile Include="MagicCardObject.cpp" />
     <ClCompile Include="MagicCollection.cpp" />
     <ClCompile Include="ServerIFace.cpp" />
     <ClCompile Include="ServerIFace\ClientSocket.cpp" />
@@ -181,7 +180,6 @@
     <ClInclude Include="ICollection.h" />
     <ClInclude Include="ICollectionObject.h" />
     <ClInclude Include="JSONImporter.h" />
-    <ClInclude Include="MagicCardObject.h" />
     <ClInclude Include="ServerIFace.h" />
     <ClInclude Include="ServerIFace\ClientSocket.h" />
     <ClInclude Include="ServerIFace\ProgramServer.h" />

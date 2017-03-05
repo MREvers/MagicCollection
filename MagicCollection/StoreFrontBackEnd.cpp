@@ -247,7 +247,6 @@ bool CStoreFrontBackEnd::IsSameCard(std::string aszLongOne, std::string aszLongT
 	std::string szDetails;
 	if (Collection::ParseCardLine(aszLongOne, iAmount, szName, szDetails))
 	{
-
 		std::string szNameTwo;
 		int iAmountTwo;
 		std::string szDetailsTwo;
@@ -255,14 +254,20 @@ bool CStoreFrontBackEnd::IsSameCard(std::string aszLongOne, std::string aszLongT
 		{
 			if (szName == szNameTwo)
 			{
-				std::vector<std::pair<std::string, std::string>> lstAttrs = Collection::ParseAttrs(szDetails);
-				std::vector<std::pair<std::string, std::string>> lstAttrsTwo = Collection::ParseAttrs(szDetailsTwo);
-				CopyObject oCop = CollectionObject::GenerateCopy(std::string("None"), lstAttrs);
-				CopyObject oCop2 = CollectionObject::GenerateCopy(std::string("None"), lstAttrsTwo);
-				if (CollectionObject::IsSameIdentity(&oCop, &oCop2))
+				int iFound = m_ColSource->LoadCard(szName);
+				if (iFound != -1)
 				{
-					return true;
+					std::vector<std::pair<std::string, std::string>> lstAttrs = Collection::ParseAttrs(szDetails);
+					std::vector<std::pair<std::string, std::string>> lstAttrsTwo = Collection::ParseAttrs(szDetailsTwo);
+					CollectionObject* ColObject = m_ColSource->GetCardPrototype(iFound);
+					CopyObject oCop = ColObject->GenerateCopy(std::string("None"), lstAttrs);
+					CopyObject oCop2 = ColObject->GenerateCopy(std::string("None"), lstAttrsTwo);
+					if (CollectionObject::IsSameIdentity(&oCop, &oCop2))
+					{
+						return true;
+					}
 				}
+
 			}
 		}
 	}
