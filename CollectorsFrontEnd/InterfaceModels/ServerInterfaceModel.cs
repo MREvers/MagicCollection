@@ -33,6 +33,8 @@ namespace CollectorsFrontEnd.InterfaceModels
                 SCI.RemoveItem(aszCollectionName, aszCardNameLong, lstMeta);
             }
 
+
+
             /// <summary>
             /// Calls the server for the most up to date list of copies.
             /// </summary>
@@ -89,6 +91,12 @@ namespace CollectorsFrontEnd.InterfaceModels
                 List<Tuple<string,string>> aLstMatchMeta)
             {
                 SCI.AddMetaTag(aszCollectionName, aszLongCardName, aszKey, aszVal, aLstMatchMeta);
+            }
+
+            public static void SubmitMetaTagChangesToServer(string aszCollectionName, string aszLongName,
+                List<Tuple<string, string>> alstNewMeta, List<Tuple<string,string>> alstMeta)
+            {
+                SCI.AddMetaTags(aszCollectionName, aszLongName, alstNewMeta, alstMeta);
             }
 
             public static void RemoveMetaTag(string aszCollectionName,

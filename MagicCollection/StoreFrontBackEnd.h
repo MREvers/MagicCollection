@@ -48,6 +48,11 @@ public:
 		std::string aszKey,
 		std::string aszValue,
 		std::vector<std::pair<std::string, std::string>> alstMatchMeta);
+   void AddMetaTags(
+      std::string aszCollection,
+      std::string aszLongName,
+      std::vector<std::pair<std::string, std::string>> alstNewTags,
+      std::vector<std::pair<std::string, std::string>> alstMatchMeta);
 	void AddMetaTag(
 		std::string aszCollection,
 		std::string aszLongName,

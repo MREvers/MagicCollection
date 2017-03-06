@@ -244,7 +244,7 @@ namespace CollectorsFrontEnd.Interfaces
                 bool bFound = false;
                 foreach (Tuple<string, string> Tup in aDataModel.CardModelObject.LstMetaTags)
                 {
-                    if (Tup.Item1 == NewTup.First)
+                    if (Tup.Item1 == NewTup.First && Tup.Item2 == NewTup.Second)
                     {
                         bFound = true;
                         break;
@@ -277,15 +277,20 @@ namespace CollectorsFrontEnd.Interfaces
                 }
             }
 
+            List<Tuple<string, string>> LstChanges = new List<Tuple<string, string>>();
             foreach (Tuple<string, string> AddTag in LstAddedTags)
             {
-                aDataModel.CardModelObject.AddMetaTag(AddTag);
+                LstChanges.Add(AddTag);
             }
 
             foreach (Tuple<string, string> RemoveTag in LstRemovedTags)
             {
-                aDataModel.CardModelObject.RemoveMetaTag(RemoveTag.Item1);
+                // aDataModel.CardModelObject.RemoveMetaTag(RemoveTag.Item1);
+                Tuple<string, string> RemoveTuple = new Tuple<string, string>(RemoveTag.Item1, "!NULL");
+                LstChanges.Add(RemoveTuple);
             }
+
+            aDataModel.CardModelObject.SubmitMetaTagChangesToServer(LstChanges);
 
             if (LstAddedTags.Count + LstRemovedTags.Count > 0)
             {
@@ -359,5 +364,10 @@ namespace CollectorsFrontEnd.Interfaces
             showAddItemWindow();
         }
         #endregion
+
+        private void eSaveCollection_Click(object sender, RoutedEventArgs e)
+        {
+            DataModel.SaveCollection();
+        }
     }
 }

@@ -59,6 +59,10 @@ public:
 		System::String^ ahszKey,
 		System::String^ ahszVal,
 		System::Collections::Generic::List<System::Tuple<System::String^, System::String^>^>^ hlstMetaTags);
+   void AddMetaTags(System::String^ ahszCollectionName,
+      System::String^ ahszLongName,
+      System::Collections::Generic::List<System::Tuple<System::String^, System::String^>^>^ hlstNewTags,
+      System::Collections::Generic::List<System::Tuple<System::String^, System::String^>^>^ hlstMetaTags);
 	void AddMetaTag(System::String^ ahszCollectionName,
 		System::String^ ahszLongName,
 		System::String^ ahszKey,

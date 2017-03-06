@@ -47,7 +47,8 @@
             <Button x:Name="BtnBulkEdit" Grid.Row="3"  HorizontalAlignment="Stretch">
                 <TextBlock>Bulk Edit</TextBlock>
             </Button>
-            <Button x:Name="BtnSaveCollection" Grid.Row="4"  HorizontalAlignment="Stretch">
+            <Button x:Name="BtnSaveCollection" Grid.Row="4"  HorizontalAlignment="Stretch"
+                    Click="eSaveCollection_Click">
                 <TextBlock>Save Collection</TextBlock>
             </Button>
         </Grid>

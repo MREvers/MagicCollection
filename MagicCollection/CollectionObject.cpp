@@ -113,12 +113,27 @@ void CopyObject::RemoveMetaTag(std::string aszCollection, std::string aszKey)
 
 void CopyObject::SetMetaTag(std::string aszCollection, std::string aszKey, std::string aszVal)
 {
+   if (aszVal == "!NULL")
+   {
+      RemoveMetaTag(aszCollection, aszKey);
+      return;
+   }
+
 	// Ensure that this tag is not unique to a collection
 	if (IsPerCollectionTag(aszKey))
 	{
 		if (HasPerCollectionTag(aszCollection, aszKey))
 		{
-			PerCollectionMetaTags[aszCollection].push_back(std::make_pair(aszKey, aszVal));
+         int iFind = SourceObject::List_Find(aszKey, PerCollectionMetaTags[aszCollection]);
+         if (iFind == -1)
+         {
+            PerCollectionMetaTags[aszCollection].push_back(std::make_pair(aszKey, aszVal));
+         }
+         else
+         {
+            PerCollectionMetaTags[aszCollection][iFind].second = aszVal;
+         }
+			
 		}
 		else
 		{

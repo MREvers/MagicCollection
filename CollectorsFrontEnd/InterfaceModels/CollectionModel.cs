@@ -32,6 +32,11 @@ namespace CollectorsFrontEnd.InterfaceModels
             }
         }
 
+        public void SaveCollection()
+        {
+            ServerInterfaceModel.CollectionInterfaceModel.SaveCollection(CollectionName);
+        }
+
         public void AddItem(string aszCardNameLong, List<Tuple<string, string>> alstMeta)
         {
             ServerInterfaceModel.CollectionInterfaceModel.AddItem(CollectionName, aszCardNameLong, alstMeta);

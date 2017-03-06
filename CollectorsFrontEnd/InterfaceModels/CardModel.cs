@@ -100,6 +100,12 @@ namespace CollectorsFrontEnd.InterfaceModels
                 LstMetaTags);
         }
 
+        public void SubmitMetaTagChangesToServer(List<Tuple<string, string>> alstNewMeta)
+        {
+            ServerInterfaceModel
+                .CardClassInterfaceModel.SubmitMetaTagChangesToServer(TargetCollection, CardNameLong, alstNewMeta, LstMetaTags);
+        }
+
         public string GetMetaTag(string aszKey)
         {
             string szRetVal = "";

@@ -76,6 +76,10 @@ public:
 		std::vector<std::pair<std::string, std::string>> alstMatchMeta = std::vector<std::pair<std::string, std::string>>());
 	void SetMetaTag(std::string aszLongName, std::string aszKey, std::string aszValue,
 		std::vector<std::pair<std::string, std::string>> alstMatchMeta = std::vector<std::pair<std::string, std::string>>());
+   // Used to set OR REMOVE multiple tags at once. "!NULL" will indicate removal.
+   void SetMetaTags(std::string aszLongName,
+      std::vector<std::pair<std::string, std::string>> alstKeyVals = std::vector<std::pair<std::string, std::string>>(),
+      std::vector<std::pair<std::string, std::string>> alstMatchMeta = std::vector<std::pair<std::string, std::string>>());
 
 	void SetNonUniqueAttribute(std::string aszLongName, std::string aszKey, std::string aszValue,
 		std::vector<std::pair<std::string, std::string>> alstMatchMeta = std::vector<std::pair<std::string, std::string>>());
@@ -135,6 +139,11 @@ private:
 		CopyObject* aoCO,
 		std::string aszKey,
 		std::string aszNewTag);
+   // Change multiple tags on one tag. If not using this, the identity of the
+   //  card will change before adding the next.
+   void setMetaTags(
+      CopyObject* aoCO,
+      std::vector<std::pair<std::string,std::string>> alstKeyVals);
 	void removeMetaTag(
 		CopyObject* aoCO,
 		std::string aszKey);

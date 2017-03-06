@@ -306,6 +306,30 @@ void ServerClientInterface::AddMetaTag(System::String^ ahszCollectionName, Syste
 	m_StoreFrontBackEnd->AddMetaTag(szCollectionName, szLongCardName, szKey, szVal, lstMetaTagPairs);
 }
 
+void ServerClientInterface::AddMetaTags(System::String^ ahszCollectionName,
+   System::String^ ahszLongName,
+   System::Collections::Generic::List<System::Tuple<System::String^, System::String^>^>^ hlstNewTags,
+   System::Collections::Generic::List<System::Tuple<System::String^, System::String^>^>^ hlstMetaTags)
+{
+   std::string szCollectionName = msclr::interop::marshal_as<std::string>(ahszCollectionName);
+   std::string szLongCardName = msclr::interop::marshal_as<std::string>(ahszLongName);
+
+   std::vector<std::pair<std::string, std::string>> lstNewTags = tupleListToVector(hlstNewTags);
+
+   std::vector<std::pair<std::string, std::string>> lstMetaTagPairs;
+   for (int i = 0; i < hlstMetaTags->Count; i++)
+   {
+      std::pair<std::string, std::string> pair;
+      std::string szFirst = msclr::interop::marshal_as<std::string>(hlstMetaTags[i]->Item1);
+      std::string szSecond = msclr::interop::marshal_as<std::string>(hlstMetaTags[i]->Item2);
+      pair.first = szFirst;
+      pair.second = szSecond;
+      lstMetaTagPairs.push_back(pair);
+   }
+
+   m_StoreFrontBackEnd->AddMetaTags(szCollectionName, szLongCardName, lstNewTags, lstMetaTagPairs);
+}
+
 void ServerClientInterface::AddMetaTag(
 	System::String^ ahszCollectionName,
 	System::String^ ahszLongName,
