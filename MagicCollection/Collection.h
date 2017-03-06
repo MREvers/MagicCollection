@@ -74,15 +74,12 @@ public:
 
 	void RemoveMetaTag(std::string aszLongName, std::string aszKey,
 		std::vector<std::pair<std::string, std::string>> alstMatchMeta = std::vector<std::pair<std::string, std::string>>());
-	void AddMetaTag(std::string aszLongName, std::string aszKey, std::string aszValue,
-		std::vector<std::pair<std::string, std::string>> alstMatchMeta = std::vector<std::pair<std::string, std::string>>());
-	void AddMetaTags(std::string aszLongName, std::vector<std::pair<std::string,std::string>> alstKeyVals,
+	void SetMetaTag(std::string aszLongName, std::string aszKey, std::string aszValue,
 		std::vector<std::pair<std::string, std::string>> alstMatchMeta = std::vector<std::pair<std::string, std::string>>());
 
 	void SetNonUniqueAttribute(std::string aszLongName, std::string aszKey, std::string aszValue,
 		std::vector<std::pair<std::string, std::string>> alstMatchMeta = std::vector<std::pair<std::string, std::string>>());
-	void SetNonUniqueAttributes(std::string aszLongName, std::vector<std::pair<std::string, std::string>> alstKeyVals,
-		std::vector<std::pair<std::string, std::string>> alstMatchMeta = std::vector<std::pair<std::string, std::string>>());
+
 	// Returns the list of restions if restrictions exist. * if none exist.
 	std::vector<std::string> GetNonUniqueAttributeRestrictions(std::string aszLongName, std::string aszKey);
 
@@ -121,23 +118,59 @@ private:
 
 	void setName(std::string aszName);
 
-	void addItem(std::string aszNewItem, std::vector<std::pair<std::string, std::string>> alstAttrs,
+	void addItem(std::string aszNewItem,
+		std::vector<std::pair<std::string, std::string>> alstAttrs,
 		std::vector<std::pair<std::string, std::string>> alstMeta);
-	CopyObject* forceAdd(std::string aszNewItem, std::vector<std::pair<std::string, std::string>> alstAttrs);
-	// Only adds the collection object cache locations
-	void registerItem(int aiItem);
 	void removeItem(
 		std::string aszItem,
 		std::vector<std::pair<std::string, std::string>> alstAttrs,
 		std::vector<std::pair<std::string, std::string>> alstMeta);
 
-	void changeItemAttribute(std::string aszCardname, CopyObject* aoCO, std::string aszKey, std::string aszNewVal, bool bFinal = true);
-	std::string changeItemAttribute_string(std::string aszCardname, CopyObject* aoCO, std::string aszKey, std::string aszNewVal, bool bIsParentCol = true);
-	void changeItemAttrs(CopyObject* aoCO, std::string aszKey, std::string aszNewVal);
+	void changeItemAttribute(
+		std::string aszCardname,
+		CopyObject* aoCO,
+		std::string aszKey,
+		std::string aszNewVal, 
+		bool bFinal = true);
+	std::string changeItemAttribute_string(
+		std::string aszCardname,
+		CopyObject* aoCO,
+		std::string aszKey,
+		std::string aszNewVal,
+		bool bIsParentCol = true);
+	void changeItemAttrs(
+		CopyObject* aoCO,
+		std::string aszKey, 
+		std::string aszNewVal);
+
+	void setItemAttr(
+		std::string aszCardname,
+		std::vector<std::pair<std::string, std::string>> alstAttrs,
+		std::vector<std::pair<std::string, std::string>> alstMeta,
+		CopyObject* aoCO, 
+		std::string aszKey,
+		std::string aszNewVal);
+
+	void setMetaTag(
+		std::string aszCardname,
+		std::vector<std::pair<std::string, std::string>> alstAttrs,
+		std::vector<std::pair<std::string, std::string>> alstMeta,
+		CopyObject* aoCO,
+		std::string aszKey,
+		std::string aszNewTag);
+	void removeMetaTag(
+		std::string aszCardname,
+		std::vector<std::pair<std::string, std::string>> alstAttrs,
+		std::vector<std::pair<std::string, std::string>> alstMeta,
+		CopyObject* aoCO,
+		std::string aszKey);
 
 	Transaction* openTransaction();
 	void finalizeTransaction(bool abRecord = true);
 
+	CopyObject* forceAdd(std::string aszNewItem, std::vector<std::pair<std::string, std::string>> alstAttrs);
+	// Only adds the collection object cache locations
+	void registerItem(int aiItem);
 
 	std::string cardToString(int aiCardFlyweight, std::pair<CopyObject*, int>* aoCopy, bool bFullDets = false);
 	std::vector<std::string> splitIntoLines(std::string aszString);

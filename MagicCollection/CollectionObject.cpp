@@ -260,9 +260,9 @@ void CopyObject::SetNonUniqueAttr(std::string aszKey, std::string aszValue)
 	}
 }
 
-bool CopyObject::IsSameMetaTags(CopyObject* aoCOne, CopyObject* aoCTwo, bool abUseIgnore)
+bool CopyObject::IsSameMetaTags(std::string aszCollectionName, CopyObject* aoCOne, CopyObject* aoCTwo, bool abUseIgnore)
 {
-	return IsSameMetaTags(aoCOne->MetaTags, aoCTwo->MetaTags, abUseIgnore);
+	return IsSameMetaTags(aoCOne->GetMetaTags(aszCollectionName), aoCTwo->GetMetaTags(aszCollectionName), abUseIgnore);
 }
 
 bool CopyObject::IsSameMetaTags(
@@ -535,6 +535,34 @@ bool CollectionObject::GetCopy(std::string aszCollectionName, std::vector<std::p
 			bFound = true;
 			roCO = *iter_copies;
 			break;
+		}
+	}
+
+	return bFound;
+}
+
+bool CollectionObject::GetCopy(
+	std::string aszCollectionName,
+	std::vector<std::pair<std::string, std::string>> alstAttrs,
+	std::vector<std::pair<std::string, std::string>> alstMeta,
+	CopyObject*& roCO)
+{
+	bool bFound = false;
+	CopyObject oCompare = GenerateCopy(aszCollectionName, alstAttrs);
+
+	std::vector<CopyObject*> lstCopies = GetLocalCopies(aszCollectionName);
+	std::vector<CopyObject*>::iterator iter_copies = lstCopies.begin();
+	for (; iter_copies != lstCopies.end(); ++iter_copies)
+	{
+		if (IsSameIdentity(&oCompare, *iter_copies))
+		{
+			if (CopyObject::IsSameMetaTags(aszCollectionName, &oCompare, *iter_copies, true))
+			{
+				bFound = true;
+				roCO = *iter_copies;
+				break;
+			}
+			
 		}
 	}
 

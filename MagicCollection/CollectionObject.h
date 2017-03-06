@@ -44,7 +44,7 @@ public:
 
 	void SetNonUniqueAttr(std::string aszKey, std::string aszValue);
 
-	static bool IsSameMetaTags(CopyObject* aoCOne, CopyObject* aoCTwo, bool abUseIgnore = true);
+	static bool IsSameMetaTags(std::string aszCollectionName, CopyObject* aoCOne, CopyObject* aoCTwo, bool abUseIgnore = true);
 	static bool IsSameMetaTags(
 		std::vector<std::pair<std::string, std::string>> alstTagsOne,
 		std::vector<std::pair<std::string, std::string>> alstTagsTwo, bool abUseIgnore = true);
@@ -71,6 +71,7 @@ public:
 
 	// Collection Interface
 	std::string GetName();
+
 	CopyObject* AddCopy(std::string aszCollectionName);
 	CopyObject* AddCopy(std::string aszCollectionName, std::vector<std::pair<std::string, std::string>> alstAttrs);
 
@@ -87,7 +88,12 @@ public:
 	std::vector<CopyObject*> GetCopiesWith(std::string aszCollectionName, std::string aszParent, std::vector<std::pair<std::string, std::string>> alstAttrs);
 	// Gets a copy with matching attrs
 	bool GetCopy(std::string aszCollectionName, std::vector<std::pair<std::string, std::string>> alstAttrs, CopyObject*& roCO, bool abExact = true);
-	// Used in building a printable structure
+	bool GetCopy(
+		std::string aszCollectionName,
+		std::vector<std::pair<std::string, std::string>> alstAttrs,
+		std::vector<std::pair<std::string, std::string>> alstMeta,
+		CopyObject*& roCO);
+
 	
 	std::map<std::string, std::vector<std::string>> GetNonUniqueAttributeRestrictions();
 	void SetNonUniqueAttributeRestrictions(std::map<std::string, std::vector<std::string>> aMapRestrictions);

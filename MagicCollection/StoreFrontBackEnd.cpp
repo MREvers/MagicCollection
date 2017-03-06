@@ -195,7 +195,7 @@ void CStoreFrontBackEnd::AddMetaTag(std::string aszCollectionName, std::string a
 	if (m_ColFactory->CollectionExists(aszCollectionName))
 	{
 		Collection* oCol = m_ColFactory->GetCollection(aszCollectionName);
-		oCol->AddMetaTag(aszLongName, aszKey, aszValue, alstMatchMeta);
+		oCol->SetMetaTag(aszLongName, aszKey, aszValue, alstMatchMeta);
 	}
 }
 
@@ -210,7 +210,7 @@ void CStoreFrontBackEnd::AddMetaTag(
 	if (m_ColFactory->CollectionExists(aszCollectionName))
 	{
 		Collection* oCol = m_ColFactory->GetCollection(aszCollectionName);
-		oCol->AddMetaTag(aszLongName, aszKey + "." + aszSubKey, aszValue, alstMatchMeta);
+		oCol->SetMetaTag(aszLongName, aszKey + "." + aszSubKey, aszValue, alstMatchMeta);
 	}
 }
 
