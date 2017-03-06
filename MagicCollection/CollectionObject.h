@@ -34,12 +34,12 @@ public:
 
 	// Meta Tag Controlling Functions
 	std::vector<std::pair<std::string, std::string>> GetMetaTags(std::string aszCollection);
+   std::pair<std::string, std::string> GetMetaTag(std::string aszCollection, std::string aszKey);
 	bool IsPerCollectionTag(std::string aszKeyName);
 	void RemoveMetaTag(std::string aszCollection, std::string aszKey);
 	void SetMetaTag(std::string aszCollection, std::string aszKey, std::string aszVal);
 	void SetMetaTag(std::string aszCollection, std::string aszKey, std::string aszSubKey, std::string aszVal);
 	bool HasMetaTag(std::string aszKey);
-	std::pair<std::string, std::string> GetMetaTag(std::string aszKey);
 	bool HasPerCollectionTag(std::string aszCollection, std::string aszKey);
 
 	void SetNonUniqueAttr(std::string aszKey, std::string aszValue);
@@ -101,6 +101,10 @@ public:
 	CopyObject GenerateCopy(std::string aszCollectionName);
 	// Used in building a printable structure
 	CopyObject GenerateCopy(std::string aszCollectionName, std::vector<std::pair<std::string, std::string>> alstAttrs);
+   CopyObject GenerateCopy(
+      std::string aszCollectionName,
+      std::vector<std::pair<std::string, std::string>> alstAttrs,
+      std::vector<std::pair<std::string, std::string>> alstMeta);
 	// Keep in mind that this does not compare names because the name of the card is not known by the copy object.
 	// Additionally, it assumes you are comparing two cards of the same type.
 	static bool IsSameIdentity(CopyObject* aoCOne, CopyObject* aoCTwo, bool bMatchParent = true);

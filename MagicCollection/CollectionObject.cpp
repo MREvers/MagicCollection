@@ -156,10 +156,10 @@ bool CopyObject::HasMetaTag(std::string aszKey)
 	return false;
 }
 
-std::pair<std::string, std::string> CopyObject::GetMetaTag(std::string aszKey)
+std::pair<std::string, std::string> CopyObject::GetMetaTag(std::string aszCollection, std::string aszKey)
 {
 	std::string szKey = aszKey;
-	std::string szVal = "";
+	std::string szVal = "!NULL";
 	std::vector<std::pair<std::string, std::string>>::iterator iter_Tags = MetaTags.begin();
 	for (; iter_Tags != MetaTags.end(); ++iter_Tags)
 	{
@@ -168,6 +168,26 @@ std::pair<std::string, std::string> CopyObject::GetMetaTag(std::string aszKey)
 			szVal = iter_Tags->first;
 		}
 	}
+
+   if (szVal == "!NULL")
+   {
+      if (IsPerCollectionTag(aszKey))
+      {
+         if (HasPerCollectionTag(aszCollection ,aszKey))
+         {
+            std::vector<std::pair<std::string,std::string>>::iterator iter_PerCols =
+               PerCollectionMetaTags.at(aszCollection).begin();
+            for (; iter_PerCols != PerCollectionMetaTags.at(aszCollection).end(); ++iter_PerCols)
+            {
+               if (iter_PerCols->first == aszKey)
+               {
+                  szVal = iter_PerCols->second;
+               }
+            }
+         }
+      }
+   }
+
 	return std::make_pair(szKey, szVal);
 }
 
@@ -413,6 +433,22 @@ CopyObject CollectionObject::GenerateCopy(std::string aszCollectionName, std::ve
 	return oNewCopy;
 }
 
+CopyObject CollectionObject::GenerateCopy(
+   std::string aszCollectionName,
+   std::vector<std::pair<std::string, std::string>> alstAttrs,
+   std::vector<std::pair<std::string, std::string>> alstMeta)
+{
+   CopyObject oNewCopy = GenerateCopy(aszCollectionName, alstAttrs);
+
+   std::vector<std::pair<std::string, std::string>>::iterator iter_MetaTags = alstMeta.begin();
+   for (; iter_MetaTags != alstMeta.end(); ++iter_MetaTags)
+   {
+      oNewCopy.SetMetaTag(aszCollectionName, iter_MetaTags->first, iter_MetaTags->second);
+   }
+
+   return oNewCopy;
+}
+
 void CollectionObject::RemoveCopy(std::string aszCollectionName,
 	std::vector<std::pair<std::string, std::string>> alstAttrs,
 	std::vector<std::pair<std::string, std::string>> alstMeta)
@@ -548,7 +584,7 @@ bool CollectionObject::GetCopy(
 	CopyObject*& roCO)
 {
 	bool bFound = false;
-	CopyObject oCompare = GenerateCopy(aszCollectionName, alstAttrs);
+	CopyObject oCompare = GenerateCopy(aszCollectionName, alstAttrs, alstMeta);
 
 	std::vector<CopyObject*> lstCopies = GetLocalCopies(aszCollectionName);
 	std::vector<CopyObject*>::iterator iter_copies = lstCopies.begin();

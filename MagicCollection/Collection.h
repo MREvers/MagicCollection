@@ -126,44 +126,26 @@ private:
 		std::vector<std::pair<std::string, std::string>> alstAttrs,
 		std::vector<std::pair<std::string, std::string>> alstMeta);
 
-	void changeItemAttribute(
-		std::string aszCardname,
-		CopyObject* aoCO,
-		std::string aszKey,
-		std::string aszNewVal, 
-		bool bFinal = true);
-	std::string changeItemAttribute_string(
-		std::string aszCardname,
-		CopyObject* aoCO,
-		std::string aszKey,
-		std::string aszNewVal,
-		bool bIsParentCol = true);
-	void changeItemAttrs(
-		CopyObject* aoCO,
-		std::string aszKey, 
-		std::string aszNewVal);
-
 	void setItemAttr(
-		std::string aszCardname,
-		std::vector<std::pair<std::string, std::string>> alstAttrs,
-		std::vector<std::pair<std::string, std::string>> alstMeta,
 		CopyObject* aoCO, 
 		std::string aszKey,
 		std::string aszNewVal);
 
 	void setMetaTag(
-		std::string aszCardname,
-		std::vector<std::pair<std::string, std::string>> alstAttrs,
-		std::vector<std::pair<std::string, std::string>> alstMeta,
 		CopyObject* aoCO,
 		std::string aszKey,
 		std::string aszNewTag);
 	void removeMetaTag(
-		std::string aszCardname,
-		std::vector<std::pair<std::string, std::string>> alstAttrs,
-		std::vector<std::pair<std::string, std::string>> alstMeta,
 		CopyObject* aoCO,
 		std::string aszKey);
+
+   // Produces a string representation of the attribute strain
+   std::string changeItemAttribute_string(
+      std::string aszCardname,
+      CopyObject* aoCO,
+      std::string aszKey,
+      std::string aszNewVal,
+      bool bIsParentCol = true);
 
 	Transaction* openTransaction();
 	void finalizeTransaction(bool abRecord = true);
