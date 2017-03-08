@@ -120,6 +120,33 @@ namespace CollectorsFrontEnd.InterfaceModels
             return szRetVal;
         }
 
+        public string GetAttr(string aszKey)
+        {
+            string szRetVal = "";
+            foreach(var tup in LstIdentifiedAttrs)
+            {
+                if (tup.Item1 == aszKey)
+                {
+                    szRetVal = tup.Item2;
+                    break;
+                }
+            }
+
+            if (szRetVal == "")
+            {
+                foreach (var tup in LstSpecifiedAttrs)
+                {
+                    if (tup.Item1 == aszKey)
+                    {
+                        szRetVal = tup.Item2;
+                        break;
+                    }
+                }
+            }
+
+            return szRetVal;
+        }
+
         // Does not count meta tags
         public bool IsSameAs(CardModel aoCardModel)
         {

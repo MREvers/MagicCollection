@@ -27,8 +27,7 @@
             <ListBox x:Name="LstBoxLoadedCollections"
                      Grid.Row="1" 
                      ItemsSource="{Binding LstAvailableCollections}"
-                     Height="284" 
-                     VerticalAlignment="Bottom"
+                     VerticalAlignment="Stretch"
                      SelectionChanged="eLstBoxLoadedCollections_SelectionChanged">
 
             </ListBox>

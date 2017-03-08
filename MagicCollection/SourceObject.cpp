@@ -91,9 +91,16 @@ std::vector<std::string> SourceObject::Str_Split(std::string aszSplit, std::stri
             szFocus = "";
          }
 
+         // The Delimiter couldn't possibly be in the remaining chars because there aren't
+         // enough. So Add the remaining chars.
          if (i + iDelimSize == iSplitSize)
          {
             szBefore += szFocus;
+
+            for (int t = 1; t < iDelimSize; t++)
+            {
+               szBefore += aszSplit[i+t];
+            }
 
             lstSZs.push_back(szBefore);
             break;

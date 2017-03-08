@@ -15,14 +15,31 @@ using System.Windows.Shapes;
 using CollectorsFrontEnd.InterfaceModels;
 using System.Collections.ObjectModel;
 using CollectorsFrontEnd.Interfaces.Subs;
+using System.ComponentModel;
 
 namespace CollectorsFrontEnd.Interfaces
 {
     /// <summary>
     /// Interaction logic for CompCollectionView.xaml
     /// </summary>
-    public partial class CompCollectionView : UserControl, IComponent
+    public partial class CompCollectionView : UserControl, IComponent, INotifyPropertyChanged
     {
+        #region DataBinding
+        private UserControl _ImageComponent;
+        public UserControl ImageComponent
+        {
+            get
+            {
+                return _ImageComponent;
+            }
+
+            set
+            {
+                _ImageComponent = value;
+                OnPropertyChanged("ImageComponent");
+            }
+        }
+
         private readonly ObservableCollection<CompSubGeneralization> _LstGeneralizations = new ObservableCollection<CompSubGeneralization>();
         public ObservableCollection<CompSubGeneralization> LstGeneralizations
         {
@@ -31,8 +48,15 @@ namespace CollectorsFrontEnd.Interfaces
                 return _LstGeneralizations;
             }
         }
+
+        protected virtual void OnPropertyChanged(string propertyName)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+        #endregion
         #region Public Fields
         public event ComponentEvent UnhandledEvent;
+        public event PropertyChangedEventHandler PropertyChanged;
 
         public CollectionModel DataModel;
         #endregion
@@ -50,7 +74,7 @@ namespace CollectorsFrontEnd.Interfaces
             {
                 DataModel = ServerInterfaceModel.GenerateCollectionModel(aszCollectionName);
             }
-            
+
             buildListView();
         }
 
@@ -88,10 +112,12 @@ namespace CollectorsFrontEnd.Interfaces
 
             foreach (string szGeneralization in mapGeneralizations.Keys)
             {
-                CompSubGeneralization CSG = new CompSubGeneralization(mapGeneralizations[szGeneralization]);
+                CompSubGeneralization CSG = new CompSubGeneralization(mapGeneralizations[szGeneralization], szGeneralization);
                 CSG.UnhandledEvent += RouteReceivedUnhandledEvent;
                 LstGeneralizations.Add(CSG);
             }
+
+            updateCardDisplay(DataModel.LstCopyModels[0]);
         }
 
         private void showAddItemWindow()
@@ -136,6 +162,10 @@ namespace CollectorsFrontEnd.Interfaces
             }
         }
 
+        private void updateCardDisplay(CardModel aCM)
+        {
+            ImageComponent = new CompSubCardDisplayer(aCM);
+        }
 
         private void showMainDisplay()
         {
@@ -297,8 +327,21 @@ namespace CollectorsFrontEnd.Interfaces
                 DataModel.Refresh();
                 buildListView();
             }
-           
+
             showMainDisplay();
+        }
+
+        private void ecGeneralizationSelectionChange(CompSubGeneralization.CompSubGeneralizationModel aDataObject)
+        {
+            foreach (CompSubGeneralization Gen in LstGeneralizations)
+            {
+                if (Gen.GeneralizationName != aDataObject.GeneralizationName)
+                {
+                    Gen.LVItems.UnselectAll();
+                }
+            }
+
+            updateCardDisplay(aDataObject.SelectedItemDisplayer.DataModel);
         }
 
         public void RouteReceivedUnhandledEvent(IDataModel aDataObject, string aszAction)
@@ -353,6 +396,13 @@ namespace CollectorsFrontEnd.Interfaces
                 else if (aszAction == "OK")
                 {
                     ecAmountInterchangerWindowAccept((CompSubAmountInterchanger.AmountInterchangerModel)aDataObject);
+                }
+            }
+            else if (aDataObject.GetType() == typeof(CompSubGeneralization.CompSubGeneralizationModel))
+            {
+                if (aszAction == "SelectionChanged")
+                {
+                    ecGeneralizationSelectionChange((CompSubGeneralization.CompSubGeneralizationModel)aDataObject);
                 }
             }
         }

@@ -35,7 +35,8 @@
             <Grid.ColumnDefinitions>
                 <ColumnDefinition/>
             </Grid.ColumnDefinitions>
-
+            <UserControl x:Name="UCImage" Content="{Binding ImageComponent}">
+            </UserControl>
             <Button x:Name="BtnAddItem" Grid.Row="1" HorizontalAlignment="Stretch"
                     Click="eAddItemWindowButton_Click">
                 <TextBlock>Add Item</TextBlock>

@@ -87,11 +87,14 @@ int CollectionSource::LoadCard(std::string aszCardName)
 {
 	int iCacheLocation = -1;
 	std::string szCardName = CollectionObject::str_trim(aszCardName, ' ');
+
+   // Look in the Source Object Buffer for a matching item.
 	int iFound = findInBuffer(szCardName, false);
 	if (iFound != -1)
 	{
 		SourceObject* oSource = &m_lstptCardBuffer.at(iFound);
 
+      // Check if this card has already been loaded. If not, load it.
 		iCacheLocation = oSource->GetCacheIndex();
 		if (iCacheLocation == -1)
 		{

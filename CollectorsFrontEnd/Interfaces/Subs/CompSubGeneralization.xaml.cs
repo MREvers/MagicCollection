@@ -47,19 +47,29 @@ namespace CollectorsFrontEnd.Interfaces.Subs
         }
         #endregion
 
+        public string GeneralizationName
+        {
+            get
+            {
+                return DataModel.GeneralizationName;
+            }
+        }
+
         public class CompSubGeneralizationModel : IDataModel
         {
             public ObservableCollection<CompSubItemDisplayer> LstCardModels = 
                 new ObservableCollection<CompSubItemDisplayer>();
-
+            public string GeneralizationName { get; set; }
+            public CompSubItemDisplayer SelectedItemDisplayer { get; set; }
         }
 
         public CompSubGeneralizationModel DataModel = new CompSubGeneralizationModel();
 
-        public CompSubGeneralization(List<CardModel> alstCardModels)
+        public CompSubGeneralization(List<CardModel> alstCardModels, string aszGenName)
         {
             InitializeComponent();
             DataContext = this;
+            DataModel.GeneralizationName = aszGenName;
             foreach (CardModel CM in alstCardModels)
             {
                 CompSubItemDisplayer CSID = new CompSubItemDisplayer(CM);
@@ -132,5 +142,14 @@ namespace CollectorsFrontEnd.Interfaces.Subs
         }
 
         #endregion
+
+        private void eSelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (LVItems.SelectedIndex != -1)
+            {
+                DataModel.SelectedItemDisplayer = LstCardModels[LVItems.SelectedIndex];
+                UnhandledEvent(DataModel, "SelectionChanged");
+            }
+        }
     }
 }
