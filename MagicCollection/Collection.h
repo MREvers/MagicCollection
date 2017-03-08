@@ -19,12 +19,12 @@
 
 class Collection : public ICollection
 {
-	struct CardTags
-	{
-		std::vector<std::pair<std::string, std::string>> Attrs; //Attributes
-		std::vector<std::pair<std::string, std::string>> Tags; //Metatags
-	};
-
+   /* Friend Class Action
+    * Used to wrap an action that changes the collection with an action
+    * that can undo it. Allows undo button.
+    * Also maintains a string description of the action so that it can
+    * be recorded in the .history.txt file.
+    */
 	class Action
 	{
 	public:
@@ -33,6 +33,10 @@ class Collection : public ICollection
 		std::function<void()> Undo;
 	};
 
+   /* Friend Class Transaction
+   * Wraps a list of actions. Provides interface for executing associated
+   * actions and rolling back those actions.
+   */
 	class Transaction
 	{
 	public:
@@ -52,39 +56,106 @@ class Collection : public ICollection
 	private:
 		Collection* m_Col;
 	};
+
 public:
+   /* Collection
+   * @Param aszName Name of the collection
+   * @Param aoSource Pointer to a collection source.
+   * @Param alstLoadedCollections Pointer to a list of loaded collections. (Used in producing debug information)
+   */
 	Collection(std::string aszName, CollectionSource* aoSource, std::vector<std::string>* alstLoadedCollections);
 	~Collection();
 
-	// Meta
+	/* GetName()
+   * @Return The name of this collection.
+   */
 	std::string GetName();
 
+   /* Additem (Version 1) (Transaction)
+   * Adds the item specified.
+   * @Param aszNewItem String Name of item to search for in the Collection source.
+   * @Param alstAttrs List of attributes that the added item will have. None by default.
+   * @Param alstMetaTags List of Meta-Tags that the added Item will have. None by default.
+   */
 	void AddItem(std::string aszNewItem,
 		bool bFinal = true,
 		std::vector<std::pair<std::string, std::string>> alstAttrs = std::vector<std::pair<std::string, std::string>>(),
 		std::vector<std::pair<std::string, std::string>> alstMetaTags = std::vector<std::pair<std::string, std::string>>()) override;
-	void AddItem(std::string aszNewItemLongName,
+	
+   /* Additem (Version 2) (Transaction)
+   * Uses the NonUniqueAttrs in the long name to add a card to the collection.
+   * @Param aszNewItemLongName Long name of the item to be added. Contains the NonUniqueAttributes.
+   * @Param alstMetaTags List of Meta-Tags that the added Item will have.
+   */
+   void AddItem(std::string aszNewItemLongName,
 		std::vector<std::pair<std::string, std::string>> alstMetaTags);
 
-	void RemoveItem(std::string aszNewItem,
+   /* RemoveItem (Version 1) (Transaction)
+   * @Param aszRemoveItem Short name of item to be removed.
+   * @Param bFinal True indicate that the transaction will be closed within this function call.
+   * @Param alstAttrs List of NonUnique Attributes identifying the copy to be removed.
+   * @Param alstMeta List of Meta-Tags identifying the copy to be removed.
+   */
+	void RemoveItem(std::string aszRemoveItem,
 		bool bFinal = true,
 		std::vector<std::pair<std::string, std::string>> alstAttrs = std::vector<std::pair<std::string, std::string>>(),
 		std::vector<std::pair<std::string, std::string>> alstMeta = std::vector<std::pair<std::string, std::string>>()) override;
-	void RemoveItem(std::string aszRemoveItemLongName, std::vector<std::pair<std::string, std::string>> alstMeta);
+   
+   /* RemoveItem (Version 2) (Transaction)
+   * @Param aszRemoveItemLongName Long name of the item to be removed. Contains the identifying NonUniqueAttributes.
+   * @Param alstMetaTags List of Meta-Tags identifying the copy to be removed.
+   */
+   void RemoveItem(std::string aszRemoveItemLongName, std::vector<std::pair<std::string, std::string>> alstMeta);
 
+   /* RemoveMetaTag (Transaction)
+   * The Copy to be modified is identified here, then is stored off for when the operation is to be completed.
+   * @Param aszLongName Long Name of item to remove tag from. Contains the identifying NonUniqueAttributes.
+   * @Param aszKey Key of Meta-Tag to be removed.
+   * @Param alstMatchMeta Meta-Tags Identifying copy to remove tag from.
+   */
 	void RemoveMetaTag(std::string aszLongName, std::string aszKey,
 		std::vector<std::pair<std::string, std::string>> alstMatchMeta = std::vector<std::pair<std::string, std::string>>());
-	void SetMetaTag(std::string aszLongName, std::string aszKey, std::string aszValue,
+	
+   /* SetMetaTag  (Transaction)
+   * Sets the single Meta-Tag of identified copy.
+   * The Copy to be modified is identified here, then is stored off for when the operation is to be completed.
+   * @Param aszLongName Long Name of copy to set the tag on. Contains the identifying NonUniqueAttributes.
+   * @Param aszKey New Meta-Tag Key to add.
+   * @Param aszValue New Meta-Tag Value to be added.
+   * @Param alstMatchMeta Meta-Tags Identify the copy to be modified.
+   */
+   void SetMetaTag(std::string aszLongName, std::string aszKey, std::string aszValue,
 		std::vector<std::pair<std::string, std::string>> alstMatchMeta = std::vector<std::pair<std::string, std::string>>());
-   // Used to set OR REMOVE multiple tags at once. "!NULL" will indicate removal.
+   // 
+
+   /* SetMetaTags  (Transaction)
+   * Sets many tags of the identified copy.
+   * Used to set OR REMOVE multiple tags at once. "!NULL" in the value position will indicate removal.
+   * The Copy to be modified is identified here, then is stored off for when the operation is to be completed.
+   * @Param aszLongName Long Name of copy to set the tag on. Contains the identifying NonUniqueAttributes.
+   * @Param alstKeyVals List of new Meta-Tag Key Value Pairs to be added to the identified copy.
+   * @Param alstMatchMeta Meta-Tags Identify the copy to be modified.
+   */
    void SetMetaTags(std::string aszLongName,
       std::vector<std::pair<std::string, std::string>> alstKeyVals = std::vector<std::pair<std::string, std::string>>(),
       std::vector<std::pair<std::string, std::string>> alstMatchMeta = std::vector<std::pair<std::string, std::string>>());
 
+   /* SetNonUniqueAttribute (Transaction)
+   * The Copy to be modified is identified here, then is stored off for when the operation is to be completed.
+   * @Param aszLongName Long Name of copy to set the attribute on. Contains the identifying NonUniqueAttributes.
+   * @Param aszKey String key of attribute to set.
+   * @Param aszValue Value of attribute.
+   * @Param alstMatchMeta Meta-Tags Identify the copy to be modified.
+   */
 	void SetNonUniqueAttribute(std::string aszLongName, std::string aszKey, std::string aszValue,
 		std::vector<std::pair<std::string, std::string>> alstMatchMeta = std::vector<std::pair<std::string, std::string>>());
 
 	// Returns the list of restions if restrictions exist. * if none exist.
+   /* GetNonUniqueAttributeRestrictions
+   * Gets the possible values of the specified nonunique trait. For example, Thraben inspecter is only in SOI.
+   * @Param aszLongName Long Name of card type to get restrictions from. Identifying info does not matter.
+   * @Param aszKey Key of NonUniqueAttribute to get restrictions for.
+   */
 	std::vector<std::string> GetNonUniqueAttributeRestrictions(std::string aszLongName, std::string aszKey);
 
 	std::vector < std::vector<std::pair<std::string, std::string>>> GetMetaTags(std::string aszLongName);
