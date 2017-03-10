@@ -306,7 +306,7 @@ void ServerClientInterface::AddMetaTag(System::String^ ahszCollectionName, Syste
 	m_StoreFrontBackEnd->AddMetaTag(szCollectionName, szLongCardName, szKey, szVal, lstMetaTagPairs);
 }
 
-void ServerClientInterface::AddMetaTags(System::String^ ahszCollectionName,
+void ServerClientInterface::SetMetaTags(System::String^ ahszCollectionName,
    System::String^ ahszLongName,
    System::Collections::Generic::List<System::Tuple<System::String^, System::String^>^>^ hlstNewTags,
    System::Collections::Generic::List<System::Tuple<System::String^, System::String^>^>^ hlstMetaTags)
@@ -327,7 +327,7 @@ void ServerClientInterface::AddMetaTags(System::String^ ahszCollectionName,
       lstMetaTagPairs.push_back(pair);
    }
 
-   m_StoreFrontBackEnd->AddMetaTags(szCollectionName, szLongCardName, lstNewTags, lstMetaTagPairs);
+   m_StoreFrontBackEnd->SetMetaTags(szCollectionName, szLongCardName, lstNewTags, lstMetaTagPairs);
 }
 
 void ServerClientInterface::AddMetaTag(
@@ -377,6 +377,24 @@ void ServerClientInterface::RemoveMetaTag(System::String^ ahszCollectionName,
 	}
 
 	m_StoreFrontBackEnd->RemoveMetaTag(szCollectionName, szLongCardName, szKey, lstMetaTagPairs);
+}
+
+void ServerClientInterface::SetFeatures(System::String^ ahszCollectionName,
+   System::String^ ahszLongName,
+   System::Collections::Generic::List<System::Tuple<System::String^, System::String^>^>^ hlstNewTags,
+   System::Collections::Generic::List<System::Tuple<System::String^, System::String^>^>^ hlstNewAttsr,
+   System::Collections::Generic::List<System::Tuple<System::String^, System::String^>^>^ hlstMetaTags)
+{
+   std::string szCollectionName = msclr::interop::marshal_as<std::string>(ahszCollectionName);
+   std::string szLongCardName = msclr::interop::marshal_as<std::string>(ahszLongName);
+
+   std::vector<std::pair<std::string, std::string>> lstNewTags = tupleListToVector(hlstNewTags);
+
+   std::vector<std::pair<std::string, std::string>> lstMetaTagPairs = tupleListToVector(hlstMetaTags);
+
+   std::vector<std::pair<std::string, std::string>> lstNewAttrs = tupleListToVector(hlstNewAttsr);
+
+   m_StoreFrontBackEnd->SetFeatures(szCollectionName, szLongCardName, lstNewTags, lstNewAttrs, lstMetaTagPairs);
 }
 
 System::Boolean ServerClientInterface::IsSameIdentity(System::String^ aszLongNameOne, System::String^ aszLongNameTwo)

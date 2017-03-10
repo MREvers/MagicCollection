@@ -96,7 +96,15 @@ namespace CollectorsFrontEnd.InterfaceModels
             public static void SubmitMetaTagChangesToServer(string aszCollectionName, string aszLongName,
                 List<Tuple<string, string>> alstNewMeta, List<Tuple<string,string>> alstMeta)
             {
-                SCI.AddMetaTags(aszCollectionName, aszLongName, alstNewMeta, alstMeta);
+                SCI.SetMetaTags(aszCollectionName, aszLongName, alstNewMeta, alstMeta);
+            }
+
+            public static void SubmitFeatureChangesToServer(string aszCollectionName, string aszLongName,
+                List<Tuple<string, string>> alstNewMeta,
+                List<Tuple<string, string>> alstNewAttrs,
+                List<Tuple<string, string>> alstMeta)
+            {
+                SCI.SetFeatures(aszCollectionName, aszLongName, alstNewMeta, alstNewAttrs, alstMeta);
             }
 
             public static void RemoveMetaTag(string aszCollectionName,
@@ -112,9 +120,16 @@ namespace CollectorsFrontEnd.InterfaceModels
             {
                 // Save in set
 
-                string szMUID = aoCardModel.GetMetaTag("multiverseid");
+                string szMUID = aoCardModel.GetAttr("multiverseid");
+                string szSet = aoCardModel.GetAttr("set");
                 BitmapImage bi3;
-                string szFilePath = SZ_IMAGE_CACHE_PATH + aoCardModel.CardName + ".jpg";
+
+                string szBasePath = SZ_IMAGE_CACHE_PATH + szSet + "/";
+                if (szMUID != "")
+                {
+                    szBasePath += szMUID + "/";
+                }
+                string szFilePath = szBasePath + aoCardModel.CardName + ".jpg";
                 if (!File.Exists(szFilePath))
                 {
                     bi3 = new BitmapImage();
@@ -152,8 +167,16 @@ namespace CollectorsFrontEnd.InterfaceModels
             {
                 EventArgs e = ie.e;
                 CardModel cardModel = ie.DataModel;
+                string szMUID = cardModel.GetAttr("multiverseid");
+                string szSet = cardModel.GetAttr("set");
+
                 JpegBitmapEncoder encoder = new JpegBitmapEncoder();
-                String photolocation = SZ_IMAGE_CACHE_PATH + cardModel.CardName + ".jpg";  //file name 
+                string szBasePath = SZ_IMAGE_CACHE_PATH + szSet + "/";
+                if (szMUID != "")
+                {
+                    szBasePath += szMUID + "/";
+                }
+                String photolocation = szBasePath + cardModel.CardName + ".jpg";
                 encoder.Frames.Add(BitmapFrame.Create((BitmapImage)sender));
 
                 if (!Directory.Exists(Path.GetDirectoryName(photolocation)))

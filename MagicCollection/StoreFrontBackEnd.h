@@ -48,7 +48,7 @@ public:
 		std::string aszKey,
 		std::string aszValue,
 		std::vector<std::pair<std::string, std::string>> alstMatchMeta);
-   void AddMetaTags(
+   void SetMetaTags(
       std::string aszCollection,
       std::string aszLongName,
       std::vector<std::pair<std::string, std::string>> alstNewTags,
@@ -65,6 +65,12 @@ public:
 		std::string aszLongName,
 		std::string aszKey,
 		std::vector<std::pair<std::string, std::string>> alstMatchMeta);
+   void SetFeatures(
+      std::string aszCollection,
+      std::string aszLongName,
+      std::vector<std::pair<std::string, std::string>> alstNewMetaTags,
+      std::vector<std::pair<std::string, std::string>> alstNewAttrs,
+      std::vector<std::pair<std::string, std::string>> alstMatchMeta);
 
 	// For parsing long names
 	std::vector<std::pair<std::string, std::string>> ParseAttrs(std::string aszDetails);

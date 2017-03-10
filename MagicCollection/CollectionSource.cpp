@@ -7,8 +7,7 @@ CollectionSource::CollectionSource()
 
 	// THESE ALSO HAVE TO BE ACCOUNTED FOR IN THE IMPORTER
 	//  TODO: Tie these together at some point.
-	m_lstPairedNonUniques.push_back("set");
-	m_lstPairedNonUniques.push_back("multiverseid");
+	m_lstPairedNonUniques.push_back(std::make_pair("set", "multiverseid"));
 }
 
 CollectionSource::~CollectionSource()
@@ -109,6 +108,7 @@ int CollectionSource::LoadCard(std::string aszCardName)
 			}
 
 			oCard.SetNonUniqueAttributeRestrictions(oSource->NonUniqueAttributes);
+         oCard.SetPairedNonUniqueAttrs(m_lstPairedNonUniques);
 
 			// Store the location of the CollectionObject in the cache
 			iCacheLocation = m_lstoCardCache.size();

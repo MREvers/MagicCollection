@@ -24,19 +24,6 @@ namespace CollectorsFrontEnd.Interfaces.Subs
     public partial class CompSubAttributeChanger : UserControl, IComponent, INotifyPropertyChanged
     {
         #region Data Binding
-        private BitmapImage _CardImage;
-        public BitmapImage CardImage
-        {
-            get
-            {
-                return _CardImage;
-            }
-            set
-            {
-                _CardImage = value;
-                OnPropertyChanged("CardImage");
-            }
-        }
 
         public event PropertyChangedEventHandler PropertyChanged;
         protected virtual void OnPropertyChanged(string propertyName)
@@ -118,8 +105,6 @@ namespace CollectorsFrontEnd.Interfaces.Subs
             InitializeComponent();
 
             DataModel = new CompSubAttributeChangerModel(aDataModel, aDataModel.LstMetaTags);
-            DataModel.CardModelObject.PropertyChanged += eImageLoaded;
-            DataModel.CardModelObject.GetImage();
             DataContext = DataModel;
         }
 
@@ -180,15 +165,6 @@ namespace CollectorsFrontEnd.Interfaces.Subs
                 DGMetas.Items.Refresh();
             }
             showMainDisplay();
-        }
-
-        private void eImageLoaded(object sender, PropertyChangedEventArgs e)
-        {
-            if (e.PropertyName == "CardImage")
-            {
-                CardModel dataModel = (CardModel)sender;
-                CardImage = (BitmapImage)dataModel.CardImage;
-            }
         }
         #endregion Private EH
 

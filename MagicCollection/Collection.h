@@ -150,6 +150,13 @@ public:
 	void SetNonUniqueAttribute(std::string aszLongName, std::string aszKey, std::string aszValue,
 		std::vector<std::pair<std::string, std::string>> alstMatchMeta = std::vector<std::pair<std::string, std::string>>());
 
+   void SetFeatures(
+      std::string aszLongName,
+      std::vector<std::pair<std::string, std::string>> alstNewMeta,
+      std::vector<std::pair<std::string, std::string>> alstNewAttrs,
+      std::vector<std::pair<std::string, std::string>> alstMatchMeta);
+
+
 	// Returns the list of restions if restrictions exist. * if none exist.
    /* GetNonUniqueAttributeRestrictions
    * Gets the possible values of the specified nonunique trait. For example, Thraben inspecter is only in SOI.
@@ -205,6 +212,9 @@ private:
 		CopyObject* aoCO, 
 		std::string aszKey,
 		std::string aszNewVal);
+   void setItemAttrs(
+      CopyObject* aoCO,
+      std::vector<std::pair<std::string, std::string>> alstAttrs);
 
 	void setMetaTag(
 		CopyObject* aoCO,
@@ -218,6 +228,10 @@ private:
 	void removeMetaTag(
 		CopyObject* aoCO,
 		std::string aszKey);
+
+   void setFeatures(CopyObject* aoCO,
+      std::vector<std::pair<std::string, std::string>> alstNewMeta,
+      std::vector<std::pair<std::string, std::string>> alstNewAttrs);
 
    // Produces a string representation of the attribute strain
    std::string changeItemAttribute_string(

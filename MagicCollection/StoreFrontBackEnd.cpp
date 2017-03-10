@@ -199,7 +199,7 @@ void CStoreFrontBackEnd::AddMetaTag(std::string aszCollectionName, std::string a
 	}
 }
 
-void  CStoreFrontBackEnd::AddMetaTags(
+void  CStoreFrontBackEnd::SetMetaTags(
    std::string aszCollection,
    std::string aszLongName,
    std::vector<std::pair<std::string, std::string>> alstNewTags,
@@ -238,6 +238,20 @@ void CStoreFrontBackEnd::RemoveMetaTag(
 		Collection* oCol = m_ColFactory->GetCollection(aszCollection);
 		oCol->RemoveMetaTag(aszLongName, aszKey, alstMatchMeta);
 	}
+}
+
+void  CStoreFrontBackEnd::SetFeatures(
+   std::string aszCollection,
+   std::string aszLongName,
+   std::vector<std::pair<std::string, std::string>> alstNewTags,
+   std::vector<std::pair<std::string, std::string>> alstNewAttrs,
+   std::vector<std::pair<std::string, std::string>> alstMatchMeta)
+{
+   if (m_ColFactory->CollectionExists(aszCollection))
+   {
+      Collection* oCol = m_ColFactory->GetCollection(aszCollection);
+      oCol->SetFeatures(aszLongName, alstNewTags, alstNewAttrs, alstMatchMeta);
+   }
 }
 
 std::vector < std::vector<std::pair<std::string, std::string>>>

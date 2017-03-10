@@ -415,6 +415,61 @@ void Collection::SetNonUniqueAttribute(
    oTrans->Finalize();
 }
 
+void Collection::SetFeatures(
+   std::string aszLongName,
+   std::vector<std::pair<std::string, std::string>> alstNewMeta,
+   std::vector<std::pair<std::string, std::string>> alstNewAttrs,
+   std::vector<std::pair<std::string, std::string>> alstMatchMeta)
+{
+   if (TransactionIntercept)
+   {
+      std::string szCardName;
+      int iAmount;
+      std::string szDetails;
+      if (Collection::ParseCardLine(aszLongName, iAmount, szCardName, szDetails))
+      {
+         std::vector<std::pair<std::string, std::string>> lstAttrs = ParseAttrs(szDetails);
+         int iCardProto = m_ColSource->LoadCard(szCardName);
+         if (iCardProto != -1)
+         {
+            CollectionObject* oCardPrototype = m_ColSource->GetCardPrototype(iCardProto);
+            CopyObject* oCO;
+            if (oCardPrototype->GetCopy(m_szName, lstAttrs, alstMatchMeta, oCO))
+            {
+               // Store the action and how to undo it here.
+               Collection::Action oAction;
+               oAction.Identifier = "Set Meta-Tag '";// + szCard;
+               oAction.Do = std::bind(&Collection::setFeatures, this, oCO, alstNewMeta, alstNewAttrs);
+
+               std::vector<std::pair<std::string, std::string>> lstUndoList;
+               std::vector<std::pair<std::string, std::string>> lstOldMetaTags = oCO->GetMetaTags(m_szName);
+               std::vector<std::pair<std::string, std::string>>::iterator iter_MetaTags = lstOldMetaTags.begin();
+               for (; iter_MetaTags != lstOldMetaTags.end(); ++iter_MetaTags)
+               {
+                  lstUndoList.push_back(std::make_pair(iter_MetaTags->first, iter_MetaTags->second));
+               }
+               oAction.Undo = std::bind(&Collection::setFeatures, this, oCO, lstUndoList, lstAttrs);
+
+               // Store the arguments
+               Collection::Transaction* oTrans = &m_lstTransactions.at(m_lstTransactions.size() - 1);
+               oTrans->AddAction(oAction);
+            }
+
+
+         }
+      }
+      TransactionIntercept = false;
+      return;
+   }
+
+
+   Collection::Transaction* oTrans = openTransaction();
+
+   (*oTrans)->SetFeatures(aszLongName, alstNewMeta, alstNewAttrs, alstMatchMeta);
+
+   oTrans->Finalize();
+}
+
 std::vector<std::string> Collection::GetNonUniqueAttributeRestrictions(std::string aszLongName, std::string aszKey)
 {
    std::string szCardName;
@@ -576,6 +631,18 @@ void Collection::setItemAttr(
    aoCO->SetNonUniqueAttr(aszKey, aszNewVal);
 }
 
+void Collection::setItemAttrs(
+   CopyObject* aoCO,
+   std::vector<std::pair<std::string, std::string>> alstKeyVals)
+{
+   std::vector<std::pair<std::string, std::string>>::iterator iter_KeyVals = alstKeyVals.begin();
+   for (; iter_KeyVals != alstKeyVals.end(); ++iter_KeyVals)
+   {
+      aoCO->SetNonUniqueAttr(iter_KeyVals->first, iter_KeyVals->second);
+   }
+}
+
+
 void Collection::setMetaTag(
    CopyObject* aoCO,
    std::string aszKey,
@@ -600,6 +667,14 @@ void  Collection::removeMetaTag(
    std::string aszKey)
 {
    aoCO->RemoveMetaTag(m_szName, aszKey);
+}
+
+void Collection::setFeatures(CopyObject* aoCO,
+   std::vector<std::pair<std::string, std::string>> alstNewMeta,
+   std::vector<std::pair<std::string, std::string>> alstNewAttrs)
+{
+   setMetaTags(aoCO, alstNewMeta);
+   setItemAttrs(aoCO, alstNewAttrs);
 }
 
 void Collection::LoadCollection(std::string aszFileName, std::vector<std::pair<std::string, std::string>>& alstOutsideForcedChanges)

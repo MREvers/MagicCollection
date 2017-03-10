@@ -60,7 +60,7 @@ public:
 		System::String^ ahszKey,
 		System::String^ ahszVal,
 		System::Collections::Generic::List<System::Tuple<System::String^, System::String^>^>^ hlstMetaTags);
-   void AddMetaTags(System::String^ ahszCollectionName,
+   void SetMetaTags(System::String^ ahszCollectionName,
       System::String^ ahszLongName,
       System::Collections::Generic::List<System::Tuple<System::String^, System::String^>^>^ hlstNewTags,
       System::Collections::Generic::List<System::Tuple<System::String^, System::String^>^>^ hlstMetaTags);
@@ -74,6 +74,13 @@ public:
 		System::String^ ahszLongName,
 		System::String^ ahszKey,
 		System::Collections::Generic::List<System::Tuple<System::String^, System::String^>^>^ hlstMetaTags);
+
+   void SetFeatures(System::String^ ahszCollectionName,
+      System::String^ ahszLongName,
+      System::Collections::Generic::List<System::Tuple<System::String^, System::String^>^>^ hlstNewTags,
+      System::Collections::Generic::List<System::Tuple<System::String^, System::String^>^>^ hlstNewAttsr,
+      System::Collections::Generic::List<System::Tuple<System::String^, System::String^>^>^ hlstMetaTags);
+
 	System::Boolean IsSameIdentity(System::String^ aszLongNameOne, System::String^ aszLongNameTwo);
 	System::Boolean IsSameMetaTags(
 		System::Collections::Generic::List<System::Tuple<System::String^, System::String^>^>^ hlstMetaTagsOne,

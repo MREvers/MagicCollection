@@ -97,6 +97,7 @@ public:
 	
 	std::map<std::string, std::vector<std::string>> GetNonUniqueAttributeRestrictions();
 	void SetNonUniqueAttributeRestrictions(std::map<std::string, std::vector<std::string>> aMapRestrictions);
+   void SetPairedNonUniqueAttrs(std::vector<std::pair<std::string, std::string>> alstPairedAttrs);
 	
 	CopyObject GenerateCopy(std::string aszCollectionName);
 	// Used in building a printable structure

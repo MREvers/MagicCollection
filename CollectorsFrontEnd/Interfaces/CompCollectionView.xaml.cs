@@ -244,6 +244,7 @@ namespace CollectorsFrontEnd.Interfaces
                     }
                 }
             }
+
             DataModel.Refresh();
             buildListView();
             showMainDisplay();
@@ -307,26 +308,27 @@ namespace CollectorsFrontEnd.Interfaces
                 }
             }
 
-            List<Tuple<string, string>> LstChanges = new List<Tuple<string, string>>();
+            List<Tuple<string, string>> LstMetaChanges = new List<Tuple<string, string>>();
             foreach (Tuple<string, string> AddTag in LstAddedTags)
             {
-                LstChanges.Add(AddTag);
+                LstMetaChanges.Add(AddTag);
             }
 
             foreach (Tuple<string, string> RemoveTag in LstRemovedTags)
             {
                 // aDataModel.CardModelObject.RemoveMetaTag(RemoveTag.Item1);
                 Tuple<string, string> RemoveTuple = new Tuple<string, string>(RemoveTag.Item1, "!NULL");
-                LstChanges.Add(RemoveTuple);
+                LstMetaChanges.Add(RemoveTuple);
             }
 
-            aDataModel.CardModelObject.SubmitMetaTagChangesToServer(LstChanges);
+            // Now do the attrs
+            List<Tuple<string, string>> LstFinalAttrs = aDataModel.LstNonUniqueAttrs
+                .Select(x => new Tuple<string, string>(x.Key, x.Value)).ToList();
 
-            if (LstAddedTags.Count + LstRemovedTags.Count > 0)
-            {
-                DataModel.Refresh();
-                buildListView();
-            }
+            // Submit everything to the server.
+            aDataModel.CardModelObject.SubmitFeatureChangesToServer(LstMetaChanges, LstFinalAttrs);
+            DataModel.Refresh();
+            buildListView();
 
             showMainDisplay();
         }

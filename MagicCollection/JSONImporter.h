@@ -40,5 +40,6 @@ private:
    int list_Find(std::string aszString, std::vector<std::string> alstSearch);
    std::vector<std::string> m_NonUniqueKeys; // These grab all values whenever found.
    std::vector<std::string> m_PairedKeys; // These will fill with a blank value if not found per card.
+   std::vector<std::string> str_Split(std::string aszSplit, std::string aszDelim);
 };
 

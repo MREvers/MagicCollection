@@ -106,6 +106,20 @@ namespace CollectorsFrontEnd.InterfaceModels
                 .CardClassInterfaceModel.SubmitMetaTagChangesToServer(TargetCollection, CardNameLong, alstNewMeta, LstMetaTags);
         }
 
+        public void SubmitFeatureChangesToServer(List<Tuple<string, string>> alstNewMeta,
+            List<Tuple<string, string>> alstNewAttrs)
+        {
+            ServerInterfaceModel
+                .CardClassInterfaceModel
+                .SubmitFeatureChangesToServer(
+                TargetCollection,
+                CardNameLong,
+                alstNewMeta,
+                alstNewAttrs,
+                LstMetaTags);
+            CardImage = null;
+        }
+
         public string GetMetaTag(string aszKey)
         {
             string szRetVal = "";

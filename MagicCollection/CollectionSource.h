@@ -44,7 +44,7 @@ private:
    std::vector<SourceObject> m_lstptCardBuffer;
    std::vector<CollectionObject> m_lstoCardCache;
    std::vector<std::string> m_lstNonUniqueKeys;
-   std::vector<std::string> m_lstPairedNonUniques;
+   std::vector<std::pair<std::string,std::string>> m_lstPairedNonUniques;
 
    int findInBuffer(std::string aszName, bool abCaseSensitive);
    bool isUnique(std::string aszUnique);

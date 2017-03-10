@@ -3,112 +3,112 @@
 std::vector<std::string> CopyObject::PerCollectionMetaTagNames({ "Generalization" });
 
 CopyObject::CopyObject(
-	std::string aszParent,
-	std::vector<std::pair<std::string, std::string>>* alstPairedTags,
-	std::map<std::string, std::vector<std::string>>* alstRestrictions)
+   std::string aszParent,
+   std::vector<std::pair<std::string, std::string>>* alstPairedTags,
+   std::map<std::string, std::vector<std::string>>* alstRestrictions)
 {
-	ParentCollection = aszParent;
-	SetPairedTraitsReference(alstPairedTags);
-	SetNonUniqueAttributesRestrictionsReference(alstRestrictions);
+   ParentCollection = aszParent;
+   SetPairedTraitsReference(alstPairedTags);
+   SetNonUniqueAttributesRestrictionsReference(alstRestrictions);
 
 
-	// Initialize the nonuniques.
-	std::map<std::string, std::vector<std::string>>::iterator iter_NonUniques = m_mapNonUniqueAttributesRestrictions->begin();
-	for (; iter_NonUniques != m_mapNonUniqueAttributesRestrictions->end(); ++iter_NonUniques)
-	{
-		this->SetNonUniqueAttr(iter_NonUniques->first, iter_NonUniques->second.at(0));
-	}
+   // Initialize the nonuniques.
+   std::map<std::string, std::vector<std::string>>::iterator iter_NonUniques = m_mapNonUniqueAttributesRestrictions->begin();
+   for (; iter_NonUniques != m_mapNonUniqueAttributesRestrictions->end(); ++iter_NonUniques)
+   {
+      this->SetNonUniqueAttr(iter_NonUniques->first, iter_NonUniques->second.at(0));
+   }
 }
 
 void CopyObject::SetPairedTraitsReference(std::vector<std::pair<std::string, std::string>>* aLstPairedTraits)
 {
-	m_LstPairedTraits = aLstPairedTraits;
+   m_LstPairedTraits = aLstPairedTraits;
 }
 void CopyObject::SetNonUniqueAttributesRestrictionsReference(std::map<std::string, std::vector<std::string>>* aMapNonUAttrRestr)
 {
-	m_mapNonUniqueAttributesRestrictions = aMapNonUAttrRestr;
+   m_mapNonUniqueAttributesRestrictions = aMapNonUAttrRestr;
 }
 
 
 std::vector<std::pair<std::string, std::string>> CopyObject::GetMetaTags(std::string aszCollection)
 {
-	std::vector<std::pair<std::string, std::string>> lstRetVal;
-	if (PerCollectionMetaTags.find(aszCollection) != PerCollectionMetaTags.end())
-	{
-		lstRetVal = PerCollectionMetaTags[aszCollection];
-	}
+   std::vector<std::pair<std::string, std::string>> lstRetVal;
+   if (PerCollectionMetaTags.find(aszCollection) != PerCollectionMetaTags.end())
+   {
+      lstRetVal = PerCollectionMetaTags[aszCollection];
+   }
 
-	std::vector<std::pair<std::string, std::string>>::iterator iter_NUTags = MetaTags.begin();
-	for (; iter_NUTags != MetaTags.end(); ++iter_NUTags)
-	{
-		lstRetVal.push_back(*iter_NUTags);
-	}
+   std::vector<std::pair<std::string, std::string>>::iterator iter_NUTags = MetaTags.begin();
+   for (; iter_NUTags != MetaTags.end(); ++iter_NUTags)
+   {
+      lstRetVal.push_back(*iter_NUTags);
+   }
 
-	return lstRetVal;
+   return lstRetVal;
 }
 
 bool CopyObject::IsPerCollectionTag(std::string aszKeyValName)
 {
-	std::vector<std::string>::iterator iter_KeyVals = PerCollectionMetaTagNames.begin();
-	for (; iter_KeyVals != PerCollectionMetaTagNames.end(); ++iter_KeyVals)
-	{
-		if ((*iter_KeyVals) == aszKeyValName)
-		{
-			return true;
-		}
-	}
-	return false;
+   std::vector<std::string>::iterator iter_KeyVals = PerCollectionMetaTagNames.begin();
+   for (; iter_KeyVals != PerCollectionMetaTagNames.end(); ++iter_KeyVals)
+   {
+      if ((*iter_KeyVals) == aszKeyValName)
+      {
+         return true;
+      }
+   }
+   return false;
 }
 
 void CopyObject::RemoveMetaTag(std::string aszCollection, std::string aszKey)
 {
-	// Ensure that this tag is not unique to a collection
-	if (IsPerCollectionTag(aszKey) && HasPerCollectionTag(aszCollection, aszKey))
-	{
-		int iFound;
-		if ((iFound = SourceObject::List_Find(aszKey, PerCollectionMetaTags[aszCollection])) != -1)
-		{
-			std::vector<std::pair<std::string, std::string>> lstNewMetaTags;
-			std::vector<std::pair<std::string, std::string>>::iterator iter_MetaTags =
-				PerCollectionMetaTags[aszCollection].begin();
-			int index = 0;
-			for (; iter_MetaTags != PerCollectionMetaTags[aszCollection].end(); iter_MetaTags++)
-			{
-				if (index != iFound)
-				{
-					lstNewMetaTags.push_back(*iter_MetaTags);
-				}
-				index++;
-			}
+   // Ensure that this tag is not unique to a collection
+   if (IsPerCollectionTag(aszKey) && HasPerCollectionTag(aszCollection, aszKey))
+   {
+      int iFound;
+      if ((iFound = SourceObject::List_Find(aszKey, PerCollectionMetaTags[aszCollection])) != -1)
+      {
+         std::vector<std::pair<std::string, std::string>> lstNewMetaTags;
+         std::vector<std::pair<std::string, std::string>>::iterator iter_MetaTags =
+            PerCollectionMetaTags[aszCollection].begin();
+         int index = 0;
+         for (; iter_MetaTags != PerCollectionMetaTags[aszCollection].end(); iter_MetaTags++)
+         {
+            if (index != iFound)
+            {
+               lstNewMetaTags.push_back(*iter_MetaTags);
+            }
+            index++;
+         }
 
-			PerCollectionMetaTags[aszCollection] = lstNewMetaTags;
-		}
+         PerCollectionMetaTags[aszCollection] = lstNewMetaTags;
+      }
 
-	}
-	else
-	{
-		if (HasMetaTag(aszKey))
-		{
-			int iFound;
-			if ((iFound = SourceObject::List_Find(aszKey, MetaTags)) != -1)
-			{
-				std::vector<std::pair<std::string, std::string>> lstNewMetaTags;
-				std::vector<std::pair<std::string, std::string>>::iterator iter_MetaTags =
-					PerCollectionMetaTags[aszCollection].begin();
-				int index = 0;
-				for (; iter_MetaTags != PerCollectionMetaTags[aszCollection].end(); iter_MetaTags++)
-				{
-					if (index != iFound)
-					{
-						lstNewMetaTags.push_back(*iter_MetaTags);
-					}
-					index++;
-				}
+   }
+   else
+   {
+      if (HasMetaTag(aszKey))
+      {
+         int iFound;
+         if ((iFound = SourceObject::List_Find(aszKey, MetaTags)) != -1)
+         {
+            std::vector<std::pair<std::string, std::string>> lstNewMetaTags;
+            std::vector<std::pair<std::string, std::string>>::iterator iter_MetaTags =
+               PerCollectionMetaTags[aszCollection].begin();
+            int index = 0;
+            for (; iter_MetaTags != PerCollectionMetaTags[aszCollection].end(); iter_MetaTags++)
+            {
+               if (index != iFound)
+               {
+                  lstNewMetaTags.push_back(*iter_MetaTags);
+               }
+               index++;
+            }
 
-				MetaTags = lstNewMetaTags;
-			}
-		}
-	}
+            MetaTags = lstNewMetaTags;
+         }
+      }
+   }
 }
 
 void CopyObject::SetMetaTag(std::string aszCollection, std::string aszKey, std::string aszVal)
@@ -119,11 +119,11 @@ void CopyObject::SetMetaTag(std::string aszCollection, std::string aszKey, std::
       return;
    }
 
-	// Ensure that this tag is not unique to a collection
-	if (IsPerCollectionTag(aszKey))
-	{
-		if (HasPerCollectionTag(aszCollection, aszKey))
-		{
+   // Ensure that this tag is not unique to a collection
+   if (IsPerCollectionTag(aszKey))
+   {
+      if (HasPerCollectionTag(aszCollection, aszKey))
+      {
          int iFind = SourceObject::List_Find(aszKey, PerCollectionMetaTags[aszCollection]);
          if (iFind == -1)
          {
@@ -133,64 +133,64 @@ void CopyObject::SetMetaTag(std::string aszCollection, std::string aszKey, std::
          {
             PerCollectionMetaTags[aszCollection][iFind].second = aszVal;
          }
-			
-		}
-		else
-		{
-			std::vector<std::pair<std::string, std::string>> lstNewCol;
-			lstNewCol.push_back(std::make_pair(aszKey, aszVal));
-			PerCollectionMetaTags[aszCollection] = lstNewCol;
-		}
-	}
-	else
-	{
-		if (!HasMetaTag(aszKey))
-		{
-			MetaTags.push_back(std::make_pair(aszKey, aszVal));
-		}
-	}
+
+      }
+      else
+      {
+         std::vector<std::pair<std::string, std::string>> lstNewCol;
+         lstNewCol.push_back(std::make_pair(aszKey, aszVal));
+         PerCollectionMetaTags[aszCollection] = lstNewCol;
+      }
+   }
+   else
+   {
+      if (!HasMetaTag(aszKey))
+      {
+         MetaTags.push_back(std::make_pair(aszKey, aszVal));
+      }
+   }
 
 }
 
 void CopyObject::SetMetaTag(std::string aszCollection, std::string aszKey, std::string aszSubKey, std::string aszVal)
 {
-	std::string szFullKey = aszKey + "." + aszSubKey;
-	SetMetaTag(aszCollection, szFullKey, aszVal);
+   std::string szFullKey = aszKey + "." + aszSubKey;
+   SetMetaTag(aszCollection, szFullKey, aszVal);
 }
 
 bool CopyObject::HasMetaTag(std::string aszKey)
 {
-	std::vector<std::pair<std::string, std::string>>::iterator iter_Tags = MetaTags.begin();
-	for (; iter_Tags != MetaTags.end(); ++iter_Tags)
-	{
-		if (iter_Tags->first == aszKey)
-		{
-			return true;
-		}
-	}
-	return false;
+   std::vector<std::pair<std::string, std::string>>::iterator iter_Tags = MetaTags.begin();
+   for (; iter_Tags != MetaTags.end(); ++iter_Tags)
+   {
+      if (iter_Tags->first == aszKey)
+      {
+         return true;
+      }
+   }
+   return false;
 }
 
 std::pair<std::string, std::string> CopyObject::GetMetaTag(std::string aszCollection, std::string aszKey)
 {
-	std::string szKey = aszKey;
-	std::string szVal = "!NULL";
-	std::vector<std::pair<std::string, std::string>>::iterator iter_Tags = MetaTags.begin();
-	for (; iter_Tags != MetaTags.end(); ++iter_Tags)
-	{
-		if (iter_Tags->first == aszKey)
-		{
-			szVal = iter_Tags->first;
-		}
-	}
+   std::string szKey = aszKey;
+   std::string szVal = "!NULL";
+   std::vector<std::pair<std::string, std::string>>::iterator iter_Tags = MetaTags.begin();
+   for (; iter_Tags != MetaTags.end(); ++iter_Tags)
+   {
+      if (iter_Tags->first == aszKey)
+      {
+         szVal = iter_Tags->first;
+      }
+   }
 
    if (szVal == "!NULL")
    {
       if (IsPerCollectionTag(aszKey))
       {
-         if (HasPerCollectionTag(aszCollection ,aszKey))
+         if (HasPerCollectionTag(aszCollection, aszKey))
          {
-            std::vector<std::pair<std::string,std::string>>::iterator iter_PerCols =
+            std::vector<std::pair<std::string, std::string>>::iterator iter_PerCols =
                PerCollectionMetaTags.at(aszCollection).begin();
             for (; iter_PerCols != PerCollectionMetaTags.at(aszCollection).end(); ++iter_PerCols)
             {
@@ -203,158 +203,179 @@ std::pair<std::string, std::string> CopyObject::GetMetaTag(std::string aszCollec
       }
    }
 
-	return std::make_pair(szKey, szVal);
+   return std::make_pair(szKey, szVal);
 }
 
 bool CopyObject::HasPerCollectionTag(std::string aszCollection, std::string aszKey)
 {
-	if (PerCollectionMetaTags.find(aszCollection) != PerCollectionMetaTags.end())
-	{
-		std::vector<std::pair<std::string, std::string>>::iterator iter_Tags = PerCollectionMetaTags[aszCollection].begin();
-		for (; iter_Tags != PerCollectionMetaTags[aszCollection].end(); ++iter_Tags)
-		{
-			if (iter_Tags->first == aszKey)
-			{
-				return true;
-			}
-		}
-	}
-	return false;
+   if (PerCollectionMetaTags.find(aszCollection) != PerCollectionMetaTags.end())
+   {
+      std::vector<std::pair<std::string, std::string>>::iterator iter_Tags = PerCollectionMetaTags[aszCollection].begin();
+      for (; iter_Tags != PerCollectionMetaTags[aszCollection].end(); ++iter_Tags)
+      {
+         if (iter_Tags->first == aszKey)
+         {
+            return true;
+         }
+      }
+   }
+   return false;
 
 }
 
 void CopyObject::SetNonUniqueAttr(std::string aszKey, std::string aszValue)
 {
-	// The construct copy function is static, so I can't just grab the paired
-	//	traits from the collection obj. I need to overhaul the Construct Copy function.
-	//  It really can't be static because the copy now has dependencies on the CollectionObj.
-	// This really makes more sense, because the IsSameCopy function should really be on
-	//  the collectionobject level... maybe, idk.
-	// Or the SetNonUniqueAttr is on the collectionobj level... Idk, shit's broke.
+   if (!CollectionObject::IsNonUniqueTrait(aszKey))
+   {
+      return;
+   }
 
+   bool bCheckPairedTraits = false;
+   int iIndexOfAllowedTrait = 0;
+   bool bRestrictedMatch = false;
+   // Already has a value.
+   std::map<std::string, std::vector<std::string>>::iterator lstRestrictions =
+      m_mapNonUniqueAttributesRestrictions->find(aszKey);
+   if (lstRestrictions != m_mapNonUniqueAttributesRestrictions->end())
+   {
+      // Check to make sure that the attribute is restricted
+      // If it is, make sure the value is a legal value
+      if ((iIndexOfAllowedTrait = SourceObject::List_Find(aszValue, lstRestrictions->second)) != -1)
+      {
+         // It is a legal value
+         if (NonUniqueTraits[aszKey] != aszValue)
+         {
+            NonUniqueTraits[aszKey] = aszValue;
+            bCheckPairedTraits = true;
+            bRestrictedMatch = true;
+         }
 
-	bool bCheckPairedTraits = false;
-	int iIndexOfAllowedTrait = 0;
-	bool bRestrictedMatch = false;
-	// Already has a value.
-	std::map<std::string, std::vector<std::string>>::iterator lstRestrictions =
-		m_mapNonUniqueAttributesRestrictions->find(aszKey);
-	if (lstRestrictions != m_mapNonUniqueAttributesRestrictions->end())
-	{
-		// Check to make sure that the attribute is restricted
-		// If it is, make sure the value is a legal value
-		if ((iIndexOfAllowedTrait = SourceObject::List_Find(aszValue, lstRestrictions->second)) != -1)
-		{
-			// It is a legal value
-			NonUniqueTraits[aszKey] = aszValue;
-			bCheckPairedTraits = true;
-			bRestrictedMatch = true;
-		}
-	}
-	else
-	{
-		// If not, just set the value
-		NonUniqueTraits[aszKey] = aszValue;
-		bCheckPairedTraits = true;
-	}
+      }
+   }
+   else
+   {
+      // If not, just set the value.
+      if (NonUniqueTraits[aszKey] != aszValue)
+      {
+         NonUniqueTraits[aszKey] = aszValue;
+         bCheckPairedTraits = true;
+      }
+   }
 
-	// Loop through and make sure all paired traits are set.
-	if (bCheckPairedTraits)
-	{
-		std::vector<std::string> lstSetTraits;
-		bool bAllSet = false;
-		while (!bAllSet)
-		{
-			bool bFoundAll = true;
-			std::vector<std::pair<std::string, std::string>>::iterator iter_PairedTraits = m_LstPairedTraits->begin();
-			for (; iter_PairedTraits != m_LstPairedTraits->end(); ++iter_PairedTraits)
-			{
-				if (iter_PairedTraits->first == aszKey)
-				{
-					if (!SourceObject::List_Find(iter_PairedTraits->second, lstSetTraits))
-					{
-						if (bRestrictedMatch)
-						{
-							NonUniqueTraits[iter_PairedTraits->second] =
-								(*m_mapNonUniqueAttributesRestrictions)[iter_PairedTraits->second][iIndexOfAllowedTrait];
-						}
-						else
-						{
-							NonUniqueTraits[iter_PairedTraits->second] = aszValue;
-						}
-						lstSetTraits.push_back(iter_PairedTraits->second);
-						bFoundAll == false;
-					}
-				}
-				
-			}
+   // Loop through and make sure all paired traits are set.
+   if (bCheckPairedTraits)
+   {
+      std::vector<std::string> lstSetTraits;
+      bool bAllSet = false;
+      while (!bAllSet)
+      {
+         bool bFoundAll = true;
+         std::vector<std::pair<std::string, std::string>>::iterator iter_PairedTraits = m_LstPairedTraits->begin();
+         for (; iter_PairedTraits != m_LstPairedTraits->end(); ++iter_PairedTraits)
+         {
+            if (iter_PairedTraits->first == aszKey)
+            {
+               if (SourceObject::List_Find(iter_PairedTraits->second, lstSetTraits) == -1)
+               {
+                  if (bRestrictedMatch)
+                  {
+                     NonUniqueTraits[iter_PairedTraits->second] =
+                        (*m_mapNonUniqueAttributesRestrictions)[iter_PairedTraits->second][iIndexOfAllowedTrait];
+                  }
+                  else
+                  {
+                     NonUniqueTraits[iter_PairedTraits->second] = aszValue;
+                  }
+                  lstSetTraits.push_back(iter_PairedTraits->second);
+                  bFoundAll == false;
+               }
+            }
+            else if (iter_PairedTraits->second == aszKey)
+            {
+               if (SourceObject::List_Find(iter_PairedTraits->first, lstSetTraits) == -1)
+               {
+                  if (bRestrictedMatch)
+                  {
+                     NonUniqueTraits[iter_PairedTraits->first] =
+                        (*m_mapNonUniqueAttributesRestrictions)[iter_PairedTraits->first][iIndexOfAllowedTrait];
+                  }
+                  else
+                  {
+                     NonUniqueTraits[iter_PairedTraits->first] = aszValue;
+                  }
+                  lstSetTraits.push_back(iter_PairedTraits->first);
+                  bFoundAll == false;
+               }
+            }
 
-			bAllSet |= bFoundAll;
-		}
+         }
 
-	}
+         bAllSet |= bFoundAll;
+      }
+
+   }
 }
 
 bool CopyObject::IsSameMetaTags(std::string aszCollectionName, CopyObject* aoCOne, CopyObject* aoCTwo, bool abUseIgnore)
 {
-	return IsSameMetaTags(aoCOne->GetMetaTags(aszCollectionName), aoCTwo->GetMetaTags(aszCollectionName), abUseIgnore);
+   return IsSameMetaTags(aoCOne->GetMetaTags(aszCollectionName), aoCTwo->GetMetaTags(aszCollectionName), abUseIgnore);
 }
 
 bool CopyObject::IsSameMetaTags(
-	std::vector<std::pair<std::string, std::string>> alstTagsOne,
-	std::vector<std::pair<std::string, std::string>> alstTagsTwo,
-	bool abUseIgnore)
+   std::vector<std::pair<std::string, std::string>> alstTagsOne,
+   std::vector<std::pair<std::string, std::string>> alstTagsTwo,
+   bool abUseIgnore)
 {
-	std::vector<std::pair<std::string, std::string>> lstUnignoredTagsOne;
-	std::vector<std::pair<std::string, std::string>> lstUnignoredTagsTwo;
+   std::vector<std::pair<std::string, std::string>> lstUnignoredTagsOne;
+   std::vector<std::pair<std::string, std::string>> lstUnignoredTagsTwo;
 
-	std::vector<std::string> lstIgnoredTags;
-	int iFindIgnore;
-	if (abUseIgnore && (iFindIgnore = SourceObject::List_Find("_ignore", alstTagsOne)) != -1)
-	{
-		std::pair<std::string, std::string> pair_szIgnored = alstTagsOne[iFindIgnore];
-		std::string szIgnored = pair_szIgnored.second;
-		lstIgnoredTags = SourceObject::Str_Split(szIgnored, ";");
-	}
+   std::vector<std::string> lstIgnoredTags;
+   int iFindIgnore;
+   if (abUseIgnore && (iFindIgnore = SourceObject::List_Find("_ignore", alstTagsOne)) != -1)
+   {
+      std::pair<std::string, std::string> pair_szIgnored = alstTagsOne[iFindIgnore];
+      std::string szIgnored = pair_szIgnored.second;
+      lstIgnoredTags = SourceObject::Str_Split(szIgnored, ";");
+   }
 
-	std::vector<std::pair<std::string, std::string>>::iterator iter_UnignoredTagsOne = alstTagsOne.begin();
-	for (; iter_UnignoredTagsOne != alstTagsOne.end(); iter_UnignoredTagsOne++)
-	{
-		// It is a multitiag if the split list is > 1
-		std::vector<std::string> lstSplitString = SourceObject::Str_Split(iter_UnignoredTagsOne->first, ".");
-		std::string szKey = lstSplitString[0];
-		if (szKey.size() > 0 && szKey[0] != '_' && SourceObject::List_Find(szKey, lstIgnoredTags) == -1)
-		{
-			lstUnignoredTagsOne.push_back(*iter_UnignoredTagsOne);
-		}
-	}
+   std::vector<std::pair<std::string, std::string>>::iterator iter_UnignoredTagsOne = alstTagsOne.begin();
+   for (; iter_UnignoredTagsOne != alstTagsOne.end(); iter_UnignoredTagsOne++)
+   {
+      // It is a multitiag if the split list is > 1
+      std::vector<std::string> lstSplitString = SourceObject::Str_Split(iter_UnignoredTagsOne->first, ".");
+      std::string szKey = lstSplitString[0];
+      if (szKey.size() > 0 && szKey[0] != '_' && SourceObject::List_Find(szKey, lstIgnoredTags) == -1)
+      {
+         lstUnignoredTagsOne.push_back(*iter_UnignoredTagsOne);
+      }
+   }
 
-	if (abUseIgnore && (iFindIgnore = SourceObject::List_Find("_ignore", alstTagsTwo)) != -1)
-	{
-		std::pair<std::string, std::string> pair_szIgnored = alstTagsTwo[iFindIgnore];
-		std::string szIgnored = pair_szIgnored.second;
-		lstIgnoredTags = SourceObject::Str_Split(szIgnored, ";");
-	}
+   if (abUseIgnore && (iFindIgnore = SourceObject::List_Find("_ignore", alstTagsTwo)) != -1)
+   {
+      std::pair<std::string, std::string> pair_szIgnored = alstTagsTwo[iFindIgnore];
+      std::string szIgnored = pair_szIgnored.second;
+      lstIgnoredTags = SourceObject::Str_Split(szIgnored, ";");
+   }
 
-	std::vector<std::pair<std::string, std::string>>::iterator iter_UnignoredTagsTwo = alstTagsTwo.begin();
-	for (; iter_UnignoredTagsTwo != alstTagsTwo.end(); iter_UnignoredTagsTwo++)
-	{
-		// It is a multitiag if the split list is > 1
-		std::vector<std::string> lstSplitString = SourceObject::Str_Split(iter_UnignoredTagsTwo->first, ".");
-		std::string szKey = lstSplitString[0];
-		if (szKey.size() > 0 && szKey[0] != '_' && SourceObject::List_Find(szKey, lstIgnoredTags) == -1)
-		{
-			lstUnignoredTagsTwo.push_back(*iter_UnignoredTagsTwo);
-		}
-	}
+   std::vector<std::pair<std::string, std::string>>::iterator iter_UnignoredTagsTwo = alstTagsTwo.begin();
+   for (; iter_UnignoredTagsTwo != alstTagsTwo.end(); iter_UnignoredTagsTwo++)
+   {
+      // It is a multitiag if the split list is > 1
+      std::vector<std::string> lstSplitString = SourceObject::Str_Split(iter_UnignoredTagsTwo->first, ".");
+      std::string szKey = lstSplitString[0];
+      if (szKey.size() > 0 && szKey[0] != '_' && SourceObject::List_Find(szKey, lstIgnoredTags) == -1)
+      {
+         lstUnignoredTagsTwo.push_back(*iter_UnignoredTagsTwo);
+      }
+   }
 
-	return CollectionObject::CompareKeyValPairList(lstUnignoredTagsTwo, lstUnignoredTagsOne);
+   return CollectionObject::CompareKeyValPairList(lstUnignoredTagsTwo, lstUnignoredTagsOne);
 }
 
 CollectionObject::CollectionObject(std::string aszName)
 {
-	m_iAllCopies = 0;
-	m_szName = aszName;
+   m_iAllCopies = 0;
+   m_szName = aszName;
 }
 
 CollectionObject::~CollectionObject()
@@ -363,89 +384,89 @@ CollectionObject::~CollectionObject()
 
 bool CollectionObject::MapAttributes(std::string aszName, std::string aszValue)
 {
-	m_mapAttributes[aszName] = aszValue;
-	return false;
+   m_mapAttributes[aszName] = aszValue;
+   return false;
 }
 
 std::string CollectionObject::GetAttribute(std::string aszAttr)
 {
-	if (m_mapAttributes.find(aszAttr) != m_mapAttributes.end())
-	{
-		return m_mapAttributes[aszAttr];
-	}
+   if (m_mapAttributes.find(aszAttr) != m_mapAttributes.end())
+   {
+      return m_mapAttributes[aszAttr];
+   }
 }
 
 std::vector<std::string> CollectionObject::GetRestrictionListFor(std::string aszAttr)
 {
-	std::vector<std::string> lstRetVal;
+   std::vector<std::string> lstRetVal;
 
-	if (m_mapNonUniqueAttributesRestrictions.find(aszAttr) != m_mapNonUniqueAttributesRestrictions.end())
-	{
-		lstRetVal == m_mapNonUniqueAttributesRestrictions[aszAttr];
-	}
+   if (m_mapNonUniqueAttributesRestrictions.find(aszAttr) != m_mapNonUniqueAttributesRestrictions.end())
+   {
+      lstRetVal == m_mapNonUniqueAttributesRestrictions[aszAttr];
+   }
 
-	return lstRetVal;
+   return lstRetVal;
 }
 
 std::map<std::string, std::string> CollectionObject::GetAttributesMap()
 {
-	return m_mapAttributes;
+   return m_mapAttributes;
 }
 
 std::string CollectionObject::GetName()
 {
-	return m_szName;
+   return m_szName;
 }
 
 // By default the parent is the collection that adds it.
 CopyObject* CollectionObject::AddCopy(std::string aszCollectionName)
 {
-	CopyObject oNewCopy = GenerateCopy(aszCollectionName);
-	
-	m_lstCopies.push_back(oNewCopy);
-	return &m_lstCopies[m_lstCopies.size() - 1];
+   CopyObject oNewCopy = GenerateCopy(aszCollectionName);
+
+   m_lstCopies.push_back(oNewCopy);
+   return &m_lstCopies[m_lstCopies.size() - 1];
 }
 
 CopyObject*  CollectionObject::AddCopy(std::string aszCollectionName, std::vector<std::pair<std::string, std::string>> alstAttrs)
 {
-	CopyObject oNewCopy = GenerateCopy(aszCollectionName, alstAttrs);
+   CopyObject oNewCopy = GenerateCopy(aszCollectionName, alstAttrs);
 
-	m_lstCopies.push_back(oNewCopy);
-	return &m_lstCopies[m_lstCopies.size() - 1];
+   m_lstCopies.push_back(oNewCopy);
+   return &m_lstCopies[m_lstCopies.size() - 1];
 }
 
 CopyObject CollectionObject::GenerateCopy(std::string aszCollectionName)
 {
-	CopyObject oNewCopy(aszCollectionName, &m_lstPairedAttributes, &m_mapNonUniqueAttributesRestrictions);
-	oNewCopy.ResidentCollections.push_back(aszCollectionName);
-	return oNewCopy;
+   CopyObject oNewCopy(aszCollectionName, &m_lstPairedAttributes, &m_mapNonUniqueAttributesRestrictions);
+   oNewCopy.ResidentCollections.push_back(aszCollectionName);
+   return oNewCopy;
 }
 
 
 CopyObject CollectionObject::GenerateCopy(std::string aszCollectionName, std::vector<std::pair<std::string, std::string>> alstAttrs)
 {
-	CopyObject oNewCopy = GenerateCopy(aszCollectionName);
+   CopyObject oNewCopy = GenerateCopy(aszCollectionName);
 
-	for (int i = 0; i < alstAttrs.size(); i++)
-	{
-		std::pair<std::string, std::string> pszs = alstAttrs.at(i);
-		if (pszs.first == "Parent")
-		{
-			oNewCopy.ParentCollection = pszs.second;
-		}
-		else
-		{
-			// We only need to store the non-unique traits.
-			//  All other traits are stored in the collectionobj.
-			if (IsNonUniqueTrait(pszs.first))
-			{
-				oNewCopy.SetNonUniqueAttr(pszs.first, pszs.second);
-			}
-		}
+   for (int i = 0; i < alstAttrs.size(); i++)
+   {
+      std::pair<std::string, std::string> pszs = alstAttrs.at(i);
+      if (pszs.first == "Parent")
+      {
+         oNewCopy.ParentCollection = pszs.second;
+      }
+      else
+      {
+         // We only need to store the non-unique traits.
+         //  All other traits are stored in the collectionobj.
+         if (IsNonUniqueTrait(pszs.first))
+         {
+            oNewCopy.SetNonUniqueAttr(pszs.first, pszs.second);
+         }
+      }
 
-	}
+   }
 
-	return oNewCopy;
+   return oNewCopy;
 }
 
 CopyObject CollectionObject::GenerateCopy(
@@ -465,170 +486,175 @@ CopyObject CollectionObject::GenerateCopy(
 }
 
 void CollectionObject::RemoveCopy(std::string aszCollectionName,
-	std::vector<std::pair<std::string, std::string>> alstAttrs,
-	std::vector<std::pair<std::string, std::string>> alstMeta)
+   std::vector<std::pair<std::string, std::string>> alstAttrs,
+   std::vector<std::pair<std::string, std::string>> alstMeta)
 {
-	for (std::vector<CopyObject>::iterator iter = m_lstCopies.begin(); iter != m_lstCopies.end(); ++iter)
-	{
-		if (iter->ParentCollection == aszCollectionName)
-		{
-			if (CompareKeyValPairList(
-				ConvertMapToList(iter->NonUniqueTraits),
-				FilterOutUniqueTraits(alstAttrs)))
-			{
-				if (CopyObject::IsSameMetaTags(iter->MetaTags, alstMeta))
-				{
-					m_lstCopies.erase(iter);
-					break;
-				}
+   for (std::vector<CopyObject>::iterator iter = m_lstCopies.begin(); iter != m_lstCopies.end(); ++iter)
+   {
+      if (iter->ParentCollection == aszCollectionName)
+      {
+         if (CompareKeyValPairList(
+            ConvertMapToList(iter->NonUniqueTraits),
+            FilterOutUniqueTraits(alstAttrs)))
+         {
+            if (CopyObject::IsSameMetaTags(iter->MetaTags, alstMeta))
+            {
+               m_lstCopies.erase(iter);
+               break;
+            }
 
-			}
+         }
 
-		}
-	}
+      }
+   }
 }
 
 std::vector<CopyObject*> CollectionObject::GetLocalCopiesWith(std::string aszParent, std::vector<std::pair<std::string, std::string>> alstAttrs)
 {
-	std::vector<CopyObject*> rLstRetVal;
-	std::vector<CopyObject>::iterator card_iter = m_lstCopies.begin();
-	for (; card_iter != m_lstCopies.end(); ++card_iter)
-	{
-		if (card_iter->ParentCollection == aszParent)
-		{
-			CopyObject oCOID = GenerateCopy(aszParent, alstAttrs);
-			CopyObject* oFoundCard = card_iter._Ptr;
-			if (IsSameIdentity(&oCOID, oFoundCard, true))
-			{
-				rLstRetVal.push_back(oFoundCard);
-			}
-			break;
-		}
+   std::vector<CopyObject*> rLstRetVal;
+   std::vector<CopyObject>::iterator card_iter = m_lstCopies.begin();
+   for (; card_iter != m_lstCopies.end(); ++card_iter)
+   {
+      if (card_iter->ParentCollection == aszParent)
+      {
+         CopyObject oCOID = GenerateCopy(aszParent, alstAttrs);
+         CopyObject* oFoundCard = card_iter._Ptr;
+         if (IsSameIdentity(&oCOID, oFoundCard, true))
+         {
+            rLstRetVal.push_back(oFoundCard);
+         }
+         break;
+      }
 
-	}
+   }
 
-	return rLstRetVal;
+   return rLstRetVal;
 }
 
 std::vector<CopyObject*> CollectionObject::GetLocalCopies(std::string aszCollectionName)
 {
-	std::vector<CopyObject*> rLstRetVal;
-	std::vector<CopyObject>::iterator card_iter = m_lstCopies.begin();
-	for (; card_iter != m_lstCopies.end(); ++card_iter)
-	{
-		if (card_iter->ParentCollection == aszCollectionName)
-		{
-			CopyObject* oFoundCard = card_iter._Ptr;
-			rLstRetVal.push_back(oFoundCard);
-		}
-	}
+   std::vector<CopyObject*> rLstRetVal;
+   std::vector<CopyObject>::iterator card_iter = m_lstCopies.begin();
+   for (; card_iter != m_lstCopies.end(); ++card_iter)
+   {
+      if (card_iter->ParentCollection == aszCollectionName)
+      {
+         CopyObject* oFoundCard = card_iter._Ptr;
+         rLstRetVal.push_back(oFoundCard);
+      }
+   }
 
-	return rLstRetVal;
+   return rLstRetVal;
 }
 
 std::vector<CopyObject*> CollectionObject::GetCopies(std::string aszCollectionName)
 {
-	std::vector<CopyObject*> rLstRetVal;
-	std::vector<CopyObject>::iterator card_iter = m_lstCopies.begin();
-	for (; card_iter != m_lstCopies.end(); ++card_iter)
-	{
-		std::vector<std::string>::iterator resi_iter = card_iter->ResidentCollections.begin();
-		for (; resi_iter != card_iter->ResidentCollections.end(); ++resi_iter)
-		{
-			if (*resi_iter == aszCollectionName)
-			{
-				CopyObject* oFoundCard = card_iter._Ptr;
-				rLstRetVal.push_back(oFoundCard);
-				break;
-			}
-		}
-	}
+   std::vector<CopyObject*> rLstRetVal;
+   std::vector<CopyObject>::iterator card_iter = m_lstCopies.begin();
+   for (; card_iter != m_lstCopies.end(); ++card_iter)
+   {
+      std::vector<std::string>::iterator resi_iter = card_iter->ResidentCollections.begin();
+      for (; resi_iter != card_iter->ResidentCollections.end(); ++resi_iter)
+      {
+         if (*resi_iter == aszCollectionName)
+         {
+            CopyObject* oFoundCard = card_iter._Ptr;
+            rLstRetVal.push_back(oFoundCard);
+            break;
+         }
+      }
+   }
 
-	return rLstRetVal;
+   return rLstRetVal;
 }
 
 std::vector<CopyObject*> CollectionObject::GetCopiesWith(std::string aszCollectionName, std::string aszCardParent, std::vector<std::pair<std::string, std::string>> alstAttrs)
 {
-	std::vector<CopyObject*> rLstRetVal;
-	std::vector<CopyObject>::iterator card_iter = m_lstCopies.begin();
-	for (; card_iter != m_lstCopies.end(); ++card_iter)
-	{
-		std::vector<std::string>::iterator resi_iter = card_iter->ResidentCollections.begin();
-		for (; resi_iter != card_iter->ResidentCollections.end(); ++resi_iter)
-		{
-			if (*resi_iter == aszCollectionName)
-			{
-				CopyObject oCOID = GenerateCopy(aszCardParent, alstAttrs);
-				CopyObject* oFoundCard = card_iter._Ptr;
-				if (IsSameIdentity(&oCOID, oFoundCard, true))
-				{
-					rLstRetVal.push_back(oFoundCard);
-				}
-				break;
-			}
-		}
-	}
+   std::vector<CopyObject*> rLstRetVal;
+   std::vector<CopyObject>::iterator card_iter = m_lstCopies.begin();
+   for (; card_iter != m_lstCopies.end(); ++card_iter)
+   {
+      std::vector<std::string>::iterator resi_iter = card_iter->ResidentCollections.begin();
+      for (; resi_iter != card_iter->ResidentCollections.end(); ++resi_iter)
+      {
+         if (*resi_iter == aszCollectionName)
+         {
+            CopyObject oCOID = GenerateCopy(aszCardParent, alstAttrs);
+            CopyObject* oFoundCard = card_iter._Ptr;
+            if (IsSameIdentity(&oCOID, oFoundCard, true))
+            {
+               rLstRetVal.push_back(oFoundCard);
+            }
+            break;
+         }
+      }
+   }
 
-	return rLstRetVal;
+   return rLstRetVal;
 }
 
 bool CollectionObject::GetCopy(std::string aszCollectionName, std::vector<std::pair<std::string, std::string>> alstAttrs, CopyObject*& roCO, bool abExact)
 {
-	bool bFound = false;
-	CopyObject oCompare = GenerateCopy(aszCollectionName, alstAttrs);
+   bool bFound = false;
+   CopyObject oCompare = GenerateCopy(aszCollectionName, alstAttrs);
 
-	std::vector<CopyObject*> lstCopies = GetLocalCopies(aszCollectionName);
-	std::vector<CopyObject*>::iterator iter_copies = lstCopies.begin();
-	for (; iter_copies != lstCopies.end(); ++iter_copies)
-	{
-		if (IsSameIdentity(&oCompare, *iter_copies))
-		{
-			bFound = true;
-			roCO = *iter_copies;
-			break;
-		}
-	}
+   std::vector<CopyObject*> lstCopies = GetLocalCopies(aszCollectionName);
+   std::vector<CopyObject*>::iterator iter_copies = lstCopies.begin();
+   for (; iter_copies != lstCopies.end(); ++iter_copies)
+   {
+      if (IsSameIdentity(&oCompare, *iter_copies))
+      {
+         bFound = true;
+         roCO = *iter_copies;
+         break;
+      }
+   }
 
-	return bFound;
+   return bFound;
 }
 
 bool CollectionObject::GetCopy(
-	std::string aszCollectionName,
-	std::vector<std::pair<std::string, std::string>> alstAttrs,
-	std::vector<std::pair<std::string, std::string>> alstMeta,
-	CopyObject*& roCO)
+   std::string aszCollectionName,
+   std::vector<std::pair<std::string, std::string>> alstAttrs,
+   std::vector<std::pair<std::string, std::string>> alstMeta,
+   CopyObject*& roCO)
 {
-	bool bFound = false;
-	CopyObject oCompare = GenerateCopy(aszCollectionName, alstAttrs, alstMeta);
+   bool bFound = false;
+   CopyObject oCompare = GenerateCopy(aszCollectionName, alstAttrs, alstMeta);
 
-	std::vector<CopyObject*> lstCopies = GetLocalCopies(aszCollectionName);
-	std::vector<CopyObject*>::iterator iter_copies = lstCopies.begin();
-	for (; iter_copies != lstCopies.end(); ++iter_copies)
-	{
-		if (IsSameIdentity(&oCompare, *iter_copies))
-		{
-			if (CopyObject::IsSameMetaTags(aszCollectionName, &oCompare, *iter_copies, true))
-			{
-				bFound = true;
-				roCO = *iter_copies;
-				break;
-			}
-			
-		}
-	}
+   std::vector<CopyObject*> lstCopies = GetLocalCopies(aszCollectionName);
+   std::vector<CopyObject*>::iterator iter_copies = lstCopies.begin();
+   for (; iter_copies != lstCopies.end(); ++iter_copies)
+   {
+      if (IsSameIdentity(&oCompare, *iter_copies))
+      {
+         if (CopyObject::IsSameMetaTags(aszCollectionName, &oCompare, *iter_copies, true))
+         {
+            bFound = true;
+            roCO = *iter_copies;
+            break;
+         }
 
-	return bFound;
+      }
+   }
+
+   return bFound;
 }
 
 std::map<std::string, std::vector<std::string>> CollectionObject::GetNonUniqueAttributeRestrictions()
 {
-	return m_mapNonUniqueAttributesRestrictions;
+   return m_mapNonUniqueAttributesRestrictions;
 }
 
 // Sets nonunique attributes
 void CollectionObject::SetNonUniqueAttributeRestrictions(std::map<std::string, std::vector<std::string>> aMapRestrictions)
 {
-	m_mapNonUniqueAttributesRestrictions = aMapRestrictions;
+   m_mapNonUniqueAttributesRestrictions = aMapRestrictions;
+}
+
+void CollectionObject::SetPairedNonUniqueAttrs(std::vector<std::pair<std::string, std::string>> alstPairedAttrs)
+{
+   m_lstPairedAttributes = alstPairedAttrs;
 }
 
 // ASSUMES TWO CARDS OF THE SAME TYPE
@@ -636,62 +662,62 @@ void CollectionObject::SetNonUniqueAttributeRestrictions(std::map<std::string, s
 // Only compares attributes
 bool CollectionObject::IsSameIdentity(CopyObject* aoCOne, CopyObject* aoCTwo, bool bMatchParent)
 {
-	bool bMatch = true;
+   bool bMatch = true;
 
-	bMatch &= (aoCOne->ParentCollection == aoCTwo->ParentCollection) || !bMatchParent;
+   bMatch &= (aoCOne->ParentCollection == aoCTwo->ParentCollection) || !bMatchParent;
 
-	if (bMatch)
-	{
-		std::map<std::string, std::string>::iterator iter_keyVals = aoCOne->NonUniqueTraits.begin();
-		for (; iter_keyVals != aoCOne->NonUniqueTraits.end(); ++iter_keyVals)
-		{
+   if (bMatch)
+   {
+      std::map<std::string, std::string>::iterator iter_keyVals = aoCOne->NonUniqueTraits.begin();
+      for (; iter_keyVals != aoCOne->NonUniqueTraits.end(); ++iter_keyVals)
+      {
 
-			bool bFoundMatch = false;
-			std::map<std::string, std::string>::iterator iter_keyValsTwo = aoCTwo->NonUniqueTraits.begin();
-			for (; iter_keyValsTwo != aoCTwo->NonUniqueTraits.end(); ++iter_keyValsTwo)
-			{
-				if (iter_keyVals->first == iter_keyValsTwo->first)
-				{
-					if (bFoundMatch |= iter_keyVals->second == iter_keyValsTwo->second)
-					{
-						break;
-					}
-				}
-			}
+         bool bFoundMatch = false;
+         std::map<std::string, std::string>::iterator iter_keyValsTwo = aoCTwo->NonUniqueTraits.begin();
+         for (; iter_keyValsTwo != aoCTwo->NonUniqueTraits.end(); ++iter_keyValsTwo)
+         {
+            if (iter_keyVals->first == iter_keyValsTwo->first)
+            {
+               if (bFoundMatch |= iter_keyVals->second == iter_keyValsTwo->second)
+               {
+                  break;
+               }
+            }
+         }
 
-			if (!(bMatch &= bFoundMatch))
-			{
-				break;
-			}
-		}
+         if (!(bMatch &= bFoundMatch))
+         {
+            break;
+         }
+      }
 
-		return bMatch;
-	}
+      return bMatch;
+   }
 }
 
 std::vector<std::pair<std::string, std::string>> CollectionObject::FilterOutUniqueTraits(std::vector<std::pair<std::string, std::string>> alstAttrs)
 {
-	std::vector<std::pair<std::string, std::string>> lstRetVal;
-	std::vector<std::pair<std::string, std::string>>::iterator iter_Traits = alstAttrs.begin();
-	for (; iter_Traits != alstAttrs.end(); ++iter_Traits)
-	{
-		if (IsNonUniqueTrait(iter_Traits->first))
-		{
-			lstRetVal.push_back(*iter_Traits);
-		}
-	}
-	return lstRetVal;
+   std::vector<std::pair<std::string, std::string>> lstRetVal;
+   std::vector<std::pair<std::string, std::string>>::iterator iter_Traits = alstAttrs.begin();
+   for (; iter_Traits != alstAttrs.end(); ++iter_Traits)
+   {
+      if (IsNonUniqueTrait(iter_Traits->first))
+      {
+         lstRetVal.push_back(*iter_Traits);
+      }
+   }
+   return lstRetVal;
 }
 
 std::vector<std::pair<std::string, std::string>> CollectionObject::ConvertMapToList(std::map<std::string, std::string>  aMap)
 {
-	std::vector<std::pair<std::string, std::string>> lstRetVal;
-	std::map<std::string, std::string>::iterator iter_Map = aMap.begin();
-	for (; iter_Map != aMap.end(); ++iter_Map)
-	{
-		lstRetVal.push_back(std::make_pair(iter_Map->first, iter_Map->second));
-	}
-	return lstRetVal;
+   std::vector<std::pair<std::string, std::string>> lstRetVal;
+   std::map<std::string, std::string>::iterator iter_Map = aMap.begin();
+   for (; iter_Map != aMap.end(); ++iter_Map)
+   {
+      lstRetVal.push_back(std::make_pair(iter_Map->first, iter_Map->second));
+   }
+   return lstRetVal;
 }
 
 const char * const CollectionObject::LstUniqueTraits[] = { "manaCost", "colors", "name", "power",
@@ -699,70 +725,70 @@ const char * const CollectionObject::LstUniqueTraits[] = { "manaCost", "colors",
 
 bool CollectionObject::IsUniqueTrait(std::string aszTrait)
 {
-	for (int i = 0; i < 7; i++)
-	{
-		if (aszTrait == LstUniqueTraits[i])
-		{
-			return true;
-		}
-	}
-	return false;
+   for (int i = 0; i < 7; i++)
+   {
+      if (aszTrait == LstUniqueTraits[i])
+      {
+         return true;
+      }
+   }
+   return false;
 }
 const char * const CollectionObject::LstNonUniqueTraits[] = { "set", "multiverseid" };
 bool CollectionObject::IsNonUniqueTrait(std::string aszTrait)
 {
-	for (int i = 0; i < 2; i++)
-	{
-		if (aszTrait == LstNonUniqueTraits[i])
-		{
-			return true;
-		}
-	}
-	return false;
+   for (int i = 0; i < 2; i++)
+   {
+      if (aszTrait == LstNonUniqueTraits[i])
+      {
+         return true;
+      }
+   }
+   return false;
 }
 
 bool CollectionObject::CompareKeyValPairList(std::vector<std::pair<std::string, std::string>> alstFirst,
-	std::vector<std::pair<std::string, std::string>> alstSecond)
+   std::vector<std::pair<std::string, std::string>> alstSecond)
 {
-	bool bMatch = true;
+   bool bMatch = true;
 
-	if (bMatch = (alstFirst.size() == alstSecond.size()))
-	{
-		std::vector<std::pair<std::string, std::string>>::iterator iter_First = alstFirst.begin();
-		std::vector<std::pair<std::string, std::string>>::iterator iter_Second = alstSecond.begin();
+   if (bMatch = (alstFirst.size() == alstSecond.size()))
+   {
+      std::vector<std::pair<std::string, std::string>>::iterator iter_First = alstFirst.begin();
+      std::vector<std::pair<std::string, std::string>>::iterator iter_Second = alstSecond.begin();
 
-		for (; iter_First != alstFirst.end(); ++iter_First)
-		{
-			bool bFoundMatch = false;
-			for (; iter_Second != alstSecond.end(); ++iter_Second)
-			{
-				if (iter_First->first == iter_Second->first)
-				{
-					if (iter_First->second == iter_Second->second)
-					{
-						bFoundMatch = true;
-						break;
-					}
-				}
-			}
+      for (; iter_First != alstFirst.end(); ++iter_First)
+      {
+         bool bFoundMatch = false;
+         for (; iter_Second != alstSecond.end(); ++iter_Second)
+         {
+            if (iter_First->first == iter_Second->first)
+            {
+               if (iter_First->second == iter_Second->second)
+               {
+                  bFoundMatch = true;
+                  break;
+               }
+            }
+         }
 
-			if (!bFoundMatch)
-			{
-				bMatch = false;
-				break;
-			}
-		}
-	}
-	return bMatch;
+         if (!bFoundMatch)
+         {
+            bMatch = false;
+            break;
+         }
+      }
+   }
+   return bMatch;
 }
 
 std::string CollectionObject::str_trim(const std::string& src, char removeChar)
 {
-	size_t first = src.find_first_not_of(' ');
-	if (std::string::npos == first)
-	{
-		return src;
-	}
-	size_t last = src.find_last_not_of(' ');
-	return src.substr(first, (last - first + 1));
+   size_t first = src.find_first_not_of(' ');
+   if (std::string::npos == first)
+   {
+      return src;
+   }
+   size_t last = src.find_last_not_of(' ');
+   return src.substr(first, (last - first + 1));
 }
