@@ -438,7 +438,7 @@ void Collection::SetFeatures(
             {
                // Store the action and how to undo it here.
                Collection::Action oAction;
-               oAction.Identifier = "Set Meta-Tag '";// + szCard;
+               oAction.Identifier = "Set Features '";// + szCard;
                oAction.Do = std::bind(&Collection::setFeatures, this, oCO, alstNewMeta, alstNewAttrs);
 
                std::vector<std::pair<std::string, std::string>> lstUndoList;
@@ -623,6 +623,207 @@ std::string Collection::changeItemAttribute_string(
    return "% " + szCard + " -> " + szAfter;
 }
 
+void Collection::loadCollectionFromFile(std::string aszFileName)
+{
+   // Load the collection
+   std::ifstream in(aszFileName);
+   std::stringstream buffer;
+   buffer << in.rdbuf();
+   std::string contents(buffer.str());
+
+   std::vector<std::string> lstLines = splitIntoLines(contents);
+
+   loadCollectionLines(lstLines);
+}
+
+void Collection::loadCollectionLines(std::vector<std::string>& alstLines)
+{
+   for (std::vector<std::string>::iterator iter_CardLine = alstLines.begin(); iter_CardLine != alstLines.end(); ++iter_CardLine)
+   {
+      this->loadCardLine(*iter_CardLine);
+   }
+
+   finalizeTransaction(false);
+}
+
+bool Collection::loadCardLine(std::string aszNewCardLine)
+{
+   int iNum;
+   std::string szName;
+   std::string szDetails;
+   if (!ParseCardLine(aszNewCardLine, iNum, szName, szDetails))
+   {
+      m_lstUnreversibleChanges.push_back("Could Not Parse Line \"" + aszNewCardLine + "\"");
+      return false;
+   }
+   std::vector<std::pair<std::string, std::string>> lstKeyVals = ParseAttrs(szDetails);
+
+   // Add or find a copy for each count.
+   for (int i = 0; i < iNum; i++)
+   {
+      bool bNeedNewCopy = true;
+      int iCardIndex = m_ColSource->LoadCard(szName);
+      if (iCardIndex != -1)
+      {
+         // Create a temporary copy that will be used in comparisons
+         CollectionObject* ColPrototype = m_ColSource->GetCardPrototype(iCardIndex);
+
+         // Keep in mind, that lstKeyVals may overwrite m_szName as the parent collection.
+         CopyObject oTargetCopy = ColPrototype->GenerateCopy(m_szName, lstKeyVals);
+
+         // Look for a copy that is identical to this copy and check whether it is
+         // currently uncounted/unincluded in this collection. If a copy is found,
+         // add this collection to its resident collection.
+
+         // Check for all existing copies in the collection that the target copy claims it is in.
+         bool bNeedNewCopy = true;
+         std::vector<CopyObject*> lstExistingCopies = m_ColSource
+            ->GetCardPrototype(iCardIndex)
+            ->GetLocalCopies(oTargetCopy.ParentCollection);
+         std::vector<CopyObject*>::iterator iter_ExistingCopy = lstExistingCopies.begin();
+         for (; iter_ExistingCopy != lstExistingCopies.end(); ++iter_ExistingCopy)
+         {
+            // The only way a copy could possibly have this collection as a resi. is if this collection created it
+            //  or used it. If that is the case, then we should not use it as the copy.
+            if (SourceObject::List_Find(m_szName, (*iter_ExistingCopy)->ResidentCollections) == -1)
+            {
+               // This copy is not used by this collection. Check if this copy is identical to the target copy.
+               if (CollectionObject::IsSameIdentity(&oTargetCopy, *iter_ExistingCopy))
+               {
+                  // Record that this item is in this collection.
+                  // Normally this is done during the "AddItem" call, but
+                  // if the copy was loaded by another collection, it must
+                  // be done here.
+                  registerItem(iCardIndex);
+
+                  // Record this collection in this copy's residents.
+                  (*iter_ExistingCopy)->ResidentCollections.push_back(m_szName);
+                  bNeedNewCopy = false;
+                  break;
+               }
+            }
+         }
+
+         // If we didn't find a copy that matches, generate a new one.
+         if (bNeedNewCopy)
+         {
+            // Just add the copy if it is in this collection or
+            // the collection is loaded.
+            if (oTargetCopy.ParentCollection == m_szName ||
+               (SourceObject::List_Find(oTargetCopy.ParentCollection, *m_lstLoadedCollectionsBuffer) == -1))
+            {
+               AddItem(szName, false, lstKeyVals);
+            }
+            else
+            {
+               // If the parent collection is loaded, and a copy was not found in that collection,
+               // add a modified copy where the parent is ""
+               std::vector<std::pair<std::string, std::string>> lstKeyValsFixed(lstKeyVals);
+               std::vector<std::pair<std::string, std::string>>::iterator iter_keyvals = lstKeyValsFixed.begin();
+               for (; iter_keyvals != lstKeyValsFixed.end(); ++iter_keyvals)
+               {
+                  if (iter_keyvals->first == "Parent")
+                  {
+                     iter_keyvals->second = "";
+
+                     // Record somewhere that this change was made.
+                     m_lstUnreversibleChanges.push_back(changeItemAttribute_string(szName, &oTargetCopy, "Parent", ""));
+                     break;
+                  }
+               }
+
+               AddItem(szName, false, lstKeyValsFixed);
+            }
+
+         } // End If need new copy
+
+      } // End card name exists
+      else
+      {
+         // Can't find the card in the source... PANIC
+         m_lstUnreversibleChanges.push_back("Could Not Find Card \"" + szName + "\"");
+      }
+
+   } // End for Card name in file
+
+   return false;
+}
+
+void Collection::refreshCopyLinks(std::vector<std::pair<std::string, std::string>>& alstOutsideForcedChanges)
+{
+   // Now that the collection is loaded, if there are cards with parent collection == this but
+   // this is not in their residents, then that copy no longer exists.
+   std::vector<std::pair<std::string, CopyObject*>> lstFullCol = m_ColSource->GetCollection(m_szName);
+   std::vector<std::pair<std::string, CopyObject*>> ::iterator iter_ColOs = lstFullCol.begin();
+   for (; iter_ColOs != lstFullCol.end(); ++iter_ColOs)
+   {
+      if (SourceObject::List_Find(m_szName, (*iter_ColOs).second->ResidentCollections) == -1)
+      {
+         std::vector<std::string> lstAffectedCols = (*iter_ColOs).second->ResidentCollections;
+         std::vector<std::string>::iterator iter_affected_col = lstAffectedCols.begin();
+         for (; iter_affected_col != lstAffectedCols.end(); ++iter_affected_col)
+         {
+            alstOutsideForcedChanges.push_back(
+               std::make_pair(
+                  *iter_affected_col,
+                  changeItemAttribute_string((*iter_ColOs).first, (*iter_ColOs).second, "Parent", "", false)
+               ));
+         }
+         (*iter_ColOs).second->ParentCollection = "";
+      }
+   }
+}
+
+void Collection::loadMetaTagsFromFile()
+{
+   // Now load meta tags
+   std::ifstream in(m_szMetaTagFileName + ".txt");
+   if (in.good())
+   {
+      std::stringstream buffer;
+      buffer << in.rdbuf();
+      std::string contents(buffer.str());
+
+      std::vector<std::string> lstLines = splitIntoLines(contents);
+
+      loadMetaTagLines(lstLines);
+   }
+}
+
+void Collection::loadMetaTagLines(std::vector<std::string>& alstLines)
+{
+   for (std::vector<std::string>::iterator iter = alstLines.begin(); iter != alstLines.end(); ++iter)
+   {
+      std::vector<std::string> LstSplitLine = SourceObject::Str_Split(*iter, ":");
+      if (LstSplitLine.size() == 2)
+      {
+         std::string szTempName;
+         std::string szTempDetails;
+         int iTaggedCards;
+         if (ParseCardLine(LstSplitLine[0], iTaggedCards, szTempName, szTempDetails))
+         {
+            std::string szKey = "";
+            std::string szVal = "";
+            std::vector<std::pair<std::string, std::string>> LstSplitMeta = ParseAttrs(LstSplitLine[1]);
+            if (LstSplitMeta.size() > 0)
+            {
+               // Store the tags so that
+               // There are no MatchMeta because no cards have meta yet. I.e. NO META TAGS
+               for (int k = 0; k < iTaggedCards; k++)
+               {
+                  std::vector<std::pair<std::string, std::string>>::iterator iter_NewMeta = LstSplitMeta.begin();
+                  for (; iter_NewMeta != LstSplitMeta.end(); ++iter_NewMeta)
+                  {
+                     SetMetaTag(LstSplitLine[0], iter_NewMeta->first, iter_NewMeta->second);
+                  }
+               } // End for number of copies
+            }
+         } // End if successful parse
+
+      }
+   }
+}
+
 void Collection::setItemAttr(
    CopyObject* aoCO,
    std::string aszKey,
@@ -679,243 +880,11 @@ void Collection::setFeatures(CopyObject* aoCO,
 
 void Collection::LoadCollection(std::string aszFileName, std::vector<std::pair<std::string, std::string>>& alstOutsideForcedChanges)
 {
-   {
-      // Load the collection
-      std::ifstream in(aszFileName);
-      std::stringstream buffer;
-      buffer << in.rdbuf();
-      std::string contents(buffer.str());
+   this->loadCollectionFromFile(aszFileName);
 
-      std::vector<std::string> lstLines = splitIntoLines(contents);
+   this->refreshCopyLinks(alstOutsideForcedChanges);
 
-      for (std::vector<std::string>::iterator iter = lstLines.begin(); iter != lstLines.end(); ++iter)
-      {
-         int iNum;
-         std::string szName;
-         std::string szDetails;
-         bool bSuccessfulParse = ParseCardLine(*iter, iNum, szName, szDetails);
-         if (!bSuccessfulParse)
-         {
-            m_lstUnreversibleChanges.push_back("Could Not Parse Line \"" + *iter + "\"");
-            continue;
-         }
-         std::vector<std::pair<std::string, std::string>> lstKeyVals = ParseAttrs(szDetails);
-
-         // Check if cards with identical exist.
-         try
-         {
-            // lstUsedCopies keeps track of copies that have alrea
-            std::vector<CopyObject*> lstUsedCopies;
-            for (int i = 0; i < iNum; i++)
-            {
-               bool bNeedNewCopy = true;
-               int iCardIndex = m_ColSource->LoadCard(szName);
-               if (iCardIndex != -1)
-               {
-                  // Create a temporary copy.
-                  CollectionObject* ColPrototype = m_ColSource->GetCardPrototype(iCardIndex);
-                  CopyObject oCopy = ColPrototype->GenerateCopy(m_szName, lstKeyVals);
-
-                  // Check if a copy already exists.
-
-                  // If so, is it used already.
-
-                  // If not, use it.
-
-                  // Otherwise, keep going checking.
-
-                  std::vector<CopyObject*> lstCopies = m_ColSource->GetCardPrototype(iCardIndex)->GetLocalCopies(oCopy.ParentCollection);
-                  std::vector<CopyObject*>::iterator iter_possible_dups = lstCopies.begin();
-                  for (; iter_possible_dups != lstCopies.end(); ++iter_possible_dups)
-                  {
-                     // The only way a card could have this col in its resis if this col created it.
-                     bool bIsResi = false;
-                     std::vector<std::string>::iterator iter_resi = (*iter_possible_dups)->ResidentCollections.begin();
-                     for (; iter_resi != (*iter_possible_dups)->ResidentCollections.end(); ++iter_resi)
-                     {
-                        if (*iter_resi == m_szName)
-                        {
-                           bIsResi = true;
-                           bool bAlreadyRecorded = false;
-                           for (int q = 0; q < lstUsedCopies.size(); q++)
-                           {
-                              if ((int)(lstUsedCopies[q]) == (int)*iter_possible_dups)
-                              {
-                                 bAlreadyRecorded = true;
-                                 break;
-                              }
-
-                           }
-                           if (!bAlreadyRecorded)
-                           {
-                              lstUsedCopies.push_back(*iter_possible_dups);
-                           }
-
-                           break;
-                        }
-                     }
-
-                     // Only check if the identity is the same if it's not already in this set.
-                     if (!bIsResi && CollectionObject::IsSameIdentity(&oCopy, *iter_possible_dups))
-                     {
-
-                        // Check if it is used already
-                        bool bIsAlreadyUsed = false;
-                        std::vector<CopyObject*>::iterator iter_already_used = lstUsedCopies.begin();
-                        for (; iter_already_used != lstUsedCopies.end(); ++iter_already_used)
-                        {
-                           if ((int)*iter_already_used == (int)*iter_possible_dups)
-                           {
-                              bIsAlreadyUsed = true;
-                              break;
-                           }
-                        }
-
-                        // Use this copy, register this col with the copy.
-                        if (!bIsAlreadyUsed)
-                        {
-                           registerItem(iCardIndex);
-                           (*iter_possible_dups)->ResidentCollections.push_back(m_szName);
-                           lstUsedCopies.push_back(*iter_possible_dups);
-                           bNeedNewCopy = false;
-                           break;
-                        }
-                     }
-                  }
-
-                  bool bCollectionExists = false;
-                  // Check if a collection exists
-                  std::vector<std::string>::iterator iter_collections = m_lstLoadedCollectionsBuffer->begin();
-                  for (; iter_collections != m_lstLoadedCollectionsBuffer->end(); ++iter_collections)
-                  {
-                     if (oCopy.ParentCollection != m_szName && *iter_collections == oCopy.ParentCollection)
-                     {
-                        bCollectionExists = true;
-                        break;
-                     }
-                  }
-
-                  // If card copy does not exist, create a new one.
-                  if (bNeedNewCopy && !bCollectionExists)
-                  {
-                     AddItem(szName, false, lstKeyVals);
-                  }
-                  else if (bNeedNewCopy && bCollectionExists)
-                  {
-                     std::vector<std::pair<std::string, std::string>> lstDupList(lstKeyVals);
-                     // Set the parent collection = "" because that card no longer exists in that collection
-                     std::vector<std::pair<std::string, std::string>>::iterator iter_keyvals = lstDupList.begin();
-                     for (; iter_keyvals != lstDupList.end(); ++iter_keyvals)
-                     {
-                        if (iter_keyvals->first == "Parent")
-                        {
-                           iter_keyvals->second = "";
-                           AddItem(szName, false, lstDupList);
-
-                           // Record somewhere that this change was made.
-                           m_lstUnreversibleChanges.push_back(changeItemAttribute_string(szName, &oCopy, "Parent", ""));
-                           break;
-                        }
-                     }
-
-                  } // End if (bNeedNewCopy && !bCollectionExists)
-               } // End card name exists
-               else
-               {
-                  // Can't find the card... PANIC
-                  m_lstUnreversibleChanges.push_back("Could Not Find Card \"" + szName + "\"");
-               }
-
-
-            } // End for Card name in file
-
-
-         }
-         catch (...)
-         {
-
-         }
-
-      }
-
-      finalizeTransaction(false);
-
-      // Now that the collection is loaded, if there are cards with parent collection == this but
-      // this is not in their residents, then that copy no longer exists.
-      std::vector<std::pair<std::string, CopyObject*>> lstFullCol = m_ColSource->GetCollection(m_szName);
-      std::vector<std::pair<std::string, CopyObject*>> ::iterator iter_ColOs = lstFullCol.begin();
-      for (; iter_ColOs != lstFullCol.end(); ++iter_ColOs)
-      {
-         std::vector<std::string> lstResis = (*iter_ColOs).second->ResidentCollections;
-         std::vector<std::string>::iterator iter_resi = lstResis.begin();
-         bool bFoundParent = false;
-         for (; iter_resi != lstResis.end(); ++iter_resi)
-         {
-            if (*iter_resi == m_szName)
-            {
-               bFoundParent = true;
-               break;
-            }
-         }
-
-         if (!bFoundParent)
-         {
-            std::vector<std::string> lstAffectedCols = (*iter_ColOs).second->ResidentCollections;
-            std::vector<std::string>::iterator iter_affected_col = lstAffectedCols.begin();
-            for (; iter_affected_col != lstAffectedCols.end(); ++iter_affected_col)
-            {
-               alstOutsideForcedChanges.push_back(std::make_pair(*iter_affected_col, changeItemAttribute_string((*iter_ColOs).first, (*iter_ColOs).second, "Parent", "", false)));
-            }
-            (*iter_ColOs).second->ParentCollection = "";
-         }
-      }
-   }
-
-   {
-      // Now load meta tags
-      std::ifstream in(m_szMetaTagFileName + ".txt");
-      if (in.good())
-      {
-         std::stringstream buffer;
-         buffer << in.rdbuf();
-         std::string contents(buffer.str());
-
-         std::vector<std::string> lstLines = splitIntoLines(contents);
-
-         for (std::vector<std::string>::iterator iter = lstLines.begin(); iter != lstLines.end(); ++iter)
-         {
-            std::vector<std::string> LstSplitLine = SourceObject::Str_Split(*iter, ":");
-            if (LstSplitLine.size() == 2)
-            {
-               std::string szTempName;
-               std::string szTempDetails;
-               int iTaggedCards;
-               if (ParseCardLine(LstSplitLine[0], iTaggedCards, szTempName, szTempDetails))
-               {
-                  std::string szKey = "";
-                  std::string szVal = "";
-                  std::vector<std::pair<std::string, std::string>> LstSplitMeta = ParseAttrs(LstSplitLine[1]);
-                  if (LstSplitMeta.size() > 0)
-                  {
-                     // Store the tags so that
-                     // There are no MatchMeta because no cards have meta yet.
-                     for (int k = 0; k < iTaggedCards; k++)
-                     {
-                        std::vector<std::pair<std::string, std::string>>::iterator iter_NewMeta = LstSplitMeta.begin();
-                        for (; iter_NewMeta != LstSplitMeta.end(); ++iter_NewMeta)
-                        {
-                           SetMetaTag(LstSplitLine[0], iter_NewMeta->first, iter_NewMeta->second);
-                        }
-
-                     }
-                  }
-               }
-
-            }
-         }
-      }
-
-   }
+   this->loadMetaTagsFromFile();
 }
 
 void Collection::SaveCollection(std::string aszFileName)
