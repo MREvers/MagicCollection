@@ -435,6 +435,16 @@ CopyObject*  CollectionObject::AddCopy(std::string aszCollectionName, std::vecto
    return &m_lstCopies[m_lstCopies.size() - 1];
 }
 
+CopyObject*  CollectionObject::AddCopy(std::string aszCollectionName,
+   std::vector<std::pair<std::string, std::string>> alstAttrs,
+   std::vector<std::pair<std::string, std::string>> alstMeta)
+{
+   CopyObject oNewCopy = GenerateCopy(aszCollectionName, alstAttrs, alstMeta);
+
+   m_lstCopies.push_back(oNewCopy);
+   return &m_lstCopies[m_lstCopies.size() - 1];
+}
+
 CopyObject CollectionObject::GenerateCopy(std::string aszCollectionName)
 {
    CopyObject oNewCopy(aszCollectionName, &m_lstPairedAttributes, &m_mapNonUniqueAttributesRestrictions);
@@ -485,7 +495,7 @@ CopyObject CollectionObject::GenerateCopy(
    return oNewCopy;
 }
 
-void CollectionObject::RemoveCopy(std::string aszCollectionName,
+bool CollectionObject::RemoveCopy(std::string aszCollectionName,
    std::vector<std::pair<std::string, std::string>> alstAttrs,
    std::vector<std::pair<std::string, std::string>> alstMeta)
 {
@@ -500,13 +510,15 @@ void CollectionObject::RemoveCopy(std::string aszCollectionName,
             if (CopyObject::IsSameMetaTags(iter->MetaTags, alstMeta))
             {
                m_lstCopies.erase(iter);
-               break;
+               return true;
             }
 
          }
 
       }
    }
+
+   return false;
 }
 
 std::vector<CopyObject*> CollectionObject::GetLocalCopiesWith(std::string aszParent, std::vector<std::pair<std::string, std::string>> alstAttrs)

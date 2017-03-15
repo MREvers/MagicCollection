@@ -73,10 +73,13 @@ public:
 	std::string GetName();
 
 	CopyObject* AddCopy(std::string aszCollectionName);
-	CopyObject* AddCopy(std::string aszCollectionName, std::vector<std::pair<std::string, std::string>> alstAttrs);
-
+	CopyObject* AddCopy(std::string aszCollectionName,
+      std::vector<std::pair<std::string, std::string>> alstAttrs);
+   CopyObject*  AddCopy(std::string aszCollectionName,
+      std::vector<std::pair<std::string, std::string>> alstAttrs,
+      std::vector<std::pair<std::string, std::string>> alstMeta);
 	// The col children will have to match exactly... because copies are not identical.
-	void RemoveCopy(std::string aszCollectionName,
+	bool RemoveCopy(std::string aszCollectionName,
 		std::vector<std::pair<std::string, std::string>> alstAttrs,
 		std::vector<std::pair<std::string, std::string>> alstMeta);
 	std::vector<CopyObject*> GetLocalCopies(std::string aszCollectionName);

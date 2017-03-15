@@ -15,6 +15,7 @@
 #include "CollectionObject.h"
 // Just use magic card object for now
 #include "CollectionSource.h"
+#include "StringHelper.h"
 
 
 class Collection : public ICollection
@@ -107,6 +108,12 @@ public:
    */
    void RemoveItem(std::string aszRemoveItemLongName, std::vector<std::pair<std::string, std::string>> alstMeta);
 
+   void ReplaceItem(std::string aszRemoveItemLongName,
+      std::vector<std::pair<std::string, std::string>> alstIdentifyingMeta,
+      std::string aszAddItemLongName,
+      std::vector<std::pair<std::string, std::string>> alstNewMeta,
+      bool bFinal = true);
+
    /* RemoveMetaTag (Transaction)
    * The Copy to be modified is identified here, then is stored off for when the operation is to be completed.
    * @Param aszLongName Long Name of item to remove tag from. Contains the identifying NonUniqueAttributes.
@@ -161,8 +168,8 @@ public:
       std::string aszLongName,
       std::vector<std::pair<std::string, std::string>> alstNewMeta,
       std::vector<std::pair<std::string, std::string>> alstNewAttrs,
-      std::vector<std::pair<std::string, std::string>> alstMatchMeta);
-
+      std::vector<std::pair<std::string, std::string>> alstMatchMeta,
+      bool bFinal = true);
 
 	// Returns the list of restions if restrictions exist. * if none exist.
    /* GetNonUniqueAttributeRestrictions
@@ -177,7 +184,8 @@ public:
 
 	void LoadCollection(std::string aszCollectionFile, std::vector<std::pair<std::string, std::string>>& alstOutsideForcedChanges);
 	void SaveCollection(std::string aszCollectionFileName);
-	// Clears the history file, then writes the baseline.
+   void LoadBulkChanges(std::vector<std::string>& alstBulkChanges);
+   // Clears the history file, then writes the baseline.
 	void CreateBaselineHistory();
 	void RecordForcedTransaction(std::string aszTransactionString);
 	std::vector<std::string> GetCollectionList();
@@ -209,10 +217,17 @@ private:
 	void addItem(std::string aszNewItem,
 		std::vector<std::pair<std::string, std::string>> alstAttrs,
 		std::vector<std::pair<std::string, std::string>> alstMeta);
-	void removeItem(
+	bool removeItem(
 		std::string aszItem,
 		std::vector<std::pair<std::string, std::string>> alstAttrs,
 		std::vector<std::pair<std::string, std::string>> alstMeta);
+
+   void replaceItem(std::string aszNewItem,
+      std::vector<std::pair<std::string, std::string>> alstNewAttrs,
+      std::vector<std::pair<std::string, std::string>> alstNewMeta,
+      std::string aszOldItem,
+      std::vector<std::pair<std::string, std::string>> alstOldAttrs,
+      std::vector<std::pair<std::string, std::string>> alstOldMeta);
 
 	void setItemAttr(
 		CopyObject* aoCO, 
@@ -271,6 +286,21 @@ private:
    */
    bool loadCardLine(std::string aszNewCardLine);
 
+   /* loadRemoveCardLine
+   *  This is different from the other load line functions because it expects a
+   *  DIFFERENT REPRESENTATION.
+   *  Expects LongName : {Meta}
+   */
+   bool loadRemoveCardLine(std::string aszRemoveCardLine);
+
+   /* loadChangeCardLine
+   *  Either changes the features of a card or replaces a card depending on input.
+   *  This is different from the other load line functions because it expects a
+   *  DIFFERENT REPRESENTATION.
+   *  Expects LongName : {Meta} -> LongName : {Meta}
+   */
+   bool loadChangeCardLine(std::string aszChangeCardLine);
+
    /* loadMetaTags
    *  Loads a file of meta tags of the format - LongName : { Meta Tags }
    *  For each line in the file, it searches for a "LongName" copy with NO meta tags 
@@ -294,7 +324,9 @@ private:
 	Transaction* openTransaction();
 	void finalizeTransaction(bool abRecord = true);
 
-	CopyObject* forceAdd(std::string aszNewItem, std::vector<std::pair<std::string, std::string>> alstAttrs);
+	CopyObject* forceAdd(std::string aszNewItem, 
+      std::vector<std::pair<std::string, std::string>> alstAttrs,
+      std::vector<std::pair<std::string, std::string>> alstMeta = std::vector<std::pair<std::string, std::string>>());
 	// Only adds the collection object cache locations
 	void registerItem(int aiItem);
 

@@ -171,6 +171,7 @@
     <ClCompile Include="ServerIFace\WinSocketListener.cpp" />
     <ClCompile Include="SourceObject.cpp" />
     <ClCompile Include="StoreFrontBackEnd.cpp" />
+    <ClCompile Include="StringHelper.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Collection.h" />
@@ -189,6 +190,7 @@
     <ClInclude Include="ServerIFace\WinSocketListener.h" />
     <ClInclude Include="SourceObject.h" />
     <ClInclude Include="StoreFrontBackEnd.h" />
+    <ClInclude Include="StringHelper.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="AllSets.json.out">

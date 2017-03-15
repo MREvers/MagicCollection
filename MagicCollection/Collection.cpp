@@ -197,6 +197,84 @@ Collection::RemoveItem(std::string aszNewItemLongName,
 }
 
 void
+Collection::ReplaceItem(std::string aszRemoveItemLongName,
+   std::vector<std::pair<std::string, std::string>> alstIdentifyingMeta,
+   std::string aszAddItemLongName,
+   std::vector<std::pair<std::string, std::string>> alstNewMeta,
+   bool bFinal)
+{
+   // If we are in the midst of a transaction
+   if (TransactionIntercept)
+   {
+      bool bValidInput = true;
+      std::string szRemoveName;
+      int iCount;
+      std::string szDetails;
+      std::vector<std::pair<std::string, std::string>> lstRemoveAttrs;
+      if (bValidInput &= Collection::ParseCardLine(aszRemoveItemLongName, iCount, szRemoveName, szDetails))
+      {
+         lstRemoveAttrs = Collection::ParseAttrs(szDetails);
+      }
+
+      std::string szAddName;
+      std::vector<std::pair<std::string, std::string>> lstAddAttrs;
+      if (bValidInput &= Collection::ParseCardLine(aszRemoveItemLongName, iCount, szAddName, szDetails))
+      {
+         lstAddAttrs = Collection::ParseAttrs(szDetails);
+      }
+
+      if (bValidInput)
+      {
+         int iCardRemoveProto = m_ColSource->LoadCard(szRemoveName);
+         int iCardAddProto = m_ColSource->LoadCard(szAddName);
+         if (iCardRemoveProto != -1 && iCardAddProto != -1)
+         {
+            // Check ahead of time if the remove copy exists.
+            CollectionObject* AddCardPrototype = m_ColSource->GetCardPrototype(iCardRemoveProto);
+            CopyObject* oCO;
+            if (AddCardPrototype->GetCopy(m_szName, lstRemoveAttrs, alstIdentifyingMeta, oCO))
+            {
+               std::string szCard = "TBD";//cardToString(iCardProto, &std::make_pair(oCO, 1));
+
+               Collection::Action oAction;
+               oAction.Identifier = "- " + szCard;
+               oAction.Do = std::bind(&Collection::replaceItem, this,
+                  szAddName,
+                  lstAddAttrs,
+                  alstNewMeta,
+                  szRemoveName,
+                  lstRemoveAttrs,
+                  alstIdentifyingMeta);
+               oAction.Undo = std::bind(&Collection::replaceItem, this,
+                  szRemoveName,
+                  lstRemoveAttrs,
+                  alstIdentifyingMeta,
+                  szAddName,
+                  lstAddAttrs,
+                  alstNewMeta);
+
+               // Store the arguments
+               Collection::Transaction* oTrans = &m_lstTransactions.at(m_lstTransactions.size() - 1);
+               oTrans->AddAction(oAction);
+
+               TransactionIntercept = false;
+            }
+         }
+      }
+      return;
+   }
+
+   Collection::Transaction* oTrans = openTransaction();
+
+   (*oTrans)->ReplaceItem(aszRemoveItemLongName, alstIdentifyingMeta, aszAddItemLongName, alstNewMeta);
+
+   if (bFinal)
+   {
+      oTrans->Finalize();
+   }
+}
+
+void
 Collection::RemoveMetaTag(
    std::string aszLongName,
    std::string aszKey,
@@ -419,7 +497,8 @@ void Collection::SetFeatures(
    std::string aszLongName,
    std::vector<std::pair<std::string, std::string>> alstNewMeta,
    std::vector<std::pair<std::string, std::string>> alstNewAttrs,
-   std::vector<std::pair<std::string, std::string>> alstMatchMeta)
+   std::vector<std::pair<std::string, std::string>> alstMatchMeta,
+   bool bFinal)
 {
    if (TransactionIntercept)
    {
@@ -467,7 +546,11 @@ void Collection::SetFeatures(
 
    (*oTrans)->SetFeatures(aszLongName, alstNewMeta, alstNewAttrs, alstMatchMeta);
 
-   oTrans->Finalize();
+   if (bFinal)
+   {
+      oTrans->Finalize();
+   }
+
 }
 
 std::vector<std::string> Collection::GetNonUniqueAttributeRestrictions(std::string aszLongName, std::string aszKey)
@@ -534,7 +617,15 @@ void Collection::setName(std::string aszName)
 // AddItem(AnotherCollection, name) -- from another collection.
 // AddItem(name) -- from source
 // This will also be fairly slow. In the future this should strictly be used for cards from source.
-void Collection::addItem(std::string aszNewItem, std::vector<std::pair<std::string, std::string>> alstAttrs,
+void Collection::addItem(std::string aszNewItem,
+   std::vector<std::pair<std::string, std::string>> alstAttrs,
+   std::vector<std::pair<std::string, std::string>> alstMeta)
+{
+   forceAdd(aszNewItem, alstAttrs, alstMeta);
+}
+
+CopyObject* Collection::forceAdd(std::string aszNewItem,
+   std::vector<std::pair<std::string, std::string>> alstAttrs,
    std::vector<std::pair<std::string, std::string>> alstMeta)
 {
    int iCard = m_ColSource->LoadCard(aszNewItem);
@@ -546,28 +637,7 @@ void Collection::addItem(std::string aszNewItem, std::vector<std::pair<std::stri
       CollectionObject* oCard = m_ColSource->GetCardPrototype(iCard);
 
       // Add a copy of this card. Save the reference if we need to add unique traits.
-      CopyObject* oCO = oCard->AddCopy(m_szName, alstAttrs);
-
-      std::vector<std::pair<std::string, std::string>>::iterator iter_Meta = alstMeta.begin();
-      for (; iter_Meta != alstMeta.end(); iter_Meta++)
-      {
-         oCO->SetMetaTag(m_szName, iter_Meta->first, iter_Meta->second);
-      }
-   }
-}
-
-CopyObject* Collection::forceAdd(std::string aszNewItem, std::vector<std::pair<std::string, std::string>> alstAttrs)
-{
-   int iCard = m_ColSource->LoadCard(aszNewItem);
-   if (iCard != -1)
-   {
-      registerItem(iCard);
-
-      // Get a copy of this card.
-      CollectionObject* oCard = m_ColSource->GetCardPrototype(iCard);
-
-      // Add a copy of this card. Save the reference if we need to add unique traits.
-      CopyObject* oCO = oCard->AddCopy(m_szName, alstAttrs);
+      CopyObject* oCO = oCard->AddCopy(m_szName, alstAttrs, alstMeta);
 
       return oCO;
    }
@@ -588,7 +658,7 @@ void Collection::registerItem(int aiItem)
    }
 }
 
-void Collection::removeItem(std::string aszRemoveItem,
+bool Collection::removeItem(std::string aszRemoveItem,
    std::vector<std::pair<std::string, std::string>> alstAttrs,
    std::vector<std::pair<std::string, std::string>> alstMeta)
 {
@@ -599,7 +669,27 @@ void Collection::removeItem(std::string aszRemoveItem,
       CollectionObject* oCard = m_ColSource->GetCardPrototype(iCard);
 
       // Add a copy of this card.
-      oCard->RemoveCopy(m_szName, alstAttrs, alstMeta);
+      return oCard->RemoveCopy(m_szName, alstAttrs, alstMeta);
+   }
+   return false;
+}
+
+void Collection::replaceItem(std::string aszNewItem,
+   std::vector<std::pair<std::string, std::string>> alstNewAttrs,
+   std::vector<std::pair<std::string, std::string>> alstNewMeta,
+   std::string aszOldItem,
+   std::vector<std::pair<std::string, std::string>> alstOldAttrs,
+   std::vector<std::pair<std::string, std::string>> alstOldMeta)
+{
+   int iRemoveCard = m_ColSource->LoadCard(aszOldItem);
+   int iAddCard = m_ColSource->LoadCard(aszNewItem);
+   if (iRemoveCard != -1 && iAddCard != -1)
+   {
+      // If we successfully removed the card, add the replacement card.
+      if (removeItem(m_szName, alstOldAttrs, alstOldMeta))
+      {
+         forceAdd(m_szName, alstNewAttrs, alstNewMeta);
+      }
    }
 }
 
@@ -745,6 +835,100 @@ bool Collection::loadCardLine(std::string aszNewCardLine)
       }
 
    } // End for Card name in file
+
+   return false;
+}
+
+bool Collection::loadRemoveCardLine(std::string aszRemoveCardLine)
+{
+   // Separate the long name from the meta tags
+   std::vector<std::string> lstLongNameAndMeta = StringHelper::Str_Split(aszRemoveCardLine, ":");
+   if (lstLongNameAndMeta.size() == 2)
+   {
+      bool bValidInput = true;
+      std::string szRemoveName;
+      int iCount;
+      std::string szDetails;
+      std::vector<std::pair<std::string, std::string>> lstRemoveAttrs;
+      if (bValidInput &= Collection::ParseCardLine(lstLongNameAndMeta[0], iCount, szRemoveName, szDetails))
+      {
+         lstRemoveAttrs = Collection::ParseAttrs(szDetails);
+      }
+
+      if (bValidInput)
+      {
+         std::vector<std::pair<std::string, std::string>> lstIdentifyingMeta =
+            ParseAttrs(lstLongNameAndMeta[1]);
+         RemoveItem(szRemoveName, false, lstRemoveAttrs, lstIdentifyingMeta);
+      }
+   }
+
+   return false;
+}
+
+bool Collection::loadChangeCardLine(std::string aszChangeCardLine)
+{
+   // Determine if this is a replacement or a change
+   // Expects LongName : {Meta} -> LongName : {Meta}
+   // First split the line
+   std::vector<std::string> lstBeforeAfter = StringHelper::Str_Split(aszChangeCardLine, "->");
+   if (lstBeforeAfter.size() == 2)
+   {
+      // Get the meta tag information
+      std::vector<std::string> lstBeforeLongNameAndMeta = StringHelper::Str_Split(lstBeforeAfter[0], ":");
+      std::vector<std::string> lstAfterLongNameAndMeta = StringHelper::Str_Split(lstBeforeAfter[1], ":");
+      if (lstBeforeLongNameAndMeta.size() == 2 &&
+         lstAfterLongNameAndMeta.size() == 2)
+      {
+         // Parse the meta tags
+         std::vector<std::pair<std::string, std::string>> lstAddMetaTags =
+            ParseAttrs(lstAfterLongNameAndMeta[1]);
+         std::vector<std::pair<std::string, std::string>> lstRemoveMetaTags =
+            ParseAttrs(lstBeforeLongNameAndMeta[1]);
+
+         // Determine if the card is a replacement or a change.
+         bool bValidInput = true;
+         std::string szRemoveName;
+         int iCount;
+         std::string szDetails;
+         std::vector<std::pair<std::string, std::string>> lstRemoveAttrs;
+         if (bValidInput &= Collection::ParseCardLine(lstBeforeLongNameAndMeta[0], iCount, szRemoveName, szDetails))
+         {
+            lstRemoveAttrs = Collection::ParseAttrs(szDetails);
+         }
+
+         std::string szAddName;
+         std::vector<std::pair<std::string, std::string>> lstAddAttrs;
+         if (bValidInput &= Collection::ParseCardLine(lstAfterLongNameAndMeta[0], iCount, szAddName, szDetails))
+         {
+            lstAddAttrs = Collection::ParseAttrs(szDetails);
+         }
+
+         if (bValidInput)
+         {
+            if (szAddName != szRemoveName)
+            {
+               // Its a replacement
+               // Call the replace function
+               ReplaceItem(lstBeforeLongNameAndMeta[0],
+                  lstRemoveMetaTags,
+                  lstAfterLongNameAndMeta[0],
+                  lstAddMetaTags,
+                  false);
+            }
+            else
+            {
+               // Its a change
+               SetFeatures(lstBeforeLongNameAndMeta[0],
+                  lstAddMetaTags,
+                  lstAddAttrs,
+                  lstRemoveMetaTags,
+                  false);
+            }
+         }
+
+      }
+   }
 
    return false;
 }
@@ -973,6 +1157,69 @@ void Collection::SaveCollection(std::string aszFileName)
    }
 
    oColFile.close();
+}
+
+void Collection::LoadBulkChanges(std::vector<std::string>& alstBulkChanges)
+{
+   // + or nothing is an add.
+   // - is a remove
+   // % is a change or replacement
+   std::vector<std::string> lstAddLines;
+   std::vector<std::string> lstRemoveLines;
+   std::vector<std::string> lstChangeLines;
+
+   // Sort the lines
+   std::vector<std::string>::iterator iter_Line = alstBulkChanges.begin();
+   for (; iter_Line != alstBulkChanges.end(); ++iter_Line)
+   {
+      // Clean the line
+      std::string szLine = StringHelper::Str_Trim(*iter_Line, ' ');
+
+      // Check the first character and sort
+      if (szLine.size() > 0)
+      {
+         if ((szLine[0] == '+') || (szLine[0] == '-') || (szLine[0] == '%'))
+         {
+            std::string szLineShort = StringHelper::Str_Trim(szLine.substr(1, szLine.size() - 1), ' ');
+            if (szLine[0] == '+')
+            {
+               lstAddLines.push_back(szLineShort);
+            }
+            else if (szLine[0] == '-')
+            {
+               lstRemoveLines.push_back(szLineShort);
+            }
+            else if (szLine[0] == '%')
+            {
+               lstChangeLines.push_back(szLineShort);
+            }
+         }
+         else
+         {
+            lstAddLines.push_back(szLine);
+         }
+      }
+   } // End for each line
+
+   iter_Line = lstAddLines.begin();
+   for (; iter_Line != lstAddLines.end(); ++iter_Line)
+   {
+      loadCardLine(*iter_Line);
+   }
+
+   iter_Line = lstRemoveLines.begin();
+   for (; iter_Line != lstRemoveLines.end(); ++iter_Line)
+   {
+      loadRemoveCardLine(*iter_Line);
+   }
+
+   iter_Line = lstChangeLines.begin();
+   for (; iter_Line != lstChangeLines.end(); ++iter_Line)
+   {
+      loadChangeCardLine(*iter_Line);
+   }
+
+   finalizeTransaction(true);
 }
 
 void Collection::RecordForcedTransaction(std::string aszTransactionString)
@@ -1259,9 +1506,6 @@ bool Collection::ParseCardLine(std::string aszLine, int& riCount, std::string& r
    // Output the details
    rszDetails = szDetails;
 }
-
-
-
 
 void Collection::RollbackTransaction()
 {
