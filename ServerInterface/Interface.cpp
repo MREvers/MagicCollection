@@ -89,6 +89,16 @@ System::String^ ServerClientInterface::LoadCollection(System::String^ ahszCollec
 	return gcnew System::String(szCollectionName.c_str());
 }
 
+void
+ServerClientInterface::LoadBulkChanges(
+   System::String^ ahszCollectionName,
+   System::Collections::Generic::List<System::String^>^ ahlstChanges)
+{
+   std::string szCollectionName = msclr::interop::marshal_as<std::string>(ahszCollectionName);
+   std::vector<std::string> lstChanges = stringListToVector(ahlstChanges);
+   m_StoreFrontBackEnd->LoadBulkChanges(szCollectionName, lstChanges);
+}
+
 System::Collections::Generic::Dictionary<System::String^, System::String^>^ ServerClientInterface::GetCopyLocations(System::String^ ahszCollectionName, System::String^ ahszLongCardName)
 {
 	System::Collections::Generic::Dictionary<System::String^, System::String^>^ hlstRetval = gcnew System::Collections::Generic::Dictionary<System::String^, System::String^>();
@@ -446,4 +456,16 @@ std::vector<std::pair<std::string, std::string>> ServerClientInterface::tupleLis
 		lstMetaTagPairs.push_back(pair);
 	}
 	return lstMetaTagPairs;
+}
+
+std::vector<std::string>
+ServerClientInterface::stringListToVector(System::Collections::Generic::List<System::String^>^ hlstChanges)
+{
+   std::vector<std::string> lstStrings;
+   for (int i = 0; i < hlstChanges->Count; i++)
+   {
+      std::string szFirst = msclr::interop::marshal_as<std::string>(hlstChanges[i]);
+      lstStrings.push_back(szFirst);
+   }
+   return lstStrings;
 }

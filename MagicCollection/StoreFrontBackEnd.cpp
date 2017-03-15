@@ -132,6 +132,15 @@ std::string CStoreFrontBackEnd::LoadCollection(std::string aszCollection)
 	}
 }
 
+std::string CStoreFrontBackEnd::LoadBulkChanges(std::string aszCollection, std::vector<std::string> alstChanges)
+{
+   if (m_ColFactory->CollectionExists(aszCollection))
+   {
+      Collection* oColO = m_ColFactory->GetCollection(aszCollection);
+      oColO->LoadBulkChanges(alstChanges);
+   }
+}
+
 std::vector<std::string> CStoreFrontBackEnd::GetCollectionList(std::string aszCollection)
 {
 	if (m_ColFactory->CollectionExists(aszCollection))

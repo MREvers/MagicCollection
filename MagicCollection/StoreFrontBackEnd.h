@@ -18,9 +18,14 @@ public:
    ~CStoreFrontBackEnd();
 
    // Collection interface
-   void AddItem(std::string aszCollection, std::string aszItem,
+   void AddItem(
+      std::string aszCollection,
+      std::string aszItem,
       std::vector<std::pair<std::string, std::string>> alstMeta);
-   void RemoveItem(std::string aszCollection, std::string aszItem, std::vector<std::pair<std::string, std::string>> alstMeta);
+   void RemoveItem(
+      std::string aszCollection, 
+      std::string aszItem, 
+      std::vector<std::pair<std::string, std::string>> alstMeta);
    void SaveCollection(std::string aszCollectionToSave);
 
    std::vector<std::pair<std::string, std::string>> GetCardAttributes(std::string aszCardNameLong);
@@ -29,6 +34,9 @@ public:
 
    // Loads specified collection into memory by file name
    std::string LoadCollection(std::string aszCollectionToLoad);
+
+   // Load Bulk Changes
+   std::string LoadBulkChanges(std::string aszCollection, std::vector<std::string> alstChanges);
 
    // Returns a string list of all the cards in long name form
    std::vector<std::string> GetCollectionList(std::string aszCollection);
