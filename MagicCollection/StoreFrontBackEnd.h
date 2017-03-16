@@ -36,7 +36,7 @@ public:
    std::string LoadCollection(std::string aszCollectionToLoad);
 
    // Load Bulk Changes
-   std::string LoadBulkChanges(std::string aszCollection, std::vector<std::string> alstChanges);
+   void LoadBulkChanges(std::string aszCollection, std::vector<std::string> alstChanges);
 
    // Returns a string list of all the cards in long name form
    std::vector<std::string> GetCollectionList(std::string aszCollection);

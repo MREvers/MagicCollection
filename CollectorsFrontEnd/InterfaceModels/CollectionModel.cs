@@ -52,5 +52,30 @@ namespace CollectorsFrontEnd.InterfaceModels
             ServerInterfaceModel.CollectionInterfaceModel.Refresh(CollectionName);
         }
 
+        public List<string> GetAllCardsStartingWith(string aszString)
+        {
+            List<string> LstStartingStrings = new List<string>();
+            List<string> LstContainingStrings = new List<string>();
+            foreach (CardModel CM in LstCopyModels)
+            {
+                string szShortName = CM.CardName.ToLower();
+                if (szShortName.Contains(aszString))
+                {
+                    if (szShortName.Substring(0, aszString.Length) == aszString)
+                    {
+                        LstStartingStrings.Add(CM.CardNameLong);
+                    }
+                    else
+                    {
+                        LstContainingStrings.Add(CM.CardNameLong);
+                    }
+                }
+            }
+
+            LstStartingStrings = LstStartingStrings.Concat(LstContainingStrings).ToList();
+
+            return LstStartingStrings;
+        }
+
     }
 }

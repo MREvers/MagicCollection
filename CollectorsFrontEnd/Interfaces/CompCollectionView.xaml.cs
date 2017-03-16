@@ -134,6 +134,20 @@ namespace CollectorsFrontEnd.Interfaces
             }
         }
 
+        private void showBulkEditWindow()
+        {
+            showMainDisplay();
+            if (DataModel.CollectionName != "")
+            {
+                CompSubBulkEdits ITI = new CompSubBulkEdits(DataModel);
+                m_OverlayControl = ITI;
+                ITI.UnhandledEvent += RouteReceivedUnhandledEvent;
+                Panel.SetZIndex(CenterPanel, 2);
+                CenterPanel.Children.Add(ITI);
+                SPItemsControl.IsEnabled = false;
+            }
+        }
+
         private void showItemInterchangerWindow(List<CardModel> alstCardModels)
         {
             showMainDisplay();
@@ -407,6 +421,17 @@ namespace CollectorsFrontEnd.Interfaces
                     ecGeneralizationSelectionChange((CompSubGeneralization.CompSubGeneralizationModel)aDataObject);
                 }
             }
+            else if (aDataObject.GetType() == typeof(CompSubBulkEdits.CompSubBulkEditsDataModel))
+            {
+                if (aszAction == "Cancel")
+                {
+                    showMainDisplay();
+                }
+                else if (aszAction == "Accept")
+                {
+
+                }
+            }
         }
         #endregion
 
@@ -415,11 +440,18 @@ namespace CollectorsFrontEnd.Interfaces
         {
             showAddItemWindow();
         }
-        #endregion
 
         private void eSaveCollection_Click(object sender, RoutedEventArgs e)
         {
             DataModel.SaveCollection();
         }
+
+        private void eBulkEditWindow_Click(object sender, RoutedEventArgs e)
+        {
+            showBulkEditWindow();
+        }
+        #endregion
+
+
     }
 }

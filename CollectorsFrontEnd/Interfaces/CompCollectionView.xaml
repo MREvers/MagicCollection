@@ -45,7 +45,8 @@
                     >
                 <TextBlock>Bulk Add</TextBlock>
             </Button>
-            <Button x:Name="BtnBulkEdit" Grid.Row="3"  HorizontalAlignment="Stretch">
+            <Button x:Name="BtnBulkEdit" Grid.Row="3"  HorizontalAlignment="Stretch"
+                    Click="eBulkEditWindow_Click">
                 <TextBlock>Bulk Edit</TextBlock>
             </Button>
             <Button x:Name="BtnSaveCollection" Grid.Row="4"  HorizontalAlignment="Stretch"

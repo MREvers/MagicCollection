@@ -120,6 +120,17 @@ namespace CollectorsFrontEnd.InterfaceModels
             CardImage = null;
         }
 
+        public string GetFullIdentifier()
+        {
+            string szMetaList = "{ ";
+            foreach(Tuple<string,string> MTag in LstMetaTags)
+            {
+                szMetaList += MTag.Item1 + "=\"" + MTag.Item2 + "\" ";
+            }
+            szMetaList += "}";
+            return CardNameLong + " : " + szMetaList;
+        }
+
         public string GetMetaTag(string aszKey)
         {
             string szRetVal = "";
