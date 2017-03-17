@@ -13,11 +13,13 @@ namespace CollectorsFrontEnd.InterfaceModels
     {
         public string CollectionName;
         public List<CardModel> LstCopyModels;
+        public List<CardModel> LstLastQuery;
 
         public CollectionModel(string aszName, List<Tuple<string, List<Tuple<string, string>>>> aLstCards)
         {
             CollectionName = aszName;
             LstCopyModels = new List<CardModel>();
+            LstLastQuery = new List<CardModel>();
             BuildCopyModelList(aLstCards);
 
         }
@@ -54,8 +56,8 @@ namespace CollectorsFrontEnd.InterfaceModels
 
         public List<string> GetAllCardsStartingWith(string aszString)
         {
-            List<string> LstStartingStrings = new List<string>();
-            List<string> LstContainingStrings = new List<string>();
+            List<CardModel> LstStartingStrings = new List<CardModel>();
+            List<CardModel> LstContainingStrings = new List<CardModel>();
             foreach (CardModel CM in LstCopyModels)
             {
                 string szShortName = CM.CardName.ToLower();
@@ -63,18 +65,18 @@ namespace CollectorsFrontEnd.InterfaceModels
                 {
                     if (szShortName.Substring(0, aszString.Length) == aszString)
                     {
-                        LstStartingStrings.Add(CM.CardNameLong);
+                        LstStartingStrings.Add(CM);
                     }
                     else
                     {
-                        LstContainingStrings.Add(CM.CardNameLong);
+                        LstContainingStrings.Add(CM);
                     }
                 }
             }
 
-            LstStartingStrings = LstStartingStrings.Concat(LstContainingStrings).ToList();
+            LstLastQuery = LstStartingStrings.Concat(LstContainingStrings).ToList();
 
-            return LstStartingStrings;
+            return LstLastQuery.Select(x => x.CardNameLong).ToList();
         }
 
     }

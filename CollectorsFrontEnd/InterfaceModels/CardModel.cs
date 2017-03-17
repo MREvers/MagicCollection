@@ -11,6 +11,7 @@ namespace CollectorsFrontEnd.InterfaceModels
 {
     public class CardModel : IDataModel, INotifyPropertyChanged
     {
+        public static List<string> TEMP_LST_IMPORTANT_IDENTS = new List<string>() { "set" };
 
         public string CardName { get; set; }
         public int Amount { get; set; }
@@ -129,6 +130,33 @@ namespace CollectorsFrontEnd.InterfaceModels
             }
             szMetaList += "}";
             return CardNameLong + " : " + szMetaList;
+        }
+
+        public string GetIdealIdentifier()
+        {
+            List<string> LstImpList = TEMP_LST_IMPORTANT_IDENTS;
+            string szSupport = " [";
+            if (LstImpList.Count == 1)
+            {
+                szSupport += GetAttr(LstImpList[0])+"]";
+            }
+            else
+            {
+                for (int i = 0; i < LstImpList.Count; i++)
+                {
+                    szSupport += LstImpList[i] + "=" + GetAttr(LstImpList[i]);
+                    if (i != LstImpList.Count - 1)
+                    {
+                        szSupport += ", ";
+                    }
+                    else
+                    {
+                        szSupport += "]";
+                    }
+                }
+
+            }
+            return CardName + szSupport;
         }
 
         public string GetMetaTag(string aszKey)
