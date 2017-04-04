@@ -191,6 +191,12 @@ namespace CollectorsFrontEnd.Interfaces
         #endregion Private Functions
 
         #region Event Handlers
+        private void ecBulkEditsAccept(CompSubBulkEdits.CompSubBulkEditsDataModel aDataModel)
+        {
+            DataModel.SubmitBulkEdits(aDataModel.LstTextChanges);
+            showMainDisplay();
+        }
+
         private void ecAddItem(CompSubAddItemWindow.AddItemDataModel aDataModel)
         {
             //MainWindow.SCI.AddItem(ActiveCollection, m_CurrentAddItemWindow.ComboText, new List<Tuple<string, string>>());
@@ -423,19 +429,22 @@ namespace CollectorsFrontEnd.Interfaces
             }
             else if (aDataObject.GetType() == typeof(CompSubBulkEdits.CompSubBulkEditsDataModel))
             {
+                CompSubBulkEdits.CompSubBulkEditsDataModel dM = (CompSubBulkEdits.CompSubBulkEditsDataModel)aDataObject;
                 if (aszAction == "Cancel")
                 {
                     showMainDisplay();
                 }
                 else if (aszAction == "Accept")
                 {
-
+                    ecBulkEditsAccept(dM);
                 }
             }
         }
         #endregion
 
         #region UI Event Handlers
+       
+
         public void eAddItemWindowButton_Click(object sender, RoutedEventArgs e)
         {
             showAddItemWindow();

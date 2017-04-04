@@ -49,6 +49,8 @@ public:
    // Returns list of all cards containing aszText
    std::vector<std::string> GetAllCardsStartingWith(std::string aszText);
 
+   void SetBaselineHistory(std::string aszCollection);
+
    std::vector < std::vector<std::pair<std::string, std::string>>> GetMetaTags(std::string aszCollection, std::string aszLongName);
    void AddMetaTag(
       std::string aszCollection,

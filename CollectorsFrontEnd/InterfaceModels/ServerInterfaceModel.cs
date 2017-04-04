@@ -33,7 +33,15 @@ namespace CollectorsFrontEnd.InterfaceModels
                 SCI.RemoveItem(aszCollectionName, aszCardNameLong, lstMeta);
             }
 
+            public static void SetBaselineHistory(string aszCollection)
+            {
+                SCI.SetBaselineHistory(aszCollection);
+            }
 
+            public static void LoadBulkChanges(string aszCollection, List<string> alstChanges)
+            {
+                SCI.LoadBulkChanges(aszCollection, alstChanges);
+            }
 
             /// <summary>
             /// Calls the server for the most up to date list of copies.

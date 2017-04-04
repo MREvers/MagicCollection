@@ -50,6 +50,9 @@ public:
          System::String^ ahszCollectionName, 
          System::Collections::Generic::List<System::String^>^ ahlstChanges);
 
+   void
+      SetBaselineHistory(System::String^ ahszCollectionName);
+
 	System::Collections::Generic::Dictionary<System::String^, System::String^>^ 
       GetCopyLocations(System::String^ ahszCollectionName, System::String^ ahszLongCardName);
 

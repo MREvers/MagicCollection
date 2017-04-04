@@ -99,6 +99,13 @@ ServerClientInterface::LoadBulkChanges(
    m_StoreFrontBackEnd->LoadBulkChanges(szCollectionName, lstChanges);
 }
 
+void
+ServerClientInterface::SetBaselineHistory(System::String^ ahszCollectionName)
+{
+   std::string szCollectionName = msclr::interop::marshal_as<std::string>(ahszCollectionName);
+   m_StoreFrontBackEnd->SetBaselineHistory(szCollectionName);
+}
+
 System::Collections::Generic::Dictionary<System::String^, System::String^>^ ServerClientInterface::GetCopyLocations(System::String^ ahszCollectionName, System::String^ ahszLongCardName)
 {
 	System::Collections::Generic::Dictionary<System::String^, System::String^>^ hlstRetval = gcnew System::Collections::Generic::Dictionary<System::String^, System::String^>();

@@ -132,7 +132,8 @@ public:
    * @Param alstMatchMeta Meta-Tags Identify the copy to be modified.
    */
    void SetMetaTag(std::string aszLongName, std::string aszKey, std::string aszValue,
-		std::vector<std::pair<std::string, std::string>> alstMatchMeta = std::vector<std::pair<std::string, std::string>>());
+		std::vector<std::pair<std::string, std::string>> alstMatchMeta = std::vector<std::pair<std::string, std::string>>(),
+      bool bFinal = true);
    // 
 
    /* SetMetaTags  (Transaction)
@@ -330,7 +331,7 @@ private:
 	// Only adds the collection object cache locations
 	void registerItem(int aiItem);
 
-	std::string cardToString(int aiCardFlyweight, std::pair<CopyObject*, int>* aoCopy, bool bFullDets = false);
+	std::string cardToString(int aiCardFlyweight, std::pair<CopyObject*, int>* aoCopy, bool bFullDets = false, bool bInclMeta = false);
 	std::vector<std::string> splitIntoLines(std::string aszString);
 };
 

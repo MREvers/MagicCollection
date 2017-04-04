@@ -507,7 +507,7 @@ bool CollectionObject::RemoveCopy(std::string aszCollectionName,
             ConvertMapToList(iter->NonUniqueTraits),
             FilterOutUniqueTraits(alstAttrs)))
          {
-            if (CopyObject::IsSameMetaTags(iter->MetaTags, alstMeta))
+            if (CopyObject::IsSameMetaTags(iter->GetMetaTags(aszCollectionName), alstMeta))
             {
                m_lstCopies.erase(iter);
                return true;

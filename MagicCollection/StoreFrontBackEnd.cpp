@@ -198,6 +198,15 @@ std::vector<std::string> CStoreFrontBackEnd::GetAllCardsStartingWith(std::string
 	return m_ColSource->GetAllCardsStartingWith(aszText);
 }
 
+void CStoreFrontBackEnd::SetBaselineHistory(std::string aszCollectionName)
+{
+   if (m_ColFactory->CollectionExists(aszCollectionName))
+   {
+      Collection* oCol = m_ColFactory->GetCollection(aszCollectionName);
+      oCol->CreateBaselineHistory();
+   }
+}
+
 void CStoreFrontBackEnd::AddMetaTag(std::string aszCollectionName, std::string aszLongName, std::string aszKey, std::string aszValue,
 	std::vector<std::pair<std::string, std::string>> alstMatchMeta)
 {
