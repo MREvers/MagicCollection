@@ -499,23 +499,19 @@ bool CollectionObject::RemoveCopy(std::string aszCollectionName,
    std::vector<std::pair<std::string, std::string>> alstAttrs,
    std::vector<std::pair<std::string, std::string>> alstMeta)
 {
+   CopyObject oNewCopy = GenerateCopy(aszCollectionName, alstAttrs, alstMeta);
    for (std::vector<CopyObject>::iterator iter = m_lstCopies.begin(); iter != m_lstCopies.end(); ++iter)
    {
-      if (iter->ParentCollection == aszCollectionName)
+      if (IsSameIdentity(&oNewCopy, &(*iter)))
       {
-         if (CompareKeyValPairList(
-            ConvertMapToList(iter->NonUniqueTraits),
-            FilterOutUniqueTraits(alstAttrs)))
+         if (CopyObject::IsSameMetaTags(iter->GetMetaTags(aszCollectionName), alstMeta))
          {
-            if (CopyObject::IsSameMetaTags(iter->GetMetaTags(aszCollectionName), alstMeta))
-            {
-               m_lstCopies.erase(iter);
-               return true;
-            }
-
+            m_lstCopies.erase(iter);
+            return true;
          }
 
       }
+
    }
 
    return false;
@@ -634,7 +630,7 @@ bool CollectionObject::GetCopy(
    bool bFound = false;
    CopyObject oCompare = GenerateCopy(aszCollectionName, alstAttrs, alstMeta);
 
-   std::vector<CopyObject*> lstCopies = GetLocalCopies(aszCollectionName);
+   std::vector<CopyObject*> lstCopies = GetCopies(aszCollectionName);
    std::vector<CopyObject*>::iterator iter_copies = lstCopies.begin();
    for (; iter_copies != lstCopies.end(); ++iter_copies)
    {

@@ -218,7 +218,7 @@ Collection::ReplaceItem(std::string aszRemoveItemLongName,
 
       std::string szAddName;
       std::vector<std::pair<std::string, std::string>> lstAddAttrs;
-      if (bValidInput &= Collection::ParseCardLine(aszRemoveItemLongName, iCount, szAddName, szDetails))
+      if (bValidInput &= Collection::ParseCardLine(aszAddItemLongName, iCount, szAddName, szDetails))
       {
          lstAddAttrs = Collection::ParseAttrs(szDetails);
       }
@@ -694,9 +694,9 @@ void Collection::replaceItem(std::string aszNewItem,
    if (iRemoveCard != -1 && iAddCard != -1)
    {
       // If we successfully removed the card, add the replacement card.
-      if (removeItem(m_szName, alstOldAttrs, alstOldMeta))
+      if (removeItem(aszOldItem, alstOldAttrs, alstOldMeta))
       {
-         forceAdd(m_szName, alstNewAttrs, alstNewMeta);
+         forceAdd(aszNewItem, alstNewAttrs, alstNewMeta);
       }
    }
 }
@@ -928,7 +928,17 @@ bool Collection::loadChangeCardLine(std::string aszChangeCardLine)
          if (bValidInput &= (iAddProto != -1))
          {
             CollectionObject* oCOAdd = m_ColSource->GetCardPrototype(iAddProto);
-            CopyObject oCopyAdd = oCOAdd->GenerateCopy(m_szName, lstAddAttrs);
+            int parInt = SourceObject::List_Find("Parent", lstAddAttrs);
+            std::string copyParent;
+            if (parInt != -1)
+            {
+               copyParent = lstAddAttrs[parInt].second;
+            }
+            else
+            {
+               copyParent = m_szName;
+            }
+            CopyObject oCopyAdd = oCOAdd->GenerateCopy(copyParent, lstRemoveAttrs);
             szAddLong = cardToString(iAddProto, &std::make_pair(&oCopyAdd, 1));
          }
 
@@ -937,7 +947,17 @@ bool Collection::loadChangeCardLine(std::string aszChangeCardLine)
          if (bValidInput &= (iRemoveProto != -1))
          {
             CollectionObject* oCORemove = m_ColSource->GetCardPrototype(iRemoveProto);
-            CopyObject oCopyRemove = oCORemove->GenerateCopy(m_szName, lstAddAttrs);
+            int parInt = SourceObject::List_Find("Parent", lstRemoveAttrs);
+            std::string copyParent;
+            if (parInt != -1)
+            {
+               copyParent = lstRemoveAttrs[parInt].second;
+            }
+            else
+            {
+               copyParent = m_szName;
+            }
+            CopyObject oCopyRemove = oCORemove->GenerateCopy(copyParent, lstRemoveAttrs);
             szRemoveLong = cardToString(iRemoveProto, &std::make_pair(&oCopyRemove, 1));
          }
 

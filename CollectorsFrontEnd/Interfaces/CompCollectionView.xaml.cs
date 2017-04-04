@@ -194,6 +194,8 @@ namespace CollectorsFrontEnd.Interfaces
         private void ecBulkEditsAccept(CompSubBulkEdits.CompSubBulkEditsDataModel aDataModel)
         {
             DataModel.SubmitBulkEdits(aDataModel.LstTextChanges);
+            DataModel.Refresh();
+            buildListView();
             showMainDisplay();
         }
 
