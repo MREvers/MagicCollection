@@ -1,6 +1,7 @@
 ﻿using CollectorsFrontEnd.InterfaceModels;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -23,8 +24,8 @@ namespace CollectorsFrontEnd.Interfaces
     public partial class StoreFrontMain : Window, INotifyPropertyChanged, IComponent
     {
         #region Bindings
-        private IComponent _OperationWindow;
-        public IComponent OperationWindow {
+        private IMenuBarComponent _OperationWindow;
+        public IMenuBarComponent OperationWindow {
             get
             {
                 return _OperationWindow;
@@ -33,6 +34,19 @@ namespace CollectorsFrontEnd.Interfaces
             {
                 _OperationWindow = value;
                 OnPropertyChanged();
+            }
+        }
+
+        private ObservableCollection<MenuItem> _LstViewOptions;
+        public ObservableCollection<MenuItem> LstViewOptions
+        {
+            get
+            {
+                return _LstViewOptions;
+            }
+            set
+            {
+                _LstViewOptions = value;
             }
         }
         #endregion
@@ -62,6 +76,7 @@ namespace CollectorsFrontEnd.Interfaces
             ServerInterfaceModel.GenerateCollectionModel("Primary.txt");
             ServerInterfaceModel.GenerateCollectionModel("Main.txt");
 
+            LstViewOptions = new ObservableCollection<MenuItem>();
             ecSwitchToCollectionOverview();
         }
 
@@ -79,12 +94,14 @@ namespace CollectorsFrontEnd.Interfaces
         {
             OperationWindow = new CompCollectionsOverview(ServerInterfaceModel.GetLoadedCollectionList());
             OperationWindow.UnhandledEvent += RouteReceivedUnhandledEvent;
+            getViewOptions();
         }
 
         public void ecSwitchToCollectionView(string aszCollectionName)
         {
             OperationWindow = new CompCollectionView(aszCollectionName);
             OperationWindow.UnhandledEvent += RouteReceivedUnhandledEvent;
+            getViewOptions();
         }
 
         public void RouteReceivedUnhandledEvent(IDataModel aDataObject, string aszAction)
@@ -103,6 +120,28 @@ namespace CollectorsFrontEnd.Interfaces
 
 
         #endregion Default Functions (Component Functionality)
+
+        #region Private FUnctions
+        private void getViewOptions()
+        {
+            LstViewOptions.Clear();
+            List<Tuple<string, MenuAction>> LstActions = new List<Tuple<string, MenuAction>>();
+            LstActions = OperationWindow.GetMenuActions();
+            foreach (var act in LstActions)
+            {
+                MenuItem mI = new MenuItem();
+                mI.Header = act.Item1;
+                mI.Click += (o, e) => { act.Item2(); };
+                LstViewOptions.Add(mI);
+            }
+            if (LstActions.Count == 0)
+            {
+                MenuItem mI = new MenuItem();
+                mI.Header = "Empty";
+                LstViewOptions.Add(mI);
+            }
+        }
+        #endregion
 
         private void eClose_Click(object sender, RoutedEventArgs e)
         {

@@ -97,6 +97,7 @@
     </ApplicationDefinition>
     <Compile Include="IComponent.cs" />
     <Compile Include="IDataModel.cs" />
+    <Compile Include="IMenuBarComponent.cs" />
     <Compile Include="InterfaceModels\CollectionModel.cs" />
     <Compile Include="InterfaceModels\CardModel.cs" />
     <Compile Include="InterfaceModels\ServerInterfaceModel.cs" />

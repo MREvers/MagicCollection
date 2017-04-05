@@ -22,7 +22,7 @@ namespace CollectorsFrontEnd.Interfaces
     /// <summary>
     /// Interaction logic for CompCollectionView.xaml
     /// </summary>
-    public partial class CompCollectionView : UserControl, IComponent, INotifyPropertyChanged
+    public partial class CompCollectionView : UserControl, IMenuBarComponent, INotifyPropertyChanged
     {
         #region DataBinding
         private UserControl _ImageComponent;
@@ -81,6 +81,15 @@ namespace CollectorsFrontEnd.Interfaces
         public IDataModel GetDataModel()
         {
             return DataModel;
+        }
+
+        public List<Tuple<string, MenuAction>> GetMenuActions()
+        {
+            List<Tuple<string, MenuAction>> LstMenuActions = new List<Tuple<string, MenuAction>>()
+            {
+                new Tuple<string, MenuAction>("Set Baseline History", eSetBaselineHistory)
+            };
+            return LstMenuActions;//throw new NotImplementedException();
         }
         #endregion
 
@@ -445,7 +454,10 @@ namespace CollectorsFrontEnd.Interfaces
         #endregion
 
         #region UI Event Handlers
-       
+        public void eSetBaselineHistory()
+        {
+            DataModel.SetBaselineHistory();
+        }
 
         public void eAddItemWindowButton_Click(object sender, RoutedEventArgs e)
         {

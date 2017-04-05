@@ -26,6 +26,9 @@
                         <Separator></Separator>
                         <MenuItem Header="Close" Click="eClose_Click"/>
                     </MenuItem>
+                    <MenuItem Header="View Options" Height="20" ItemsSource="{Binding LstViewOptions}">
+
+                    </MenuItem>
                 </Menu>
             </Border>
         </DockPanel>

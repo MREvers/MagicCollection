@@ -34,6 +34,11 @@ namespace CollectorsFrontEnd.InterfaceModels
             }
         }
 
+        public void SetBaselineHistory()
+        {
+            ServerInterfaceModel.CollectionInterfaceModel.SetBaselineHistory(CollectionName);
+        }
+
         public void SaveCollection()
         {
             ServerInterfaceModel.CollectionInterfaceModel.SaveCollection(CollectionName);

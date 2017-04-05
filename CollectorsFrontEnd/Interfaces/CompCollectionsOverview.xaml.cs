@@ -22,7 +22,7 @@ namespace CollectorsFrontEnd.Interfaces
     /// <summary>
     /// Interaction logic for CompCollectionsOverview.xaml
     /// </summary>
-    public partial class CompCollectionsOverview : UserControl, IComponent, INotifyPropertyChanged
+    public partial class CompCollectionsOverview : UserControl, IMenuBarComponent, INotifyPropertyChanged
     {
         #region Data Binding
         public List<string> LstAvailableCollections
@@ -103,6 +103,11 @@ namespace CollectorsFrontEnd.Interfaces
             return DataModel;
         }
 
+        public List<Tuple<string, MenuAction>> GetMenuActions()
+        {
+            return new List<Tuple<string, MenuAction>>();//throw new NotImplementedException();
+        }
+
         private void eBtnViewCollection_Click(object sender, RoutedEventArgs e)
         {
             if (LstBoxLoadedCollections.SelectedValue != null)
@@ -115,5 +120,7 @@ namespace CollectorsFrontEnd.Interfaces
             }
             
         }
+
+
     }
 }

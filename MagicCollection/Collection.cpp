@@ -747,13 +747,19 @@ void Collection::loadCollectionLines(std::vector<std::string>& alstLines)
 bool Collection::loadCardLine(std::string aszNewCardLine)
 {
    int iNum;
-   std::string szName;
+   std::string szName = "";
    std::string szDetails;
    if (!ParseCardLine(aszNewCardLine, iNum, szName, szDetails))
    {
       m_lstUnreversibleChanges.push_back("Could Not Parse Line \"" + aszNewCardLine + "\"");
       return false;
    }
+
+   if (szName == "")
+   {
+      return false;
+   }
+
    std::vector<std::pair<std::string, std::string>> lstKeyVals = ParseAttrs(szDetails);
 
    // Add or find a copy for each count.
