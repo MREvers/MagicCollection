@@ -48,6 +48,15 @@ void CStoreFrontBackEnd::RemoveItem(std::string aszCollectionName,
 	}
 }
 
+void CStoreFrontBackEnd::CreateCollection(std::string aszCollectionName)
+{
+   if (!m_ColFactory->CollectionExists(aszCollectionName))
+   {
+      Collection* oCol = m_ColFactory->GetCollection(aszCollectionName);
+      oCol->SaveCollection(oCol->GetName() + ".txt");
+   }
+}
+
 void CStoreFrontBackEnd::SaveCollection(std::string aszCollectionName)
 {
 	if (m_ColFactory->CollectionExists(aszCollectionName))

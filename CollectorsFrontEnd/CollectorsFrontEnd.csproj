@@ -77,6 +77,8 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Core" />
@@ -128,6 +130,9 @@
     <Compile Include="Interfaces\Subs\CompSubCardDisplayer.xaml.cs">
       <DependentUpon>CompSubCardDisplayer.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Interfaces\Subs\CompSubEnterText.xaml.cs">
+      <DependentUpon>CompSubEnterText.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Interfaces\Subs\CompSubGeneralization.xaml.cs">
       <DependentUpon>CompSubGeneralization.xaml</DependentUpon>
     </Compile>
@@ -171,6 +176,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Interfaces\Subs\CompSubCardDisplayer.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Interfaces\Subs\CompSubEnterText.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

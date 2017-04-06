@@ -1,4 +1,5 @@
 ﻿using CollectorsFrontEnd.InterfaceModels;
+using CollectorsFrontEnd.Interfaces.Subs;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -48,12 +49,20 @@ namespace CollectorsFrontEnd.Interfaces
         }
         #endregion
 
+        UserControl m_OverlayControl = null;
+
         public class CollectionsOverviewerModel : IDataModel
         {
             public CollectionsOverviewerModel(List<string> aLstAvailableCollections)
             {
+                UpdateCollectionsList(aLstAvailableCollections);
+            }
+
+            public void UpdateCollectionsList(List<string> aLstAvailableCollections)
+            {
                 LstAvailableCollections = aLstAvailableCollections;
             }
+
             public List<string> LstAvailableCollections;
             public List<string> LstCurrentCollectionPreview = new List<string>();
             public string SelectedCollection = "";
@@ -71,6 +80,15 @@ namespace CollectorsFrontEnd.Interfaces
             LstBoxCollectionPreview.ItemsSource = DataModel.LstCurrentCollectionPreview;
         }
 
+        private void buildAvailableCollectionsList()
+        {
+            // Get Loaded Collections
+            List<string> lstAvailableCollections = ServerInterfaceModel.GetLoadedCollectionList();
+            DataModel.UpdateCollectionsList(lstAvailableCollections);
+            LstBoxLoadedCollections.ItemsSource = DataModel.LstAvailableCollections;
+            LstBoxCollectionPreview.ItemsSource = DataModel.LstCurrentCollectionPreview;
+        }
+
         // This is unhandled
         private void eLstBoxLoadedCollections_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
@@ -82,7 +100,7 @@ namespace CollectorsFrontEnd.Interfaces
                 DataModel.LstCurrentCollectionPreview = ColM.LstCopyModels.Select(x => x.CardNameLong).ToList();
                 LstBoxCollectionPreview.ItemsSource = DataModel.LstCurrentCollectionPreview;
             }
-            
+
             /* THis is view selection code
             string szCollectionSelected = LstBoxLoadedCollections.SelectedValue.ToString();
             if (!string.IsNullOrEmpty(szCollectionSelected))
@@ -95,7 +113,20 @@ namespace CollectorsFrontEnd.Interfaces
         // This gets subscribed to the unhandled event of its components
         public void RouteReceivedUnhandledEvent(IDataModel aDataObject, string aszAction)
         {
-            throw new NotImplementedException();
+            if (aDataObject.GetType() == typeof(CompSubEnterText.CompSubEnterTextDataModel))
+            {
+                CompSubEnterText.CompSubEnterTextDataModel DM = (CompSubEnterText.CompSubEnterTextDataModel) aDataObject;
+                if (aszAction == "Cancel")
+                {
+                    showMainDisplay();
+                }
+                else if (aszAction == "OK")
+                {
+                    addCollection(DM.Text);
+                    buildAvailableCollectionsList();
+                    showMainDisplay();
+                }
+            }
         }
 
         public IDataModel GetDataModel()
@@ -108,6 +139,35 @@ namespace CollectorsFrontEnd.Interfaces
             return new List<Tuple<string, MenuAction>>();//throw new NotImplementedException();
         }
 
+        private void addCollection(string aszNewName)
+        {
+            ServerInterfaceModel.CreateCollection(aszNewName);
+        }
+
+        private void showMainDisplay()
+        {
+            if (m_OverlayControl != null)
+            {
+                CenterPanel.Children.Remove(m_OverlayControl);
+            }
+            
+            m_OverlayControl = null;
+            ControlPanel.IsEnabled = true;
+        }
+
+        private void showEnterTextWindow()
+        {
+            showMainDisplay();
+
+            CompSubEnterText ITI = new CompSubEnterText();
+            m_OverlayControl = ITI;
+            ITI.UnhandledEvent += RouteReceivedUnhandledEvent;
+            Panel.SetZIndex(CenterPanel, 2);
+            CenterPanel.Children.Add(ITI);
+            ControlPanel.IsEnabled = false;
+
+        }
+
         private void eBtnViewCollection_Click(object sender, RoutedEventArgs e)
         {
             if (LstBoxLoadedCollections.SelectedValue != null)
@@ -118,9 +178,17 @@ namespace CollectorsFrontEnd.Interfaces
                     UnhandledEvent(DataModel, "ViewCollection");
                 }
             }
-            
+
         }
 
+        private void eLoadCol_Click(object sender, RoutedEventArgs e)
+        {
 
+        }
+
+        private void eAddCol_Click(object sender, RoutedEventArgs e)
+        {
+            showEnterTextWindow();
+        }
     }
 }

@@ -37,6 +37,9 @@ public:
    MCopyObject^ 
       ConvertItemToCopyObject(System::String^ ahszCard);
 
+   void
+      CreateCollection(System::String^ aszCollectionName);
+
 	// Eventually Add file name arg.
 	void 
       SaveCollection(System::String^ aszCollectionName);

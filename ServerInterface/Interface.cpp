@@ -76,6 +76,13 @@ MCopyObject^ ServerClientInterface::ConvertItemToCopyObject(System::String^ ahsz
 	return roCO;
 }
 
+void
+ServerClientInterface::CreateCollection(System::String^ ahszCollectionName)
+{
+   std::string szCollectionName = msclr::interop::marshal_as<std::string>(ahszCollectionName);
+   m_StoreFrontBackEnd->CreateCollection(szCollectionName);
+}
+
 void ServerClientInterface::SaveCollection(System::String^ ahszCollectionName)
 {
 	std::string szCollectionName = msclr::interop::marshal_as<std::string>(ahszCollectionName);

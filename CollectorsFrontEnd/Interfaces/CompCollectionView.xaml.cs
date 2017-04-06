@@ -96,6 +96,10 @@ namespace CollectorsFrontEnd.Interfaces
         #region Private Functions
         private void buildListView()
         {
+            if (!(DataModel.LstCopyModels.Count > 0))
+            {
+                return;
+            }
             LstGeneralizations.Clear();
             Dictionary<string, List<CardModel>> mapGeneralizations = new Dictionary<string, List<CardModel>>();
             mapGeneralizations.Add("Main", new List<CardModel>());

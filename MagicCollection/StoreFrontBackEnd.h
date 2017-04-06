@@ -26,6 +26,9 @@ public:
       std::string aszCollection, 
       std::string aszItem, 
       std::vector<std::pair<std::string, std::string>> alstMeta);
+
+   void CreateCollection(std::string aszCollectionName);
+
    void SaveCollection(std::string aszCollectionToSave);
 
    std::vector<std::pair<std::string, std::string>> GetCardAttributes(std::string aszCardNameLong);

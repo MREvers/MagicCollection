@@ -277,5 +277,11 @@ namespace CollectorsFrontEnd.InterfaceModels
         {
             SCI.ImportCollection();
         }
+
+        public static void CreateCollection(string aszName)
+        {
+            SCI.CreateCollection(aszName);
+            GenerateCollectionModel(aszName + ".txt");
+        }
     }
 }
