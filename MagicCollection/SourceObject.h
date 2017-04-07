@@ -33,6 +33,8 @@ public:
    int GetCacheIndex();
    void Cache(unsigned short aiCacheIndex);
 
+   void FinalizeSize();
+
    static std::vector<std::string> Str_Split(std::string aszSplit, std::string aszDelim);
    static int List_Find(std::string aszFind, std::vector<std::string> alstFindList);
    static int List_Find(std::string aszFind, std::vector<std::pair<std::string, std::string>> alstFindList);
@@ -45,6 +47,7 @@ private:
 
    bool isNonUniqueFlag(short aiCheck);
    unsigned short extractSize(short aiCheck);
+
 };
 
 #pragma message ("Finish SourceObject.h")

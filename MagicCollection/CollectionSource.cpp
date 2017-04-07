@@ -9,7 +9,7 @@ CollectionSource::CollectionSource()
 	//  TODO: Tie these together at some point.
 	m_lstPairedNonUniques.push_back(std::make_pair("set", "mid"));
 	m_iAllCharBuffSize = 0;
-	m_AllCharBuff = new char[7500000];
+	m_AllCharBuff = new char[3550000];
 }
 
 CollectionSource::~CollectionSource()
@@ -67,7 +67,7 @@ void CollectionSource::LoadLib(std::string aszFileName)
 		{
 			std::string szCardKey = xmlNode_CardAttribute->name();
 			std::string keyCode = getKeyCode(szCardKey);
-			if (keyCode != "")
+			if (keyCode != "" && keyCode != "nam")
 			{
 				if (isUnique(szCardKey))
 				{
@@ -93,6 +93,7 @@ void CollectionSource::LoadLib(std::string aszFileName)
 			xmlNode_CardAttribute = xmlNode_CardAttribute->next_sibling();
 		}
 
+		sO->FinalizeSize();
 		xmlNode_Card = xmlNode_Card->next_sibling();
 	}
 

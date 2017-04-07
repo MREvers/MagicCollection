@@ -6,7 +6,7 @@ SourceObject::SourceObject(int aiCharBufOffset)
    m_iCachedIndex = -1;
    m_iCharBufferOffset = aiCharBufOffset;
    m_iKeyValArraySize = 0;
-   m_pLstKeyVals = new unsigned short[20];
+   m_pLstKeyVals = new unsigned short[9];
    m_iNameIndex = 0;
 }
 
@@ -144,6 +144,18 @@ int SourceObject::GetCacheIndex()
 void SourceObject::Cache(unsigned short aiCacheIndex)
 {
    m_iCachedIndex = aiCacheIndex;
+}
+
+void SourceObject::FinalizeSize()
+{
+	unsigned short* newList = new unsigned short[m_iKeyValArraySize];
+	for (int i = 0; i < m_iKeyValArraySize; i++)
+	{
+		newList[i] == m_pLstKeyVals[i];
+	}
+	delete[] m_pLstKeyVals;
+
+	m_pLstKeyVals = newList;
 }
 
 std::vector<std::string> SourceObject::Str_Split(std::string aszSplit, std::string aszDelim)
