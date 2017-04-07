@@ -1,40 +1,139 @@
 #include "SourceObject.h"
 
 
-SourceObject::SourceObject(std::string aszName)
+SourceObject::SourceObject(int aiCharBufOffset)
 {
-   AddAttribute("name", aszName);
    m_iCachedIndex = -1;
-   m_szName = aszName;
+   m_iCharBufferOffset = aiCharBufOffset;
+   m_iKeyValArraySize = 0;
+   m_pLstKeyVals = new unsigned short[20];
+   m_iNameIndex = 0;
 }
 
 SourceObject::~SourceObject()
 {
 }
 
-bool SourceObject::AddAttribute(std::string key, std::string value)
+unsigned int SourceObject::AddAttribute(std::string key, std::string value, char* aplstCharBuf, unsigned int aiBufSize)
 {
-   Attributes.insert(std::make_pair(key, value));
-   return false;
+   unsigned short iKeyValPair = 0;
+   unsigned short iSize = value.size();
+   iKeyValPair = (iKeyValPair | iSize);
+
+   for (int i = 0; i < 3; i++)
+   {
+      aplstCharBuf[aiBufSize + i] = key[i];
+   }
+   
+   for (int i = 0; i < value.size(); i++)
+   {
+      aplstCharBuf[aiBufSize + i + 3] = value[i];
+   }
+
+   m_pLstKeyVals[m_iKeyValArraySize] = iKeyValPair;
+   
+   m_iKeyValArraySize++;
+
+   return 3 + value.size();
 }
 
-bool SourceObject::AddNonUniqueAttribute(std::string aszKey, std::string aszVal)
+unsigned int SourceObject::AddNonUniqueAttribute(std::string key, std::string value, char* aplstCharBuf, unsigned int aiBufSize)
 {
-   if (NonUniqueAttributes.find(aszKey) != NonUniqueAttributes.end())
+   unsigned short iKeyValPair;
+   iKeyValPair = 1 << 15;
+   unsigned short iSize = value.size();
+
+   iKeyValPair = iKeyValPair | iSize;
+
+   for (int i = 0; i < 3; i++)
    {
-      NonUniqueAttributes[aszKey].push_back(aszVal);
+      aplstCharBuf[aiBufSize + i] = key[i];
    }
-   else
+
+   for (int i = 0; i < value.size(); i++)
    {
-      std::vector<std::string> lstNewlst = Str_Split(aszVal, "::");
-      NonUniqueAttributes[aszKey] = lstNewlst;
+      aplstCharBuf[aiBufSize + i + 3] = value[i];
    }
-   return false;
+
+   m_pLstKeyVals[m_iKeyValArraySize] = iKeyValPair;
+
+   m_iKeyValArraySize++;
+
+   return 3 + value.size();
 }
 
-std::string SourceObject::GetName()
+std::string SourceObject::GetName(char* aiSearchBuffer)
 {
-   return m_szName;
+   return GetAttribute("nam", aiSearchBuffer);
+}
+
+std::string SourceObject::GetAttribute(std::string aszKey, char* aiSearchBuffer)
+{
+   unsigned short iLoopBufferOffset = 0;
+   for (int i = 0; i < m_iKeyValArraySize; i++)
+   {
+      unsigned short iCurrentKVPair = m_pLstKeyVals[i];
+      unsigned short iValueSize = extractSize(iCurrentKVPair);
+      std::string szKeyCode(aiSearchBuffer + m_iCharBufferOffset + iLoopBufferOffset, 3);
+      if (szKeyCode == aszKey)
+      {
+         std::string szValue(aiSearchBuffer + m_iCharBufferOffset + iLoopBufferOffset + 3, iValueSize);
+         return szValue;
+      }
+      else
+      {
+         iLoopBufferOffset += 3 + iValueSize;
+      }
+   }
+
+   return "";
+}
+
+// Only returns unique attrs
+std::vector<std::pair<std::string,std::string>> SourceObject::GetAttributes(char* aiSearchBuffer)
+{
+   std::vector<std::pair<std::string, std::string>> lstRetVal;
+
+   unsigned short iLoopBufferOffset = 0;
+   for (int i = 0; i < m_iKeyValArraySize; i++)
+   {
+      unsigned short iCurrentKVPair = m_pLstKeyVals[i];
+      unsigned short iValueSize = extractSize(iCurrentKVPair);
+      if (true)
+      {
+         std::string szKeyCode(aiSearchBuffer + m_iCharBufferOffset + iLoopBufferOffset, 3);
+         std::string szValue(aiSearchBuffer + m_iCharBufferOffset + iLoopBufferOffset + 3, iValueSize);
+         
+         lstRetVal.push_back(std::make_pair(szKeyCode, szValue));
+      }
+      iLoopBufferOffset += 3 + iValueSize;
+   }
+
+   return lstRetVal;
+}
+
+std::map<std::string, std::vector<std::string>> SourceObject::GetNonUniqueAttributeRestrictions(char* aiSearchBuffer)
+{
+   std::map<std::string, std::vector<std::string>> mapNonUAttrs;
+
+   unsigned short iLoopBufferOffset = 0;
+   for (int i = 0; i < m_iKeyValArraySize; i++)
+   {
+      unsigned short iCurrentKVPair = m_pLstKeyVals[i];
+      unsigned short iValueSize = extractSize(iCurrentKVPair);
+      if (isNonUniqueFlag(iCurrentKVPair))
+      {
+         std::string szKeyCode(aiSearchBuffer + m_iCharBufferOffset + iLoopBufferOffset, 3);
+         std::string szValue(aiSearchBuffer + m_iCharBufferOffset + iLoopBufferOffset + 3, iValueSize);
+
+         std::vector<std::string> lstNewlst = Str_Split(szValue, "::");
+
+         mapNonUAttrs[szKeyCode] = lstNewlst;
+      }
+      iLoopBufferOffset += 3 + iValueSize;
+   }
+
+   return mapNonUAttrs;
 }
 
 int SourceObject::GetCacheIndex()
@@ -42,7 +141,7 @@ int SourceObject::GetCacheIndex()
    return m_iCachedIndex;
 }
 
-void SourceObject::Cache(int aiCacheIndex)
+void SourceObject::Cache(unsigned short aiCacheIndex)
 {
    m_iCachedIndex = aiCacheIndex;
 }
@@ -57,7 +156,7 @@ std::vector<std::string> SourceObject::Str_Split(std::string aszSplit, std::stri
    }
    else
    {
-      int iDelimSize =  aszDelim.size();
+      int iDelimSize = aszDelim.size();
       int iSplitSize = aszSplit.size();
       std::vector<std::string> lstSZs;
       std::string szBefore = "";
@@ -99,7 +198,7 @@ std::vector<std::string> SourceObject::Str_Split(std::string aszSplit, std::stri
 
             for (int t = 1; t < iDelimSize; t++)
             {
-               szBefore += aszSplit[i+t];
+               szBefore += aszSplit[i + t];
             }
 
             lstSZs.push_back(szBefore);
@@ -115,30 +214,40 @@ std::vector<std::string> SourceObject::Str_Split(std::string aszSplit, std::stri
 
 int SourceObject::List_Find(std::string aszFind, std::vector<std::string> alstFindList)
 {
-	std::vector<std::string>::iterator iter_list = alstFindList.begin();
-	int index = 0;
-	for (; iter_list != alstFindList.end(); iter_list++)
-	{
-		if (*iter_list == aszFind)
-		{
-			return index;
-		}
-		index++;
-	}
-	return -1;
+   std::vector<std::string>::iterator iter_list = alstFindList.begin();
+   int index = 0;
+   for (; iter_list != alstFindList.end(); iter_list++)
+   {
+      if (*iter_list == aszFind)
+      {
+         return index;
+      }
+      index++;
+   }
+   return -1;
 }
 
-int SourceObject::List_Find(std::string aszFind, std::vector<std::pair<std::string,std::string>> alstFindList)
+int SourceObject::List_Find(std::string aszFind, std::vector<std::pair<std::string, std::string>> alstFindList)
 {
-	std::vector<std::pair<std::string, std::string>>::iterator iter_list = alstFindList.begin();
-	int index = 0;
-	for (; iter_list != alstFindList.end(); iter_list++)
-	{
-		if (iter_list->first == aszFind)
-		{
-			return index;
-		}
-		index++;
-	}
-	return -1;
+   std::vector<std::pair<std::string, std::string>>::iterator iter_list = alstFindList.begin();
+   int index = 0;
+   for (; iter_list != alstFindList.end(); iter_list++)
+   {
+      if (iter_list->first == aszFind)
+      {
+         return index;
+      }
+      index++;
+   }
+   return -1;
+}
+
+bool SourceObject::isNonUniqueFlag(short aiCheck)
+{
+   return aiCheck & (1 << 15);
+}
+
+unsigned short SourceObject::extractSize(short aiCheck)
+{
+   return (aiCheck & 0x7FFF);
 }

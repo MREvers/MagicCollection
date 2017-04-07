@@ -279,8 +279,10 @@ void CopyObject::SetNonUniqueAttr(std::string aszKey, std::string aszValue)
                {
                   if (bRestrictedMatch)
                   {
-                     NonUniqueTraits[iter_PairedTraits->second] =
-                        (*m_mapNonUniqueAttributesRestrictions)[iter_PairedTraits->second][iIndexOfAllowedTrait];
+
+						  NonUniqueTraits[iter_PairedTraits->second] =
+							  (*m_mapNonUniqueAttributesRestrictions)[iter_PairedTraits->second][iIndexOfAllowedTrait];
+					  
                   }
                   else
                   {

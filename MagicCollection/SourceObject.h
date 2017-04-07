@@ -8,34 +8,43 @@
 
 class CollectionObject;
 
+// This stores a list of ints, specifying key val pairs as indicated in the colsource
+// This stores an array of ints (Like above) int*
+// Short Cache index
+// Short name index and array size
 class SourceObject
 {
 public:
-   SourceObject(std::string aszName);
+   SourceObject(int aiCharBufOffset);
    ~SourceObject();
 
-   // Used in building this object
-   std::map<std::string, std::string> Attributes;
-   std::map<std::string, std::vector<std::string>> NonUniqueAttributes;
    //std::vector<std::pair<std::string, std::string>> Attribs;
-   bool AddAttribute(std::string key, std::string value);
-   bool AddNonUniqueAttribute(std::string, std::string value);
+   unsigned int AddAttribute(std::string key, std::string value, char* aplstCharBuf, unsigned int aiBufSize);
+   unsigned int AddNonUniqueAttribute(std::string key, std::string value, char* aplstCharBuf, unsigned int aiBufSize);
 
    // Used in loading from source DB.
-   std::string GetName();
+   std::string GetName(char* aiSearchBuffer);
+
+   // Requires the 3 char keycode
+   std::string GetAttribute(std::string aszKeyCode, char* aiSearchBuffer);
+   std::vector<std::pair<std::string, std::string>> GetAttributes(char* aiSearchBuffer);
+
+   std::map<std::string, std::vector<std::string>> GetNonUniqueAttributeRestrictions(char* aiSearchBuffer);
    int GetCacheIndex();
-   void Cache(int aiCacheIndex);
+   void Cache(unsigned short aiCacheIndex);
 
    static std::vector<std::string> Str_Split(std::string aszSplit, std::string aszDelim);
    static int List_Find(std::string aszFind, std::vector<std::string> alstFindList);
    static int List_Find(std::string aszFind, std::vector<std::pair<std::string, std::string>> alstFindList);
-
 private:
-   int m_iCachedIndex;
-   int m_iHaves;
-   std::string m_szName;
+   unsigned short* m_pLstKeyVals;
+   unsigned int m_iCharBufferOffset;
+   short m_iCachedIndex;
+   unsigned char m_iNameIndex;
+   unsigned char m_iKeyValArraySize;
 
-   
+   bool isNonUniqueFlag(short aiCheck);
+   unsigned short extractSize(short aiCheck);
 };
 
 #pragma message ("Finish SourceObject.h")
