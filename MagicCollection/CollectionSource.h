@@ -49,6 +49,8 @@ private:
    int findInBuffer(std::string aszName, bool abCaseSensitive);
    bool isUnique(std::string aszUnique);
 
+   void finalizeBuffer();
+
    // This buffer stores ALL characters for every card.
    // It is a list of keyVal sequences where the KEYS are all 3 CHARS LONG.
    // So, in order to specify a pair, you need the start point, and the length of the val.
@@ -60,6 +62,7 @@ private:
    unsigned int m_iAllCharBuffSize;
 
    std::string getKeyCode(std::string aszFullKey);
+   std::string getFullKey(std::string aszKeyCode);
 };
 
 #pragma message ("Finish CollectionSource.h")

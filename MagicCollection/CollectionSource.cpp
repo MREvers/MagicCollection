@@ -7,7 +7,7 @@ CollectionSource::CollectionSource()
 
 	// THESE ALSO HAVE TO BE ACCOUNTED FOR IN THE IMPORTER
 	//  TODO: Tie these together at some point.
-	m_lstPairedNonUniques.push_back(std::make_pair("set", "mid"));
+	m_lstPairedNonUniques.push_back(std::make_pair("set", "multiverseid"));
 	m_iAllCharBuffSize = 0;
 	m_AllCharBuff = new char[3550000];
 }
@@ -97,6 +97,8 @@ void CollectionSource::LoadLib(std::string aszFileName)
 		xmlNode_Card = xmlNode_Card->next_sibling();
 	}
 
+	finalizeBuffer();
+
 	// Mechanisms
 	clock_t end = clock();
 	double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;
@@ -130,7 +132,17 @@ int CollectionSource::LoadCard(std::string aszCardName)
 				bHasAllAttributes = oCard.MapAttributes(att_iter->first, att_iter->second);
 			}
 
-			oCard.SetNonUniqueAttributeRestrictions(oSource->GetNonUniqueAttributeRestrictions(m_AllCharBuff));
+			std::map<std::string, std::vector<std::string>> lstUnfixedAttrs = oSource->GetNonUniqueAttributeRestrictions(m_AllCharBuff);
+
+			std::map<std::string, std::vector<std::string>> lstFixedAttrs;
+
+			std::map<std::string, std::vector<std::string>>::iterator iter_UnfixedAttrs = lstUnfixedAttrs.begin();
+			for (; iter_UnfixedAttrs != lstUnfixedAttrs.end(); ++iter_UnfixedAttrs)
+			{
+				lstFixedAttrs[getFullKey(iter_UnfixedAttrs->first)] = iter_UnfixedAttrs->second;
+			}
+
+			oCard.SetNonUniqueAttributeRestrictions(lstFixedAttrs);
 			oCard.SetPairedNonUniqueAttrs(m_lstPairedNonUniques);
 
 			// Store the location of the CollectionObject in the cache
@@ -263,6 +275,14 @@ bool CollectionSource::isUnique(std::string aszFind)
 	return true;
 }
 
+void CollectionSource::finalizeBuffer()
+{
+	char* newBufferSize = new char[m_iAllCharBuffSize];
+	memcpy(newBufferSize, m_AllCharBuff, m_iAllCharBuffSize);
+	delete[] m_AllCharBuff;
+	m_AllCharBuff = newBufferSize;
+}
+
 std::string CollectionSource::getKeyCode(std::string aszFullKey)
 {
 	if (aszFullKey == "power")
@@ -298,6 +318,47 @@ std::string CollectionSource::getKeyCode(std::string aszFullKey)
 		return "mid";
 	}
 	else if (aszFullKey == "set")
+	{
+		return "set";
+	}
+
+}
+
+std::string CollectionSource::getFullKey(std::string aszKeyCode)
+{
+	if (aszKeyCode == "pow")
+	{
+		return "power";
+	}
+	else if (aszKeyCode == "tuf")
+	{
+		return "toughness";
+	}
+	else if (aszKeyCode == "man")
+	{
+		return "manaCost";
+	}
+	else if (aszKeyCode == "txt")
+	{
+		return "text";
+	}
+	else if (aszKeyCode == "loy")
+	{
+		return "loyalty";
+	}
+	else if (aszKeyCode == "nam")
+	{
+		return "name";
+	}
+	else if (aszKeyCode == "clr")
+	{
+		return "colors";
+	}
+	else if (aszKeyCode == "mid")
+	{
+		return "multiverseid";
+	}
+	else if (aszKeyCode == "set")
 	{
 		return "set";
 	}
