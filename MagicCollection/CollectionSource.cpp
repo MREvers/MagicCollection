@@ -129,7 +129,7 @@ int CollectionSource::LoadCard(std::string aszCardName)
 			bool bHasAllAttributes = false;
 			for (; att_iter != lstAttrs.end() && !bHasAllAttributes; ++att_iter)
 			{
-				bHasAllAttributes = oCard.MapAttributes(att_iter->first, att_iter->second);
+				bHasAllAttributes = oCard.MapAttributes(getFullKey(att_iter->first), att_iter->second);
 			}
 
 			std::map<std::string, std::vector<std::string>> lstUnfixedAttrs = oSource->GetNonUniqueAttributeRestrictions(m_AllCharBuff);

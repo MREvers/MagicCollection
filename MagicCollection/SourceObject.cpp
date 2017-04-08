@@ -104,7 +104,7 @@ std::vector<std::pair<std::string,std::string>> SourceObject::GetAttributes(char
    {
       unsigned short iCurrentKVPair = m_pLstKeyVals[i];
       unsigned short iValueSize = extractSize(iCurrentKVPair);
-      if (true)
+      if (!isNonUniqueFlag(iCurrentKVPair))
       {
          std::string szKeyCode(aiSearchBuffer + m_iCharBufferOffset + iLoopBufferOffset, 3);
          std::string szValue(aiSearchBuffer + m_iCharBufferOffset + iLoopBufferOffset + 3, iValueSize);
