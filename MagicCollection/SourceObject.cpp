@@ -43,11 +43,6 @@ unsigned int SourceObject::AddAttribute(std::string aszkey, std::string value, c
       aplstCharBuf[aiBufSize + i + 3] = value[i];
    }
 
-   if (iKeyValPair > 25000)
-   {
-	   iKeyValPair = 0;
-   }
-
    m_pLstKeyVals[m_iKeyValArraySize] = iKeyValPair;
    
    m_iKeyValArraySize++;
