@@ -16,6 +16,7 @@
 // Just use magic card object for now
 #include "CollectionSource.h"
 #include "StringHelper.h"
+#include "Config.h"
 
 
 class Collection : public ICollection

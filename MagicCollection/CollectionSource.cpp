@@ -2,12 +2,6 @@
 #include "CollectionSource.h"
 CollectionSource::CollectionSource()
 {
-	m_lstNonUniqueKeys.push_back("set");
-	m_lstNonUniqueKeys.push_back("multiverseid");
-
-	// THESE ALSO HAVE TO BE ACCOUNTED FOR IN THE IMPORTER
-	//  TODO: Tie these together at some point.
-	m_lstPairedNonUniques.push_back(std::make_pair("set", "multiverseid"));
 	m_iAllCharBuffSize = 0;
 	m_AllCharBuff = new char[3550000];
 }
@@ -44,7 +38,7 @@ void CollectionSource::LoadLib(std::string aszFileName)
 	// With the xml example above this is the <document/> node
 	rapidxml::xml_node<> *xmlNode_Cards = xmlNode_CardDatabase->first_node("cards");
 	rapidxml::xml_node<> *xmlNode_Card = xmlNode_Cards->first_node();
-
+	std::string szNameKeyCode = Config::GetConfigClass()->GetKeyCode("name");
 	while (xmlNode_Card != 0)
 	{
 		rapidxml::xml_node<> *xmlNode_CardAttribute = xmlNode_Card->first_node();
@@ -53,42 +47,24 @@ void CollectionSource::LoadLib(std::string aszFileName)
 
 		SourceObject* sO = new SourceObject(m_iAllCharBuffSize);
 		std::string aszName = xmlNode_CardName->value();
-		m_iAllCharBuffSize += sO->AddAttribute("nam", xmlNode_CardName->value(), m_AllCharBuff, m_iAllCharBuffSize);
+		m_iAllCharBuffSize += sO->AddAttribute(szNameKeyCode, xmlNode_CardName->value(), m_AllCharBuff, m_iAllCharBuffSize);
 		m_lstptCardBuffer.push_back(*sO);
 		delete sO;
 		sO = &m_lstptCardBuffer[m_lstptCardBuffer.size() - 1];
 
 		bool bHasAll = false;
-		if (aszName == "Gideon, Ally of Zendikar")
-		{
-			int i = 0;
-		}
 		while (xmlNode_CardAttribute != 0)
 		{
 			std::string szCardKey = xmlNode_CardAttribute->name();
-			std::string keyCode = getKeyCode(szCardKey);
-			if (keyCode != "" && keyCode != "nam")
+			std::string keyCode = Config::GetConfigClass()->GetKeyCode(szCardKey);
+			if (keyCode != "" && keyCode != szNameKeyCode)
 			{
-				if (isUnique(szCardKey))
-				{
-					m_iAllCharBuffSize += sO->AddAttribute(
-						keyCode,
-						xmlNode_CardAttribute->value(),
-						m_AllCharBuff,
-						m_iAllCharBuffSize);
-				}
-				else
-				{
-
-					m_iAllCharBuffSize += sO->AddNonUniqueAttribute(
-						keyCode,
-						xmlNode_CardAttribute->value(),
-						m_AllCharBuff,
-						m_iAllCharBuffSize);
-				}
+				m_iAllCharBuffSize += sO->AddAttribute(
+					keyCode,
+					xmlNode_CardAttribute->value(),
+					m_AllCharBuff,
+					m_iAllCharBuffSize);
 			}
-
-
 
 			xmlNode_CardAttribute = xmlNode_CardAttribute->next_sibling();
 		}
@@ -110,7 +86,7 @@ void CollectionSource::LoadLib(std::string aszFileName)
 int CollectionSource::LoadCard(std::string aszCardName)
 {
 	int iCacheLocation = -1;
-	std::string szCardName = CollectionObject::str_trim(aszCardName, ' ');
+	std::string szCardName = StringHelper::Str_Trim(aszCardName, ' ');
 
 	// Look in the Source Object Buffer for a matching item.
 	int iFound = findInBuffer(szCardName, false);
@@ -129,7 +105,7 @@ int CollectionSource::LoadCard(std::string aszCardName)
 			bool bHasAllAttributes = false;
 			for (; att_iter != lstAttrs.end() && !bHasAllAttributes; ++att_iter)
 			{
-				bHasAllAttributes = oCard.MapAttributes(getFullKey(att_iter->first), att_iter->second);
+				bHasAllAttributes = oCard.MapAttributes(Config::GetConfigClass()->GetFullKey(att_iter->first), att_iter->second);
 			}
 
 			std::map<std::string, std::vector<std::string>> lstUnfixedAttrs = oSource->GetNonUniqueAttributeRestrictions(m_AllCharBuff);
@@ -139,11 +115,11 @@ int CollectionSource::LoadCard(std::string aszCardName)
 			std::map<std::string, std::vector<std::string>>::iterator iter_UnfixedAttrs = lstUnfixedAttrs.begin();
 			for (; iter_UnfixedAttrs != lstUnfixedAttrs.end(); ++iter_UnfixedAttrs)
 			{
-				lstFixedAttrs[getFullKey(iter_UnfixedAttrs->first)] = iter_UnfixedAttrs->second;
+				lstFixedAttrs[Config::GetConfigClass()->GetFullKey(iter_UnfixedAttrs->first)] = iter_UnfixedAttrs->second;
 			}
 
 			oCard.SetNonUniqueAttributeRestrictions(lstFixedAttrs);
-			oCard.SetPairedNonUniqueAttrs(m_lstPairedNonUniques);
+			oCard.SetPairedNonUniqueAttrs(Config::GetConfigClass()->GetPairedKeysList());
 
 			// Store the location of the CollectionObject in the cache
 			iCacheLocation = m_lstoCardCache.size();
@@ -263,104 +239,10 @@ int CollectionSource::findInBuffer(std::string aszCardName, bool abCaseSensitive
 	return -1;
 }
 
-bool CollectionSource::isUnique(std::string aszFind)
-{
-	for (auto sz : m_lstNonUniqueKeys)
-	{
-		if (aszFind == sz)
-		{
-			return false;
-		}
-	}
-	return true;
-}
-
 void CollectionSource::finalizeBuffer()
 {
 	char* newBufferSize = new char[m_iAllCharBuffSize];
 	memcpy(newBufferSize, m_AllCharBuff, m_iAllCharBuffSize);
 	delete[] m_AllCharBuff;
 	m_AllCharBuff = newBufferSize;
-}
-
-std::string CollectionSource::getKeyCode(std::string aszFullKey)
-{
-	if (aszFullKey == "power")
-	{
-		return "pow";
-	}
-	else if (aszFullKey == "toughness")
-	{
-		return "tuf";
-	}
-	else if (aszFullKey == "manaCost")
-	{
-		return "man";
-	}
-	else if (aszFullKey == "text")
-	{
-		return "txt";
-	}
-	else if (aszFullKey == "loyalty")
-	{
-		return "loy";
-	}
-	else if (aszFullKey == "name")
-	{
-		return "nam";
-	}
-	else if (aszFullKey == "colors")
-	{
-		return "clr";
-	}
-	else if (aszFullKey == "multiverseid")
-	{
-		return "mid";
-	}
-	else if (aszFullKey == "set")
-	{
-		return "set";
-	}
-
-}
-
-std::string CollectionSource::getFullKey(std::string aszKeyCode)
-{
-	if (aszKeyCode == "pow")
-	{
-		return "power";
-	}
-	else if (aszKeyCode == "tuf")
-	{
-		return "toughness";
-	}
-	else if (aszKeyCode == "man")
-	{
-		return "manaCost";
-	}
-	else if (aszKeyCode == "txt")
-	{
-		return "text";
-	}
-	else if (aszKeyCode == "loy")
-	{
-		return "loyalty";
-	}
-	else if (aszKeyCode == "nam")
-	{
-		return "name";
-	}
-	else if (aszKeyCode == "clr")
-	{
-		return "colors";
-	}
-	else if (aszKeyCode == "mid")
-	{
-		return "multiverseid";
-	}
-	else if (aszKeyCode == "set")
-	{
-		return "set";
-	}
-
 }

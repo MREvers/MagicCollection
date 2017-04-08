@@ -66,7 +66,7 @@ void CopyObject::RemoveMetaTag(std::string aszCollection, std::string aszKey)
    if (IsPerCollectionTag(aszKey) && HasPerCollectionTag(aszCollection, aszKey))
    {
       int iFound;
-      if ((iFound = SourceObject::List_Find(aszKey, PerCollectionMetaTags[aszCollection])) != -1)
+      if ((iFound = Config::GetConfigClass()->List_Find(aszKey, PerCollectionMetaTags[aszCollection])) != -1)
       {
          std::vector<std::pair<std::string, std::string>> lstNewMetaTags;
          std::vector<std::pair<std::string, std::string>>::iterator iter_MetaTags =
@@ -90,7 +90,7 @@ void CopyObject::RemoveMetaTag(std::string aszCollection, std::string aszKey)
       if (HasMetaTag(aszKey))
       {
          int iFound;
-         if ((iFound = SourceObject::List_Find(aszKey, MetaTags)) != -1)
+         if ((iFound = Config::GetConfigClass()->List_Find(aszKey, MetaTags)) != -1)
          {
             std::vector<std::pair<std::string, std::string>> lstNewMetaTags;
             std::vector<std::pair<std::string, std::string>>::iterator iter_MetaTags =
@@ -124,7 +124,7 @@ void CopyObject::SetMetaTag(std::string aszCollection, std::string aszKey, std::
    {
       if (HasPerCollectionTag(aszCollection, aszKey))
       {
-         int iFind = SourceObject::List_Find(aszKey, PerCollectionMetaTags[aszCollection]);
+         int iFind = Config::GetConfigClass()->List_Find(aszKey, PerCollectionMetaTags[aszCollection]);
          if (iFind == -1)
          {
             PerCollectionMetaTags[aszCollection].push_back(std::make_pair(aszKey, aszVal));
@@ -225,7 +225,7 @@ bool CopyObject::HasPerCollectionTag(std::string aszCollection, std::string aszK
 
 void CopyObject::SetNonUniqueAttr(std::string aszKey, std::string aszValue)
 {
-   if (!CollectionObject::IsNonUniqueTrait(aszKey))
+   if (!Config::GetConfigClass()->IsIdentifyingAttributes(aszKey))
    {
       return;
    }
@@ -240,7 +240,7 @@ void CopyObject::SetNonUniqueAttr(std::string aszKey, std::string aszValue)
    {
       // Check to make sure that the attribute is restricted
       // If it is, make sure the value is a legal value
-      if ((iIndexOfAllowedTrait = SourceObject::List_Find(aszValue, lstRestrictions->second)) != -1)
+      if ((iIndexOfAllowedTrait = Config::GetConfigClass()->List_Find(aszValue, lstRestrictions->second)) != -1)
       {
          // It is a legal value
          if (NonUniqueTraits[aszKey] != aszValue)
@@ -275,7 +275,7 @@ void CopyObject::SetNonUniqueAttr(std::string aszKey, std::string aszValue)
          {
             if (iter_PairedTraits->first == aszKey)
             {
-               if (SourceObject::List_Find(iter_PairedTraits->second, lstSetTraits) == -1)
+               if (Config::GetConfigClass()->List_Find(iter_PairedTraits->second, lstSetTraits) == -1)
                {
                   if (bRestrictedMatch)
                   {
@@ -294,7 +294,7 @@ void CopyObject::SetNonUniqueAttr(std::string aszKey, std::string aszValue)
             }
             else if (iter_PairedTraits->second == aszKey)
             {
-               if (SourceObject::List_Find(iter_PairedTraits->first, lstSetTraits) == -1)
+               if (Config::GetConfigClass()->List_Find(iter_PairedTraits->first, lstSetTraits) == -1)
                {
                   if (bRestrictedMatch)
                   {
@@ -333,39 +333,39 @@ bool CopyObject::IsSameMetaTags(
 
    std::vector<std::string> lstIgnoredTags;
    int iFindIgnore;
-   if (abUseIgnore && (iFindIgnore = SourceObject::List_Find("_ignore", alstTagsOne)) != -1)
+   if (abUseIgnore && (iFindIgnore = Config::GetConfigClass()->List_Find("_ignore", alstTagsOne)) != -1)
    {
       std::pair<std::string, std::string> pair_szIgnored = alstTagsOne[iFindIgnore];
       std::string szIgnored = pair_szIgnored.second;
-      lstIgnoredTags = SourceObject::Str_Split(szIgnored, ";");
+      lstIgnoredTags = StringHelper::Str_Split(szIgnored, ";");
    }
 
    std::vector<std::pair<std::string, std::string>>::iterator iter_UnignoredTagsOne = alstTagsOne.begin();
    for (; iter_UnignoredTagsOne != alstTagsOne.end(); iter_UnignoredTagsOne++)
    {
       // It is a multitiag if the split list is > 1
-      std::vector<std::string> lstSplitString = SourceObject::Str_Split(iter_UnignoredTagsOne->first, ".");
+      std::vector<std::string> lstSplitString = StringHelper::Str_Split(iter_UnignoredTagsOne->first, ".");
       std::string szKey = lstSplitString[0];
-      if (szKey.size() > 0 && szKey[0] != '_' && SourceObject::List_Find(szKey, lstIgnoredTags) == -1)
+      if (szKey.size() > 0 && szKey[0] != '_' && Config::GetConfigClass()->List_Find(szKey, lstIgnoredTags) == -1)
       {
          lstUnignoredTagsOne.push_back(*iter_UnignoredTagsOne);
       }
    }
 
-   if (abUseIgnore && (iFindIgnore = SourceObject::List_Find("_ignore", alstTagsTwo)) != -1)
+   if (abUseIgnore && (iFindIgnore = Config::GetConfigClass()->List_Find("_ignore", alstTagsTwo)) != -1)
    {
       std::pair<std::string, std::string> pair_szIgnored = alstTagsTwo[iFindIgnore];
       std::string szIgnored = pair_szIgnored.second;
-      lstIgnoredTags = SourceObject::Str_Split(szIgnored, ";");
+      lstIgnoredTags = StringHelper::Str_Split(szIgnored, ";");
    }
 
    std::vector<std::pair<std::string, std::string>>::iterator iter_UnignoredTagsTwo = alstTagsTwo.begin();
    for (; iter_UnignoredTagsTwo != alstTagsTwo.end(); iter_UnignoredTagsTwo++)
    {
       // It is a multitiag if the split list is > 1
-      std::vector<std::string> lstSplitString = SourceObject::Str_Split(iter_UnignoredTagsTwo->first, ".");
+      std::vector<std::string> lstSplitString = StringHelper::Str_Split(iter_UnignoredTagsTwo->first, ".");
       std::string szKey = lstSplitString[0];
-      if (szKey.size() > 0 && szKey[0] != '_' && SourceObject::List_Find(szKey, lstIgnoredTags) == -1)
+      if (szKey.size() > 0 && szKey[0] != '_' &&  Config::GetConfigClass()->List_Find(szKey, lstIgnoredTags) == -1)
       {
          lstUnignoredTagsTwo.push_back(*iter_UnignoredTagsTwo);
       }
@@ -470,7 +470,7 @@ CopyObject CollectionObject::GenerateCopy(std::string aszCollectionName, std::ve
       {
          // We only need to store the non-unique traits.
          //  All other traits are stored in the collectionobj.
-         if (IsNonUniqueTrait(pszs.first))
+         if (Config::GetConfigClass()->IsIdentifyingAttributes(pszs.first))
          {
             oNewCopy.SetNonUniqueAttr(pszs.first, pszs.second);
          }
@@ -711,7 +711,7 @@ std::vector<std::pair<std::string, std::string>> CollectionObject::FilterOutUniq
    std::vector<std::pair<std::string, std::string>>::iterator iter_Traits = alstAttrs.begin();
    for (; iter_Traits != alstAttrs.end(); ++iter_Traits)
    {
-      if (IsNonUniqueTrait(iter_Traits->first))
+      if (Config::GetConfigClass()->IsIdentifyingAttributes(iter_Traits->first))
       {
          lstRetVal.push_back(*iter_Traits);
       }
@@ -728,33 +728,6 @@ std::vector<std::pair<std::string, std::string>> CollectionObject::ConvertMapToL
       lstRetVal.push_back(std::make_pair(iter_Map->first, iter_Map->second));
    }
    return lstRetVal;
-}
-
-const char * const CollectionObject::LstUniqueTraits[] = { "manaCost", "colors", "name", "power",
-"toughness", "loyalty", "text" };
-
-bool CollectionObject::IsUniqueTrait(std::string aszTrait)
-{
-   for (int i = 0; i < 7; i++)
-   {
-      if (aszTrait == LstUniqueTraits[i])
-      {
-         return true;
-      }
-   }
-   return false;
-}
-const char * const CollectionObject::LstNonUniqueTraits[] = { "set", "multiverseid" };
-bool CollectionObject::IsNonUniqueTrait(std::string aszTrait)
-{
-   for (int i = 0; i < 2; i++)
-   {
-      if (aszTrait == LstNonUniqueTraits[i])
-      {
-         return true;
-      }
-   }
-   return false;
 }
 
 bool CollectionObject::CompareKeyValPairList(std::vector<std::pair<std::string, std::string>> alstFirst,
@@ -790,15 +763,4 @@ bool CollectionObject::CompareKeyValPairList(std::vector<std::pair<std::string, 
       }
    }
    return bMatch;
-}
-
-std::string CollectionObject::str_trim(const std::string& src, char removeChar)
-{
-   size_t first = src.find_first_not_of(' ');
-   if (std::string::npos == first)
-   {
-      return src;
-   }
-   size_t last = src.find_last_not_of(' ');
-   return src.substr(first, (last - first + 1));
 }

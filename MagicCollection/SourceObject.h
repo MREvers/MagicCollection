@@ -5,6 +5,8 @@
 #include <vector>
 
 #include "CollectionObject.h"
+#include "StringHelper.h"
+#include "Config.h"
 
 class CollectionObject;
 
@@ -19,8 +21,10 @@ public:
    ~SourceObject();
 
    //std::vector<std::pair<std::string, std::string>> Attribs;
-   unsigned int AddAttribute(std::string key, std::string value, char* aplstCharBuf, unsigned int aiBufSize);
-   unsigned int AddNonUniqueAttribute(std::string key, std::string value, char* aplstCharBuf, unsigned int aiBufSize);
+   unsigned int AddAttribute(std::string key,
+	   std::string value,
+	   char* aplstCharBuf,
+	   unsigned int aiBufSize);
 
    // Used in loading from source DB.
    std::string GetName(char* aiSearchBuffer);
@@ -34,10 +38,6 @@ public:
    void Cache(unsigned short aiCacheIndex);
 
    void FinalizeSize();
-
-   static std::vector<std::string> Str_Split(std::string aszSplit, std::string aszDelim);
-   static int List_Find(std::string aszFind, std::vector<std::string> alstFindList);
-   static int List_Find(std::string aszFind, std::vector<std::pair<std::string, std::string>> alstFindList);
 private:
    unsigned short* m_pLstKeyVals;
    unsigned int m_iCharBufferOffset;

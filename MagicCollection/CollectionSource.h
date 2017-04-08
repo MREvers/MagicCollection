@@ -43,11 +43,8 @@ public:
 private:
    std::vector<SourceObject> m_lstptCardBuffer;
    std::vector<CollectionObject> m_lstoCardCache;
-   std::vector<std::string> m_lstNonUniqueKeys;
-   std::vector<std::pair<std::string,std::string>> m_lstPairedNonUniques;
 
    int findInBuffer(std::string aszName, bool abCaseSensitive);
-   bool isUnique(std::string aszUnique);
 
    void finalizeBuffer();
 
@@ -60,9 +57,6 @@ private:
    // Bits 11-32: Start point.
    char* m_AllCharBuff;
    unsigned int m_iAllCharBuffSize;
-
-   std::string getKeyCode(std::string aszFullKey);
-   std::string getFullKey(std::string aszKeyCode);
 };
 
 #pragma message ("Finish CollectionSource.h")

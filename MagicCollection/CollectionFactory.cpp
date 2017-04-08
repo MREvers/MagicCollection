@@ -109,9 +109,9 @@ std::string CollectionFactory::GetCollectionNameFromFile(std::string aszCollecti
 		if (lstLines[0].size() > 0 && lstLines[0].at(0) == ':')
 		{
 			std::string szPreprocess = "";
-			std::string szNoColon = SourceObject::Str_Split(lstLines[0], ":")[1];
-			std::vector<std::string> lstPair = SourceObject::Str_Split(lstLines[0], "=");
-			std::string szColName = SourceObject::Str_Split(lstPair[1], "\"")[1];
+			std::string szNoColon = StringHelper::Str_Split(lstLines[0], ":")[1];
+			std::vector<std::string> lstPair = StringHelper::Str_Split(lstLines[0], "=");
+			std::string szColName = StringHelper::Str_Split(lstPair[1], "\"")[1];
 			return szColName;
 		}
 	}

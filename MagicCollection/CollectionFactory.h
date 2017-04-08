@@ -3,6 +3,7 @@
 #include <string>
 
 #include "Collection.h"
+#include "StringHelper.h"
 #include "CollectionSource.h"
 class CollectionFactory
 {

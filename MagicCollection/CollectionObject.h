@@ -3,8 +3,8 @@
 
 #include "ICollectionObject.h"
 #include "ICollection.h"
-#include "SourceObject.h"
-
+#include "Config.h"
+#include "StringHelper.h"
 
 #include <string>
 #include <vector>
@@ -34,7 +34,7 @@ public:
 
 	// Meta Tag Controlling Functions
 	std::vector<std::pair<std::string, std::string>> GetMetaTags(std::string aszCollection);
-   std::pair<std::string, std::string> GetMetaTag(std::string aszCollection, std::string aszKey);
+    std::pair<std::string, std::string> GetMetaTag(std::string aszCollection, std::string aszKey);
 	bool IsPerCollectionTag(std::string aszKeyName);
 	void RemoveMetaTag(std::string aszCollection, std::string aszKey);
 	void SetMetaTag(std::string aszCollection, std::string aszKey, std::string aszVal);
@@ -116,14 +116,8 @@ public:
 		FilterOutUniqueTraits(std::vector<std::pair<std::string, std::string>> alstAttrs);
 	static std::vector<std::pair<std::string, std::string>> 
 		ConvertMapToList(std::map<std::string, std::string>  aMap);
-	static bool IsUniqueTrait(std::string aszTrait);
-	static bool IsNonUniqueTrait(std::string aszTrait);
 	static bool CompareKeyValPairList(std::vector<std::pair<std::string, std::string>> alstFirst,
 		std::vector<std::pair<std::string, std::string>> alstSecond);
-	static std::string str_trim( const std::string& aszTrim, char removeChar);
-
-	static const char * const LstUniqueTraits[];
-	static const char * const LstNonUniqueTraits[];
 private:
 	int m_iAllCopies; // Used in assigning IDs.
 

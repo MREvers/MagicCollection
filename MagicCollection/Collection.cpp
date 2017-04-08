@@ -789,7 +789,7 @@ bool Collection::loadCardLine(std::string aszNewCardLine)
          {
             // The only way a copy could possibly have this collection as a resi. is if this collection created it
             //  or used it. If that is the case, then we should not use it as the copy.
-            if (SourceObject::List_Find(m_szName, (*iter_ExistingCopy)->ResidentCollections) == -1)
+            if (Config::GetConfigClass()->List_Find(m_szName, (*iter_ExistingCopy)->ResidentCollections) == -1)
             {
                // This copy is not used by this collection. Check if this copy is identical to the target copy.
                if (CollectionObject::IsSameIdentity(&oTargetCopy, *iter_ExistingCopy))
@@ -814,7 +814,7 @@ bool Collection::loadCardLine(std::string aszNewCardLine)
             // Just add the copy if it is in this collection or
             // the collection is loaded.
             if (oTargetCopy.ParentCollection == m_szName ||
-               (SourceObject::List_Find(oTargetCopy.ParentCollection, *m_lstLoadedCollectionsBuffer) == -1))
+               (Config::GetConfigClass()->List_Find(oTargetCopy.ParentCollection, *m_lstLoadedCollectionsBuffer) == -1))
             {
                AddItem(szName, false, lstKeyVals);
             }
@@ -934,7 +934,7 @@ bool Collection::loadChangeCardLine(std::string aszChangeCardLine)
          if (bValidInput &= (iAddProto != -1))
          {
             CollectionObject* oCOAdd = m_ColSource->GetCardPrototype(iAddProto);
-            int parInt = SourceObject::List_Find("Parent", lstAddAttrs);
+            int parInt = Config::GetConfigClass()->List_Find("Parent", lstAddAttrs);
             std::string copyParent;
             if (parInt != -1)
             {
@@ -953,7 +953,7 @@ bool Collection::loadChangeCardLine(std::string aszChangeCardLine)
          if (bValidInput &= (iRemoveProto != -1))
          {
             CollectionObject* oCORemove = m_ColSource->GetCardPrototype(iRemoveProto);
-            int parInt = SourceObject::List_Find("Parent", lstRemoveAttrs);
+            int parInt = Config::GetConfigClass()->List_Find("Parent", lstRemoveAttrs);
             std::string copyParent;
             if (parInt != -1)
             {
@@ -1004,7 +1004,7 @@ void Collection::refreshCopyLinks(std::vector<std::pair<std::string, std::string
    std::vector<std::pair<std::string, CopyObject*>> ::iterator iter_ColOs = lstFullCol.begin();
    for (; iter_ColOs != lstFullCol.end(); ++iter_ColOs)
    {
-      if (SourceObject::List_Find(m_szName, (*iter_ColOs).second->ResidentCollections) == -1)
+      if (Config::GetConfigClass()->List_Find(m_szName, (*iter_ColOs).second->ResidentCollections) == -1)
       {
          std::vector<std::string> lstAffectedCols = (*iter_ColOs).second->ResidentCollections;
          std::vector<std::string>::iterator iter_affected_col = lstAffectedCols.begin();
@@ -1041,7 +1041,7 @@ void Collection::loadMetaTagLines(std::vector<std::string>& alstLines)
 {
    for (std::vector<std::string>::iterator iter = alstLines.begin(); iter != alstLines.end(); ++iter)
    {
-      std::vector<std::string> LstSplitLine = SourceObject::Str_Split(*iter, ":");
+      std::vector<std::string> LstSplitLine = StringHelper::Str_Split(*iter, ":");
       if (LstSplitLine.size() == 2)
       {
          std::string szTempName;
@@ -1466,13 +1466,13 @@ Collection::GetCollectionListWithMeta()
 std::vector<std::pair<std::string, std::string>> Collection::ParseAttrs(std::string aszAttrs)
 {
    std::vector<std::pair<std::string, std::string>> lstKeyVals;
-   std::vector<std::string> lstDetails = SourceObject::Str_Split(aszAttrs, " ");
+   std::vector<std::string> lstDetails = StringHelper::Str_Split(aszAttrs, " ");
    for (std::vector<std::string>::iterator iter_attrs = lstDetails.begin(); iter_attrs != lstDetails.end(); ++iter_attrs)
    {
-      std::vector<std::string> lstPairs = SourceObject::Str_Split(*iter_attrs, "=");
+      std::vector<std::string> lstPairs = StringHelper::Str_Split(*iter_attrs, "=");
       if (lstPairs.size() > 1)
       {
-         std::vector<std::string> lstVal = SourceObject::Str_Split(lstPairs[1], "\"");
+         std::vector<std::string> lstVal = StringHelper::Str_Split(lstPairs[1], "\"");
          if (lstVal.size() == 3)
          {
             std::string szVal = lstVal[1];
