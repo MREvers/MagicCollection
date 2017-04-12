@@ -862,7 +862,7 @@ void Collection::loadCollectionFromFile(std::string aszFileName)
 	buffer << in.rdbuf();
 	std::string contents(buffer.str());
 
-	std::vector<std::string> lstLines = splitIntoLines(contents);
+	std::vector<std::string> lstLines = StringHelper::SplitIntoLines(contents);
 
 	loadCollectionLines(lstLines);
 }
@@ -1164,7 +1164,7 @@ void Collection::loadMetaTagsFromFile()
 		buffer << in.rdbuf();
 		std::string contents(buffer.str());
 
-		std::vector<std::string> lstLines = splitIntoLines(contents);
+		std::vector<std::string> lstLines = StringHelper::SplitIntoLines(contents);
 
 		loadMetaTagLines(lstLines);
 	}
