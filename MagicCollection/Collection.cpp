@@ -624,24 +624,27 @@ void Collection::SetFeatures(
 
 		// All meta tags are valid so if the attributes are valid then so is the change
 		std::vector<std::string> lstDiffKeys;
-		CopyObject* pseudoCopy = nullptr;
 		if (bValidAttribute)
 		{
 			// Simulate the change
-			pseudoCopy = &oRealCopyPrototype->GenerateCopy(m_szName, lstAttrs, alstMatchMeta);
-			setFeatures(pseudoCopy, alstNewMeta, alstNewAttrs);
+			CopyObject pseudoCopy = oRealCopyPrototype->GenerateCopy(m_szName, lstAttrs, alstMatchMeta);
+			setFeatures(&pseudoCopy, alstNewMeta, alstNewAttrs);
 
 			// Check for differences
 			auto iter_PrevTraits = oRealCopy->NonUniqueTraits.begin();
 			for (; iter_PrevTraits != oRealCopy->NonUniqueTraits.end(); ++iter_PrevTraits)
 			{
-				auto iter_NewTraits = pseudoCopy->NonUniqueTraits.find(iter_PrevTraits->first);
-				if (iter_NewTraits != oRealCopy->NonUniqueTraits.end())
+				auto iter_NewTraits = pseudoCopy.NonUniqueTraits.find(iter_PrevTraits->first);
+				if (iter_NewTraits != pseudoCopy.NonUniqueTraits.end())
 				{
 					if (iter_NewTraits->second != iter_PrevTraits->second)
 					{
 						lstDiffKeys.push_back(iter_PrevTraits->first);
 					}
+				}
+				else
+				{
+					lstDiffKeys.push_back(iter_PrevTraits->first);
 				}
 			}
 
@@ -650,46 +653,45 @@ void Collection::SetFeatures(
 			{
 				bValidChange = true;
 			}
-		}
 
-		if (bValidChange)
-		{
-			szIdentifier += "Set Attribute(s) ";
-			for (int i = 0; i < lstDiffKeys.size(); i++)
+			if (bValidChange)
 			{
-				szIdentifier += lstDiffKeys[i] + " to " + pseudoCopy->NonUniqueTraits[lstDiffKeys[i]];
-				if (i != lstDiffKeys.size() - 1)
+				szIdentifier += "Set Attribute(s) ";
+				for (int i = 0; i < lstDiffKeys.size(); i++)
 				{
-					szIdentifier += ", and ";
+					szIdentifier += lstDiffKeys[i] + " to " + pseudoCopy.NonUniqueTraits[lstDiffKeys[i]];
+					if (i != lstDiffKeys.size() - 1)
+					{
+						szIdentifier += ", and ";
+					}
+					else
+					{
+						szIdentifier += " on " + aszLongName + ".";
+					}
 				}
-				else
+
+				std::function<void()> fnDo;
+				fnDo = std::bind(&Collection::setFeatures, this, oRealCopy, alstNewMeta, alstNewAttrs);
+
+				std::function<void()> fnUndo;
+				std::vector<std::pair<std::string, std::string>> lstUndoList;
+				std::vector<std::pair<std::string, std::string>> lstOldMetaTags = oRealCopy->GetMetaTags(m_szName);
+				std::vector<std::pair<std::string, std::string>>::iterator iter_MetaTags = lstOldMetaTags.begin();
+				for (; iter_MetaTags != lstOldMetaTags.end(); ++iter_MetaTags)
 				{
-					szIdentifier += " on " + aszLongName + ".";
+					lstUndoList.push_back(std::make_pair(iter_MetaTags->first, iter_MetaTags->second));
 				}
+				fnUndo = std::bind(&Collection::setFeatures, this, oRealCopy, lstUndoList, lstAttrs);
+
+				Collection::Action oAction;
+				oAction.Identifier = szIdentifier;
+				oAction.Do = fnDo;
+				oAction.Undo = fnUndo;
+
+				oTrans->AddAction(oAction);
+
+				oTrans->Finalize();
 			}
-
-			std::function<void()> fnDo;
-			fnDo = std::bind(&Collection::setFeatures, this, oRealCopy, alstNewMeta, alstNewAttrs);
-
-			std::function<void()> fnUndo;
-			std::vector<std::pair<std::string, std::string>> lstUndoList;
-			std::vector<std::pair<std::string, std::string>> lstOldMetaTags = oRealCopy->GetMetaTags(m_szName);
-			std::vector<std::pair<std::string, std::string>>::iterator iter_MetaTags = lstOldMetaTags.begin();
-			for (; iter_MetaTags != lstOldMetaTags.end(); ++iter_MetaTags)
-			{
-				lstUndoList.push_back(std::make_pair(iter_MetaTags->first, iter_MetaTags->second));
-			}
-			fnUndo = std::bind(&Collection::setFeatures, this, oRealCopy, lstUndoList, lstAttrs);
-
-			Collection::Action oAction;
-			oAction.Identifier = szIdentifier;
-			oAction.Do = fnDo;
-			oAction.Undo = fnUndo;
-
-			oTrans->AddAction(oAction);
-
-			oTrans->Finalize();
-
 		}
 	}
 }
