@@ -10,5 +10,6 @@ public:
 
    static std::string Str_Trim(const std::string& srz, char removeChar);
    static std::vector<std::string> Str_Split(std::string& aszSplit, std::string aszDelim);
+   static std::vector<std::string> SplitIntoLines(std::string aszString);
 };
 

@@ -330,7 +330,6 @@ private:
 	void registerItem(int aiItem);
 
 	std::string cardToString(int aiCardFlyweight, std::pair<CopyObject*, int>* aoCopy, bool bFullDets = false, bool bInclMeta = false);
-	std::vector<std::string> splitIntoLines(std::string aszString);
 };
 
 #pragma message ("Finish Collection.h")

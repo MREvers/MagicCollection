@@ -11,29 +11,29 @@ Config* Config::ms_pConfig = nullptr;
 
 Config::Config()
 {
-	ms_lstStaticAttributes.push_back("manaCost");
-	ms_lstStaticAttributes.push_back("colors");
-	ms_lstStaticAttributes.push_back("name");
-	ms_lstStaticAttributes.push_back("power");
-	ms_lstStaticAttributes.push_back("toughness");
-	ms_lstStaticAttributes.push_back("loyalty");
-	ms_lstStaticAttributes.push_back("text");
+	m_lstStaticAttributes.push_back("manaCost");
+	m_lstStaticAttributes.push_back("colors");
+	m_lstStaticAttributes.push_back("name");
+	m_lstStaticAttributes.push_back("power");
+	m_lstStaticAttributes.push_back("toughness");
+	m_lstStaticAttributes.push_back("loyalty");
+	m_lstStaticAttributes.push_back("text");
 
-	ms_lstIdentifyingAttributes.push_back("set");
-	ms_lstIdentifyingAttributes.push_back("multiverseid");
+	m_lstIdentifyingAttributes.push_back("set");
+	m_lstIdentifyingAttributes.push_back("multiverseid");
 
-	ms_lstPairedKeys.push_back(std::make_pair("set","multiverseid"));
+	m_lstPairedKeys.push_back(std::make_pair("set","multiverseid"));
 
-	ms_lstKeyCodeMappings.push_back(std::make_pair("set","set"));
-	ms_lstKeyCodeMappings.push_back(std::make_pair("multiverseid", "mid"));
-	ms_lstKeyCodeMappings.push_back(std::make_pair("manaCost", "man"));
-	ms_lstKeyCodeMappings.push_back(std::make_pair("colors", "clr"));
-	ms_lstKeyCodeMappings.push_back(std::make_pair("name", "nam"));
-	ms_lstKeyCodeMappings.push_back(std::make_pair("toughness", "tuf"));
-	ms_lstKeyCodeMappings.push_back(std::make_pair("loyalty", "loy"));
-	ms_lstKeyCodeMappings.push_back(std::make_pair("text", "txt"));
+	m_lstKeyCodeMappings.push_back(std::make_pair("set","set"));
+	m_lstKeyCodeMappings.push_back(std::make_pair("multiverseid", "mid"));
+	m_lstKeyCodeMappings.push_back(std::make_pair("manaCost", "man"));
+	m_lstKeyCodeMappings.push_back(std::make_pair("colors", "clr"));
+	m_lstKeyCodeMappings.push_back(std::make_pair("name", "nam"));
+	m_lstKeyCodeMappings.push_back(std::make_pair("toughness", "tuf"));
+	m_lstKeyCodeMappings.push_back(std::make_pair("loyalty", "loy"));
+	m_lstKeyCodeMappings.push_back(std::make_pair("text", "txt"));
 
-	ms_lstPerCollectionMetaTags.push_back("Generalization");
+	m_lstPerCollectionMetaTags.push_back("Generalization");
 }
 
 
@@ -43,8 +43,8 @@ Config::~Config()
 
 std::string Config::GetKeyCode(std::string aszFullKey)
 {
-	std::vector<std::pair<std::string, std::string>>::iterator iter_KeyMappings = ms_lstKeyCodeMappings.begin();
-	for (; iter_KeyMappings != ms_lstKeyCodeMappings.end(); ++iter_KeyMappings)
+	std::vector<std::pair<std::string, std::string>>::iterator iter_KeyMappings = m_lstKeyCodeMappings.begin();
+	for (; iter_KeyMappings != m_lstKeyCodeMappings.end(); ++iter_KeyMappings)
 	{
 		if (iter_KeyMappings->first == aszFullKey)
 		{
@@ -56,8 +56,8 @@ std::string Config::GetKeyCode(std::string aszFullKey)
 }
 std::string Config::GetFullKey(std::string aszKeyCode)
 {
-	std::vector<std::pair<std::string, std::string>>::iterator iter_KeyMappings = ms_lstKeyCodeMappings.begin();
-	for (; iter_KeyMappings != ms_lstKeyCodeMappings.end(); ++iter_KeyMappings)
+	std::vector<std::pair<std::string, std::string>>::iterator iter_KeyMappings = m_lstKeyCodeMappings.begin();
+	for (; iter_KeyMappings != m_lstKeyCodeMappings.end(); ++iter_KeyMappings)
 	{
 		if (iter_KeyMappings->second == aszKeyCode)
 		{
@@ -70,30 +70,30 @@ std::string Config::GetFullKey(std::string aszKeyCode)
 
 std::vector<std::pair<std::string, std::string>> Config::GetPairedKeysList()
 {
-	return ms_lstPairedKeys;
+	return m_lstPairedKeys;
 }
 std::vector < std::string> Config::GetIdentifyingAttributes()
 {
-	return ms_lstIdentifyingAttributes;
+	return m_lstIdentifyingAttributes;
 }
 std::vector<std::string> Config::GetStaticAttributes()
 {
-	return ms_lstStaticAttributes;
+	return m_lstStaticAttributes;
 }
 
 std::vector<std::string> Config::GetPerCollectionMetaTags()
 {
-	return ms_lstPerCollectionMetaTags;
+	return m_lstPerCollectionMetaTags;
 }
 
 bool Config::IsIdentifyingAttributes(std::string aszAttrs)
 {
-	return List_Find(aszAttrs, ms_lstIdentifyingAttributes) != -1;
+	return List_Find(aszAttrs, m_lstIdentifyingAttributes) != -1;
 }
 
 bool Config::IsStaticAttribute(std::string aszAttr)
 {
-	return List_Find(aszAttr, ms_lstStaticAttributes) != -1;
+	return List_Find(aszAttr, m_lstStaticAttributes) != -1;
 }
 
 int Config::List_Find(std::string aszFind, std::vector<std::string>& alstFindList)

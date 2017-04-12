@@ -25,11 +25,11 @@ public:
 	static Config* GetConfigClass();
 
 private:
-	std::vector<std::pair<std::string, std::string>> ms_lstKeyCodeMappings;
-	std::vector<std::pair<std::string, std::string>> ms_lstPairedKeys;
-	std::vector<std::string> ms_lstIdentifyingAttributes;
-	std::vector<std::string> ms_lstStaticAttributes;
-	std::vector<std::string> ms_lstPerCollectionMetaTags;
+	std::vector<std::pair<std::string, std::string>> m_lstKeyCodeMappings;
+	std::vector<std::pair<std::string, std::string>> m_lstPairedKeys;
+	std::vector<std::string> m_lstIdentifyingAttributes;
+	std::vector<std::string> m_lstStaticAttributes;
+	std::vector<std::string> m_lstPerCollectionMetaTags;
 
 	static Config* Config::ms_pConfig;
 };

@@ -64,38 +64,26 @@ bool CopyObject::IsPerCollectionTag(std::string aszKeyValName)
 void CopyObject::RemoveMetaTag(std::string aszCollection, std::string aszKey)
 {
 	// Ensure that this tag is not unique to a collection
+	std::vector<std::pair<std::string, std::string>>* targetRemoveList = nullptr;
 	if (IsPerCollectionTag(aszKey) && HasPerCollectionTag(aszCollection, aszKey))
 	{
-		int iFound;
-		if ((iFound = Config::GetConfigClass()->List_Find(aszKey, PerCollectionMetaTags[aszCollection])) != -1)
-		{
-			std::vector<std::pair<std::string, std::string>> lstNewMetaTags;
-			std::vector<std::pair<std::string, std::string>>::iterator iter_MetaTags =
-				PerCollectionMetaTags[aszCollection].begin();
-			int index = 0;
-			for (; iter_MetaTags != PerCollectionMetaTags[aszCollection].end(); iter_MetaTags++)
-			{
-				if (index != iFound)
-				{
-					lstNewMetaTags.push_back(*iter_MetaTags);
-				}
-				index++;
-			}
-
-			PerCollectionMetaTags[aszCollection] = lstNewMetaTags;
-		}
-
+		targetRemoveList = &PerCollectionMetaTags[aszCollection];
 	}
 	else if (HasMetaTag(aszKey))
 	{
+		targetRemoveList = &MetaTags;
+	}
+
+	if (targetRemoveList != nullptr)
+	{
 		int iFound;
-		if ((iFound = Config::GetConfigClass()->List_Find(aszKey, MetaTags)) != -1)
+		if ((iFound = Config::GetConfigClass()->List_Find(aszKey, *targetRemoveList)) != -1)
 		{
 			std::vector<std::pair<std::string, std::string>> lstNewMetaTags;
 			std::vector<std::pair<std::string, std::string>>::iterator iter_MetaTags =
-				MetaTags.begin();
+				targetRemoveList->begin();
 			int index = 0;
-			for (; iter_MetaTags != MetaTags.end(); iter_MetaTags++)
+			for (; iter_MetaTags != targetRemoveList->end(); iter_MetaTags++)
 			{
 				if (index != iFound)
 				{
@@ -104,10 +92,10 @@ void CopyObject::RemoveMetaTag(std::string aszCollection, std::string aszKey)
 				index++;
 			}
 
-			MetaTags = lstNewMetaTags;
+			*targetRemoveList = lstNewMetaTags;
 		}
-
 	}
+
 }
 
 void CopyObject::SetMetaTag(std::string aszCollection, std::string aszKey, std::string aszVal)
@@ -147,6 +135,11 @@ void CopyObject::SetMetaTag(std::string aszCollection, std::string aszKey, std::
 		{
 			MetaTags.push_back(std::make_pair(aszKey, aszVal));
 		}
+		else
+		{
+			int iFound = Config::GetConfigClass()->List_Find(aszKey, MetaTags);
+			MetaTags[iFound].second = aszVal;
+		}
 	}
 
 }
@@ -159,15 +152,7 @@ void CopyObject::SetMetaTag(std::string aszCollection, std::string aszKey, std::
 
 bool CopyObject::HasMetaTag(std::string aszKey)
 {
-	std::vector<std::pair<std::string, std::string>>::iterator iter_Tags = MetaTags.begin();
-	for (; iter_Tags != MetaTags.end(); ++iter_Tags)
-	{
-		if (iter_Tags->first == aszKey)
-		{
-			return true;
-		}
-	}
-	return false;
+	return Config::GetConfigClass()->List_Find(aszKey, MetaTags) != -1;
 }
 
 std::pair<std::string, std::string> CopyObject::GetMetaTag(std::string aszCollection, std::string aszKey)
@@ -185,18 +170,15 @@ std::pair<std::string, std::string> CopyObject::GetMetaTag(std::string aszCollec
 
 	if (szVal == "!NULL")
 	{
-		if (IsPerCollectionTag(aszKey))
+		if (IsPerCollectionTag(aszKey) && HasPerCollectionTag(aszCollection, aszKey))
 		{
-			if (HasPerCollectionTag(aszCollection, aszKey))
+			std::vector<std::pair<std::string, std::string>>::iterator iter_PerCols =
+				PerCollectionMetaTags.at(aszCollection).begin();
+			for (; iter_PerCols != PerCollectionMetaTags.at(aszCollection).end(); ++iter_PerCols)
 			{
-				std::vector<std::pair<std::string, std::string>>::iterator iter_PerCols =
-					PerCollectionMetaTags.at(aszCollection).begin();
-				for (; iter_PerCols != PerCollectionMetaTags.at(aszCollection).end(); ++iter_PerCols)
+				if (iter_PerCols->first == aszKey)
 				{
-					if (iter_PerCols->first == aszKey)
-					{
-						szVal = iter_PerCols->second;
-					}
+					szVal = iter_PerCols->second;
 				}
 			}
 		}
@@ -272,43 +254,31 @@ void CopyObject::SetNonUniqueAttr(std::string aszKey, std::string aszValue)
 			std::vector<std::pair<std::string, std::string>>::iterator iter_PairedTraits = m_LstPairedTraits->begin();
 			for (; iter_PairedTraits != m_LstPairedTraits->end(); ++iter_PairedTraits)
 			{
+				std::string* pszTargetStr = nullptr;
 				if (iter_PairedTraits->first == aszKey)
 				{
-					if (Config::GetConfigClass()->List_Find(iter_PairedTraits->second, lstSetTraits) == -1)
-					{
-						if (bRestrictedMatch)
-						{
-
-							NonUniqueTraits[iter_PairedTraits->second] =
-								(*m_mapNonUniqueAttributesRestrictions)[iter_PairedTraits->second][iIndexOfAllowedTrait];
-
-						}
-						else
-						{
-							NonUniqueTraits[iter_PairedTraits->second] = aszValue;
-						}
-						lstSetTraits.push_back(iter_PairedTraits->second);
-						bFoundAll == false;
-					}
+					pszTargetStr = &iter_PairedTraits->second;
 				}
 				else if (iter_PairedTraits->second == aszKey)
 				{
-					if (Config::GetConfigClass()->List_Find(iter_PairedTraits->first, lstSetTraits) == -1)
-					{
-						if (bRestrictedMatch)
-						{
-							NonUniqueTraits[iter_PairedTraits->first] =
-								(*m_mapNonUniqueAttributesRestrictions)[iter_PairedTraits->first][iIndexOfAllowedTrait];
-						}
-						else
-						{
-							NonUniqueTraits[iter_PairedTraits->first] = aszValue;
-						}
-						lstSetTraits.push_back(iter_PairedTraits->first);
-						bFoundAll == false;
-					}
+					pszTargetStr = &iter_PairedTraits->first;
 				}
 
+				if (pszTargetStr != nullptr && 
+					Config::GetConfigClass()->List_Find(*pszTargetStr, lstSetTraits) == -1)
+				{
+					if (bRestrictedMatch)
+					{
+						NonUniqueTraits[*pszTargetStr] =
+							(*m_mapNonUniqueAttributesRestrictions)[*pszTargetStr][iIndexOfAllowedTrait];
+					}
+					else
+					{
+						NonUniqueTraits[*pszTargetStr] = aszValue;
+					}
+					lstSetTraits.push_back(*pszTargetStr);
+					bFoundAll == false;
+				}
 			}
 
 			bAllSet |= bFoundAll;

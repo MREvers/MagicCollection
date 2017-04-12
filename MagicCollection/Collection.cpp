@@ -1775,29 +1775,3 @@ std::string Collection::cardToString(int aiCardProto, std::pair<CopyObject*, int
 
 	return szLine;
 }
-
-std::vector<std::string> Collection::splitIntoLines(std::string aszString)
-{
-	std::vector<std::string> lstLines;
-	std::string szLine = "";
-	for (int i = 0; i < aszString.size(); i++)
-	{
-
-		if (aszString[i] == '\n')
-		{
-			lstLines.push_back(szLine);
-			szLine = "";
-		}
-		else
-		{
-			szLine = szLine + aszString[i];
-			if (i == aszString.size() - 1)
-			{
-				lstLines.push_back(szLine);
-				szLine = "";
-			}
-		}
-
-	}
-	return lstLines;
-}
