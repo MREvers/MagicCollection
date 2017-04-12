@@ -45,6 +45,7 @@ private:
    std::vector<CollectionObject> m_lstoCardCache;
 
    int findInBuffer(std::string aszName, bool abCaseSensitive);
+   int findInCache(std::string aszName, bool abCaseSensitive);
 
    void finalizeBuffer();
 

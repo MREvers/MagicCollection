@@ -88,16 +88,16 @@ int CollectionSource::LoadCard(std::string aszCardName)
 	int iCacheLocation = -1;
 	std::string szCardName = StringHelper::Str_Trim(aszCardName, ' ');
 
-	// Look in the Source Object Buffer for a matching item.
-	int iFound = findInBuffer(szCardName, false);
-	if (iFound != -1)
+	// Since it is faster to look in the cache, check that first.
+	iCacheLocation = findInCache(szCardName, false);
+	if (iCacheLocation == -1)
 	{
-		SourceObject* oSource = &m_lstptCardBuffer.at(iFound);
-
-		// Check if this card has already been loaded. If not, load it.
-		iCacheLocation = oSource->GetCacheIndex();
-		if (iCacheLocation == -1)
+		// Look in the Source Object Buffer for a matching item.
+		int iFound = findInBuffer(szCardName, false);
+		if (iFound != -1)
 		{
+			SourceObject* oSource = &m_lstptCardBuffer.at(iFound);
+
 			// The card is already cached.
 			CollectionObject oCard(aszCardName);
 			std::vector<std::pair<std::string, std::string>> lstAttrs = oSource->GetAttributes(m_AllCharBuff);
@@ -236,6 +236,21 @@ int CollectionSource::findInBuffer(std::string aszCardName, bool abCaseSensitive
 			iLeft = middle + 1;
 	}
 
+	return -1;
+}
+
+int CollectionSource::findInCache(std::string aszName, bool abCaseSensitive)
+{
+	std::vector<CollectionObject>::iterator iter_ColObj = m_lstoCardCache.begin();
+	int index = 0;
+	for (; iter_ColObj != m_lstoCardCache.end(); ++iter_ColObj)
+	{
+		if (iter_ColObj->GetName() == aszName)
+		{
+			return index;
+		}
+		index++;
+	}
 	return -1;
 }
 

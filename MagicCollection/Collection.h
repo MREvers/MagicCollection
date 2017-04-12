@@ -45,7 +45,6 @@ class Collection : public ICollection
 		Transaction(Collection* aoCol);
 		~Transaction();
 
-		Collection* operator-> ();
 		void AddAction(Action& aoAct);
 		void RemoveAction(int i);
 		void Finalize(bool abRecordable = true);
@@ -198,8 +197,6 @@ public:
 	static bool ParseCardLine(std::string aszLine, int& riCount, std::string& rszName, std::string& rszDetails);
 
 	void PrintList();
-
-	bool TransactionIntercept;
 
 private:
 	CollectionSource* m_ColSource;

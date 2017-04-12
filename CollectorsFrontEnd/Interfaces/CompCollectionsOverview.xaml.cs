@@ -97,17 +97,9 @@ namespace CollectorsFrontEnd.Interfaces
             CollectionModel ColM = ServerInterfaceModel.GetCollectionModel(szCollectionSelected);
             if (!(ColM == null))
             {
-                DataModel.LstCurrentCollectionPreview = ColM.LstCopyModels.Select(x => x.CardNameLong).ToList();
+                DataModel.LstCurrentCollectionPreview = ColM.LstCopyModels.Select(x => x.GetIdealIdentifier()).ToList();
                 LstBoxCollectionPreview.ItemsSource = DataModel.LstCurrentCollectionPreview;
             }
-
-            /* THis is view selection code
-            string szCollectionSelected = LstBoxLoadedCollections.SelectedValue.ToString();
-            if (!string.IsNullOrEmpty(szCollectionSelected))
-            {
-                UnhandledEvent(DataModel);
-            }
-            */
         }
 
         // This gets subscribed to the unhandled event of its components

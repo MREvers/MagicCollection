@@ -14,7 +14,7 @@
 class CopyObject
 {
 public:
-	static std::vector<std::string> PerCollectionMetaTagNames;
+	// static std::vector<std::string> PerCollectionMetaTagNames;
 	CopyObject(
 		std::string aszParent,
 		std::vector<std::pair<std::string, std::string>>* alstPairedTags,
@@ -90,8 +90,8 @@ public:
 	// Gets all resi copies resident in aszCollectionName, located in aszParent, with the correct attributes.
 	std::vector<CopyObject*> GetCopiesWith(std::string aszCollectionName, std::string aszParent, std::vector<std::pair<std::string, std::string>> alstAttrs);
 	// Gets a copy with matching attrs
-	bool GetCopy(std::string aszCollectionName, std::vector<std::pair<std::string, std::string>> alstAttrs, CopyObject*& roCO, bool abExact = true);
-	bool GetCopy(
+	bool FindCopy(std::string aszCollectionName, std::vector<std::pair<std::string, std::string>> alstAttrs, CopyObject*& roCO, bool abExact = true);
+	bool FindCopy(
 		std::string aszCollectionName,
 		std::vector<std::pair<std::string, std::string>> alstAttrs,
 		std::vector<std::pair<std::string, std::string>> alstMeta,

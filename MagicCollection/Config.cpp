@@ -32,6 +32,8 @@ Config::Config()
 	ms_lstKeyCodeMappings.push_back(std::make_pair("toughness", "tuf"));
 	ms_lstKeyCodeMappings.push_back(std::make_pair("loyalty", "loy"));
 	ms_lstKeyCodeMappings.push_back(std::make_pair("text", "txt"));
+
+	ms_lstPerCollectionMetaTags.push_back("Generalization");
 }
 
 
@@ -77,6 +79,11 @@ std::vector < std::string> Config::GetIdentifyingAttributes()
 std::vector<std::string> Config::GetStaticAttributes()
 {
 	return ms_lstStaticAttributes;
+}
+
+std::vector<std::string> Config::GetPerCollectionMetaTags()
+{
+	return ms_lstPerCollectionMetaTags;
 }
 
 bool Config::IsIdentifyingAttributes(std::string aszAttrs)
