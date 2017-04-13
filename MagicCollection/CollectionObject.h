@@ -27,6 +27,7 @@ public:
 
 	// Non-unique in the sense that the trait itself can have more than one value.
 	std::map<std::string, std::string> NonUniqueTraits;
+	std::vector<std::pair<std::string, std::string>> GetNonUniqueTraits(bool bWithParent);
 
 	// Attr Controlling Function
 	void SetPairedTraitsReference(std::vector<std::pair<std::string, std::string>>* aLstPairedTraits);

@@ -43,6 +43,12 @@ class Collection : public ICollection
 			std::string aszLongName,
 			std::vector<std::pair<std::string, std::string>> alstMeta);
 
+		PseudoCopy(std::string aszCollectionName,
+			CollectionSource* aoColSource,
+			std::string aszName,
+			std::vector<std::pair<std::string, std::string>> alstAttrs,
+			std::vector<std::pair<std::string, std::string>> alstMeta);
+
 		bool LoadCard();
 
 		bool FindCopy();
@@ -364,9 +370,13 @@ private:
 	// Only adds the collection object cache locations
 	void registerItem(int aiItem);
 
-	PseudoCopy GeneratePseudoCopy(std::string aszLongName, std::vector<std::pair<std::string, std::string>> alstMeta);
+	PseudoCopy GeneratePseudoCopy(std::string aszLongName,
+		std::vector<std::pair<std::string, std::string>> alstMeta = std::vector<std::pair<std::string, std::string>>());
 
-	std::string cardToString(int aiCardFlyweight, std::pair<CopyObject*, int>* aoCopy, bool bFullDets = false, bool bInclMeta = false);
+	PseudoCopy GeneratePseudoCopy(
+		std::vector<std::pair<std::string, std::string>> alstAttrs,
+		std::string aszName,
+		std::vector<std::pair<std::string, std::string>> alstMeta = std::vector<std::pair<std::string, std::string>>());
 };
 
 #pragma message ("Finish Collection.h")

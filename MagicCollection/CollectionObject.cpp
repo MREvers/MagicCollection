@@ -11,13 +11,23 @@ CopyObject::CopyObject(
 	SetPairedTraitsReference(alstPairedTags);
 	SetNonUniqueAttributesRestrictionsReference(alstRestrictions);
 
-
 	// Initialize the nonuniques.
 	std::map<std::string, std::vector<std::string>>::iterator iter_NonUniques = m_mapNonUniqueAttributesRestrictions->begin();
 	for (; iter_NonUniques != m_mapNonUniqueAttributesRestrictions->end(); ++iter_NonUniques)
 	{
 		this->SetNonUniqueAttr(iter_NonUniques->first, iter_NonUniques->second.at(0));
 	}
+}
+
+std::vector<std::pair<std::string, std::string>> CopyObject::GetNonUniqueTraits(bool bWithParent)
+{
+	std::vector<std::pair<std::string, std::string>> lstRetVal;
+	lstRetVal = CollectionObject::ConvertMapToList(NonUniqueTraits);
+	if (bWithParent)
+	{
+		lstRetVal.push_back(std::make_pair("Parent", ParentCollection));
+	}
+	return lstRetVal;
 }
 
 void CopyObject::SetPairedTraitsReference(std::vector<std::pair<std::string, std::string>>* aLstPairedTraits)
