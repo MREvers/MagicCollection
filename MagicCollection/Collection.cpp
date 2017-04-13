@@ -1,5 +1,118 @@
 #include "Collection.h"
 
+Collection::PseudoCopy::PseudoCopy(std::string aszCollectionName,
+	CollectionSource* aoColSource,
+	std::string aszLongName,
+	std::vector<std::pair<std::string, std::string>> alstMeta)
+{
+	m_szCollectionName = aszCollectionName;
+	m_ColSource = aoColSource;
+	LongName = aszLongName;
+	MetaList = alstMeta;
+
+	Ok = ParseCardLine(aszLongName, Count, Name, DetailsString);
+
+	if (Ok)
+	{
+		IdentifyingAttributes = ParseAttrs(DetailsString);
+	}
+}
+
+bool Collection::PseudoCopy::LoadCard()
+{
+	if (Ok)
+	{
+		CacheIndex = m_ColSource->LoadCard(Name);
+		Ok = CacheIndex != -1;
+	}
+
+	if (Ok)
+	{
+		Prototype = m_ColSource->GetCardPrototype(CacheIndex);
+	}
+
+	return Ok;
+}
+
+bool Collection::PseudoCopy::FindCopy()
+{
+	if (Ok)
+	{
+		Ok = Prototype->FindCopy(m_szCollectionName, IdentifyingAttributes, MetaList, RealCopy);
+	}
+	return Ok;
+}
+
+CopyObject Collection::PseudoCopy::GeneratePseudoCopy()
+{
+	if (Ok)
+	{
+		return Prototype->GenerateCopy(m_szCollectionName, IdentifyingAttributes, MetaList);
+	}
+	return Prototype->GenerateCopy(m_szCollectionName);
+}
+
+std::string Collection::PseudoCopy::ToString(bool bFullDets, bool bIncludeMeta)
+{
+	CopyObject oTempCopy = GeneratePseudoCopy();
+
+	std::string szLine = "";
+	if (Count > 1)
+	{
+		szLine += std::to_string(Count);
+		szLine += "x ";
+	}
+
+	szLine += m_ColSource->GetCardPrototype(CacheIndex)->GetName();
+	szLine += " ";
+
+	if (oTempCopy.NonUniqueTraits.size() > 0 ||
+		(oTempCopy.ParentCollection != m_szCollectionName) || bFullDets)
+	{
+		szLine += "{ ";
+		if (oTempCopy.ParentCollection != m_szCollectionName || bFullDets)
+		{
+			szLine += "Parent=\"";
+			szLine += oTempCopy.ParentCollection;
+			szLine += "\" ";
+		}
+
+		if (oTempCopy.NonUniqueTraits.size() > 0)
+		{
+			std::map<std::string, std::string>::iterator iter_keyValPairs = oTempCopy.NonUniqueTraits.begin();
+			for (; iter_keyValPairs != oTempCopy.NonUniqueTraits.end(); ++iter_keyValPairs)
+			{
+				szLine += iter_keyValPairs->first;
+				szLine += "=\"";
+				szLine += iter_keyValPairs->second;
+				szLine += "\" ";
+			}
+
+		}
+		szLine += "}";
+	}
+
+	if (bIncludeMeta)
+	{
+		std::vector<std::pair<std::string, std::string>> lstVecMeta = oTempCopy.GetMetaTags(m_szCollectionName);
+		if (lstVecMeta.size() > 0)
+		{
+			szLine += " : ";
+			szLine += "{ ";
+			std::vector<std::pair<std::string, std::string>>::iterator iter_keyValPairs = lstVecMeta.begin();
+			for (; iter_keyValPairs != lstVecMeta.end(); ++iter_keyValPairs)
+			{
+				szLine += iter_keyValPairs->first;
+				szLine += "=\"";
+				szLine += iter_keyValPairs->second;
+				szLine += "\" ";
+			}
+			szLine += "}";
+		}
+	}
+
+	return szLine;
+}
 
 Collection::Transaction::Transaction(Collection* aoCol)
 {
@@ -204,71 +317,39 @@ Collection::ReplaceItem(std::string aszRemoveItemLongName,
 	bool bFinal)
 {
 	// Check if all targets exist.
-	bool bValidTargets = false;
-	CopyObject* oRealCopy;
-	CollectionObject* oRealCopyPrototype;
-	std::string szCardName;
-	int iAmount;
-	std::string szDetails;
-	std::vector<std::pair<std::string, std::string>> lstAttrs;
-	if (Collection::ParseCardLine(aszRemoveItemLongName, iAmount, szCardName, szDetails))
+	PseudoCopy oPseudoTarget = GeneratePseudoCopy(aszRemoveItemLongName, alstIdentifyingMeta);
+
+	if (oPseudoTarget.Ok) { oPseudoTarget.LoadCard(); }
+    if (oPseudoTarget.Ok) { oPseudoTarget.FindCopy(); }
+	if (oPseudoTarget.Ok)
 	{
-		lstAttrs = ParseAttrs(szDetails);
-		int iCardProto = m_ColSource->LoadCard(szCardName);
-		if (iCardProto != -1)
-		{
-			oRealCopyPrototype = m_ColSource->GetCardPrototype(iCardProto);
-			bValidTargets = oRealCopyPrototype->FindCopy(m_szName, lstAttrs, alstIdentifyingMeta, oRealCopy);
-		}
-	}
+		PseudoCopy oPseudoNew = GeneratePseudoCopy(aszAddItemLongName, alstNewMeta);
 
-	if (bValidTargets)
-	{
-		bool bValidInput = true;
-
-		std::string szAddName;
-		std::vector<std::pair<std::string, std::string>> lstAddAttrs;
-		if (bValidInput &= Collection::ParseCardLine(aszAddItemLongName, iAmount, szAddName, szDetails))
-		{
-			lstAddAttrs = Collection::ParseAttrs(szDetails);
-		}
-
-		int iCardRemoveProto = m_ColSource->LoadCard(szCardName);
-		int iCardAddProto = m_ColSource->LoadCard(szAddName);
-
-		bValidInput &= (iCardRemoveProto != -1 && iCardAddProto != -1);
-
-		if (bValidInput)
+		if (oPseudoNew.Ok) { oPseudoNew.LoadCard(); }
+		if (oPseudoNew.Ok && oPseudoTarget.Ok)
 		{
 			// Get the transaction
 			Collection::Transaction* oTrans = openTransaction();
 
-			// Initialize the identifier
-			std::string szIdentifier;
-
-			std::string szCard = cardToString(iCardRemoveProto, &std::make_pair(oRealCopy, 1), true, true);
-			CollectionObject* pseudoCardPrototype = m_ColSource->GetCardPrototype(iCardAddProto);
-			CopyObject pseudoCopy = pseudoCardPrototype->GenerateCopy(m_szName, lstAddAttrs, alstNewMeta);
-			szCard += " -> " + cardToString(iCardAddProto, &std::make_pair(&pseudoCopy, 1), true, true);
-			szIdentifier = "% " + szCard;
+			std::string szIdentifier = "% " + oPseudoTarget.ToString(true, true) + " -> " + oPseudoNew.ToString(true, true);
 
 			std::function<void()> fnDo;
 			fnDo = std::bind(&Collection::replaceItem, this,
-				szAddName,
-				lstAddAttrs,
-				alstNewMeta,
-				szCardName,
-				lstAttrs,
-				alstIdentifyingMeta);
-
+				oPseudoNew.Name,
+				oPseudoNew.IdentifyingAttributes,
+				oPseudoNew.MetaList,
+				oPseudoTarget.Name,
+				oPseudoTarget.IdentifyingAttributes,
+				oPseudoTarget.MetaList);
+				
 			std::function<void()> fnUndo;
 			fnUndo = std::bind(&Collection::replaceItem, this,
-				szCardName,
-				lstAttrs,
-				alstIdentifyingMeta,
-				szAddName,
-				lstAddAttrs,
-				alstNewMeta);
+				oPseudoTarget.Name,
+				oPseudoTarget.IdentifyingAttributes,
+				oPseudoTarget.MetaList,
+				oPseudoNew.Name,
+				oPseudoNew.IdentifyingAttributes,
+				oPseudoNew.MetaList);
 
 			Collection::Action oAction;
 			oAction.Identifier = szIdentifier; //"Set Meta-Tag '" + aszKey + "' to '" + aszValue + "' on " + aszLongName;// + szCard;
@@ -277,10 +358,7 @@ Collection::ReplaceItem(std::string aszRemoveItemLongName,
 
 			oTrans->AddAction(oAction);
 
-			if (bFinal)
-			{
-				oTrans->Finalize();
-			}
+			if (bFinal) { oTrans->Finalize(); }
 		}
 	}
 
@@ -293,28 +371,14 @@ Collection::RemoveMetaTag(
 	std::vector<std::pair<std::string, std::string>> alstMatchMeta)
 {
 	// Check if all targets exist.
-	bool bValidTargets = false;
-	CopyObject* oRealCopy = nullptr;
-	CollectionObject* oRealCopyPrototype = nullptr;
-	std::string szCardName;
-	int iAmount;
-	std::string szDetails;
-	std::vector<std::pair<std::string, std::string>> lstAttrs;
-	if (Collection::ParseCardLine(aszLongName, iAmount, szCardName, szDetails))
-	{
-		lstAttrs = ParseAttrs(szDetails);
-		int iCardProto = m_ColSource->LoadCard(szCardName);
-		if (iCardProto != -1)
-		{
-			oRealCopyPrototype = m_ColSource->GetCardPrototype(iCardProto);
-			bValidTargets = oRealCopyPrototype->FindCopy(m_szName, lstAttrs, alstMatchMeta, oRealCopy);
-		}
-	}
+	PseudoCopy oPseudoTarget = GeneratePseudoCopy(aszLongName, alstMatchMeta);
 
-	if (bValidTargets)
+	if (oPseudoTarget.Ok) { oPseudoTarget.LoadCard(); }
+	if (oPseudoTarget.Ok) { oPseudoTarget.FindCopy(); }
+	if (oPseudoTarget.Ok)
 	{
 		bool bValidTag = false;
-		std::string szOldVal = oRealCopy->GetMetaTag(m_szName, aszKey).second;
+		std::string szOldVal = oPseudoTarget.RealCopy->GetMetaTag(m_szName, aszKey).second;
 		bValidTag = szOldVal != "!NULL";
 
 		if (bValidTag)
@@ -329,11 +393,11 @@ Collection::RemoveMetaTag(
 
 			std::function<void()> fnDo;
 			fnDo = std::bind(&Collection::removeMetaTag,
-				this, oRealCopy, aszKey);
+				this, oPseudoTarget.RealCopy, aszKey);
 
 			std::function<void()> fnUndo;
 			fnUndo = std::bind(&Collection::setMetaTag,
-				this, oRealCopy, aszKey, szOldVal);
+				this, oPseudoTarget.RealCopy, aszKey, szOldVal);
 
 			Collection::Action oAction;
 			oAction.Identifier = szIdentifier; //"Set Meta-Tag '" + aszKey + "' to '" + aszValue + "' on " + aszLongName;// + szCard;
@@ -355,54 +419,33 @@ void Collection::SetMetaTag(
 	bool bFinal)
 {
 	// Check if all targets exist.
-	bool bValidTargets = false;
-	CopyObject* oRealCopy;
-	CollectionObject* oRealCopyPrototype;
-	std::string szCardName;
-	int iAmount;
-	std::string szDetails;
-	std::vector<std::pair<std::string, std::string>> lstAttrs;
-	if (Collection::ParseCardLine(aszLongName, iAmount, szCardName, szDetails))
-	{
-		lstAttrs = ParseAttrs(szDetails);
-		int iCardProto = m_ColSource->LoadCard(szCardName);
-		if (iCardProto != -1)
-		{
-			oRealCopyPrototype = m_ColSource->GetCardPrototype(iCardProto);
-			bValidTargets = oRealCopyPrototype->FindCopy(m_szName, lstAttrs, alstMatchMeta, oRealCopy);
-		}
-	}
+	PseudoCopy oPseudoTarget = GeneratePseudoCopy(aszLongName, alstMatchMeta);
 
-	if (bValidTargets)
+	if (oPseudoTarget.Ok) { oPseudoTarget.LoadCard(); }
+	if (oPseudoTarget.Ok) { oPseudoTarget.FindCopy(); }
+	if (oPseudoTarget.Ok)
 	{
 		// Get the transaction
 		Collection::Transaction* oTrans = openTransaction();
 
 		// Initialize the identifier
-		std::string szIdentifier;
-
-		// Simulate the change
-		// CopyObject pseudoCopy = oRealCopyPrototype->GenerateCopy(m_szName, lstAttrs, alstMatchMeta);
-		// setMetaTag(&pseudoCopy, aszKey, aszValue);
-
-		// Build the identifier
-		szIdentifier = "Set Meta-Tag '" + aszKey + "' to '" + aszValue + "' on " + aszLongName;
+		std::string szIdentifier = "Set Meta-Tag '" + aszKey + "' to '" + aszValue + "' on " + aszLongName;
 
 		// Store the action and how to undo it here.
 		std::function<void()> fnDo;
-		fnDo = std::bind(&Collection::setMetaTag, this, oRealCopy, aszKey, aszValue);
+		fnDo = std::bind(&Collection::setMetaTag, this, oPseudoTarget.RealCopy, aszKey, aszValue);
 
 		std::function<void()> fnUndo;
-		std::string szOldVal = oRealCopy->GetMetaTag(m_szName, aszKey).second;
+		std::string szOldVal = oPseudoTarget.RealCopy->GetMetaTag(m_szName, aszKey).second;
 		if (szOldVal != "!NULL") // Key Doesnt exist
 		{
 			fnUndo = std::bind(&Collection::setMetaTag,
-				this, oRealCopy, aszKey, szOldVal);
+				this, oPseudoTarget.RealCopy, aszKey, szOldVal);
 		}
 		else
 		{
 			fnUndo = std::bind(&Collection::removeMetaTag,
-				this, oRealCopy, aszKey);
+				this, oPseudoTarget.RealCopy, aszKey);
 		}
 
 		Collection::Action oAction;
@@ -424,25 +467,11 @@ void Collection::SetMetaTags(std::string aszLongName,
 	std::vector<std::pair<std::string, std::string>> alstMatchMeta)
 {
 	// Check if all targets exist.
-	bool bValidTargets = false;
-	CopyObject* oRealCopy;
-	CollectionObject* oRealCopyPrototype;
-	std::string szCardName;
-	std::string szDetails;
-	int iAmount;
-	std::vector<std::pair<std::string, std::string>> lstAttrs;
-	if (Collection::ParseCardLine(aszLongName, iAmount, szCardName, szDetails))
-	{
-		lstAttrs = ParseAttrs(szDetails);
-		int iCardProto = m_ColSource->LoadCard(szCardName);
-		if (iCardProto != -1)
-		{
-			oRealCopyPrototype = m_ColSource->GetCardPrototype(iCardProto);
-			bValidTargets = oRealCopyPrototype->FindCopy(m_szName, lstAttrs, alstMatchMeta, oRealCopy);
-		}
-	}
+	PseudoCopy oPseudoTarget = GeneratePseudoCopy(aszLongName, alstMatchMeta);
 
-	if (bValidTargets)
+	if (oPseudoTarget.Ok) { oPseudoTarget.LoadCard(); }
+	if (oPseudoTarget.Ok) { oPseudoTarget.FindCopy(); }
+	if (oPseudoTarget.Ok)
 	{
 		Collection::Transaction* oTrans = openTransaction();
 
@@ -465,17 +494,17 @@ void Collection::SetMetaTags(std::string aszLongName,
 		}
 
 		std::function<void()> fnDo;
-		fnDo = std::bind(&Collection::setMetaTags, this, oRealCopy, alstKeyVals);
+		fnDo = std::bind(&Collection::setMetaTags, this, oPseudoTarget.RealCopy, alstKeyVals);
 
 		std::function<void()> fnUndo;
 		std::vector<std::pair<std::string, std::string>> lstUndoList;
-		std::vector<std::pair<std::string, std::string>> lstOldMetaTags = oRealCopy->GetMetaTags(m_szName);
+		std::vector<std::pair<std::string, std::string>> lstOldMetaTags = oPseudoTarget.RealCopy->GetMetaTags(m_szName);
 		std::vector<std::pair<std::string, std::string>>::iterator iter_MetaTags = lstOldMetaTags.begin();
 		for (; iter_MetaTags != lstOldMetaTags.end(); ++iter_MetaTags)
 		{
 			lstUndoList.push_back(std::make_pair(iter_MetaTags->first, iter_MetaTags->second));
 		}
-		fnUndo = std::bind(&Collection::setMetaTags, this, oRealCopy, lstUndoList);
+		fnUndo = std::bind(&Collection::setMetaTags, this, oPseudoTarget.RealCopy, lstUndoList);
 
 		Collection::Action oAction;
 		oAction.Identifier = szIdentifier;
@@ -494,25 +523,12 @@ void Collection::SetNonUniqueAttribute(
 	std::string aszValue,
 	std::vector<std::pair<std::string, std::string>> alstMatchMeta)
 {
-	bool bValidTargets = false;
-	CopyObject* oRealCopy = nullptr;
-	CollectionObject* oRealCopyPrototype = nullptr;
-	std::string szCardName;
-	std::string szDetails;
-	int iAmount;
-	std::vector<std::pair<std::string, std::string>> lstAttrs;
-	if (Collection::ParseCardLine(aszLongName, iAmount, szCardName, szDetails))
-	{
-		lstAttrs = ParseAttrs(szDetails);
-		int iCardProto = m_ColSource->LoadCard(szCardName);
-		if (iCardProto != -1)
-		{
-			oRealCopyPrototype = m_ColSource->GetCardPrototype(iCardProto);
-			bValidTargets = oRealCopyPrototype->FindCopy(m_szName, lstAttrs, alstMatchMeta, oRealCopy);
-		}
-	}
+	// Check if all targets exist.
+	PseudoCopy oPseudoTarget = GeneratePseudoCopy(aszLongName, alstMatchMeta);
 
-	if (bValidTargets)
+	if (oPseudoTarget.Ok) { oPseudoTarget.LoadCard(); }
+	if (oPseudoTarget.Ok) { oPseudoTarget.FindCopy(); }
+	if (oPseudoTarget.Ok)
 	{
 		Collection::Transaction* oTrans = openTransaction();
 
@@ -523,22 +539,22 @@ void Collection::SetNonUniqueAttribute(
 		// Check if the attribute is a valid attribute
 		bool bValidChange = false;
 		bool bValidAttribute = false;
-		auto iter_UniqueTrait = oRealCopy->NonUniqueTraits.find(aszKey);
-		bValidAttribute = iter_UniqueTrait != oRealCopy->NonUniqueTraits.end();
+		auto iter_UniqueTrait = oPseudoTarget.RealCopy->NonUniqueTraits.find(aszKey);
+		bValidAttribute = iter_UniqueTrait != oPseudoTarget.RealCopy->NonUniqueTraits.end();
 
 		std::vector<std::string> lstDiffKeys;
 		if (bValidAttribute)
 		{
 			// Simulate the change
-			CopyObject pseudoCopy = oRealCopyPrototype->GenerateCopy(m_szName, lstAttrs, alstMatchMeta);
+			CopyObject pseudoCopy = oPseudoTarget.GeneratePseudoCopy();
 			setItemAttr(&pseudoCopy, aszKey, aszValue);
 
 			// Check for differences
-			auto iter_PrevTraits = oRealCopy->NonUniqueTraits.begin();
-			for (; iter_PrevTraits != oRealCopy->NonUniqueTraits.end(); ++iter_PrevTraits)
+			auto iter_PrevTraits = oPseudoTarget.RealCopy->NonUniqueTraits.begin();
+			for (; iter_PrevTraits != oPseudoTarget.RealCopy->NonUniqueTraits.end(); ++iter_PrevTraits)
 			{
 				auto iter_NewTraits = pseudoCopy.NonUniqueTraits.find(iter_PrevTraits->first);
-				if (iter_NewTraits != oRealCopy->NonUniqueTraits.end())
+				if (iter_NewTraits != oPseudoTarget.RealCopy->NonUniqueTraits.end())
 				{
 					if (iter_NewTraits->second != iter_PrevTraits->second)
 					{
@@ -559,11 +575,11 @@ void Collection::SetNonUniqueAttribute(
 			szIdentifier = "Setting attribute '" + aszKey + "' to '" + aszValue + "' on " + aszLongName;
 
 			std::function<void()> fnDo;
-			fnDo = std::bind(&Collection::setItemAttr, this, oRealCopy, aszKey, aszValue);
+			fnDo = std::bind(&Collection::setItemAttr, this, oPseudoTarget.RealCopy, aszKey, aszValue);
 
 			std::function<void()> fnUndo;
 			std::string szOldVal = iter_UniqueTrait->second;
-			fnUndo = std::bind(&Collection::setItemAttr, this, oRealCopy, aszKey, szOldVal);
+			fnUndo = std::bind(&Collection::setItemAttr, this, oPseudoTarget.RealCopy, aszKey, szOldVal);
 
 			Collection::Action oAction;
 			oAction.Identifier = szIdentifier;
@@ -584,28 +600,12 @@ void Collection::SetFeatures(
 	std::vector<std::pair<std::string, std::string>> alstMatchMeta,
 	bool bFinal)
 {
-	bool bValidTargets = false;
-	CopyObject* oRealCopy = nullptr;
-	CollectionObject* oRealCopyPrototype = nullptr;
-	std::string szCardName;
-	std::string szDetails;
-	int iAmount;
-	std::vector<std::pair<std::string, std::string>> lstAttrs;
-	if (Collection::ParseCardLine(aszLongName, iAmount, szCardName, szDetails))
-	{
-		std::vector<std::pair<std::string, std::string>> lstAttrs = ParseAttrs(szDetails);
-		int iCardProto = m_ColSource->LoadCard(szCardName);
-		if (iCardProto != -1)
-		{
-			oRealCopyPrototype = m_ColSource->GetCardPrototype(iCardProto);
-			if (oRealCopyPrototype->FindCopy(m_szName, lstAttrs, alstMatchMeta, oRealCopy))
-			{
-				bValidTargets = true;
-			}
-		}
-	}
+	// Check if all targets exist.
+	PseudoCopy oPseudoTarget = GeneratePseudoCopy(aszLongName, alstMatchMeta);
 
-	if (bValidTargets)
+	if (oPseudoTarget.Ok) { oPseudoTarget.LoadCard(); }
+	if (oPseudoTarget.Ok) { oPseudoTarget.FindCopy(); }
+	if (oPseudoTarget.Ok)
 	{
 		Collection::Transaction* oTrans = openTransaction();
 
@@ -618,8 +618,8 @@ void Collection::SetFeatures(
 		bool bValidAttribute = true;
 		for (int i = 0; i < alstNewAttrs.size(); i++)
 		{
-			auto iter_UniqueTrait = oRealCopy->NonUniqueTraits.find(alstNewAttrs[i].first);
-			bValidAttribute &= iter_UniqueTrait != oRealCopy->NonUniqueTraits.end();
+			auto iter_UniqueTrait = oPseudoTarget.RealCopy->NonUniqueTraits.find(alstNewAttrs[i].first);
+			bValidAttribute &= iter_UniqueTrait != oPseudoTarget.RealCopy->NonUniqueTraits.end();
 		}
 
 		// All meta tags are valid so if the attributes are valid then so is the change
@@ -627,12 +627,12 @@ void Collection::SetFeatures(
 		if (bValidAttribute)
 		{
 			// Simulate the change
-			CopyObject pseudoCopy = oRealCopyPrototype->GenerateCopy(m_szName, lstAttrs, alstMatchMeta);
+			CopyObject pseudoCopy = oPseudoTarget.GeneratePseudoCopy();
 			setFeatures(&pseudoCopy, alstNewMeta, alstNewAttrs);
 
 			// Check for differences
-			auto iter_PrevTraits = oRealCopy->NonUniqueTraits.begin();
-			for (; iter_PrevTraits != oRealCopy->NonUniqueTraits.end(); ++iter_PrevTraits)
+			auto iter_PrevTraits = oPseudoTarget.RealCopy->NonUniqueTraits.begin();
+			for (; iter_PrevTraits != oPseudoTarget.RealCopy->NonUniqueTraits.end(); ++iter_PrevTraits)
 			{
 				auto iter_NewTraits = pseudoCopy.NonUniqueTraits.find(iter_PrevTraits->first);
 				if (iter_NewTraits != pseudoCopy.NonUniqueTraits.end())
@@ -671,17 +671,17 @@ void Collection::SetFeatures(
 				}
 
 				std::function<void()> fnDo;
-				fnDo = std::bind(&Collection::setFeatures, this, oRealCopy, alstNewMeta, alstNewAttrs);
+				fnDo = std::bind(&Collection::setFeatures, this, oPseudoTarget.RealCopy, alstNewMeta, alstNewAttrs);
 
 				std::function<void()> fnUndo;
 				std::vector<std::pair<std::string, std::string>> lstUndoList;
-				std::vector<std::pair<std::string, std::string>> lstOldMetaTags = oRealCopy->GetMetaTags(m_szName);
+				std::vector<std::pair<std::string, std::string>> lstOldMetaTags = oPseudoTarget.RealCopy->GetMetaTags(m_szName);
 				std::vector<std::pair<std::string, std::string>>::iterator iter_MetaTags = lstOldMetaTags.begin();
 				for (; iter_MetaTags != lstOldMetaTags.end(); ++iter_MetaTags)
 				{
 					lstUndoList.push_back(std::make_pair(iter_MetaTags->first, iter_MetaTags->second));
 				}
-				fnUndo = std::bind(&Collection::setFeatures, this, oRealCopy, lstUndoList, lstAttrs);
+				fnUndo = std::bind(&Collection::setFeatures, this, oPseudoTarget.RealCopy, lstUndoList, oPseudoTarget.IdentifyingAttributes);
 
 				Collection::Action oAction;
 				oAction.Identifier = szIdentifier;
@@ -799,6 +799,11 @@ void Collection::registerItem(int aiItem)
 	{
 		m_lstCollection.push_back(aiItem);
 	}
+}
+
+Collection::PseudoCopy Collection::GeneratePseudoCopy(std::string aszLongName, std::vector<std::pair<std::string, std::string>> alstMeta)
+{
+	return PseudoCopy(m_szName, m_ColSource, aszLongName, alstMeta);
 }
 
 bool Collection::removeItem(std::string aszRemoveItem,
@@ -1079,7 +1084,7 @@ bool Collection::loadChangeCardLine(std::string aszChangeCardLine)
 				{
 					copyParent = m_szName;
 				}
-				CopyObject oCopyAdd = oCOAdd->GenerateCopy(copyParent, lstRemoveAttrs);
+				CopyObject oCopyAdd = oCOAdd->GenerateCopy(copyParent, lstAddAttrs);
 				szAddLong = cardToString(iAddProto, &std::make_pair(&oCopyAdd, 1));
 			}
 
