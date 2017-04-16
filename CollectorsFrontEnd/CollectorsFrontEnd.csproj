@@ -109,6 +109,9 @@
     <Compile Include="Interfaces\CompCollectionView.xaml.cs">
       <DependentUpon>CompCollectionView.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Interfaces\CompCubeView.xaml.cs">
+      <DependentUpon>CompCubeView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Interfaces\StoreFrontMain.xaml.cs">
       <DependentUpon>StoreFrontMain.xaml</DependentUpon>
     </Compile>
@@ -130,6 +133,9 @@
     <Compile Include="Interfaces\Subs\CompSubCardDisplayer.xaml.cs">
       <DependentUpon>CompSubCardDisplayer.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Interfaces\Subs\CompSubCardGroupList.xaml.cs">
+      <DependentUpon>CompSubCardGroupList.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Interfaces\Subs\CompSubEnterText.xaml.cs">
       <DependentUpon>CompSubEnterText.xaml</DependentUpon>
     </Compile>
@@ -148,6 +154,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Interfaces\CompCollectionView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Interfaces\CompCubeView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -176,6 +186,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Interfaces\Subs\CompSubCardDisplayer.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Interfaces\Subs\CompSubCardGroupList.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

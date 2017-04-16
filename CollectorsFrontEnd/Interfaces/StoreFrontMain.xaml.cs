@@ -99,9 +99,10 @@ namespace CollectorsFrontEnd.Interfaces
 
         public void ecSwitchToCollectionView(string aszCollectionName)
         {
-            OperationWindow = new CompCollectionView(aszCollectionName);
-            OperationWindow.UnhandledEvent += RouteReceivedUnhandledEvent;
-            getViewOptions();
+            OperationWindow = new CompCubeView(aszCollectionName);
+            // OperationWindow = new CompCollectionView(aszCollectionName);
+            //OperationWindow.UnhandledEvent += RouteReceivedUnhandledEvent;
+            //getViewOptions();
         }
 
         public void RouteReceivedUnhandledEvent(IDataModel aDataObject, string aszAction)
