@@ -25,7 +25,7 @@ namespace CollectorsFrontEnd.Interfaces
     {
         #region Data Binding
 
-        public ObservableCollection<CompSubCardGroupList> LstGroups { get; set; }
+        public ObservableCollection<Module_CardGroupList> LstGroups { get; set; }
 
         #endregion
 
@@ -45,6 +45,7 @@ namespace CollectorsFrontEnd.Interfaces
 
         #region Private Fields
         private UserControl m_OverlayControl;
+        private Module_CardGroupList m_LastClickedGroup = null;
         #endregion
 
         #region Public Functions
@@ -58,7 +59,7 @@ namespace CollectorsFrontEnd.Interfaces
                 DataModel = ServerInterfaceModel.GenerateCollectionModel(aszCollectionName);
             }
             GroupingAttr = "colors";
-            LstGroups = new ObservableCollection<CompSubCardGroupList>();
+            LstGroups = new ObservableCollection<Module_CardGroupList>();
             buildGroupsView();
         }
 
@@ -66,16 +67,17 @@ namespace CollectorsFrontEnd.Interfaces
         {
             List<Tuple<string, MenuAction>> LstMenuActions = new List<Tuple<string, MenuAction>>()
             {
-                new Tuple<string, MenuAction>("Edit List", showBulkEditWindow)
+                new Tuple<string, MenuAction>("Edit List", eShowBulkEdits),
+                new Tuple<string, MenuAction>("Set Baseline History", eSetBaselineHistory)
             };
             return LstMenuActions;
         }
 
-        public void RouteReceivedUnhandledEvent(IDataModel aDataObject, string aszAction)
+        public void RouteReceivedUnhandledEvent(IDataModel aoDataObject, string aszAction)
         {
-            if (aDataObject.GetType() == typeof(Module_BulkEdits.Data))
+            if (aoDataObject.GetType() == typeof(Module_BulkEdits.Data))
             {
-                Module_BulkEdits.Data dM = (Module_BulkEdits.Data)aDataObject;
+                Module_BulkEdits.Data dM = (Module_BulkEdits.Data)aoDataObject;
                 if (aszAction == "Cancel")
                 {
                     showMainDisplay();
@@ -83,6 +85,14 @@ namespace CollectorsFrontEnd.Interfaces
                 else if (aszAction == "Accept")
                 {
                     ecBulkEditsAccept(dM);
+                }
+            }
+            else if (aoDataObject.GetType() == typeof(Module_CardGroupList.Data))
+            {
+                Module_CardGroupList.Data DM = (Module_CardGroupList.Data)aoDataObject;
+                if (aszAction == "Selection Changed")
+                {
+                    ecGroupsSelectionChanged(DM);
                 }
             }
         }
@@ -100,16 +110,18 @@ namespace CollectorsFrontEnd.Interfaces
         {
             LstGroups.Clear();
             Dictionary<string, List<CardModel>> lstLists = generateGroupLists();
-            foreach(string szKey in lstLists.Keys)
+            foreach (string szKey in lstLists.Keys)
             {
-                LstGroups.Add(new CompSubCardGroupList(szKey, lstLists[szKey]));
+                Module_CardGroupList newGroup = new Module_CardGroupList(szKey, lstLists[szKey]);
+                newGroup.UnhandledEvent += RouteReceivedUnhandledEvent;
+                LstGroups.Add(newGroup);
             }
         }
 
-        private Dictionary<string,List<CardModel>> generateGroupLists()
+        private Dictionary<string, List<CardModel>> generateGroupLists()
         {
             Dictionary<string, List<CardModel>> MapGroups = new Dictionary<string, List<CardModel>>();
-            foreach(CardModel cm in DataModel.LstCopyModels)
+            foreach (CardModel cm in DataModel.LstCopyModels)
             {
                 string szKey = cm.GetAttr(GroupingAttr);
                 if (MapGroups.ContainsKey(szKey))
@@ -156,6 +168,40 @@ namespace CollectorsFrontEnd.Interfaces
             DataModel.Refresh();
             buildGroupsView();
             showMainDisplay();
+        }
+
+        private void ecGroupsSelectionChanged(Module_CardGroupList.Data aoDataModel)
+        {
+
+            foreach (var lstGroup in LstGroups)
+            {
+                if (lstGroup.GroupName != aoDataModel.SourceGroup.GroupName)
+                {
+                    lstGroup.ClearSelection();
+                }
+            }
+
+        }
+
+        #endregion
+
+        #region UI Event Handlers
+
+        private void Canvas_MouseMove(object sender, System.Windows.Input.MouseEventArgs e)
+        {
+           // var pos = e.GetPosition((Canvas)sender);
+            //Canvas.SetLeft(eye, pos.X);
+            //Canvas.SetTop(eye, pos.Y);
+        }
+
+        public void eSetBaselineHistory()
+        {
+            DataModel.SetBaselineHistory();
+        }
+
+        public void eShowBulkEdits()
+        {
+            showBulkEditWindow();
         }
 
         #endregion

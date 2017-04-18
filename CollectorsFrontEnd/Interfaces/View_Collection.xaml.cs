@@ -90,7 +90,7 @@ namespace CollectorsFrontEnd.Interfaces
             {
                 new Tuple<string, MenuAction>("Set Baseline History", eSetBaselineHistory)
             };
-            return LstMenuActions;//throw new NotImplementedException();
+            return LstMenuActions;
         }
         #endregion
 
@@ -192,7 +192,7 @@ namespace CollectorsFrontEnd.Interfaces
 
         private void updateCardDisplay(CardModel aCM)
         {
-            ImageComponent = new CompSubCardDisplayer(aCM);
+            ImageComponent = new Module_CardDisplayer(aCM);
         }
 
         private void showMainDisplay()

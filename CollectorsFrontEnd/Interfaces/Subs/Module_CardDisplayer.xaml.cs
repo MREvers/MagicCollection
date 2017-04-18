@@ -20,7 +20,7 @@ namespace CollectorsFrontEnd.Interfaces.Subs
     /// <summary>
     /// Interaction logic for CompSubCardDisplayer.xaml
     /// </summary>
-    public partial class CompSubCardDisplayer : UserControl, IComponent
+    public partial class Module_CardDisplayer : UserControl, IComponent
     {
         public string CardName { get; set; }
         public string CardType { get; set; }
@@ -34,7 +34,7 @@ namespace CollectorsFrontEnd.Interfaces.Subs
 
         public CardModel DataModel;
 
-        public CompSubCardDisplayer(CardModel aDataModel)
+        public Module_CardDisplayer(CardModel aDataModel)
         {
             InitializeComponent();
             DataContext = this;
@@ -55,6 +55,8 @@ namespace CollectorsFrontEnd.Interfaces.Subs
             {
                 CardModel dataModel = (CardModel)sender;
                 CardImage = (BitmapImage)dataModel.CardImage;
+                this.Width = CardImage.Width;
+                this.Height = CardImage.Height;
             }
         }
 

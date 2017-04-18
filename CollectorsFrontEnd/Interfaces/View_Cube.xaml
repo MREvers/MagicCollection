@@ -13,6 +13,7 @@
                     <WrapPanel Orientation="Vertical"/>
                 </ItemsPanelTemplate>
             </ItemsControl.ItemsPanel>
+
         </ItemsControl>
     </Grid>
 

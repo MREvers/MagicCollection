@@ -28,7 +28,7 @@ namespace CollectorsFrontEnd.Interfaces.Subs
     public partial class Module_Generalization : UserControl, INotifyPropertyChanged, IComponent
     {
         #region Bindings
-        public ObservableCollection<CompSubItemDisplayer> LstCardModels
+        public ObservableCollection<Module_ItemDisplayer> LstCardModels
         {
             get
             {
@@ -57,10 +57,10 @@ namespace CollectorsFrontEnd.Interfaces.Subs
 
         public class Data : IDataModel
         {
-            public ObservableCollection<CompSubItemDisplayer> LstCardModels = 
-                new ObservableCollection<CompSubItemDisplayer>();
+            public ObservableCollection<Module_ItemDisplayer> LstCardModels = 
+                new ObservableCollection<Module_ItemDisplayer>();
             public string GeneralizationName { get; set; }
-            public CompSubItemDisplayer SelectedItemDisplayer { get; set; }
+            public Module_ItemDisplayer SelectedItemDisplayer { get; set; }
         }
 
         public Data DataModel = new Data();
@@ -72,7 +72,7 @@ namespace CollectorsFrontEnd.Interfaces.Subs
             DataModel.GeneralizationName = aszGenName;
             foreach (CardModel CM in alstCardModels)
             {
-                CompSubItemDisplayer CSID = new CompSubItemDisplayer(CM);
+                Module_ItemDisplayer CSID = new Module_ItemDisplayer(CM);
                 CSID.UnhandledEvent += RouteReceivedUnhandledEvent;
                 LstCardModels.Add(CSID);
             }

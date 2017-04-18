@@ -130,11 +130,11 @@
     <Compile Include="Interfaces\Subs\Module_BulkEdits.xaml.cs">
       <DependentUpon>Module_BulkEdits.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Interfaces\Subs\CompSubCardDisplayer.xaml.cs">
-      <DependentUpon>CompSubCardDisplayer.xaml</DependentUpon>
+    <Compile Include="Interfaces\Subs\Module_CardDisplayer.xaml.cs">
+      <DependentUpon>Module_CardDisplayer.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Interfaces\Subs\CompSubCardGroupList.xaml.cs">
-      <DependentUpon>CompSubCardGroupList.xaml</DependentUpon>
+    <Compile Include="Interfaces\Subs\Module_CardGroupList.xaml.cs">
+      <DependentUpon>Module_CardGroupList.xaml</DependentUpon>
     </Compile>
     <Compile Include="Interfaces\Subs\CompSubEnterText.xaml.cs">
       <DependentUpon>CompSubEnterText.xaml</DependentUpon>
@@ -142,8 +142,8 @@
     <Compile Include="Interfaces\Subs\Module_Generalization.xaml.cs">
       <DependentUpon>Module_Generalization.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Interfaces\Subs\CompSubItemDisplayer.xaml.cs">
-      <DependentUpon>CompSubItemDisplayer.xaml</DependentUpon>
+    <Compile Include="Interfaces\Subs\Module_ItemDisplayer.xaml.cs">
+      <DependentUpon>Module_ItemDisplayer.xaml</DependentUpon>
     </Compile>
     <Compile Include="Interfaces\Subs\Module_KeyValCreater.xaml.cs">
       <DependentUpon>Module_KeyValCreater.xaml</DependentUpon>
@@ -185,11 +185,11 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Interfaces\Subs\CompSubCardDisplayer.xaml">
+    <Page Include="Interfaces\Subs\Module_CardDisplayer.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Interfaces\Subs\CompSubCardGroupList.xaml">
+    <Page Include="Interfaces\Subs\Module_CardGroupList.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -201,7 +201,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Interfaces\Subs\CompSubItemDisplayer.xaml">
+    <Page Include="Interfaces\Subs\Module_ItemDisplayer.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

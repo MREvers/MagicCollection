@@ -19,11 +19,11 @@ namespace CollectorsFrontEnd.Interfaces.Subs
     /// <summary>
     /// Interaction logic for CompSubItemDisplayer.xaml
     /// </summary>
-    public partial class CompSubItemDisplayer : UserControl, IComponent
+    public partial class Module_ItemDisplayer : UserControl, IComponent
     {
         public CardModel DataModel { get; set; }
 
-        public CompSubItemDisplayer(CardModel aCM)
+        public Module_ItemDisplayer(CardModel aCM)
         {
             InitializeComponent();
             DataContext = this;
