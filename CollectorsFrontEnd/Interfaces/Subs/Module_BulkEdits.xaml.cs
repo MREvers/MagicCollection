@@ -21,18 +21,18 @@ namespace CollectorsFrontEnd.Interfaces.Subs
     /// <summary>
     /// Interaction logic for CompSubBulkEdits.xaml
     /// </summary>
-    public partial class CompSubBulkEdits : UserControl, IComponent, INotifyPropertyChanged
+    public partial class Module_BulkEdits : UserControl, IComponent, INotifyPropertyChanged
     {
         public ObservableCollection<string> LstTextChanges { get; set; }
         public string RemoveCardDisplay { get; set; }
         public string AddCardDisplay { get; set; }
 
-        public class CompSubBulkEditsDataModel : IDataModel
+        public class Data : IDataModel
         {
             public List<string> LstTextChanges = new List<string>();
         }
 
-        public CompSubBulkEditsDataModel DataModel;
+        public Data DataModel;
         private int m_iAddSelectedIndex = -1;
         private int m_iRemoveSelectedIndex = -1;
         private bool m_bIsOfferedSelectionAdd = false;
@@ -41,13 +41,13 @@ namespace CollectorsFrontEnd.Interfaces.Subs
         private TextBox m_TBInRemoveCombo;
         private CollectionModel m_ColModel;
 
-        public CompSubBulkEdits(CollectionModel aoColModel)
+        public Module_BulkEdits(CollectionModel aoColModel)
         {
             InitializeComponent();
             LstTextChanges = new ObservableCollection<string>();
             m_ColModel = aoColModel;
             DataContext = this;
-            DataModel = new CompSubBulkEditsDataModel();
+            DataModel = new Data();
 
             CBAddCardSearch.AddHandler(System.Windows.Controls.Primitives.TextBoxBase.TextChangedEvent,
                       new System.Windows.Controls.TextChangedEventHandler(eAddCardSearch_TextChanged));

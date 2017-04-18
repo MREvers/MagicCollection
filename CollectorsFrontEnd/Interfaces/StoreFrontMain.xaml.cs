@@ -92,25 +92,32 @@ namespace CollectorsFrontEnd.Interfaces
 
         public void ecSwitchToCollectionOverview()
         {
-            OperationWindow = new CompCollectionsOverview(ServerInterfaceModel.GetLoadedCollectionList());
+            OperationWindow = new View_CollectionsOverview(ServerInterfaceModel.GetLoadedCollectionList());
             OperationWindow.UnhandledEvent += RouteReceivedUnhandledEvent;
             getViewOptions();
         }
 
         public void ecSwitchToCollectionView(string aszCollectionName)
         {
-            OperationWindow = new CompCubeView(aszCollectionName);
+            OperationWindow = new View_Cube(aszCollectionName);
             // OperationWindow = new CompCollectionView(aszCollectionName);
-            //OperationWindow.UnhandledEvent += RouteReceivedUnhandledEvent;
-            //getViewOptions();
+            OperationWindow.UnhandledEvent += RouteReceivedUnhandledEvent;
+            getViewOptions();
+        }
+
+        public void ecSwitchToCubeView(string aszCollectionName)
+        {
+            OperationWindow = new View_Cube(aszCollectionName);
+            OperationWindow.UnhandledEvent += RouteReceivedUnhandledEvent;
+            getViewOptions();
         }
 
         public void RouteReceivedUnhandledEvent(IDataModel aDataObject, string aszAction)
         {
-            if (aDataObject.GetType() == typeof(CompCollectionsOverview.CollectionsOverviewerModel))
+            if (aDataObject.GetType() == typeof(View_CollectionsOverview.CollectionsOverviewerModel))
             {
-                CompCollectionsOverview.CollectionsOverviewerModel CCM =
-                        (CompCollectionsOverview.CollectionsOverviewerModel)aDataObject;
+                View_CollectionsOverview.CollectionsOverviewerModel CCM =
+                        (View_CollectionsOverview.CollectionsOverviewerModel)aDataObject;
                 if (aszAction == "ViewCollection")
                 {
                     ecSwitchToCollectionView(CCM.SelectedCollection);

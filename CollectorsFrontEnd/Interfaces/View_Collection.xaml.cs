@@ -22,7 +22,7 @@ namespace CollectorsFrontEnd.Interfaces
     /// <summary>
     /// Interaction logic for CompCollectionView.xaml
     /// </summary>
-    public partial class CompCollectionView : UserControl, IMenuBarComponent, INotifyPropertyChanged
+    public partial class View_Collection : UserControl, IMenuBarComponent, INotifyPropertyChanged
     {
         #region DataBinding
         private UserControl _ImageComponent;
@@ -40,8 +40,8 @@ namespace CollectorsFrontEnd.Interfaces
             }
         }
 
-        private readonly ObservableCollection<CompSubGeneralization> _LstGeneralizations = new ObservableCollection<CompSubGeneralization>();
-        public ObservableCollection<CompSubGeneralization> LstGeneralizations
+        private readonly ObservableCollection<Module_Generalization> _LstGeneralizations = new ObservableCollection<Module_Generalization>();
+        public ObservableCollection<Module_Generalization> LstGeneralizations
         {
             get
             {
@@ -54,6 +54,7 @@ namespace CollectorsFrontEnd.Interfaces
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
         #endregion
+
         #region Public Fields
         public event ComponentEvent UnhandledEvent;
         public event PropertyChangedEventHandler PropertyChanged;
@@ -66,7 +67,7 @@ namespace CollectorsFrontEnd.Interfaces
         #endregion
 
         #region Public Functions
-        public CompCollectionView(string aszCollectionName)
+        public View_Collection(string aszCollectionName)
         {
             InitializeComponent();
             DataContext = this;
@@ -125,7 +126,7 @@ namespace CollectorsFrontEnd.Interfaces
 
             foreach (string szGeneralization in mapGeneralizations.Keys)
             {
-                CompSubGeneralization CSG = new CompSubGeneralization(mapGeneralizations[szGeneralization], szGeneralization);
+                Module_Generalization CSG = new Module_Generalization(mapGeneralizations[szGeneralization], szGeneralization);
                 CSG.UnhandledEvent += RouteReceivedUnhandledEvent;
                 LstGeneralizations.Add(CSG);
             }
@@ -152,7 +153,7 @@ namespace CollectorsFrontEnd.Interfaces
             showMainDisplay();
             if (DataModel.CollectionName != "")
             {
-                CompSubBulkEdits ITI = new CompSubBulkEdits(DataModel);
+                Module_BulkEdits ITI = new Module_BulkEdits(DataModel);
                 m_OverlayControl = ITI;
                 ITI.UnhandledEvent += RouteReceivedUnhandledEvent;
                 Panel.SetZIndex(CenterPanel, 2);
@@ -204,7 +205,7 @@ namespace CollectorsFrontEnd.Interfaces
         #endregion Private Functions
 
         #region Event Handlers
-        private void ecBulkEditsAccept(CompSubBulkEdits.CompSubBulkEditsDataModel aDataModel)
+        private void ecBulkEditsAccept(Module_BulkEdits.Data aDataModel)
         {
             DataModel.SubmitBulkEdits(aDataModel.LstTextChanges);
             DataModel.Refresh();
@@ -368,9 +369,9 @@ namespace CollectorsFrontEnd.Interfaces
             showMainDisplay();
         }
 
-        private void ecGeneralizationSelectionChange(CompSubGeneralization.CompSubGeneralizationModel aDataObject)
+        private void ecGeneralizationSelectionChange(Module_Generalization.Data aDataObject)
         {
-            foreach (CompSubGeneralization Gen in LstGeneralizations)
+            foreach (Module_Generalization Gen in LstGeneralizations)
             {
                 if (Gen.GeneralizationName != aDataObject.GeneralizationName)
                 {
@@ -435,16 +436,16 @@ namespace CollectorsFrontEnd.Interfaces
                     ecAmountInterchangerWindowAccept((CompSubAmountInterchanger.AmountInterchangerModel)aDataObject);
                 }
             }
-            else if (aDataObject.GetType() == typeof(CompSubGeneralization.CompSubGeneralizationModel))
+            else if (aDataObject.GetType() == typeof(Module_Generalization.Data))
             {
                 if (aszAction == "SelectionChanged")
                 {
-                    ecGeneralizationSelectionChange((CompSubGeneralization.CompSubGeneralizationModel)aDataObject);
+                    ecGeneralizationSelectionChange((Module_Generalization.Data)aDataObject);
                 }
             }
-            else if (aDataObject.GetType() == typeof(CompSubBulkEdits.CompSubBulkEditsDataModel))
+            else if (aDataObject.GetType() == typeof(Module_BulkEdits.Data))
             {
-                CompSubBulkEdits.CompSubBulkEditsDataModel dM = (CompSubBulkEdits.CompSubBulkEditsDataModel)aDataObject;
+                Module_BulkEdits.Data dM = (Module_BulkEdits.Data)aDataObject;
                 if (aszAction == "Cancel")
                 {
                     showMainDisplay();
@@ -478,7 +479,6 @@ namespace CollectorsFrontEnd.Interfaces
             showBulkEditWindow();
         }
         #endregion
-
 
     }
 }

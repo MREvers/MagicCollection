@@ -19,11 +19,11 @@ namespace CollectorsFrontEnd.Interfaces.Subs
     /// <summary>
     /// Interaction logic for CompSubKeyValCreater.xaml
     /// </summary>
-    public partial class CompSubKeyValCreater : UserControl, IComponent
+    public partial class Module_KeyValCreater : UserControl, IComponent
     {
 
 
-        public class CompSubKeyValCreaterModel : INotifyPropertyChanged, IDataModel
+        public class Data : INotifyPropertyChanged, IDataModel
         {
             private string _Key = "";
             private string _Value = "";
@@ -61,11 +61,11 @@ namespace CollectorsFrontEnd.Interfaces.Subs
 
         public event ComponentEvent UnhandledEvent;
 
-        public CompSubKeyValCreaterModel DataModel { get; set; }
+        public Data DataModel { get; set; }
 
-        public CompSubKeyValCreater()
+        public Module_KeyValCreater()
         {
-            DataModel = new CompSubKeyValCreaterModel();
+            DataModel = new Data();
             InitializeComponent();
             DataContext = DataModel;
         }

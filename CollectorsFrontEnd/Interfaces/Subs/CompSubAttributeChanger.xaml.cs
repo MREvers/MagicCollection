@@ -120,7 +120,7 @@ namespace CollectorsFrontEnd.Interfaces.Subs
         {
             showMainDisplay();
 
-            CompSubKeyValCreater ITI = new CompSubKeyValCreater();
+            Module_KeyValCreater ITI = new Module_KeyValCreater();
             m_OverlayControl = ITI;
             ITI.UnhandledEvent += RouteReceivedUnhandledEvent;
             Panel.SetZIndex(GrdOverlay, 2);
@@ -140,10 +140,10 @@ namespace CollectorsFrontEnd.Interfaces.Subs
         #region Public Event Handlers
         public void RouteReceivedUnhandledEvent(IDataModel aDataObject, string aszAction)
         {
-            if (aDataObject.GetType() == typeof(CompSubKeyValCreater.CompSubKeyValCreaterModel))
+            if (aDataObject.GetType() == typeof(Module_KeyValCreater.Data))
             {
-                CompSubKeyValCreater.CompSubKeyValCreaterModel oDataModel =
-                    (CompSubKeyValCreater.CompSubKeyValCreaterModel)aDataObject;
+                Module_KeyValCreater.Data oDataModel =
+                    (Module_KeyValCreater.Data)aDataObject;
                 if (aszAction == "OK")
                 {
                     ecAddMetaTag(oDataModel);
@@ -157,7 +157,7 @@ namespace CollectorsFrontEnd.Interfaces.Subs
         #endregion Public EH
 
         #region Private Event Handlers
-        private void ecAddMetaTag(CompSubKeyValCreater.CompSubKeyValCreaterModel aDataObject)
+        private void ecAddMetaTag(Module_KeyValCreater.Data aDataObject)
         {
             if (aDataObject.Key != "")
             {

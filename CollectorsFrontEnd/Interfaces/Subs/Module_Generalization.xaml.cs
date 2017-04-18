@@ -25,7 +25,7 @@ namespace CollectorsFrontEnd.Interfaces.Subs
     /// <summary>
     /// Interaction logic for CompSubGeneralization.xaml
     /// </summary>
-    public partial class CompSubGeneralization : UserControl, INotifyPropertyChanged, IComponent
+    public partial class Module_Generalization : UserControl, INotifyPropertyChanged, IComponent
     {
         #region Bindings
         public ObservableCollection<CompSubItemDisplayer> LstCardModels
@@ -55,7 +55,7 @@ namespace CollectorsFrontEnd.Interfaces.Subs
             }
         }
 
-        public class CompSubGeneralizationModel : IDataModel
+        public class Data : IDataModel
         {
             public ObservableCollection<CompSubItemDisplayer> LstCardModels = 
                 new ObservableCollection<CompSubItemDisplayer>();
@@ -63,9 +63,9 @@ namespace CollectorsFrontEnd.Interfaces.Subs
             public CompSubItemDisplayer SelectedItemDisplayer { get; set; }
         }
 
-        public CompSubGeneralizationModel DataModel = new CompSubGeneralizationModel();
+        public Data DataModel = new Data();
 
-        public CompSubGeneralization(List<CardModel> alstCardModels, string aszGenName)
+        public Module_Generalization(List<CardModel> alstCardModels, string aszGenName)
         {
             InitializeComponent();
             DataContext = this;

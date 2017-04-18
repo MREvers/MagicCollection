@@ -23,7 +23,7 @@ namespace CollectorsFrontEnd.Interfaces
     /// <summary>
     /// Interaction logic for CompCollectionsOverview.xaml
     /// </summary>
-    public partial class CompCollectionsOverview : UserControl, IMenuBarComponent, INotifyPropertyChanged
+    public partial class View_CollectionsOverview : UserControl, IMenuBarComponent, INotifyPropertyChanged
     {
         #region Data Binding
         public List<string> LstAvailableCollections
@@ -71,7 +71,7 @@ namespace CollectorsFrontEnd.Interfaces
         public CollectionsOverviewerModel DataModel;
         public event ComponentEvent UnhandledEvent;
 
-        public CompCollectionsOverview(List<string> alstAvailableCollections)
+        public View_CollectionsOverview(List<string> alstAvailableCollections)
         {
             InitializeComponent();
             DataContext = this;

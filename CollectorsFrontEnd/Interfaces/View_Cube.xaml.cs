@@ -21,7 +21,7 @@ namespace CollectorsFrontEnd.Interfaces
     /// <summary>
     /// Interaction logic for CompCubeView.xaml
     /// </summary>
-    public partial class CompCubeView : UserControl, IMenuBarComponent
+    public partial class View_Cube : UserControl, IMenuBarComponent
     {
         #region Data Binding
 
@@ -43,9 +43,13 @@ namespace CollectorsFrontEnd.Interfaces
 
         #endregion
 
+        #region Private Fields
+        private UserControl m_OverlayControl;
+        #endregion
+
         #region Public Functions
 
-        public CompCubeView(string aszCollectionName)
+        public View_Cube(string aszCollectionName)
         {
             InitializeComponent();
             DataContext = this;
@@ -60,13 +64,27 @@ namespace CollectorsFrontEnd.Interfaces
 
         public List<Tuple<string, MenuAction>> GetMenuActions()
         {
-            //throw new NotImplementedException();
-            return new List<Tuple<string, MenuAction>>();
+            List<Tuple<string, MenuAction>> LstMenuActions = new List<Tuple<string, MenuAction>>()
+            {
+                new Tuple<string, MenuAction>("Edit List", showBulkEditWindow)
+            };
+            return LstMenuActions;
         }
 
         public void RouteReceivedUnhandledEvent(IDataModel aDataObject, string aszAction)
         {
-            throw new NotImplementedException();
+            if (aDataObject.GetType() == typeof(Module_BulkEdits.Data))
+            {
+                Module_BulkEdits.Data dM = (Module_BulkEdits.Data)aDataObject;
+                if (aszAction == "Cancel")
+                {
+                    showMainDisplay();
+                }
+                else if (aszAction == "Accept")
+                {
+                    ecBulkEditsAccept(dM);
+                }
+            }
         }
 
         public IDataModel GetDataModel()
@@ -80,6 +98,7 @@ namespace CollectorsFrontEnd.Interfaces
 
         private void buildGroupsView()
         {
+            LstGroups.Clear();
             Dictionary<string, List<CardModel>> lstLists = generateGroupLists();
             foreach(string szKey in lstLists.Keys)
             {
@@ -104,6 +123,39 @@ namespace CollectorsFrontEnd.Interfaces
             }
 
             return MapGroups;
+        }
+
+        private void showBulkEditWindow()
+        {
+            showMainDisplay();
+            if (DataModel.CollectionName != "")
+            {
+                Module_BulkEdits ITI = new Module_BulkEdits(DataModel);
+                m_OverlayControl = ITI;
+                ITI.UnhandledEvent += RouteReceivedUnhandledEvent;
+                Panel.SetZIndex(CenterPanel, 2);
+                CenterPanel.Children.Add(ITI);
+                MainDisplay.IsEnabled = false;
+            }
+        }
+
+        private void showMainDisplay()
+        {
+            CenterPanel.Children.Remove(m_OverlayControl);
+            m_OverlayControl = null;
+            MainDisplay.IsEnabled = true;
+        }
+
+        #endregion
+
+        #region Event Handlers
+
+        private void ecBulkEditsAccept(Module_BulkEdits.Data aDataModel)
+        {
+            DataModel.SubmitBulkEdits(aDataModel.LstTextChanges);
+            DataModel.Refresh();
+            buildGroupsView();
+            showMainDisplay();
         }
 
         #endregion
