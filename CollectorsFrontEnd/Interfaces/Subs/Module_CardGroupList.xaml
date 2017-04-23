@@ -14,7 +14,6 @@
         <Label Content="{Binding GroupName}" HorizontalContentAlignment="Center"></Label>
         <ListView x:Name="CardGroupList" Grid.Row="1" ItemsSource="{Binding LstItems}" SelectionChanged="eItemList_SelectionChanged">
             <ListView.ItemContainerStyle>
-           
                 <Style TargetType="{x:Type ListViewItem}">
                     <Setter Property="ToolTip">
                         <Setter.Value>

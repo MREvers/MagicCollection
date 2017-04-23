@@ -7,7 +7,7 @@
              mc:Ignorable="d" 
              d:DesignHeight="380" d:DesignWidth="620">
     <Grid x:Name="CenterPanel">
-        <ItemsControl x:Name="MainDisplay" ItemsSource="{Binding LstGroups}">
+        <ItemsControl x:Name="MainDisplay" ItemsSource="{Binding LstGroups}" FrameworkElement.SizeChanged="eMainDisplay_Resize">
             <ItemsControl.ItemsPanel>
                 <ItemsPanelTemplate>
                     <WrapPanel Orientation="Vertical"/>

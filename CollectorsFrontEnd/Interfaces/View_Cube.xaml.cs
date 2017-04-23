@@ -35,11 +35,21 @@ namespace CollectorsFrontEnd.Interfaces
 
         #endregion 
 
-        #region PUblic Fields
+        #region Public Fields
 
         public CollectionModel DataModel;
 
         public string GroupingAttr;
+
+        // We can come up with a better solution in the future
+        public List<string> LstSpecialGroups = new List<string>()
+        {
+            "White",
+            "Red",
+            "Green",
+            "Blue",
+            "Black"
+        };
 
         #endregion
 
@@ -60,7 +70,10 @@ namespace CollectorsFrontEnd.Interfaces
             }
             GroupingAttr = "colors";
             LstGroups = new ObservableCollection<Module_CardGroupList>();
-            buildGroupsView();
+            Loaded += (o, e) =>
+            {
+                buildGroupsView();
+            };
         }
 
         public List<Tuple<string, MenuAction>> GetMenuActions()
@@ -106,16 +119,36 @@ namespace CollectorsFrontEnd.Interfaces
 
         #region Private Functions
 
+        // This must be called after the window is loaded or "ActualHeight" will be 0.
         private void buildGroupsView()
         {
             LstGroups.Clear();
             Dictionary<string, List<CardModel>> lstLists = generateGroupLists();
+            List<Module_CardGroupList> lstFirstsList = new List<Module_CardGroupList>();
+            List<Module_CardGroupList> lstPostLists = new List<Module_CardGroupList>();
             foreach (string szKey in lstLists.Keys)
             {
                 Module_CardGroupList newGroup = new Module_CardGroupList(szKey, lstLists[szKey]);
                 newGroup.UnhandledEvent += RouteReceivedUnhandledEvent;
-                LstGroups.Add(newGroup);
+                if (LstSpecialGroups.Where(x => newGroup.GroupName.Contains(x)).Count() > 0)
+                {
+                    lstFirstsList.Add(newGroup);
+                }
+                else
+                {
+                    lstPostLists.Add(newGroup);
+                }
             }
+
+            foreach( var ng in lstFirstsList)
+            {
+                LstGroups.Add(ng);
+            }
+            foreach( var ng in lstPostLists)
+            {
+                LstGroups.Add(ng);
+            }
+            ecResizeGroups();
         }
 
         private Dictionary<string, List<CardModel>> generateGroupLists()
@@ -162,6 +195,17 @@ namespace CollectorsFrontEnd.Interfaces
 
         #region Event Handlers
 
+        private void ecResizeGroups()
+        {
+            foreach(Module_CardGroupList grp in LstGroups)
+            {
+                if (LstSpecialGroups.Where(x => grp.GroupName.Contains(x) ).Count() > 0)
+                {
+                    grp.Height = MainDisplay.ActualHeight;
+                }
+            }
+        }
+
         private void ecBulkEditsAccept(Module_BulkEdits.Data aDataModel)
         {
             DataModel.SubmitBulkEdits(aDataModel.LstTextChanges);
@@ -189,7 +233,7 @@ namespace CollectorsFrontEnd.Interfaces
 
         private void Canvas_MouseMove(object sender, System.Windows.Input.MouseEventArgs e)
         {
-           // var pos = e.GetPosition((Canvas)sender);
+            // var pos = e.GetPosition((Canvas)sender);
             //Canvas.SetLeft(eye, pos.X);
             //Canvas.SetTop(eye, pos.Y);
         }
@@ -204,6 +248,13 @@ namespace CollectorsFrontEnd.Interfaces
             showBulkEditWindow();
         }
 
+        private void eMainDisplay_Resize(object sender, SizeChangedEventArgs e)
+        {
+            ecResizeGroups();
+        }
+
         #endregion
+
+
     }
 }
