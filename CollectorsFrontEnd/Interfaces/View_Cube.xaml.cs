@@ -130,7 +130,7 @@ namespace CollectorsFrontEnd.Interfaces
             {
                 Module_CardGroupList newGroup = new Module_CardGroupList(szKey, lstLists[szKey]);
                 newGroup.UnhandledEvent += RouteReceivedUnhandledEvent;
-                if (LstSpecialGroups.Where(x => newGroup.GroupName.Contains(x)).Count() > 0)
+                if (LstSpecialGroups.Where(x => newGroup.GroupName.Contains(x)).Count() == 1)
                 {
                     lstFirstsList.Add(newGroup);
                 }
@@ -199,7 +199,7 @@ namespace CollectorsFrontEnd.Interfaces
         {
             foreach(Module_CardGroupList grp in LstGroups)
             {
-                if (LstSpecialGroups.Where(x => grp.GroupName.Contains(x) ).Count() > 0)
+                if (LstSpecialGroups.Where(x => grp.GroupName.Contains(x) ).Count() == 1)
                 {
                     grp.Height = MainDisplay.ActualHeight;
                 }

@@ -27,6 +27,9 @@ namespace CollectorsFrontEnd.Interfaces.Subs
         public string RemoveCardDisplay { get; set; }
         public string AddCardDisplay { get; set; }
 
+        public event PropertyChangedEventHandler PropertyChanged;
+        public event ComponentEvent UnhandledEvent;
+
         public class Data : IDataModel
         {
             public List<string> LstTextChanges = new List<string>();
@@ -40,6 +43,8 @@ namespace CollectorsFrontEnd.Interfaces.Subs
         private TextBox m_TBInAddCombo;
         private TextBox m_TBInRemoveCombo;
         private CollectionModel m_ColModel;
+
+        #region Public Functions
 
         public Module_BulkEdits(CollectionModel aoColModel)
         {
@@ -57,6 +62,8 @@ namespace CollectorsFrontEnd.Interfaces.Subs
             CBAddCardSearch.LostFocus += eCBAddCardSearch_LostFocus;
             CBAddCardSearch.IsTextSearchEnabled = false;
 
+            CBAddCardSearch.PreviewKeyDown += eTabOnAddCB_Press;
+
             CBRemoveCardSearch.AddHandler(System.Windows.Controls.Primitives.TextBoxBase.TextChangedEvent,
                       new System.Windows.Controls.TextChangedEventHandler(eRemoveCardSearch_TextChanged));
 
@@ -65,9 +72,6 @@ namespace CollectorsFrontEnd.Interfaces.Subs
             CBRemoveCardSearch.LostFocus += eCBRemoveCardSearch_LostFocus;
             CBRemoveCardSearch.IsTextSearchEnabled = false;
         }
-
-        public event PropertyChangedEventHandler PropertyChanged;
-        public event ComponentEvent UnhandledEvent;
 
         public IDataModel GetDataModel()
         {
@@ -79,6 +83,10 @@ namespace CollectorsFrontEnd.Interfaces.Subs
             throw new NotImplementedException();
         }
 
+        #endregion
+
+        #region UI Event Handler
+
         private void eAddItem_Click(object sender, RoutedEventArgs e)
         {
             if (m_bIsOfferedSelectionAdd)
@@ -89,6 +97,7 @@ namespace CollectorsFrontEnd.Interfaces.Subs
                 DataModel.LstTextChanges.Add(szCmdString);
                 m_TBInAddCombo.Text = "";
                 m_TBInRemoveCombo.Text = "";
+                m_TBInAddCombo.Focus();
             }
         }
 
@@ -120,6 +129,7 @@ namespace CollectorsFrontEnd.Interfaces.Subs
                 }
                 m_TBInAddCombo.Text = "";
                 m_TBInRemoveCombo.Text = "";
+                m_TBInRemoveCombo.Focus();
             }
         }
 
@@ -161,19 +171,24 @@ namespace CollectorsFrontEnd.Interfaces.Subs
         {
             CBAddCardSearch.RemoveHandler(System.Windows.Controls.Primitives.TextBoxBase.TextChangedEvent,
                       new System.Windows.Controls.TextChangedEventHandler(eAddCardSearch_TextChanged));
-            CBAddCardSearch.IsDropDownOpen = true;
             string szDropDownText = CBAddCardSearch.Text;
             CBAddCardSearch.Items.Clear();
             m_TBInAddCombo.SelectionLength = 0;
             m_bIsOfferedSelectionAdd = false;
-
             if (szDropDownText.Length > 3)
             {
+                CBAddCardSearch.IsDropDownOpen = true;
+
                 List<string> lstCards = ServerInterfaceModel.GetAllCardsStartingWith(szDropDownText.ToLower());
-                foreach (string szCard in lstCards)
+                if (lstCards.Count > 0)
                 {
-                    CBAddCardSearch.Items.Add(szCard);
+                    foreach (string szCard in lstCards)
+                    {
+                        CBAddCardSearch.Items.Add(szCard);
+                    }
+                    
                 }
+                
             }
             m_TBInAddCombo.SelectionStart = CBAddCardSearch.Text.Length; // THIS IS NECESSARY
             m_TBInAddCombo.SelectionLength = 0;
@@ -218,13 +233,14 @@ namespace CollectorsFrontEnd.Interfaces.Subs
         {
             CBRemoveCardSearch.RemoveHandler(System.Windows.Controls.Primitives.TextBoxBase.TextChangedEvent,
                       new System.Windows.Controls.TextChangedEventHandler(eRemoveCardSearch_TextChanged));
-            CBRemoveCardSearch.IsDropDownOpen = true;
+            
             string szDropDownText = CBRemoveCardSearch.Text;
             CBRemoveCardSearch.Items.Clear();
             m_TBInRemoveCombo.SelectionLength = 0;
             m_bIsOfferedSelectionRemove = false;
             if (szDropDownText.Length > 3)
             {
+                CBRemoveCardSearch.IsDropDownOpen = true;
                 List<string> lstCards = m_ColModel.GetAllCardsStartingWith(szDropDownText.ToLower());
                 foreach (string szCard in lstCards)
                 {
@@ -246,5 +262,25 @@ namespace CollectorsFrontEnd.Interfaces.Subs
         {
             UnhandledEvent(DataModel, "Accept");
         }
+
+        private void eTabOnAddCB_Press(object o, KeyEventArgs e)
+        {
+            if (e.Key == Key.Tab && CBAddCardSearch.Items.Count > 0)
+            {
+                CBAddCardSearch.SelectedIndex = 0;
+            }
+        }
+
+        private void eTabOnRemoveCB_Press(object o, KeyEventArgs e)
+        {
+            if (e.Key == Key.Tab && CBRemoveCardSearch.Items.Count > 0)
+            {
+                CBRemoveCardSearch.SelectedIndex = 0;
+            }
+        }
+
+        #endregion
+
+
     }
 }
