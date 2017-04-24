@@ -370,13 +370,15 @@ private:
 	// Only adds the collection object cache locations
 	void registerItem(int aiItem);
 
-	PseudoCopy GeneratePseudoCopy(std::string aszLongName,
+	PseudoCopy generatePseudoCopy(std::string aszLongName,
 		std::vector<std::pair<std::string, std::string>> alstMeta = std::vector<std::pair<std::string, std::string>>());
 
-	PseudoCopy GeneratePseudoCopy(
+	PseudoCopy generatePseudoCopy(
 		std::vector<std::pair<std::string, std::string>> alstAttrs,
 		std::string aszName,
 		std::vector<std::pair<std::string, std::string>> alstMeta = std::vector<std::pair<std::string, std::string>>());
+
+	void setTransactionsNoWrite();
 };
 
 #pragma message ("Finish Collection.h")

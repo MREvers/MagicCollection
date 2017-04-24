@@ -222,7 +222,7 @@ void Collection::AddItem(std::string aszNewItem,
 	std::vector<std::pair<std::string, std::string>> alstMeta)
 {
 	// Check if all targets exist.
-	PseudoCopy oPseudoTarget = GeneratePseudoCopy(alstAttrs, aszNewItem, alstMeta);
+	PseudoCopy oPseudoTarget = generatePseudoCopy(alstAttrs, aszNewItem, alstMeta);
 
 	if (oPseudoTarget.Ok) { oPseudoTarget.LoadCard(); }
 	if (oPseudoTarget.Ok)
@@ -273,7 +273,7 @@ void Collection::RemoveItem(std::string aszRemoveItem,
 {
 
 	// Check if all targets exist.
-	PseudoCopy oPseudoTarget = GeneratePseudoCopy(alstAttrs, aszRemoveItem, alstMeta);
+	PseudoCopy oPseudoTarget = generatePseudoCopy(alstAttrs, aszRemoveItem, alstMeta);
 
 	if (oPseudoTarget.Ok) { oPseudoTarget.LoadCard(); }
 	if (oPseudoTarget.Ok) { oPseudoTarget.FindCopy(); }
@@ -327,13 +327,13 @@ Collection::ReplaceItem(std::string aszRemoveItemLongName,
 	bool bFinal)
 {
 	// Check if all targets exist.
-	PseudoCopy oPseudoTarget = GeneratePseudoCopy(aszRemoveItemLongName, alstIdentifyingMeta);
+	PseudoCopy oPseudoTarget = generatePseudoCopy(aszRemoveItemLongName, alstIdentifyingMeta);
 
 	if (oPseudoTarget.Ok) { oPseudoTarget.LoadCard(); }
 	if (oPseudoTarget.Ok) { oPseudoTarget.FindCopy(); }
 	if (oPseudoTarget.Ok)
 	{
-		PseudoCopy oPseudoNew = GeneratePseudoCopy(aszAddItemLongName, alstNewMeta);
+		PseudoCopy oPseudoNew = generatePseudoCopy(aszAddItemLongName, alstNewMeta);
 
 		if (oPseudoNew.Ok) { oPseudoNew.LoadCard(); }
 		if (oPseudoNew.Ok && oPseudoTarget.Ok)
@@ -381,7 +381,7 @@ Collection::RemoveMetaTag(
 	std::vector<std::pair<std::string, std::string>> alstMatchMeta)
 {
 	// Check if all targets exist.
-	PseudoCopy oPseudoTarget = GeneratePseudoCopy(aszLongName, alstMatchMeta);
+	PseudoCopy oPseudoTarget = generatePseudoCopy(aszLongName, alstMatchMeta);
 
 	if (oPseudoTarget.Ok) { oPseudoTarget.LoadCard(); }
 	if (oPseudoTarget.Ok) { oPseudoTarget.FindCopy(); }
@@ -429,7 +429,7 @@ void Collection::SetMetaTag(
 	bool bFinal)
 {
 	// Check if all targets exist.
-	PseudoCopy oPseudoTarget = GeneratePseudoCopy(aszLongName, alstMatchMeta);
+	PseudoCopy oPseudoTarget = generatePseudoCopy(aszLongName, alstMatchMeta);
 
 	if (oPseudoTarget.Ok) { oPseudoTarget.LoadCard(); }
 	if (oPseudoTarget.Ok) { oPseudoTarget.FindCopy(); }
@@ -477,7 +477,7 @@ void Collection::SetMetaTags(std::string aszLongName,
 	std::vector<std::pair<std::string, std::string>> alstMatchMeta)
 {
 	// Check if all targets exist.
-	PseudoCopy oPseudoTarget = GeneratePseudoCopy(aszLongName, alstMatchMeta);
+	PseudoCopy oPseudoTarget = generatePseudoCopy(aszLongName, alstMatchMeta);
 
 	if (oPseudoTarget.Ok) { oPseudoTarget.LoadCard(); }
 	if (oPseudoTarget.Ok) { oPseudoTarget.FindCopy(); }
@@ -534,7 +534,7 @@ void Collection::SetNonUniqueAttribute(
 	std::vector<std::pair<std::string, std::string>> alstMatchMeta)
 {
 	// Check if all targets exist.
-	PseudoCopy oPseudoTarget = GeneratePseudoCopy(aszLongName, alstMatchMeta);
+	PseudoCopy oPseudoTarget = generatePseudoCopy(aszLongName, alstMatchMeta);
 
 	if (oPseudoTarget.Ok) { oPseudoTarget.LoadCard(); }
 	if (oPseudoTarget.Ok) { oPseudoTarget.FindCopy(); }
@@ -611,7 +611,7 @@ void Collection::SetFeatures(
 	bool bFinal)
 {
 	// Check if all targets exist.
-	PseudoCopy oPseudoTarget = GeneratePseudoCopy(aszLongName, alstMatchMeta);
+	PseudoCopy oPseudoTarget = generatePseudoCopy(aszLongName, alstMatchMeta);
 
 	if (oPseudoTarget.Ok) { oPseudoTarget.LoadCard(); }
 	if (oPseudoTarget.Ok) { oPseudoTarget.FindCopy(); }
@@ -709,7 +709,7 @@ void Collection::SetFeatures(
 std::vector<std::string> Collection::GetNonUniqueAttributeRestrictions(std::string aszLongName, std::string aszKey)
 {
 	// Check if all targets exist.
-	PseudoCopy oPseudoTarget = GeneratePseudoCopy(aszLongName);
+	PseudoCopy oPseudoTarget = generatePseudoCopy(aszLongName);
 
 	if (oPseudoTarget.Ok) { oPseudoTarget.LoadCard(); }
 	if (oPseudoTarget.Ok) { oPseudoTarget.FindCopy(); }
@@ -731,7 +731,7 @@ std::vector<std::vector<std::pair<std::string, std::string>>> Collection::GetMet
 {
 	std::vector<std::vector<std::pair<std::string, std::string>>> lstRetVal;
 	// Check if all targets exist.
-	PseudoCopy oPseudoTarget = GeneratePseudoCopy(aszLongName);
+	PseudoCopy oPseudoTarget = generatePseudoCopy(aszLongName);
 
 	if (oPseudoTarget.Ok) { oPseudoTarget.LoadCard(); }
 	if (oPseudoTarget.Ok) { oPseudoTarget.FindCopy(); }
@@ -807,17 +807,26 @@ void Collection::registerItem(int aiItem)
 	}
 }
 
-Collection::PseudoCopy Collection::GeneratePseudoCopy(std::string aszLongName, std::vector<std::pair<std::string, std::string>> alstMeta)
+Collection::PseudoCopy Collection::generatePseudoCopy(std::string aszLongName, std::vector<std::pair<std::string, std::string>> alstMeta)
 {
 	return PseudoCopy(m_szName, m_ColSource, aszLongName, alstMeta);
 }
 
-Collection::PseudoCopy Collection::GeneratePseudoCopy(
+Collection::PseudoCopy Collection::generatePseudoCopy(
 	std::vector<std::pair<std::string, std::string>> alstAttrs,
 	std::string aszName,
 	std::vector<std::pair<std::string, std::string>> alstMeta)
 {
 	return PseudoCopy(m_szName, m_ColSource, aszName, alstAttrs, alstMeta);
+}
+
+void Collection::setTransactionsNoWrite()
+{
+	std::vector<Transaction>::iterator iter_Trans = m_lstTransactions.begin();
+	for (; iter_Trans != m_lstTransactions.end(); iter_Trans++)
+	{
+		iter_Trans->Recordable = false;
+	}
 }
 
 bool Collection::removeItem(std::string aszRemoveItem,
@@ -862,7 +871,7 @@ std::string Collection::changeItemAttribute_string(
 	std::string aszNewVal,
 	bool bIsParentCol)
 {
-	PseudoCopy oBefore = GeneratePseudoCopy(
+	PseudoCopy oBefore = generatePseudoCopy(
 		CollectionObject::ConvertMapToList(aoCO->NonUniqueTraits),
 		aszCardname);
 	std::string szBefore = oBefore.ToString();
@@ -870,7 +879,7 @@ std::string Collection::changeItemAttribute_string(
 	CopyObject oDummyCopy = oBefore.GeneratePseudoCopy();
 	setItemAttr(&oDummyCopy, aszKey, aszNewVal);
 
-	PseudoCopy oAfter = GeneratePseudoCopy(
+	PseudoCopy oAfter = generatePseudoCopy(
 		CollectionObject::ConvertMapToList(oDummyCopy.NonUniqueTraits),
 		aszCardname);
 	std::string szAfter = oAfter.ToString();
@@ -1066,8 +1075,8 @@ bool Collection::loadChangeCardLine(std::string aszChangeCardLine)
 					ParseAttrs(lstAfterLongNameAndMeta[1]);
 			}
 
-			PseudoCopy oRemoveTarget = GeneratePseudoCopy(lstBeforeLongNameAndMeta[0], lstRemoveMetaTags);
-			PseudoCopy oAddTarget = GeneratePseudoCopy(lstAfterLongNameAndMeta[0], lstAddMetaTags);
+			PseudoCopy oRemoveTarget = generatePseudoCopy(lstBeforeLongNameAndMeta[0], lstRemoveMetaTags);
+			PseudoCopy oAddTarget = generatePseudoCopy(lstAfterLongNameAndMeta[0], lstAddMetaTags);
 
 			if (oRemoveTarget.Ok) { oRemoveTarget.LoadCard(); }
 			if (oRemoveTarget.Ok) { oRemoveTarget.FindCopy(); }
@@ -1435,6 +1444,8 @@ void Collection::CreateBaselineHistory()
 	}
 
 	oHistFile.close();
+
+	setTransactionsNoWrite();
 }
 
 void Collection::PrintList()
@@ -1513,7 +1524,7 @@ std::vector<std::string> Collection::GetCollectionList()
 		std::vector<std::pair<CopyObject*, int>>::iterator iter_Bucket = lstBuckets.begin();
 		for (; iter_Bucket != lstBuckets.end(); ++iter_Bucket)
 		{
-			PseudoCopy oTemp = GeneratePseudoCopy(
+			PseudoCopy oTemp = generatePseudoCopy(
 				iter_Bucket->first->GetNonUniqueTraits(true),
 				m_ColSource->GetCardPrototype(*iter_ResiCards)->GetName(),
 				iter_Bucket->first->GetMetaTags(m_szName));
@@ -1576,7 +1587,7 @@ Collection::GetCollectionListWithMeta()
 
 		for (int i = 0; i < lstBuckets.size(); i++)
 		{
-			PseudoCopy oTemp = GeneratePseudoCopy(
+			PseudoCopy oTemp = generatePseudoCopy(
 				lstBuckets[i].first->GetNonUniqueTraits(true),
 				m_ColSource->GetCardPrototype(*iter_ResiCards)->GetName(),
 				lstBuckets[i].first->GetMetaTags(m_szName));

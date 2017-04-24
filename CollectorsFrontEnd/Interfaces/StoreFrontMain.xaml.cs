@@ -25,7 +25,8 @@ namespace CollectorsFrontEnd.Interfaces
     {
         #region Bindings
         private IMenuBarComponent _OperationWindow;
-        public IMenuBarComponent OperationWindow {
+        public IMenuBarComponent OperationWindow
+        {
             get
             {
                 return _OperationWindow;
@@ -37,8 +38,8 @@ namespace CollectorsFrontEnd.Interfaces
             }
         }
 
-        private ObservableCollection<MenuItem> _LstViewOptions;
-        public ObservableCollection<MenuItem> LstViewOptions
+        private ObservableCollection<object> _LstViewOptions;
+        public ObservableCollection<object> LstViewOptions
         {
             get
             {
@@ -76,7 +77,7 @@ namespace CollectorsFrontEnd.Interfaces
             ServerInterfaceModel.GenerateCollectionModel("Primary.txt");
             ServerInterfaceModel.GenerateCollectionModel("Main.txt");
 
-            LstViewOptions = new ObservableCollection<MenuItem>();
+            LstViewOptions = new ObservableCollection<object>();
             ecSwitchToCollectionOverview();
         }
 
@@ -137,10 +138,19 @@ namespace CollectorsFrontEnd.Interfaces
             LstActions = OperationWindow.GetMenuActions();
             foreach (var act in LstActions)
             {
-                MenuItem mI = new MenuItem();
-                mI.Header = act.Item1;
-                mI.Click += (o, e) => { act.Item2(); };
-                LstViewOptions.Add(mI);
+                if (act.Item1 != "Separator")
+                {
+                    MenuItem mI = new MenuItem();
+                    mI.Header = act.Item1;
+                    mI.Click += (o, e) => { act.Item2(); };
+                    LstViewOptions.Add(mI);
+                }
+                else
+                {
+                    LstViewOptions.Add(new Separator());
+                }
+
+
             }
             if (LstActions.Count == 0)
             {
@@ -163,7 +173,7 @@ namespace CollectorsFrontEnd.Interfaces
 
         private void eImportCards_Click(object sender, RoutedEventArgs e)
         {
-            ServerInterfaceModel.ImportJSONCollection();   
+            ServerInterfaceModel.ImportJSONCollection();
         }
     }
 }

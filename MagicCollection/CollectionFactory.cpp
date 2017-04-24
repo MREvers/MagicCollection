@@ -36,6 +36,11 @@ Collection* CollectionFactory::LoadCollection(std::string aszCollectionName, std
 
 	}
 
+	if (szColName == "")
+	{
+		return GetCollection("ErrorLoadingCollection");
+	}
+
 	return GetCollection(szColName);
 }
 

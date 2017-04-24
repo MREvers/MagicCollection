@@ -80,6 +80,8 @@ namespace CollectorsFrontEnd.Interfaces
         {
             List<Tuple<string, MenuAction>> LstMenuActions = new List<Tuple<string, MenuAction>>()
             {
+                new Tuple<string, MenuAction>("Save Collection", eSaveCollection),
+                new Tuple<string, MenuAction>("Separator", null),
                 new Tuple<string, MenuAction>("Edit List", eShowBulkEdits),
                 new Tuple<string, MenuAction>("Set Baseline History", eSetBaselineHistory)
             };
@@ -140,11 +142,11 @@ namespace CollectorsFrontEnd.Interfaces
                 }
             }
 
-            foreach( var ng in lstFirstsList)
+            foreach (var ng in lstFirstsList)
             {
                 LstGroups.Add(ng);
             }
-            foreach( var ng in lstPostLists)
+            foreach (var ng in lstPostLists)
             {
                 LstGroups.Add(ng);
             }
@@ -197,9 +199,9 @@ namespace CollectorsFrontEnd.Interfaces
 
         private void ecResizeGroups()
         {
-            foreach(Module_CardGroupList grp in LstGroups)
+            foreach (Module_CardGroupList grp in LstGroups)
             {
-                if (LstSpecialGroups.Where(x => grp.GroupName.Contains(x) ).Count() == 1)
+                if (LstSpecialGroups.Where(x => grp.GroupName.Contains(x)).Count() == 1)
                 {
                     grp.Height = MainDisplay.ActualHeight;
                 }
@@ -241,6 +243,11 @@ namespace CollectorsFrontEnd.Interfaces
         public void eSetBaselineHistory()
         {
             DataModel.SetBaselineHistory();
+        }
+
+        private void eSaveCollection()
+        {
+            DataModel.SaveCollection();
         }
 
         public void eShowBulkEdits()

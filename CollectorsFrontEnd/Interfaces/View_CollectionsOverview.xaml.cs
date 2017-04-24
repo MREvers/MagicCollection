@@ -175,6 +175,25 @@ namespace CollectorsFrontEnd.Interfaces
 
         private void eLoadCol_Click(object sender, RoutedEventArgs e)
         {
+            // Create OpenFileDialog 
+            Microsoft.Win32.OpenFileDialog dlg = new Microsoft.Win32.OpenFileDialog();
+            // Set filter for file extension and default file extension 
+            dlg.DefaultExt = ".txt";
+            dlg.Filter = "Text Files (*.txt)|*.txt";
+
+
+            // Display OpenFileDialog by calling ShowDialog method 
+            Nullable<bool> result = dlg.ShowDialog();
+
+
+            // Get the selected file name and display in a TextBox 
+            if (result == true)
+            {
+                // Open document 
+                string filename = dlg.FileName;
+                ServerInterfaceModel.GenerateCollectionModel(filename);
+                buildAvailableCollectionsList();
+            }
 
         }
 
