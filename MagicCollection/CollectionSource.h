@@ -41,8 +41,11 @@ public:
    std::vector<std::string> GetAllCardsStartingWith(std::string aszText);
 
 private:
-   std::vector<SourceObject> m_lstptCardBuffer;
+   std::vector<SourceObject> m_lstCardBuffer;
    std::vector<CollectionObject> m_lstoCardCache;
+
+   // Used for caching searches over 5 chars.
+   std::vector<std::pair<std::string, std::vector<SourceObject>>> m_lstSearchCache;
 
    int findInBuffer(std::string aszName, bool abCaseSensitive);
    int findInCache(std::string aszName, bool abCaseSensitive);

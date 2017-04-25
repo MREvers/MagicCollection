@@ -1,4 +1,5 @@
 ﻿using CollectorsFrontEnd.InterfaceModels;
+using CollectorsFrontEnd.Interfaces.Controls;
 using CollectorsFrontEnd.Interfaces.Subs;
 using System;
 using System.Collections.Generic;
@@ -33,7 +34,19 @@ namespace CollectorsFrontEnd.Interfaces
 
         public event ComponentEvent UnhandledEvent;
 
-        #endregion 
+        #endregion
+
+        #region Public Properties
+
+        public Module_GroupView MainDisplay
+        {
+            get
+            {
+                return (Module_GroupView) m_Overlay.MainControl;
+            }
+        }
+
+        #endregion
 
         #region Public Fields
 
@@ -54,8 +67,7 @@ namespace CollectorsFrontEnd.Interfaces
         #endregion
 
         #region Private Fields
-        private UserControl m_OverlayControl;
-        private Module_CardGroupList m_LastClickedGroup = null;
+        private Control_OverlayPanel m_Overlay = null;
         #endregion
 
         #region Public Functions
@@ -74,6 +86,16 @@ namespace CollectorsFrontEnd.Interfaces
             {
                 buildGroupsView();
             };
+
+            Module_GroupView groupView = new Module_GroupView();
+            groupView.LstGroups = LstGroups;
+            groupView.SizeChanged += eMainDisplay_Resize;
+
+            Control_OverlayPanel mainPanel = new Control_OverlayPanel();
+            mainPanel.SetMainControl(groupView);
+            m_Overlay = mainPanel;
+
+            CenterPanel.Children.Add(m_Overlay);
         }
 
         public List<Tuple<string, MenuAction>> GetMenuActions()
@@ -178,19 +200,14 @@ namespace CollectorsFrontEnd.Interfaces
             if (DataModel.CollectionName != "")
             {
                 Module_BulkEdits ITI = new Module_BulkEdits(DataModel);
-                m_OverlayControl = ITI;
                 ITI.UnhandledEvent += RouteReceivedUnhandledEvent;
-                Panel.SetZIndex(CenterPanel, 2);
-                CenterPanel.Children.Add(ITI);
-                MainDisplay.IsEnabled = false;
+                m_Overlay.ShowOverlay(ITI);
             }
         }
 
         private void showMainDisplay()
         {
-            CenterPanel.Children.Remove(m_OverlayControl);
-            m_OverlayControl = null;
-            MainDisplay.IsEnabled = true;
+            m_Overlay.ShowMain();
         }
 
         #endregion
@@ -232,13 +249,6 @@ namespace CollectorsFrontEnd.Interfaces
         #endregion
 
         #region UI Event Handlers
-
-        private void Canvas_MouseMove(object sender, System.Windows.Input.MouseEventArgs e)
-        {
-            // var pos = e.GetPosition((Canvas)sender);
-            //Canvas.SetLeft(eye, pos.X);
-            //Canvas.SetTop(eye, pos.Y);
-        }
 
         public void eSetBaselineHistory()
         {

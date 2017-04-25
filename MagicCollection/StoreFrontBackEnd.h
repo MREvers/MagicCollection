@@ -35,7 +35,11 @@ public:
    // Returns the list of restions if restrictions exist. * if none exist.
    std::vector<std::string> GetCardAttributeRestriction(std::string aszCardNameLong, std::string aszKey);
 
-   // Loads specified collection into memory by file name
+   /* LoadCollection
+   *  Loads specified collection into memory by file name. If fail, return an empty string.
+   *  @param aszCollectionToLoad
+   *  @return Name of collection if successful, "" if not.
+   */ 
    std::string LoadCollection(std::string aszCollectionToLoad);
 
    // Load Bulk Changes

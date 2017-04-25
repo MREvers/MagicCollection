@@ -44,7 +44,11 @@ public:
 	void 
       SaveCollection(System::String^ aszCollectionName);
 
-	// Returns the collection name
+	/* LoadCollection
+	*  Loads specified collection into memory by file name. If fail, return an empty string.
+	*  @param aszCollectionToLoad
+	*  @return Name of collection if successful, "" if not.
+	*/
 	System::String^ 
       LoadCollection(System::String^ aszCollectionName);
 

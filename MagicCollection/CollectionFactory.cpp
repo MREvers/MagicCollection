@@ -13,7 +13,7 @@ CollectionFactory::~CollectionFactory()
 {
 }
 
-Collection* CollectionFactory::LoadCollection(std::string aszCollectionName, std::string aszFileName)
+Collection* CollectionFactory::LoadCollection(std::string aszFileName)
 {
 
 	std::vector<std::pair<std::string, std::string>> lstForcedChanges;
@@ -35,13 +35,7 @@ Collection* CollectionFactory::LoadCollection(std::string aszCollectionName, std
 		return oCol;
 
 	}
-
-	if (szColName == "")
-	{
-		return GetCollection("ErrorLoadingCollection");
-	}
-
-	return GetCollection(szColName);
+	return nullptr;
 }
 
 Collection* CollectionFactory::GetCollection(std::string aszCollectionName)

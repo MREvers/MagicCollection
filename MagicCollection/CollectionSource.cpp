@@ -13,8 +13,8 @@ CollectionSource::~CollectionSource()
 
 void CollectionSource::LoadLib(std::string aszFileName)
 {
-	m_lstptCardBuffer.clear();
-	m_lstptCardBuffer.reserve(17000);
+	m_lstCardBuffer.clear();
+	m_lstCardBuffer.reserve(17000);
 
 	rapidxml::xml_document<> doc;
 	std::ifstream file(aszFileName);
@@ -48,9 +48,9 @@ void CollectionSource::LoadLib(std::string aszFileName)
 		SourceObject* sO = new SourceObject(m_iAllCharBuffSize);
 		std::string aszName = xmlNode_CardName->value();
 		m_iAllCharBuffSize += sO->AddAttribute(szNameKeyCode, xmlNode_CardName->value(), m_AllCharBuff, m_iAllCharBuffSize);
-		m_lstptCardBuffer.push_back(*sO);
+		m_lstCardBuffer.push_back(*sO);
 		delete sO;
-		sO = &m_lstptCardBuffer[m_lstptCardBuffer.size() - 1];
+		sO = &m_lstCardBuffer[m_lstCardBuffer.size() - 1];
 
 		bool bHasAll = false;
 		while (xmlNode_CardAttribute != 0)
@@ -96,7 +96,7 @@ int CollectionSource::LoadCard(std::string aszCardName)
 		int iFound = findInBuffer(szCardName, false);
 		if (iFound != -1)
 		{
-			SourceObject* oSource = &m_lstptCardBuffer.at(iFound);
+			SourceObject* oSource = &m_lstCardBuffer.at(iFound);
 
 			// The card is already cached.
 			CollectionObject oCard(aszCardName);
@@ -165,11 +165,61 @@ std::vector<std::pair<std::string, CopyObject*>> CollectionSource::GetCollection
 std::vector<std::string> CollectionSource::GetAllCardsStartingWith(std::string aszText)
 {
 	std::vector<std::string> lstCards;
+
+	bool bActiveCache = aszText.size() > 2;
+
+	if (!bActiveCache)
+	{
+		m_lstSearchCache.clear();
+	}
+
+	// Check if the search is cached already
+	if (bActiveCache)
+	{
+		int iEnd = m_lstSearchCache.size();
+		for (int i = iEnd-1; i >= 0; i--)
+		{
+			std::pair<std::string, std::vector<SourceObject>>
+				pairICache = m_lstSearchCache[i];
+			if (pairICache.first == aszText)
+			{
+				std::vector<SourceObject>::iterator iter_Result = pairICache.second.begin();
+				for (; iter_Result != pairICache.second.end(); ++iter_Result)
+				{
+					lstCards.push_back((iter_Result)->GetName(m_AllCharBuff));
+				}
+
+				return lstCards;
+			}
+			else if (aszText.substr(0, pairICache.first.size()) == pairICache.first)
+			{
+				break;
+			}
+			else
+			{
+				m_lstSearchCache.pop_back();
+			}
+		}
+	}
+
+	// If there are still entries in the searchCache, and we are here, then we only need to search
+	//  the sublist.
+	std::vector<SourceObject>* lstSearchList;
+	std::vector<SourceObject> lstCache;
+	if (bActiveCache && m_lstSearchCache.size() > 0)
+	{
+		lstSearchList = &m_lstSearchCache[m_lstSearchCache.size() - 1].second;
+	}
+	else
+	{
+		lstSearchList = &m_lstCardBuffer;
+	}
+
 	std::vector<std::string> lstStartCards;
 	std::vector<std::string> lstOthers;
 
-	std::vector<SourceObject>::iterator iter_Cards = m_lstptCardBuffer.begin();
-	for (; iter_Cards != m_lstptCardBuffer.end(); ++iter_Cards)
+	std::vector<SourceObject>::iterator iter_Cards = lstSearchList->begin();
+	for (; iter_Cards != lstSearchList->end(); ++iter_Cards)
 	{
 		std::string szCard = iter_Cards->GetName(m_AllCharBuff);
 		std::transform(szCard.begin(), szCard.end(), szCard.begin(), ::tolower);
@@ -185,6 +235,11 @@ std::vector<std::string> CollectionSource::GetAllCardsStartingWith(std::string a
 			{
 				lstOthers.push_back(iter_Cards->GetName(m_AllCharBuff));
 			}
+
+			if (bActiveCache)
+			{
+				lstCache.push_back(*iter_Cards);
+			}
 		}
 	}
 
@@ -197,6 +252,10 @@ std::vector<std::string> CollectionSource::GetAllCardsStartingWith(std::string a
 		lstCards.push_back(sz);
 	}
 
+	if (bActiveCache)
+	{
+		m_lstSearchCache.push_back(std::make_pair(aszText, lstCache));
+	}
 
 	return lstCards;
 }
@@ -209,7 +268,7 @@ int CollectionSource::findInBuffer(std::string aszCardName, bool abCaseSensitive
 		std::transform(szCardNameFixed.begin(), szCardNameFixed.end(), szCardNameFixed.begin(), ::tolower);
 	}
 
-	int iSize = m_lstptCardBuffer.size();
+	int iSize = m_lstCardBuffer.size();
 	int iLeft = 0;
 	int iRight = iSize;
 	if (iRight < 1)
@@ -227,7 +286,7 @@ int CollectionSource::findInBuffer(std::string aszCardName, bool abCaseSensitive
 			return -1;
 		}
 
-		szName = m_lstptCardBuffer.at(middle).GetName(m_AllCharBuff);
+		szName = m_lstCardBuffer.at(middle).GetName(m_AllCharBuff);
 		if (szName == szCardNameFixed)
 			return middle;
 		else if (szCardNameFixed.compare(szName) < 0)

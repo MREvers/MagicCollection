@@ -137,7 +137,16 @@ std::string CStoreFrontBackEnd::LoadCollection(std::string aszCollection)
 	if (f.good())
 	{
 		// If it does, continue.
-		return m_ColFactory->LoadCollection("Name Not Found", aszCollection)->GetName();
+		// Check if the load is successful.
+		Collection* optrLoadedCol = m_ColFactory->LoadCollection(aszCollection);
+		if (optrLoadedCol != nullptr)
+		{
+			return optrLoadedCol->GetName();
+		}
+		else
+		{
+			return "";
+		}
 	}
 }
 

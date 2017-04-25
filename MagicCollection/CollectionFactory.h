@@ -11,7 +11,13 @@ public:
    CollectionFactory(CollectionSource* aoColSource);
    ~CollectionFactory();
 
-   Collection* LoadCollection(std::string aszCollectionName, std::string aszColFile);
+   /* LoadCollection
+   *  Loads a collection into memory by file name.
+   *  If the file is missing a collection name entry, nullptr is returned
+   *  @Param aszColFile File name of collection to load.
+   *  @return Pointer to a successfully loaded collection, nullptr if fail.
+   */
+   Collection* LoadCollection( std::string aszColFile);
 
    // Returns the collection if loaded. Returns an empty collection otherwise.
    Collection* GetCollection(std::string aszCollectionName);

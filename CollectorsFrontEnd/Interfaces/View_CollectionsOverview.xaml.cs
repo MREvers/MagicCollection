@@ -191,8 +191,10 @@ namespace CollectorsFrontEnd.Interfaces
             {
                 // Open document 
                 string filename = dlg.FileName;
-                ServerInterfaceModel.GenerateCollectionModel(filename);
-                buildAvailableCollectionsList();
+                if (ServerInterfaceModel.GenerateCollectionModel(filename) != null)
+                {
+                    buildAvailableCollectionsList();
+                }
             }
 
         }

@@ -218,21 +218,25 @@ namespace CollectorsFrontEnd.InterfaceModels
         public static CollectionModel GenerateCollectionModel(string aszCollectionFileName)
         {
             string szColName = SCI.LoadCollection(aszCollectionFileName);
-            // List of [ { CardNameLong, [Tags, ...] }, ... ]
-            List<Tuple<string, List<Tuple<string, string>>>> lstCards =
-                SCI.GetCollectionListWithMeta(szColName);
-            CollectionModel CMNew = new CollectionModel(szColName, lstCards);
-            CollectionModel CMCurrent = LstCollectionModels.FirstOrDefault(x => x.CollectionName == szColName);
-            if (CMCurrent == null)
+            if (szColName != "")
             {
-                LstCollectionModels.Add(CMNew);
+                // List of [ { CardNameLong, [Tags, ...] }, ... ]
+                List<Tuple<string, List<Tuple<string, string>>>> lstCards =
+                    SCI.GetCollectionListWithMeta(szColName);
+                CollectionModel CMNew = new CollectionModel(szColName, lstCards);
+                CollectionModel CMCurrent = LstCollectionModels.FirstOrDefault(x => x.CollectionName == szColName);
+                if (CMCurrent == null)
+                {
+                    LstCollectionModels.Add(CMNew);
+                }
+                else
+                {
+                    CMCurrent.LstCopyModels = CMNew.LstCopyModels;
+                }
+
+                return CMNew;
             }
-            else
-            {
-                CMCurrent.LstCopyModels = CMNew.LstCopyModels;
-            }
-            
-            return CMNew;
+            return null;
         }
 
         public static CardModel GenerateCopyModel(string aszCardNameLong, string aszCollectionName, List<Tuple<string, string>> aLstMetaTags)
