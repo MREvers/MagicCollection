@@ -10,8 +10,6 @@
 #include <fstream>
 #include <ctime>
 
-#include "ICollection.h"
-#include "ICollectionObject.h"
 #include "CollectionObject.h"
 // Just use magic card object for now
 #include "CollectionSource.h"
@@ -19,7 +17,7 @@
 #include "Config.h"
 
 
-class Collection : public ICollection
+class Collection
 {
 	/* Friend Class PseudoCopy
 	*  Used to store information needed to identify/construct a real copy.
@@ -37,6 +35,8 @@ class Collection : public ICollection
 		CollectionObject* Prototype;
 		int CacheIndex;
 		bool Ok;
+		bool FoundCardClass;
+		bool FoundCardCopy;
 
 		PseudoCopy(std::string aszCollectionName,
 			CollectionSource* aoColSource,
@@ -60,6 +60,11 @@ class Collection : public ICollection
 	private:
 		CollectionSource* m_ColSource;
 		std::string m_szCollectionName;
+
+		// Private Constructor for common features of the common constructors
+		PseudoCopy(std::string aszCollectionName,
+			CollectionSource* aoColSource,
+			std::vector<std::pair<std::string, std::string>> alstMeta);
 	};
 
 	/* Friend Class Action
@@ -100,12 +105,25 @@ class Collection : public ICollection
 	};
 
 public:
-	/* Collection
+	/* Collection (Version 1)
 	* @Param aszName Name of the collection
 	* @Param aoSource Pointer to a collection source.
 	* @Param alstLoadedCollections Pointer to a list of loaded collections. (Used in producing debug information)
 	*/
-	Collection(std::string aszName, CollectionSource* aoSource, std::vector<std::string>* alstLoadedCollections);
+	Collection(std::string aszName,
+		CollectionSource* aoSource,
+		std::vector<std::string>* alstLoadedCollections);
+
+	/* Collection (Version 2)
+	* @Param aszName Name of the collection
+	* @Param aszParentName Name of the Parent collection
+	* @Param aoSource Pointer to a collection source.
+	* @Param alstLoadedCollections Pointer to a list of loaded collections. (Used in producing debug information)
+	*/
+	Collection(std::string aszName,
+		std::string aszParentName,
+		CollectionSource* aoSource,
+		std::vector<std::string>* alstLoadedCollections);
 	~Collection();
 
 	/* GetName()
@@ -122,7 +140,7 @@ public:
 	void AddItem(std::string aszNewItem,
 		bool bFinal = true,
 		std::vector<std::pair<std::string, std::string>> alstAttrs = std::vector<std::pair<std::string, std::string>>(),
-		std::vector<std::pair<std::string, std::string>> alstMetaTags = std::vector<std::pair<std::string, std::string>>()) override;
+		std::vector<std::pair<std::string, std::string>> alstMetaTags = std::vector<std::pair<std::string, std::string>>());
 
 	/* Additem (Version 2) (Transaction)
 	* Uses the NonUniqueAttrs in the long name to add a card to the collection.
@@ -141,7 +159,7 @@ public:
 	void RemoveItem(std::string aszRemoveItem,
 		bool bFinal = true,
 		std::vector<std::pair<std::string, std::string>> alstAttrs = std::vector<std::pair<std::string, std::string>>(),
-		std::vector<std::pair<std::string, std::string>> alstMeta = std::vector<std::pair<std::string, std::string>>()) override;
+		std::vector<std::pair<std::string, std::string>> alstMeta = std::vector<std::pair<std::string, std::string>>());
 
 	/* RemoveItem (Version 2) (Transaction)
 	* @Param aszRemoveItemLongName Long name of the item to be removed. Contains the identifying NonUniqueAttributes.
@@ -149,6 +167,13 @@ public:
 	*/
 	void RemoveItem(std::string aszRemoveItemLongName, std::vector<std::pair<std::string, std::string>> alstMeta);
 
+	/* ReplaceItem (Transaction)
+	* @Param aszRemoveItemLongName  Long name of the item to be removed. Contains the identifying NonUniqueAttributes.
+	* @Param alstIdentifyingMeta  List of Meta-Tags identifying the copy to be removed.
+	* @Param aszAddItemLongName Long name of the item to be added. Contains the NonUniqueAttributes.
+	* @Param alstNewMeta List of Meta-Tags that the added Item will have. None by default.
+	* @Param bFinal Finalize Transaction when function completes.
+	*/
 	void ReplaceItem(std::string aszRemoveItemLongName,
 		std::vector<std::pair<std::string, std::string>> alstIdentifyingMeta,
 		std::string aszAddItemLongName,
@@ -246,6 +271,7 @@ private:
 	//  the Col object to see how many copies.
 	std::vector<int> m_lstCollection;
 	std::string m_szName;
+	std::string m_szParentName;
 	std::vector<Transaction> m_lstTransactions;
 	std::vector<std::string> m_lstUnreversibleChanges;
 	std::string m_szHistoryFileName;
@@ -304,6 +330,9 @@ private:
 
 	/* loadCollectionFromFile
 	*  Uses "loadCardLine" to load each line in the collection file.
+	*  This function ignores the header lines in the collection file. Ie.
+	*  The CollectionName and the Parent Name lines are ignored. These lines
+	*  are captured my the collection factory function used to create this collection.
 	*/
 	void loadCollectionFromFile(std::string aszFileName);
 
@@ -379,6 +408,7 @@ private:
 		std::vector<std::pair<std::string, std::string>> alstMeta = std::vector<std::pair<std::string, std::string>>());
 
 	void setTransactionsNoWrite();
+	std::vector<int>& getCollectionList();
 };
 
 #pragma message ("Finish Collection.h")

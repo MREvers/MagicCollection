@@ -30,9 +30,6 @@
     <ClCompile Include="MagicCollection.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="jsoncpp.cpp">
-      <Filter>Header Files</Filter>
-    </ClCompile>
     <ClCompile Include="Collection.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -81,15 +78,12 @@
     <ClCompile Include="Config.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="jsoncpp.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="ICollection.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Collection.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ICollectionObject.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="CollectionObject.h">

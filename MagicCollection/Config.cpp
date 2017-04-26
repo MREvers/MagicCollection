@@ -22,9 +22,9 @@ Config::Config()
 	m_lstIdentifyingAttributes.push_back("set");
 	m_lstIdentifyingAttributes.push_back("multiverseid");
 
-	m_lstPairedKeys.push_back(std::make_pair("set","multiverseid"));
+	m_lstPairedKeys.push_back(std::make_pair("set", "multiverseid"));
 
-	m_lstKeyCodeMappings.push_back(std::make_pair("set","set"));
+	m_lstKeyCodeMappings.push_back(std::make_pair("set", "set"));
 	m_lstKeyCodeMappings.push_back(std::make_pair("multiverseid", "mid"));
 	m_lstKeyCodeMappings.push_back(std::make_pair("manaCost", "man"));
 	m_lstKeyCodeMappings.push_back(std::make_pair("colors", "clr"));
@@ -94,6 +94,21 @@ bool Config::IsIdentifyingAttributes(std::string aszAttrs)
 bool Config::IsStaticAttribute(std::string aszAttr)
 {
 	return List_Find(aszAttr, m_lstStaticAttributes) != -1;
+}
+
+int Config::List_Find(int aiFind, std::vector<int>& alstFindList)
+{
+	std::vector<int>::iterator iter_list = alstFindList.begin();
+	int index = 0;
+	for (; iter_list != alstFindList.end(); iter_list++)
+	{
+		if (*iter_list == aiFind)
+		{
+			return index;
+		}
+		index++;
+	}
+	return -1;
 }
 
 int Config::List_Find(std::string aszFind, std::vector<std::string>& alstFindList)

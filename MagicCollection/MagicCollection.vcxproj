@@ -180,8 +180,6 @@
     <ClInclude Include="CollectionObject.h" />
     <ClInclude Include="CollectionSource.h" />
     <ClInclude Include="Config.h" />
-    <ClInclude Include="ICollection.h" />
-    <ClInclude Include="ICollectionObject.h" />
     <ClInclude Include="JSONImporter.h" />
     <ClInclude Include="ServerIFace.h" />
     <ClInclude Include="ServerIFace\ClientSocket.h" />

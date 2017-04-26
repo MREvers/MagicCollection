@@ -35,14 +35,33 @@ public:
    // Expose the Collection Object to get copies etc..
    CollectionObject* GetCardPrototype(int aiCacheIndex);
 
-   // Returns all copies with parent == name
-   std::vector<std::pair<std::string, CopyObject*>> GetCollection(std::string aszCollectionName);
+   // This needs to be called whenever a child collection adds a card.
+   // It will let other collections know that they need to check their lists.
+   void NotifyNeedToSync(std::string aszCollectionName);
+   bool IsSyncNeeded(std::string aszCollectionName);
+
+   /* GetCollection
+   *  Returns all copies with parent == name if abOnlyCopiesWithParent == true.
+   *  @Param aszCollectionName Name of collection to look for in copies.
+   *  @Param abOnlyCopiesWithParent Only return copies with their parent == to the
+   *			collection specified.
+   */
+   std::vector<std::pair<std::string, CopyObject*>> 
+	   GetCollection(std::string aszCollectionName, bool abOnlyCopiesWithParent = true);
+
+   std::vector<int> 
+	   GetCollectionCache(std::string aszCollectionName, bool abOnlyCopiesWithParent = true);
 
    std::vector<std::string> GetAllCardsStartingWith(std::string aszText);
 
 private:
    std::vector<SourceObject> m_lstCardBuffer;
    std::vector<CollectionObject> m_lstoCardCache;
+   
+   // This is used to track whether or not a collection has the most up to date
+   //  list of its cards. A collection should only come out of sync if a child
+   //  collection of it adds a card.
+   std::map<std::string, bool> m_mapSync;
 
    // Used for caching searches over 5 chars.
    std::vector<std::pair<std::string, std::vector<SourceObject>>> m_lstSearchCache;

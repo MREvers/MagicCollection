@@ -145,13 +145,51 @@ CollectionObject* CollectionSource::GetCardPrototype(int aiCacheIndex)
 	}
 }
 
-std::vector<std::pair<std::string, CopyObject*>> CollectionSource::GetCollection(std::string aszCollectionName)
+void CollectionSource::NotifyNeedToSync(std::string aszCollectionName)
 {
+	m_mapSync[aszCollectionName] = false;
+
+	std::map<std::string, bool>::iterator iter_SyncCols = m_mapSync.begin();
+	for (; iter_SyncCols != m_mapSync.end(); ++iter_SyncCols)
+	{
+		if (iter_SyncCols->first != aszCollectionName)
+		{
+			iter_SyncCols->second = true;
+		}
+	}
+}
+
+bool CollectionSource::IsSyncNeeded(std::string aszCollectionName)
+{
+	if (m_mapSync.find(aszCollectionName) != m_mapSync.end())
+	{
+		return m_mapSync[aszCollectionName];
+	}
+	else
+	{
+		return (m_mapSync[aszCollectionName] = true);
+	}
+}
+
+std::vector<std::pair<std::string, CopyObject*>> 
+CollectionSource::GetCollection(std::string aszCollectionName, bool abOnlyCopiesWithParent)
+{
+	m_mapSync[aszCollectionName] = false;
 	std::vector<std::pair<std::string, CopyObject*>>  lstCopies;
 	std::vector<CollectionObject>::iterator iter_colObjs = m_lstoCardCache.begin();
 	for (; iter_colObjs != m_lstoCardCache.end(); ++iter_colObjs)
 	{
-		std::vector<CopyObject*> lstFoundCopies = iter_colObjs->GetLocalCopies(aszCollectionName);
+		std::vector<CopyObject*> lstFoundCopies;
+
+		if (abOnlyCopiesWithParent)
+		{
+			lstFoundCopies = iter_colObjs->GetLocalCopies(aszCollectionName);
+		}
+		else
+		{
+			lstFoundCopies = iter_colObjs->GetCopies(aszCollectionName);
+		}
+
 		std::vector<CopyObject*>::iterator iter_copies = lstFoundCopies.begin();
 		for (; iter_copies != lstFoundCopies.end(); ++iter_copies)
 		{
@@ -160,6 +198,28 @@ std::vector<std::pair<std::string, CopyObject*>> CollectionSource::GetCollection
 	}
 
 	return lstCopies;
+}
+
+std::vector<int>
+CollectionSource::GetCollectionCache(std::string aszCollectionName, bool abOnlyCopiesWithParent)
+{
+	std::vector<int> lstRetVal;
+
+	std::vector<std::pair<std::string, CopyObject*>> lstObjCol = 
+		GetCollection(aszCollectionName, abOnlyCopiesWithParent);
+
+	std::vector<std::pair<std::string, CopyObject*>>::iterator iter_ObjCol = lstObjCol.begin();
+	for (; iter_ObjCol != lstObjCol.end(); ++iter_ObjCol)
+	{
+		int iCacheNum = LoadCard(iter_ObjCol->first);
+
+		if (Config::GetConfigClass()->List_Find(iCacheNum, lstRetVal) == -1)
+		{
+			lstRetVal.push_back(iCacheNum);
+		}
+	}
+
+	return lstRetVal;
 }
 
 std::vector<std::string> CollectionSource::GetAllCardsStartingWith(std::string aszText)

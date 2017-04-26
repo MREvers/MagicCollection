@@ -39,6 +39,13 @@ void CopyObject::SetNonUniqueAttributesRestrictionsReference(std::map<std::strin
 	m_mapNonUniqueAttributesRestrictions = aMapNonUAttrRestr;
 }
 
+void CopyObject::AddResidentCollection(std::string aszCollectionName)
+{
+	if (Config::GetConfigClass()->List_Find(aszCollectionName, ResidentCollections) == -1)
+	{
+		ResidentCollections.push_back(aszCollectionName);
+	}
+}
 
 std::vector<std::pair<std::string, std::string>> CopyObject::GetMetaTags(std::string aszCollection)
 {
@@ -287,7 +294,7 @@ void CopyObject::SetNonUniqueAttr(std::string aszKey, std::string aszValue)
 						NonUniqueTraits[*pszTargetStr] = aszValue;
 					}
 					lstSetTraits.push_back(*pszTargetStr);
-					bFoundAll == false;
+					bFoundAll = false;
 				}
 			}
 

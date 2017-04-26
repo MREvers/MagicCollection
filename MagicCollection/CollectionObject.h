@@ -1,8 +1,6 @@
 #pragma once
 #pragma message ("Starting CollectionObject.h")
 
-#include "ICollectionObject.h"
-#include "ICollection.h"
 #include "Config.h"
 #include "StringHelper.h"
 
@@ -33,6 +31,8 @@ public:
 	void SetPairedTraitsReference(std::vector<std::pair<std::string, std::string>>* aLstPairedTraits);
 	void SetNonUniqueAttributesRestrictionsReference(std::map<std::string, std::vector<std::string>>* aMapNonUAttrRestr);
 
+	void AddResidentCollection(std::string aszCollectionName);
+
 	// Meta Tag Controlling Functions
 	std::vector<std::pair<std::string, std::string>> GetMetaTags(std::string aszCollection);
     std::pair<std::string, std::string> GetMetaTag(std::string aszCollection, std::string aszKey);
@@ -58,7 +58,7 @@ private:
 
 // Since this is a flyweight object, the interface should act as though it is 'in' the collection,
 //  but functionaly it should be a flyweight.
-class  CollectionObject : public ICollectionObject
+class  CollectionObject
 {
 public:
 	CollectionObject(std::string aszName);
@@ -101,13 +101,13 @@ public:
 	
 	std::map<std::string, std::vector<std::string>> GetNonUniqueAttributeRestrictions();
 	void SetNonUniqueAttributeRestrictions(std::map<std::string, std::vector<std::string>> aMapRestrictions);
-   void SetPairedNonUniqueAttrs(std::vector<std::pair<std::string, std::string>> alstPairedAttrs);
+    void SetPairedNonUniqueAttrs(std::vector<std::pair<std::string, std::string>> alstPairedAttrs);
 	
 	CopyObject GenerateCopy(std::string aszCollectionName);
 	// Used in building a printable structure
-	CopyObject GenerateCopy(std::string aszCollectionName, std::vector<std::pair<std::string, std::string>> alstAttrs);
-   CopyObject GenerateCopy(
-      std::string aszCollectionName,
+	CopyObject GenerateCopy(std::string aszCollectionName,
+		std::vector<std::pair<std::string, std::string>> alstAttrs);
+    CopyObject GenerateCopy(std::string aszCollectionName,
       std::vector<std::pair<std::string, std::string>> alstAttrs,
       std::vector<std::pair<std::string, std::string>> alstMeta);
 	// Keep in mind that this does not compare names because the name of the card is not known by the copy object.

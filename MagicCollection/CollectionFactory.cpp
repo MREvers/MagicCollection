@@ -13,14 +13,15 @@ CollectionFactory::~CollectionFactory()
 {
 }
 
-Collection* CollectionFactory::LoadCollection(std::string aszFileName)
+Collection* CollectionFactory::LoadCollectionFromFile(std::string aszFileName)
 {
-
 	std::vector<std::pair<std::string, std::string>> lstForcedChanges;
-	std::string szColName = GetCollectionNameFromFile(aszFileName);
+	std::pair<std::string,std::string> pairColNameParent = GetCollectionNameAndParentFromFile(aszFileName);
+	std::string szColName = pairColNameParent.first;
+	std::string szParentName = pairColNameParent.second;
 	if (!CollectionExists(szColName))
 	{
-		Collection* oCol = GetCollection(szColName);
+		Collection* oCol = FindOrGenerateCollection(szColName);
 		oCol->LoadCollection(aszFileName, lstForcedChanges);
 
 		std::vector<std::pair<std::string, std::string>>::iterator iter_change = lstForcedChanges.begin();
@@ -28,7 +29,7 @@ Collection* CollectionFactory::LoadCollection(std::string aszFileName)
 		{
 			if (CollectionExists(iter_change->first))
 			{
-				Collection* oChangedCol = GetCollection(iter_change->first);
+				Collection* oChangedCol = FindOrGenerateCollection(iter_change->first, szParentName);
 				oChangedCol->RecordForcedTransaction(iter_change->second);
 			}
 		}
@@ -38,7 +39,7 @@ Collection* CollectionFactory::LoadCollection(std::string aszFileName)
 	return nullptr;
 }
 
-Collection* CollectionFactory::GetCollection(std::string aszCollectionName)
+Collection* CollectionFactory::FindOrGenerateCollection(std::string aszCollectionName, std::string aszParent)
 {
 	// Check if we have the collection already.
 	std::vector<Collection>::iterator iter_cols = m_lstCollections.begin();
@@ -51,8 +52,17 @@ Collection* CollectionFactory::GetCollection(std::string aszCollectionName)
 	}
 
 	// If not, create one.
-	Collection oCol(aszCollectionName, m_ColSource, &LoadedCollections);
-	m_lstCollections.push_back(oCol);
+	if (aszParent != "")
+	{
+		Collection oCol(aszCollectionName, aszParent, m_ColSource, &LoadedCollections);
+		m_lstCollections.push_back(oCol);
+	}
+	else
+	{
+		Collection oCol(aszCollectionName, m_ColSource, &LoadedCollections);
+		m_lstCollections.push_back(oCol);
+	}
+
 	LoadedCollections.push_back(aszCollectionName);
 
 	return &m_lstCollections.at(m_lstCollections.size() - 1);
@@ -72,7 +82,7 @@ bool CollectionFactory::CollectionExists(std::string aszCollectionName)
 	return false;
 }
 
-std::string CollectionFactory::GetCollectionNameFromFile(std::string aszCollectionFileName)
+std::pair<std::string, std::string>  CollectionFactory::GetCollectionNameAndParentFromFile(std::string aszCollectionFileName)
 {
 	// Get the first line of the collection
 	std::ifstream in(aszCollectionFileName);
@@ -82,6 +92,8 @@ std::string CollectionFactory::GetCollectionNameFromFile(std::string aszCollecti
 		buffer << in.rdbuf();
 		std::string contents(buffer.str());
 
+		int iLinesNeeded = 2; // Name and Parent
+		int iFoundLines = 0;
 		std::vector<std::string> lstLines;
 		std::string szLine = "";
 		for (int i = 0; i < contents.size(); i++)
@@ -91,7 +103,12 @@ std::string CollectionFactory::GetCollectionNameFromFile(std::string aszCollecti
 			{
 				lstLines.push_back(szLine);
 				szLine = "";
-				break;
+
+				iFoundLines++;
+				if (iLinesNeeded == iFoundLines)
+				{
+					break;
+				}
 			}
 			else
 			{
@@ -104,16 +121,37 @@ std::string CollectionFactory::GetCollectionNameFromFile(std::string aszCollecti
 			}
 		}
 
-		// Get the name of the collection
-		if (lstLines[0].size() > 0 && lstLines[0].at(0) == ':')
+		std::string szColName = "";
+		std::string szParentName = "";
+
+		std::string szColNameLine = lstLines[0];
+		std::string szParentNameLine = "";
+
+		if (lstLines.size() > 1)
 		{
-			std::string szPreprocess = "";
-			std::string szNoColon = StringHelper::Str_Split(lstLines[0], ":")[1];
-			std::vector<std::string> lstPair = StringHelper::Str_Split(lstLines[0], "=");
-			std::string szColName = StringHelper::Str_Split(lstPair[1], "\"")[1];
-			return szColName;
+			szParentNameLine = lstLines[1];
+		}
+		
+		// Get the name of the collection
+		if (szColNameLine.size() > 0 && szColNameLine.at(0) == ':')
+		{
+			std::string szNoColon = StringHelper::Str_Split(szColNameLine, ":")[1];
+			std::vector<std::string> lstPair = StringHelper::Str_Split(szColNameLine, "=");
+			szColName = StringHelper::Str_Split(lstPair[1], "\"")[1];
+		}
+
+		if (szParentNameLine.size() > 0 && szParentNameLine.at(0) == ':')
+		{
+			std::string szNoColon = StringHelper::Str_Split(szParentNameLine, ":")[1];
+			std::vector<std::string> lstPair = StringHelper::Str_Split(szParentNameLine, "=");
+			szParentName = StringHelper::Str_Split(lstPair[1], "\"")[1];
+		}
+
+		if (szColName != "")
+		{
+			return std::make_pair(szColName, szParentName);
 		}
 	}
 
-	return "";
+	return std::make_pair("","");
 }

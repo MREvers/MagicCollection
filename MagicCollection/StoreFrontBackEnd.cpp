@@ -27,7 +27,7 @@ void CStoreFrontBackEnd::AddItem(
 	{
 		if (m_ColFactory->CollectionExists(aszCollectionName) && m_ColSource->LoadCard(szName) != -1)
 		{
-			Collection* oCol = m_ColFactory->GetCollection(aszCollectionName);
+			Collection* oCol = m_ColFactory->FindOrGenerateCollection(aszCollectionName);
 
 			std::vector<std::pair<std::string, std::string>> lstCardAttrs;
 			lstCardAttrs = Collection::ParseAttrs(szDetails);
@@ -44,7 +44,7 @@ void CStoreFrontBackEnd::RemoveItem(std::string aszCollectionName,
 {
 	if (m_ColFactory->CollectionExists(aszCollectionName))
 	{
-		m_ColFactory->GetCollection(aszCollectionName)->RemoveItem(aszCardLong, alstMeta);
+		m_ColFactory->FindOrGenerateCollection(aszCollectionName)->RemoveItem(aszCardLong, alstMeta);
 	}
 }
 
@@ -52,7 +52,7 @@ void CStoreFrontBackEnd::CreateCollection(std::string aszCollectionName)
 {
    if (!m_ColFactory->CollectionExists(aszCollectionName))
    {
-      Collection* oCol = m_ColFactory->GetCollection(aszCollectionName);
+      Collection* oCol = m_ColFactory->FindOrGenerateCollection(aszCollectionName);
       oCol->SaveCollection(oCol->GetName() + ".txt");
    }
 }
@@ -61,7 +61,7 @@ void CStoreFrontBackEnd::SaveCollection(std::string aszCollectionName)
 {
 	if (m_ColFactory->CollectionExists(aszCollectionName))
 	{
-		Collection* oCol = m_ColFactory->GetCollection(aszCollectionName);
+		Collection* oCol = m_ColFactory->FindOrGenerateCollection(aszCollectionName);
 		oCol->SaveCollection(oCol->GetName() + ".txt");
 	}
 }
@@ -138,7 +138,7 @@ std::string CStoreFrontBackEnd::LoadCollection(std::string aszCollection)
 	{
 		// If it does, continue.
 		// Check if the load is successful.
-		Collection* optrLoadedCol = m_ColFactory->LoadCollection(aszCollection);
+		Collection* optrLoadedCol = m_ColFactory->LoadCollectionFromFile(aszCollection);
 		if (optrLoadedCol != nullptr)
 		{
 			return optrLoadedCol->GetName();
@@ -154,7 +154,7 @@ void CStoreFrontBackEnd::LoadBulkChanges(std::string aszCollection, std::vector<
 {
    if (m_ColFactory->CollectionExists(aszCollection))
    {
-      Collection* oColO = m_ColFactory->GetCollection(aszCollection);
+      Collection* oColO = m_ColFactory->FindOrGenerateCollection(aszCollection);
       oColO->LoadBulkChanges(alstChanges);
    }
 }
@@ -163,7 +163,7 @@ std::vector<std::string> CStoreFrontBackEnd::GetCollectionList(std::string aszCo
 {
 	if (m_ColFactory->CollectionExists(aszCollection))
 	{
-		return m_ColFactory->GetCollection(aszCollection)->GetCollectionList();
+		return m_ColFactory->FindOrGenerateCollection(aszCollection)->GetCollectionList();
 	}
 	else
 	{
@@ -178,7 +178,7 @@ CStoreFrontBackEnd::GetCollectionListWithMeta(std::string aszCollection)
 {
 	if (m_ColFactory->CollectionExists(aszCollection))
 	{
-		return m_ColFactory->GetCollection(aszCollection)->GetCollectionListWithMeta();
+		return m_ColFactory->FindOrGenerateCollection(aszCollection)->GetCollectionListWithMeta();
 	}
 	else
 	{
@@ -220,7 +220,7 @@ void CStoreFrontBackEnd::SetBaselineHistory(std::string aszCollectionName)
 {
    if (m_ColFactory->CollectionExists(aszCollectionName))
    {
-      Collection* oCol = m_ColFactory->GetCollection(aszCollectionName);
+      Collection* oCol = m_ColFactory->FindOrGenerateCollection(aszCollectionName);
       oCol->CreateBaselineHistory();
    }
 }
@@ -230,7 +230,7 @@ void CStoreFrontBackEnd::AddMetaTag(std::string aszCollectionName, std::string a
 {
 	if (m_ColFactory->CollectionExists(aszCollectionName))
 	{
-		Collection* oCol = m_ColFactory->GetCollection(aszCollectionName);
+		Collection* oCol = m_ColFactory->FindOrGenerateCollection(aszCollectionName);
 		oCol->SetMetaTag(aszLongName, aszKey, aszValue, alstMatchMeta);
 	}
 }
@@ -243,7 +243,7 @@ void  CStoreFrontBackEnd::SetMetaTags(
 {
    if (m_ColFactory->CollectionExists(aszCollection))
    {
-      Collection* oCol = m_ColFactory->GetCollection(aszCollection);
+      Collection* oCol = m_ColFactory->FindOrGenerateCollection(aszCollection);
       oCol->SetMetaTags(aszLongName, alstNewTags, alstMatchMeta);
    }
 }
@@ -258,7 +258,7 @@ void CStoreFrontBackEnd::AddMetaTag(
 {
 	if (m_ColFactory->CollectionExists(aszCollectionName))
 	{
-		Collection* oCol = m_ColFactory->GetCollection(aszCollectionName);
+		Collection* oCol = m_ColFactory->FindOrGenerateCollection(aszCollectionName);
 		oCol->SetMetaTag(aszLongName, aszKey + "." + aszSubKey, aszValue, alstMatchMeta);
 	}
 }
@@ -271,7 +271,7 @@ void CStoreFrontBackEnd::RemoveMetaTag(
 {
 	if (m_ColFactory->CollectionExists(aszCollection))
 	{
-		Collection* oCol = m_ColFactory->GetCollection(aszCollection);
+		Collection* oCol = m_ColFactory->FindOrGenerateCollection(aszCollection);
 		oCol->RemoveMetaTag(aszLongName, aszKey, alstMatchMeta);
 	}
 }
@@ -285,7 +285,7 @@ void  CStoreFrontBackEnd::SetFeatures(
 {
    if (m_ColFactory->CollectionExists(aszCollection))
    {
-      Collection* oCol = m_ColFactory->GetCollection(aszCollection);
+      Collection* oCol = m_ColFactory->FindOrGenerateCollection(aszCollection);
       oCol->SetFeatures(aszLongName, alstNewTags, alstNewAttrs, alstMatchMeta);
    }
 }
@@ -295,7 +295,7 @@ CStoreFrontBackEnd::GetMetaTags(std::string aszCollectionName, std::string aszLo
 {
 	if (m_ColFactory->CollectionExists(aszCollectionName))
 	{
-		Collection* oCol = m_ColFactory->GetCollection(aszCollectionName);
+		Collection* oCol = m_ColFactory->FindOrGenerateCollection(aszCollectionName);
 		return oCol->GetMetaTags(aszLongName);
 	}
 

@@ -2,13 +2,22 @@
 
 Collection::PseudoCopy::PseudoCopy(std::string aszCollectionName,
 	CollectionSource* aoColSource,
-	std::string aszLongName,
 	std::vector<std::pair<std::string, std::string>> alstMeta)
 {
 	m_szCollectionName = aszCollectionName;
 	m_ColSource = aoColSource;
-	LongName = aszLongName;
 	MetaList = alstMeta;
+	FoundCardClass = false;
+	FoundCardCopy = false;
+}
+
+Collection::PseudoCopy::PseudoCopy(std::string aszCollectionName,
+	CollectionSource* aoColSource,
+	std::string aszLongName,
+	std::vector<std::pair<std::string, std::string>> alstMeta) :
+	PseudoCopy(aszCollectionName, aoColSource, alstMeta)
+{
+	LongName = aszLongName;
 
 	Ok = ParseCardLine(aszLongName, Count, Name, DetailsString);
 
@@ -22,12 +31,9 @@ Collection::PseudoCopy::PseudoCopy(std::string aszCollectionName,
 	CollectionSource* aoColSource,
 	std::string aszName,
 	std::vector<std::pair<std::string, std::string>> alstAttrs,
-	std::vector<std::pair<std::string, std::string>> alstMeta)
+	std::vector<std::pair<std::string, std::string>> alstMeta) :
+	PseudoCopy(aszCollectionName, aoColSource, alstMeta)
 {
-
-	m_szCollectionName = aszCollectionName;
-	m_ColSource = aoColSource;
-	MetaList = alstMeta;
 	Name = aszName;
 	IdentifyingAttributes = alstAttrs;
 	CacheIndex = -1;
@@ -57,6 +63,8 @@ bool Collection::PseudoCopy::LoadCard()
 		Prototype = m_ColSource->GetCardPrototype(CacheIndex);
 	}
 
+	FoundCardClass = Ok;
+
 	return Ok;
 }
 
@@ -66,6 +74,9 @@ bool Collection::PseudoCopy::FindCopy()
 	{
 		Ok = Prototype->FindCopy(m_szCollectionName, IdentifyingAttributes, MetaList, RealCopy);
 	}
+
+	FoundCardCopy = Ok;
+
 	return Ok;
 }
 
@@ -202,9 +213,18 @@ Collection::Collection(std::string aszName, CollectionSource* aoSource, std::vec
 {
 	m_ColSource = aoSource;
 	m_szName = aszName;
+	m_szParentName = "";
 	m_szHistoryFileName = m_szName + ".history";
 	m_szMetaTagFileName = m_szName + ".metatags";
 	m_lstLoadedCollectionsBuffer = alstLoadedCollections;
+}
+
+Collection::Collection(std::string aszName,
+	std::string aszParentName,
+	CollectionSource* aoSource,
+	std::vector<std::string>* alstLoadedCollections) : Collection(aszName, aoSource, alstLoadedCollections)
+{
+	m_szParentName = aszParentName;
 }
 
 Collection::~Collection()
@@ -225,7 +245,7 @@ void Collection::AddItem(std::string aszNewItem,
 	PseudoCopy oPseudoTarget = generatePseudoCopy(alstAttrs, aszNewItem, alstMeta);
 
 	if (oPseudoTarget.Ok) { oPseudoTarget.LoadCard(); }
-	if (oPseudoTarget.Ok)
+	if (oPseudoTarget.FoundCardClass)
 	{
 		// Get the transaction
 		Collection::Transaction* oTrans = openTransaction();
@@ -788,6 +808,22 @@ CopyObject* Collection::forceAdd(std::string aszNewItem,
 		// Add a copy of this card. Save the reference if we need to add unique traits.
 		CopyObject* oCO = oCard->AddCopy(m_szName, alstAttrs, alstMeta);
 
+		// if this is a child collection, add to the parent if parent == this
+		// alstAttrs overwrites m_szName in AddCopy if parent is present
+		if (m_szParentName != "")
+		{
+			if (oCO->ParentCollection == m_szName)
+			{
+				oCO->ParentCollection = m_szParentName;
+			}
+
+			// Make sure this collection and the parent collection are both in its residents.
+			oCO->AddResidentCollection(m_szParentName);
+			oCO->AddResidentCollection(m_szName);
+
+			m_ColSource->NotifyNeedToSync(m_szName);
+		}
+
 		return oCO;
 	}
 }
@@ -796,9 +832,9 @@ void Collection::registerItem(int aiItem)
 {
 	// Make sure we don't already 'have' this card.
 	bool bNewCard = true;
-	for (int i = 0; i < m_lstCollection.size(); i++)
+	for (int i = 0; i < getCollectionList().size(); i++)
 	{
-		bNewCard &= m_lstCollection.at(i) != aiItem;
+		bNewCard &= getCollectionList().at(i) != aiItem;
 	}
 
 	if (bNewCard)
@@ -827,6 +863,16 @@ void Collection::setTransactionsNoWrite()
 	{
 		iter_Trans->Recordable = false;
 	}
+}
+
+std::vector<int>& Collection::getCollectionList()
+{
+	if (m_ColSource->IsSyncNeeded(m_szName))
+	{
+		m_lstCollection = m_ColSource->GetCollectionCache(m_szName, false);
+	}
+
+	return m_lstCollection;
 }
 
 bool Collection::removeItem(std::string aszRemoveItem,
@@ -1319,6 +1365,7 @@ void Collection::SaveCollection(std::string aszFileName)
 		}
 
 	}
+
 	std::vector<std::pair<std::string, std::vector<std::pair<std::string, std::string>>>>
 		LstCardWithMeta = GetCollectionListWithMeta();
 	std::ofstream oMetaFile;
@@ -1343,6 +1390,12 @@ void Collection::SaveCollection(std::string aszFileName)
 	std::ofstream oColFile;
 	oColFile.open(aszFileName);
 	oColFile << ": Name=\"" + m_szName + "\" \n";
+
+	if (m_szParentName != "")
+	{
+		oColFile << ": Parent=\"" + m_szParentName + "\" \n";
+	}
+
 	for (int i = 0; i < lstLines.size(); i++)
 	{
 		std::cout << lstLines[i] << std::endl;
@@ -1450,11 +1503,11 @@ void Collection::CreateBaselineHistory()
 
 void Collection::PrintList()
 {
-	for (int i = 0; i < m_lstCollection.size(); i++)
+	for (int i = 0; i < getCollectionList().size(); i++)
 	{
-		for (int t = 0; t < m_ColSource->GetCardPrototype(m_lstCollection.at(i))->GetCopies(m_szName).size(); t++)
+		for (int t = 0; t < m_ColSource->GetCardPrototype(getCollectionList().at(i))->GetCopies(m_szName).size(); t++)
 		{
-			std::cout << m_ColSource->GetCardPrototype(m_lstCollection.at(i))->GetName() << std::endl;
+			std::cout << m_ColSource->GetCardPrototype(getCollectionList().at(i))->GetName() << std::endl;
 		}
 
 	}
@@ -1484,8 +1537,8 @@ std::vector<std::string> Collection::GetCollectionList()
 {
 	// Now look for all cards with resident col == this
 	std::vector<std::string> lstLines;
-	std::vector<int>::iterator iter_ResiCards = m_lstCollection.begin();
-	for (; iter_ResiCards != m_lstCollection.end(); ++iter_ResiCards)
+	std::vector<int>::iterator iter_ResiCards = getCollectionList().begin();
+	for (; iter_ResiCards != getCollectionList().end(); ++iter_ResiCards)
 	{
 		int iCacheID = *iter_ResiCards;
 		std::vector<CopyObject*> lstPossibleCopies = m_ColSource->GetCardPrototype(iCacheID)->GetCopies(m_szName);
@@ -1540,9 +1593,11 @@ std::vector<std::string> Collection::GetCollectionList()
 std::vector<std::pair<std::string, std::vector<std::pair<std::string, std::string>>>>
 Collection::GetCollectionListWithMeta()
 {
+	// Sync
+
 	std::vector<std::pair<std::string, std::vector<std::pair<std::string, std::string>>>> lstRetVal;
-	std::vector<int>::iterator iter_ResiCards = m_lstCollection.begin();
-	for (; iter_ResiCards != m_lstCollection.end(); ++iter_ResiCards)
+	std::vector<int>::iterator iter_ResiCards = getCollectionList().begin();
+	for (; iter_ResiCards != getCollectionList().end(); ++iter_ResiCards)
 	{
 		int iCacheID = *iter_ResiCards;
 		std::vector<CopyObject*> lstPossibleCopies = m_ColSource->GetCardPrototype(iCacheID)->GetCopies(m_szName);

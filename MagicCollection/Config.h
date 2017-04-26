@@ -19,6 +19,7 @@ public:
 	bool IsStaticAttribute(std::string aszAttrs);
 	bool IsIdentifyingAttributes(std::string aszAttrs);
 
+	int List_Find(int aiFind, std::vector<int>& alstFindList);
 	int List_Find(std::string aszFind, std::vector<std::string>& alstFindList);
 	int List_Find(std::string aszFind, std::vector<std::pair<std::string, std::string>>& alstFindList);
 
