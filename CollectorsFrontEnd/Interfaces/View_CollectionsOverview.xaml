@@ -11,43 +11,8 @@
             <ColumnDefinition Width="3*"/>
             <ColumnDefinition Width="5*"/>
         </Grid.ColumnDefinitions>
-        <Grid Grid.Row="0" Grid.Column="0" x:Name="ControlPanel">
-            <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="24"/>
-                    <RowDefinition/>
-                    <RowDefinition Height="24"/>
-                    <RowDefinition Height="24"/>
-                    <RowDefinition Height="24"/>
-                </Grid.RowDefinitions>
-                <Border BorderBrush="Black" BorderThickness="1">
-                    <Label HorizontalAlignment="Center" FontWeight="Bold" Margin="54,0,57,-1" Width="119">
-                        Loaded Collections
-                    </Label>
-                </Border>
-                <ListBox x:Name="LstBoxLoadedCollections"
-                     Grid.Row="1" 
-                     ItemsSource="{Binding LstAvailableCollections}"
-                     VerticalAlignment="Stretch"
-                     SelectionChanged="eLstBoxLoadedCollections_SelectionChanged">
+        <Grid Grid.Row="0" x:Name="OverviewPanel">
 
-                </ListBox>
-                <Button x:Name="BtnLoadCollection" Grid.Row="2" HorizontalAlignment="Stretch"
-                    Click="eLoadCol_Click">
-                    <TextBlock>Load Collection</TextBlock>
-                </Button>
-                <Button x:Name="BtnAddCollection"  Grid.Row="3"  HorizontalAlignment="Stretch"
-                    Click="eAddCol_Click">
-                    <TextBlock>Add Collection</TextBlock>
-                </Button>
-                <Button x:Name="BtnViewCollection" Grid.Row="4"  HorizontalAlignment="Stretch"
-                    Click="eBtnViewCollection_Click">
-                    <TextBlock>View Collection</TextBlock>
-                </Button>
-            </Grid>
-        </Grid>
-        <Grid Grid.Row="0" x:Name="CenterPanel">
-            
         </Grid>
         <ListBox x:Name="LstBoxCollectionPreview" 
                  ItemsSource="{Binding LstCollectionPreview}"

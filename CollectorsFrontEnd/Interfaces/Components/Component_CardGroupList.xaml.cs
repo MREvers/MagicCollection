@@ -20,7 +20,7 @@ namespace CollectorsFrontEnd.Interfaces.Subs
     /// <summary>
     /// Interaction logic for CompSubCardGroupList.xaml
     /// </summary>
-    public partial class Module_CardGroupList : UserControl, IComponent
+    public partial class Component_CardGroupList : UserControl, IComponent
     {
         #region Data Binding
 
@@ -36,7 +36,7 @@ namespace CollectorsFrontEnd.Interfaces.Subs
         public class Data : IDataModel
         {
             public List<CardModel> LstItems = new List<CardModel>();
-            public Module_CardGroupList SourceGroup;
+            public Component_CardGroupList SourceGroup;
         }
 
         #region Public properties
@@ -51,16 +51,18 @@ namespace CollectorsFrontEnd.Interfaces.Subs
 
         #region public fields
         public Data DataModel;
+        public string ToolTipName;
         #endregion
 
         #region Public Functions
 
 
-        public Module_CardGroupList(string aszGroupName, List<CardModel> alstModels)
+        public Component_CardGroupList(string aszGroupName, List<CardModel> alstModels)
         {
             InitializeComponent();
             DataContext = this;
 
+            ToolTipName = null;
             DataModel = new Data();
             DataModel.SourceGroup = this;
 
@@ -72,7 +74,6 @@ namespace CollectorsFrontEnd.Interfaces.Subs
                 ListViewItem newItem = new ListViewItem();
                 newItem.Content = alstModels[i].GetIdealIdentifier();
                 newItem.DataContext = this;
-                newItem.MouseMove += eItemList_MouseMove;
                 newItem.MouseLeave += eItemList_MouseLeave;
                 newItem.MouseEnter += eItemList_MouseMove;
                 LstItems.Add(newItem);
@@ -113,14 +114,26 @@ namespace CollectorsFrontEnd.Interfaces.Subs
         private void eItemList_MouseMove(object sender, MouseEventArgs e)
         {
             ListViewItem item = (ListViewItem)sender;
-            ToolTipDisplay = null;
             string ItemText = item.Content.ToString();
-            ToolTipDisplay = new Module_CardDisplayer(LstCardModels.Where(x => x.GetIdealIdentifier() == ItemText).FirstOrDefault());
+            if (ToolTipName != ItemText)
+            {
+                ToolTipName = ItemText;
+                CardModel oNewDisplay = LstCardModels.Where(x => x.GetIdealIdentifier() == ItemText).FirstOrDefault();
+                if (ToolTipDisplay != null)
+                {
+                    ToolTipDisplay.LoadNewSet(oNewDisplay);
+                }
+                else
+                {
+                    ToolTipDisplay = new Module_CardDisplayer(oNewDisplay);
+                }
+                
+            }
 
         }
         private void eItemList_MouseLeave(object sender, MouseEventArgs e)
         {
-            ToolTipDisplay = null;
+            ToolTipName = "";
         }
 
         #endregion 

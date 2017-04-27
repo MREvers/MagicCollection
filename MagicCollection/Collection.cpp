@@ -1723,8 +1723,8 @@ bool Collection::ParseCardLine(std::string aszLine, int& riCount, std::string& r
 	int iter_size = aszLine.size();
 	while (i < iter_size &&
 		((aszLine.at(i) >= 'a' && aszLine.at(i) <= 'z') ||
-		(aszLine.at(i) >= 'A' && aszLine.at(i) <= 'Z') ||
-			(aszLine.at(i) == ',' || aszLine.at(i) == ' ')))
+		 (aszLine.at(i) >= 'A' && aszLine.at(i) <= 'Z') ||
+		 (aszLine.at(i) == ',' || aszLine.at(i) == ' ' || aszLine.at(i) == '-')))
 	{
 		szName = szName + aszLine.at(i);
 		i++;

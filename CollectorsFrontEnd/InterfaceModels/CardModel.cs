@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using System.Runtime;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Media.Imaging;
@@ -53,14 +54,6 @@ namespace CollectorsFrontEnd.InterfaceModels
             LstMetaTags = aLstMetaTags;
             LstSpecifiedAttrs = aLstSpecifiedAttrs;
             LstIdentifiedAttrs = aLstIdentifiedAttrs;
-
-
-            /*
-            if (LstMetaTags.FirstOrDefault(x => x.Item1 == "Generalization") == null)
-            {
-                LstMetaTags.Add(new Tuple<string, string>("Generalization", "Main"));
-            }
-            */
         }
 
         public void SetAuxData(int aiAmount, string aszCardNameLong)
@@ -220,6 +213,19 @@ namespace CollectorsFrontEnd.InterfaceModels
             else
             {
                 OnPropertyChanged("CardImage");
+            }
+        }
+
+        public void UnloadImage()
+        {
+            if (_CardImage != null)
+            {
+                if (_CardImage.StreamSource != null)
+                {
+                    _CardImage.StreamSource.Close();
+                    _CardImage.StreamSource.Dispose();
+                }
+                _CardImage = null;
             }
         }
 

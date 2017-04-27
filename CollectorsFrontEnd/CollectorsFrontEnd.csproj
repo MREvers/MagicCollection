@@ -48,6 +48,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>3</WarningLevel>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
     <DebugSymbols>true</DebugSymbols>
@@ -106,8 +107,11 @@
     <Compile Include="Interfaces\Controls\Control_OverlayPanel.xaml.cs">
       <DependentUpon>Control_OverlayPanel.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Interfaces\Subs\Module_GroupView.xaml.cs">
-      <DependentUpon>Module_GroupView.xaml</DependentUpon>
+    <Compile Include="Interfaces\Components\Component_GroupView.xaml.cs">
+      <DependentUpon>Component_GroupView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Interfaces\Components\Component_OverviewList.xaml.cs">
+      <DependentUpon>Component_OverviewList.xaml</DependentUpon>
     </Compile>
     <Compile Include="Interfaces\View_CollectionsOverview.xaml.cs">
       <DependentUpon>View_CollectionsOverview.xaml</DependentUpon>
@@ -139,8 +143,8 @@
     <Compile Include="Interfaces\Subs\Module_CardDisplayer.xaml.cs">
       <DependentUpon>Module_CardDisplayer.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Interfaces\Subs\Module_CardGroupList.xaml.cs">
-      <DependentUpon>Module_CardGroupList.xaml</DependentUpon>
+    <Compile Include="Interfaces\Components\Component_CardGroupList.xaml.cs">
+      <DependentUpon>Component_CardGroupList.xaml</DependentUpon>
     </Compile>
     <Compile Include="Interfaces\Subs\CompSubEnterText.xaml.cs">
       <DependentUpon>CompSubEnterText.xaml</DependentUpon>
@@ -159,7 +163,11 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Interfaces\Subs\Module_GroupView.xaml">
+    <Page Include="Interfaces\Components\Component_GroupView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Interfaces\Components\Component_OverviewList.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -203,7 +211,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Interfaces\Subs\Module_CardGroupList.xaml">
+    <Page Include="Interfaces\Components\Component_CardGroupList.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

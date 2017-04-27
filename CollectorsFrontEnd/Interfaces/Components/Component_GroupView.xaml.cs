@@ -20,29 +20,34 @@ namespace CollectorsFrontEnd.Interfaces.Subs
     /// <summary>
     /// Interaction logic for Module_GroupView.xaml
     /// </summary>
-    public partial class Module_GroupView : UserControl
+    public partial class Component_GroupView : UserControl
     {
         #region Data Binding
 
-        public ObservableCollection<Module_CardGroupList> LstGroups { get; set; }
+        public ObservableCollection<Component_CardGroupList> LstGroups { get; set; }
 
         #endregion
 
-        public event SizeChangedEventHandler SizeChanged;
+        public event SizeChangedEventHandler ResizeOccured;
 
-        public Module_GroupView()
+        public Component_GroupView()
         {
             InitializeComponent();
             DataContext = this;
-
+            Unloaded += FreeGroups;
         }
 
         private void eMainDisplay_Resize(object sender, SizeChangedEventArgs e)
         {
-            if (SizeChanged != null)
+            if (ResizeOccured != null)
             {
-                SizeChanged(sender, e);
+                ResizeOccured(sender, e);
             }
+        }
+
+        private void FreeGroups(object o, RoutedEventArgs e)
+        {
+            LstGroups.Clear();
         }
     }
 }

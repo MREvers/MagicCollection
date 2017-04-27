@@ -1,4 +1,5 @@
 ﻿using CollectorsFrontEnd.InterfaceModels;
+using CollectorsFrontEnd.Interfaces.Controls;
 using CollectorsFrontEnd.Interfaces.Subs;
 using System;
 using System.Collections.Generic;
@@ -49,8 +50,6 @@ namespace CollectorsFrontEnd.Interfaces
         }
         #endregion
 
-        UserControl m_OverlayControl = null;
-
         public class CollectionsOverviewerModel : IDataModel
         {
             public CollectionsOverviewerModel(List<string> aLstAvailableCollections)
@@ -68,38 +67,63 @@ namespace CollectorsFrontEnd.Interfaces
             public string SelectedCollection = "";
         }
 
+        #region Public Properties
+
+        public Component_OverviewList OverlayPanel
+        {
+            get
+            {
+                return (Component_OverviewList) m_Overlay.MainControl;
+            }
+        }
+
+        #endregion
+
+        #region Public Fields
+
         public CollectionsOverviewerModel DataModel;
+
+        #endregion 
+
+        #region Private Fields
+
+        private Control_OverlayPanel m_Overlay = null;
+
+        #endregion
+
         public event ComponentEvent UnhandledEvent;
+
+        #region Public Functions
 
         public View_CollectionsOverview(List<string> alstAvailableCollections)
         {
             InitializeComponent();
             DataContext = this;
             DataModel = new CollectionsOverviewerModel(alstAvailableCollections);
-            LstBoxLoadedCollections.ItemsSource = DataModel.LstAvailableCollections;
+
             LstBoxCollectionPreview.ItemsSource = DataModel.LstCurrentCollectionPreview;
+
+            Component_OverviewList nCmp = new Component_OverviewList();
+            nCmp.LstBoxLoadedCollections.SelectionChanged += eLstBoxLoadedCollections_SelectionChanged;
+            nCmp.BtnAddCollection.Click += eAddCol_Click;
+            nCmp.BtnLoadCollection.Click += eLoadCol_Click;
+            nCmp.BtnViewCollection.Click += eViewCollection_Click;
+            nCmp.LstBoxLoadedCollections.ItemsSource = DataModel.LstAvailableCollections;
+
+            m_Overlay = new Control_OverlayPanel();
+            m_Overlay.SetMainControl(nCmp);
+
+            OverviewPanel.Children.Add(m_Overlay);
         }
 
-        private void buildAvailableCollectionsList()
+        public IDataModel GetDataModel()
         {
-            // Get Loaded Collections
-            List<string> lstAvailableCollections = ServerInterfaceModel.GetLoadedCollectionList();
-            DataModel.UpdateCollectionsList(lstAvailableCollections);
-            LstBoxLoadedCollections.ItemsSource = DataModel.LstAvailableCollections;
-            LstBoxCollectionPreview.ItemsSource = DataModel.LstCurrentCollectionPreview;
+            return DataModel;
         }
 
-        // This is unhandled
-        private void eLstBoxLoadedCollections_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        public List<Tuple<string, MenuAction>> GetMenuActions()
         {
-            string szCollectionSelected = LstBoxLoadedCollections.SelectedValue.ToString();
-            DataModel.SelectedCollection = szCollectionSelected;
-            CollectionModel ColM = ServerInterfaceModel.GetCollectionModel(szCollectionSelected);
-            if (!(ColM == null))
-            {
-                DataModel.LstCurrentCollectionPreview = ColM.LstCopyModels.Select(x => x.GetIdealIdentifier()).ToList();
-                LstBoxCollectionPreview.ItemsSource = DataModel.LstCurrentCollectionPreview;
-            }
+            return new List<Tuple<string, MenuAction>>();//throw new NotImplementedException();
         }
 
         // This gets subscribed to the unhandled event of its components
@@ -107,7 +131,7 @@ namespace CollectorsFrontEnd.Interfaces
         {
             if (aDataObject.GetType() == typeof(CompSubEnterText.CompSubEnterTextDataModel))
             {
-                CompSubEnterText.CompSubEnterTextDataModel DM = (CompSubEnterText.CompSubEnterTextDataModel) aDataObject;
+                CompSubEnterText.CompSubEnterTextDataModel DM = (CompSubEnterText.CompSubEnterTextDataModel)aDataObject;
                 if (aszAction == "Cancel")
                 {
                     showMainDisplay();
@@ -121,15 +145,33 @@ namespace CollectorsFrontEnd.Interfaces
             }
         }
 
-        public IDataModel GetDataModel()
+        #endregion
+
+        #region Private Functions
+
+        private void buildAvailableCollectionsList()
         {
-            return DataModel;
+            // Get Loaded Collections
+            List<string> lstAvailableCollections = ServerInterfaceModel.GetLoadedCollectionList();
+            DataModel.UpdateCollectionsList(lstAvailableCollections);
+            OverlayPanel.LstBoxLoadedCollections.ItemsSource = DataModel.LstAvailableCollections;
+            LstBoxCollectionPreview.ItemsSource = DataModel.LstCurrentCollectionPreview;
         }
 
-        public List<Tuple<string, MenuAction>> GetMenuActions()
+        // This is unhandled
+        private void eLstBoxLoadedCollections_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            return new List<Tuple<string, MenuAction>>();//throw new NotImplementedException();
+            string szCollectionSelected = OverlayPanel.LstBoxLoadedCollections.SelectedValue.ToString();
+            DataModel.SelectedCollection = szCollectionSelected;
+            CollectionModel ColM = ServerInterfaceModel.GetCollectionModel(szCollectionSelected);
+            if (!(ColM == null))
+            {
+                DataModel.LstCurrentCollectionPreview = ColM.LstCopyModels.Select(x => x.GetIdealIdentifier()).ToList();
+                LstBoxCollectionPreview.ItemsSource = DataModel.LstCurrentCollectionPreview;
+            }
         }
+
+ 
 
         private void addCollection(string aszNewName)
         {
@@ -138,33 +180,25 @@ namespace CollectorsFrontEnd.Interfaces
 
         private void showMainDisplay()
         {
-            if (m_OverlayControl != null)
-            {
-                CenterPanel.Children.Remove(m_OverlayControl);
-            }
-            
-            m_OverlayControl = null;
-            ControlPanel.IsEnabled = true;
+            m_Overlay.ShowMain();
         }
 
         private void showEnterTextWindow()
         {
-            showMainDisplay();
-
             CompSubEnterText ITI = new CompSubEnterText();
-            m_OverlayControl = ITI;
             ITI.UnhandledEvent += RouteReceivedUnhandledEvent;
-            Panel.SetZIndex(CenterPanel, 2);
-            CenterPanel.Children.Add(ITI);
-            ControlPanel.IsEnabled = false;
-
+            m_Overlay.ShowOverlay(ITI);
         }
 
-        private void eBtnViewCollection_Click(object sender, RoutedEventArgs e)
+        #endregion
+
+        #region UI Event Handlers
+
+        private void eViewCollection_Click(object sender, RoutedEventArgs e)
         {
-            if (LstBoxLoadedCollections.SelectedValue != null)
+            if (OverlayPanel.LstBoxLoadedCollections.SelectedValue != null)
             {
-                string szCollectionSelected = LstBoxLoadedCollections.SelectedValue.ToString();
+                string szCollectionSelected = OverlayPanel.LstBoxLoadedCollections.SelectedValue.ToString();
                 if (!string.IsNullOrEmpty(szCollectionSelected))
                 {
                     UnhandledEvent(DataModel, "ViewCollection");
@@ -203,5 +237,7 @@ namespace CollectorsFrontEnd.Interfaces
         {
             showEnterTextWindow();
         }
+
+        #endregion
     }
 }

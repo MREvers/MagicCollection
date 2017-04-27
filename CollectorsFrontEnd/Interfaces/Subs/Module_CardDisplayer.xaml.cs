@@ -38,29 +38,38 @@ namespace CollectorsFrontEnd.Interfaces.Subs
         {
             InitializeComponent();
             DataContext = this;
-            CardName = aDataModel.CardName;
-            CardType = aDataModel.GetAttr("type");
-            CardLoyalty = aDataModel.GetAttr("loyalty");
-            CardText = aDataModel.GetAttr("text");
-            CardPT = aDataModel.GetAttr("power") + "/" + aDataModel.GetAttr("toughness");
-            CardSet = aDataModel.GetAttr("set");
+            DataModel = aDataModel;
+            LoadNewSet(aDataModel);
 
-            aDataModel.PropertyChanged += eImageLoaded;
-            aDataModel.GetImage();
+            Unloaded += eUnload;
         }
 
-        private void eImageLoaded(object sender, PropertyChangedEventArgs e)
+        public void LoadNewSet(CardModel aDataModel)
         {
-            if (e.PropertyName == "CardImage")
+            if (aDataModel == null)
             {
-                CardModel dataModel = (CardModel)sender;
-                CardImage = (BitmapImage)dataModel.CardImage;
-                this.Width = CardImage.Width;
-                this.Height = CardImage.Height;
+                return;
             }
+
+            DataModel.PropertyChanged -= eImageLoaded;
+            DataModel.UnloadImage();
+            CardImage = null;
+            UpdateLayout();
+
+            DataModel = aDataModel;
+            CardName = DataModel.CardName;
+            CardType = DataModel.GetAttr("type");
+            CardLoyalty = DataModel.GetAttr("loyalty");
+            CardText = DataModel.GetAttr("text");
+            CardPT = DataModel.GetAttr("power") + "/" + DataModel.GetAttr("toughness");
+            CardSet = DataModel.GetAttr("set");
+            RefreshBindings();
+
+            DataModel.PropertyChanged += eImageLoaded;
+            DataModel.GetImage();
         }
 
-        public IDataModel GetDataModel()
+        public IDataModel GetDataModel(CardModel aDataModel)
         {
             throw new NotImplementedException();
         }
@@ -68,6 +77,42 @@ namespace CollectorsFrontEnd.Interfaces.Subs
         public void RouteReceivedUnhandledEvent(IDataModel aDataObject, string aszAction)
         {
             throw new NotImplementedException();
+        }
+
+        public IDataModel GetDataModel()
+        {
+            throw new NotImplementedException();
+        }
+        private void eImageLoaded(object sender, PropertyChangedEventArgs e)
+        {
+            CardModel dataModel = (CardModel)sender;
+            if (e.PropertyName == "CardImage" && dataModel.CardImage != null)
+            {
+                dataModel.CardImage.Freeze();
+                if (CardImage != null)
+                {
+                    CardImage.Freeze();
+                }
+                CardImage = (BitmapImage)dataModel.CardImage.GetAsFrozen();
+                this.Width = CardImage.Width;
+                this.Height = CardImage.Height;
+                RefreshBindings();
+            }
+        }
+
+        private void RefreshBindings()
+        {
+            DataContext = null;
+            DataContext = this;
+        }
+
+        private void eUnload(object sender, RoutedEventArgs e)
+        {
+            if (DataModel != null)
+            {
+                DataModel.PropertyChanged -= eImageLoaded;
+                DataModel.UnloadImage();
+            }
         }
     }
 }

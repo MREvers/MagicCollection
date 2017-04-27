@@ -16,6 +16,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.Diagnostics;
 
 namespace CollectorsFrontEnd.Interfaces
 {
@@ -26,7 +27,7 @@ namespace CollectorsFrontEnd.Interfaces
     {
         #region Data Binding
 
-        public ObservableCollection<Module_CardGroupList> LstGroups { get; set; }
+        public ObservableCollection<Component_CardGroupList> LstGroups { get; set; }
 
         #endregion
 
@@ -38,11 +39,11 @@ namespace CollectorsFrontEnd.Interfaces
 
         #region Public Properties
 
-        public Module_GroupView MainDisplay
+        public Component_GroupView MainDisplay
         {
             get
             {
-                return (Module_GroupView) m_Overlay.MainControl;
+                return (Component_GroupView) m_Overlay.MainControl;
             }
         }
 
@@ -81,21 +82,22 @@ namespace CollectorsFrontEnd.Interfaces
                 DataModel = ServerInterfaceModel.GenerateCollectionModel(aszCollectionName);
             }
             GroupingAttr = "colors";
-            LstGroups = new ObservableCollection<Module_CardGroupList>();
+            LstGroups = new ObservableCollection<Component_CardGroupList>();
             Loaded += (o, e) =>
             {
                 buildGroupsView();
             };
 
-            Module_GroupView groupView = new Module_GroupView();
+            Component_GroupView groupView = new Component_GroupView();
             groupView.LstGroups = LstGroups;
-            groupView.SizeChanged += eMainDisplay_Resize;
+            groupView.ResizeOccured += eMainDisplay_Resize;
 
             Control_OverlayPanel mainPanel = new Control_OverlayPanel();
             mainPanel.SetMainControl(groupView);
             m_Overlay = mainPanel;
 
             CenterPanel.Children.Add(m_Overlay);
+
         }
 
         public List<Tuple<string, MenuAction>> GetMenuActions()
@@ -124,9 +126,9 @@ namespace CollectorsFrontEnd.Interfaces
                     ecBulkEditsAccept(dM);
                 }
             }
-            else if (aoDataObject.GetType() == typeof(Module_CardGroupList.Data))
+            else if (aoDataObject.GetType() == typeof(Component_CardGroupList.Data))
             {
-                Module_CardGroupList.Data DM = (Module_CardGroupList.Data)aoDataObject;
+                Component_CardGroupList.Data DM = (Component_CardGroupList.Data)aoDataObject;
                 if (aszAction == "Selection Changed")
                 {
                     ecGroupsSelectionChanged(DM);
@@ -146,13 +148,16 @@ namespace CollectorsFrontEnd.Interfaces
         // This must be called after the window is loaded or "ActualHeight" will be 0.
         private void buildGroupsView()
         {
+            Stopwatch sp = new Stopwatch();
+            sp.Start();
+
             LstGroups.Clear();
             Dictionary<string, List<CardModel>> lstLists = generateGroupLists();
-            List<Module_CardGroupList> lstFirstsList = new List<Module_CardGroupList>();
-            List<Module_CardGroupList> lstPostLists = new List<Module_CardGroupList>();
+            List<Component_CardGroupList> lstFirstsList = new List<Component_CardGroupList>();
+            List<Component_CardGroupList> lstPostLists = new List<Component_CardGroupList>();
             foreach (string szKey in lstLists.Keys)
             {
-                Module_CardGroupList newGroup = new Module_CardGroupList(szKey, lstLists[szKey]);
+                Component_CardGroupList newGroup = new Component_CardGroupList(szKey, lstLists[szKey]);
                 newGroup.UnhandledEvent += RouteReceivedUnhandledEvent;
                 if (LstSpecialGroups.Where(x => newGroup.GroupName.Contains(x)).Count() == 1)
                 {
@@ -173,6 +178,9 @@ namespace CollectorsFrontEnd.Interfaces
                 LstGroups.Add(ng);
             }
             ecResizeGroups();
+
+            sp.Stop();
+            long itime = sp.ElapsedMilliseconds;
         }
 
         private Dictionary<string, List<CardModel>> generateGroupLists()
@@ -216,7 +224,7 @@ namespace CollectorsFrontEnd.Interfaces
 
         private void ecResizeGroups()
         {
-            foreach (Module_CardGroupList grp in LstGroups)
+            foreach (Component_CardGroupList grp in LstGroups)
             {
                 if (LstSpecialGroups.Where(x => grp.GroupName.Contains(x)).Count() == 1)
                 {
@@ -233,7 +241,7 @@ namespace CollectorsFrontEnd.Interfaces
             showMainDisplay();
         }
 
-        private void ecGroupsSelectionChanged(Module_CardGroupList.Data aoDataModel)
+        private void ecGroupsSelectionChanged(Component_CardGroupList.Data aoDataModel)
         {
 
             foreach (var lstGroup in LstGroups)

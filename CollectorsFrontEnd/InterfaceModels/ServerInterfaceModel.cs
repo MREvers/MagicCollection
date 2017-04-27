@@ -124,6 +124,11 @@ namespace CollectorsFrontEnd.InterfaceModels
             }
 
             // Passes the image to the callback.
+            // There is notably a memory leak in wpf bitmap images. read here.
+            //http://stackoverflow.com/questions/21877221/memory-not-getting-released-in-wpf-image
+            // I used the ANTS profiler and it looks like I am not leaking memory. It just seems that
+            // the process will hold onto memory after its no longer needed. So when viewing lots of images
+            // we may not expect it to return to its previous usage.
             public static void DownloadAndCacheImage(EventHandler aeHandlerCallback, CardModel aoCardModel)
             {
                 // Save in set
@@ -159,16 +164,24 @@ namespace CollectorsFrontEnd.InterfaceModels
                             new Uri(@"http://gatherer.wizards.com/Handlers/Image.ashx?name=" +
                             aoCardModel.CardName + "&type=card", UriKind.RelativeOrAbsolute);
                     }
-                    bi3.CacheOption = BitmapCacheOption.OnLoad;
+                    bi3.CacheOption = BitmapCacheOption.None;
                     bi3.EndInit();
                 }
                 else
                 {
                     string szFullPath = Path.GetFullPath(szFilePath);
-                    bi3 = new BitmapImage(new Uri(szFullPath, UriKind.RelativeOrAbsolute));
+
+                    bi3 = new BitmapImage();
+                    FileStream stream = File.OpenRead(szFullPath);
+
+                    bi3.BeginInit();
+                    bi3.CacheOption = BitmapCacheOption.None;
+                    bi3.StreamSource = stream;
+                    bi3.EndInit();
+                    bi3.Freeze();
                     aeHandlerCallback(bi3, null);
                 }
-
+                
             }
 
             private static void eModelImage_DownloadCompleted(object sender, ImageDownloadedEventArgs ie)
