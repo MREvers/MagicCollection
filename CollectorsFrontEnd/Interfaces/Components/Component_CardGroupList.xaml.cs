@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -20,24 +21,58 @@ namespace CollectorsFrontEnd.Interfaces.Subs
     /// <summary>
     /// Interaction logic for CompSubCardGroupList.xaml
     /// </summary>
-    public partial class Component_CardGroupList : UserControl, IComponent
+    public partial class Component_CardGroupList : UserControl, IComponent, INotifyPropertyChanged
     {
         #region Data Binding
 
         public ObservableCollection<ListViewItem> LstItems { get; set; }
 
-        public string GroupName { get; set; }
+        private string _GroupName;
+        public string GroupName
+        {
+            get
+            {
+                return _GroupName;
+            }
+            set
+            {
+                _GroupName = value;
+                OnPropertyChanged("GroupName");
+            }
+        }
 
-        public Module_CardDisplayer ToolTipDisplay { get; set; }
+        private Module_CardDisplayer _ToolTipDisplay;
+        public Module_CardDisplayer ToolTipDisplay
+        {
+            get
+            {
+                return _ToolTipDisplay;
+            }
+            set
+            {
+                _ToolTipDisplay = value;
+                OnPropertyChanged("ToolTipDisplay");
+            }
+        }
 
+        public event PropertyChangedEventHandler PropertyChanged;
+        protected virtual void OnPropertyChanged(string propertyName)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
         #endregion
 
-
+        #region Nested Types
         public class Data : IDataModel
         {
             public List<CardModel> LstItems = new List<CardModel>();
             public Component_CardGroupList SourceGroup;
         }
+        #endregion
+
+        #region Public Events
+        public event ComponentEvent UnhandledEvent;
+        #endregion
 
         #region Public properties
 
@@ -47,16 +82,12 @@ namespace CollectorsFrontEnd.Interfaces.Subs
 
         #endregion
 
-        public event ComponentEvent UnhandledEvent;
-
         #region public fields
         public Data DataModel;
         public string ToolTipName;
         #endregion
 
         #region Public Functions
-
-
         public Component_CardGroupList(string aszGroupName, List<CardModel> alstModels)
         {
             InitializeComponent();
@@ -100,7 +131,6 @@ namespace CollectorsFrontEnd.Interfaces.Subs
         #endregion
 
         #region UI event handlers
-
         private void eItemList_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             Data DM = (Data) GetDataModel();
@@ -127,10 +157,9 @@ namespace CollectorsFrontEnd.Interfaces.Subs
                 {
                     ToolTipDisplay = new Module_CardDisplayer(oNewDisplay);
                 }
-                
             }
-
         }
+
         private void eItemList_MouseLeave(object sender, MouseEventArgs e)
         {
             ToolTipName = "";

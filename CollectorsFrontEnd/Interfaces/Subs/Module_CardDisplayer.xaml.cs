@@ -20,28 +20,132 @@ namespace CollectorsFrontEnd.Interfaces.Subs
     /// <summary>
     /// Interaction logic for CompSubCardDisplayer.xaml
     /// </summary>
-    public partial class Module_CardDisplayer : UserControl, IComponent
+    public partial class Module_CardDisplayer : UserControl, IComponent, INotifyPropertyChanged
     {
-        public string CardName { get; set; }
-        public string CardType { get; set; }
-        public string CardLoyalty { get; set; }
-        public string CardText { get; set; }
-        public string CardPT { get; set; }
-        public string CardSet { get; set; }
-        public BitmapImage CardImage { get; set; } 
+        #region Data Binding
+        private string _CardName;
+        public string CardName
+        {
+            get
+            {
+                return _CardName;
+            }
+            set
+            {
+                _CardName = value;
+                OnPropertyChanged("CardName");
+            }
+        }
+
+        private string _CardType;
+        public string CardType
+        {
+            get
+            {
+                return _CardType;
+            }
+            set
+            {
+                _CardType = value;
+                OnPropertyChanged("CardType");
+            }
+        }
+
+        private string _CardLoyalty;
+        public string CardLoyalty
+        {
+            get
+            {
+                return _CardLoyalty;
+            }
+            set
+            {
+                _CardLoyalty = value;
+                OnPropertyChanged("CardLoyalty");
+            }
+        }
+
+        private string _CardText;
+        public string CardText
+        {
+            get
+            {
+                return _CardText;
+            }
+            set
+            {
+                _CardText = value;
+                OnPropertyChanged("CardText");
+            }
+        }
+
+        private string _CardPT;
+        public string CardPT
+        {
+            get
+            {
+                return _CardPT;
+            }
+            set
+            {
+                _CardPT = value;
+                OnPropertyChanged("CardPT");
+            }
+        }
+
+        private string _CardSet;
+        public string CardSet
+        {
+            get
+            {
+                return _CardSet;
+            }
+            set
+            {
+                _CardSet = value;
+                OnPropertyChanged("CardSet");
+            }
+        }
+
+        private BitmapImage _CardImage;
+        public BitmapImage CardImage
+        {
+            get
+            {
+                return _CardImage;
+            }
+            set
+            {
+                _CardImage = value;
+                OnPropertyChanged("CardImage");
+            }
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+        protected virtual void OnPropertyChanged(string propertyName)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+        #endregion
+
+        #region Public Events
 
         public event ComponentEvent UnhandledEvent;
 
-        public CardModel DataModel;
+        #endregion
 
+        #region Public Feilds
+        public CardModel DataModel;
+        #endregion
+
+        #region Public Functions
         public Module_CardDisplayer(CardModel aDataModel)
         {
             InitializeComponent();
             DataContext = this;
             DataModel = aDataModel;
             LoadNewSet(aDataModel);
-
-            Unloaded += eUnload;
+            
         }
 
         public void LoadNewSet(CardModel aDataModel)
@@ -51,22 +155,17 @@ namespace CollectorsFrontEnd.Interfaces.Subs
                 return;
             }
 
-            DataModel.PropertyChanged -= eImageLoaded;
-            DataModel.UnloadImage();
-            CardImage = null;
-            UpdateLayout();
+            releaseBindings();
 
-            DataModel = aDataModel;
-            CardName = DataModel.CardName;
-            CardType = DataModel.GetAttr("type");
-            CardLoyalty = DataModel.GetAttr("loyalty");
-            CardText = DataModel.GetAttr("text");
-            CardPT = DataModel.GetAttr("power") + "/" + DataModel.GetAttr("toughness");
-            CardSet = DataModel.GetAttr("set");
-            RefreshBindings();
+            CardName = aDataModel.CardName;
+            CardType = aDataModel.GetAttr("type");
+            CardLoyalty = aDataModel.GetAttr("loyalty");
+            CardText = aDataModel.GetAttr("text");
+            CardPT = aDataModel.GetAttr("power") + "/" + aDataModel.GetAttr("toughness");
+            CardSet = aDataModel.GetAttr("set");
 
-            DataModel.PropertyChanged += eImageLoaded;
-            DataModel.GetImage();
+            aDataModel.PropertyChanged += eImageLoaded;
+            aDataModel.GetImage();
         }
 
         public IDataModel GetDataModel(CardModel aDataModel)
@@ -83,36 +182,49 @@ namespace CollectorsFrontEnd.Interfaces.Subs
         {
             throw new NotImplementedException();
         }
-        private void eImageLoaded(object sender, PropertyChangedEventArgs e)
-        {
-            CardModel dataModel = (CardModel)sender;
-            if (e.PropertyName == "CardImage" && dataModel.CardImage != null)
-            {
-                dataModel.CardImage.Freeze();
-                if (CardImage != null)
-                {
-                    CardImage.Freeze();
-                }
-                CardImage = (BitmapImage)dataModel.CardImage.GetAsFrozen();
-                this.Width = CardImage.Width;
-                this.Height = CardImage.Height;
-                RefreshBindings();
-            }
-        }
 
-        private void RefreshBindings()
+        #endregion
+
+        #region Private Events
+
+        private void refreshBindings()
         {
             DataContext = null;
             DataContext = this;
         }
 
-        private void eUnload(object sender, RoutedEventArgs e)
+        private void releaseBindings()
         {
             if (DataModel != null)
             {
                 DataModel.PropertyChanged -= eImageLoaded;
                 DataModel.UnloadImage();
             }
+            CardImage = null;
+            UpdateLayout();
         }
+        #endregion
+
+        #region UI Event Handlers
+        private void eImageLoaded(object sender, PropertyChangedEventArgs e)
+        {
+            CardModel dataModel = (CardModel)sender;
+            if (e.PropertyName == "CardImage" && dataModel.CardImage != null)
+            {
+                CardImage = null;
+                UpdateLayout();
+                DataModel = dataModel;
+                dataModel.CardImage.Freeze();
+                CardImage = dataModel.CardImage;
+                Width = CardImage.Width;
+                Height = CardImage.Height;
+            }
+        }
+
+        private void eUnload(object sender, RoutedEventArgs e)
+        {
+            releaseBindings();
+        }
+        #endregion
     }
 }

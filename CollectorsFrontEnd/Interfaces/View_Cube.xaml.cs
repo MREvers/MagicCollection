@@ -279,7 +279,5 @@ namespace CollectorsFrontEnd.Interfaces
         }
 
         #endregion
-
-
     }
 }

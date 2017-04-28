@@ -23,19 +23,60 @@ namespace CollectorsFrontEnd.Interfaces.Subs
     /// </summary>
     public partial class Module_BulkEdits : UserControl, IComponent, INotifyPropertyChanged
     {
+        #region Data Binding
         public ObservableCollection<string> LstTextChanges { get; set; }
-        public string RemoveCardDisplay { get; set; }
-        public string AddCardDisplay { get; set; }
+
+        private string _RemoveCardDisplay;
+        public string RemoveCardDisplay
+        {
+            get
+            {
+                return _RemoveCardDisplay;
+            }
+            set
+            {
+                _RemoveCardDisplay = value;
+                OnPropertyChanged("RemoveCardDisplay");
+            }
+        }
+
+        private string _AddCardDisplay;
+        public string AddCardDisplay
+        {
+            get
+            {
+                return _AddCardDisplay;
+            }
+            set
+            {
+                _AddCardDisplay = value;
+                OnPropertyChanged("AddCardDisplay");
+            }
+        }
 
         public event PropertyChangedEventHandler PropertyChanged;
-        public event ComponentEvent UnhandledEvent;
+        protected virtual void OnPropertyChanged(string propertyName)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+        #endregion
 
+        #region Public Event
+        public event ComponentEvent UnhandledEvent;
+        #endregion
+
+        #region Nested Data Types
         public class Data : IDataModel
         {
             public List<string> LstTextChanges = new List<string>();
         }
+        #endregion
 
+        #region Public Fields
         public Data DataModel;
+        #endregion
+
+        #region Private Fields
         private int m_iAddSelectedIndex = -1;
         private int m_iRemoveSelectedIndex = -1;
         private bool m_bIsOfferedSelectionAdd = false;
@@ -43,6 +84,7 @@ namespace CollectorsFrontEnd.Interfaces.Subs
         private TextBox m_TBInAddCombo;
         private TextBox m_TBInRemoveCombo;
         private CollectionModel m_ColModel;
+        #endregion
 
         #region Public Functions
 
@@ -280,7 +322,6 @@ namespace CollectorsFrontEnd.Interfaces.Subs
         }
 
         #endregion
-
 
     }
 }

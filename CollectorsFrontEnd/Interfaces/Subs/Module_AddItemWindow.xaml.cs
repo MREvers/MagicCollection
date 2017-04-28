@@ -19,21 +19,32 @@ namespace CollectorsFrontEnd.Interfaces.Subs
     /// <summary>
     /// Interaction logic for CompSubAddItemWindow.xaml
     /// </summary>
-    public partial class CompSubAddItemWindow : UserControl, IComponent
+    public partial class Module_AddItemWindow : UserControl, IComponent
     {
-        
 
+        #region Nested Data Types
         public class AddItemDataModel: IDataModel
         {
             public string ComboBoxText { get; set; }
         }
+        #endregion
 
+        #region Public Events
         public event ComponentEvent UnhandledEvent;
-        private TextBox m_TBInCombo;
+        #endregion
+
+
+        #region Public Fields
         public AddItemDataModel DataModel;
+        #endregion
+
+        #region Private Fields
+        private TextBox m_TBInCombo;
+        #endregion
+
         #region Public Functions
 
-        public CompSubAddItemWindow()
+        public Module_AddItemWindow()
         {
             InitializeComponent();
             DataContext = this;
@@ -55,6 +66,7 @@ namespace CollectorsFrontEnd.Interfaces.Subs
             return DataModel;
         }
         #endregion PUblic Functions
+
         #region UI Event Handlers
         private void eBtnAddCard_Click(object sender, RoutedEventArgs e)
         {

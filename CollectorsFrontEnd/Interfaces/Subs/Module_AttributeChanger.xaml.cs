@@ -21,7 +21,7 @@ namespace CollectorsFrontEnd.Interfaces.Subs
     /// <summary>
     /// Interaction logic for CompSubAttributeChanger.xaml
     /// </summary>
-    public partial class CompSubAttributeChanger : UserControl, IComponent, INotifyPropertyChanged
+    public partial class Module_AttributeChanger : UserControl, IComponent, INotifyPropertyChanged
     {
         #region Data Binding
 
@@ -56,8 +56,11 @@ namespace CollectorsFrontEnd.Interfaces.Subs
             public CompSubAttributeChangerModel(CardModel aDataModel, List<Tuple<string, string>> aLstCurrentTags)
             {
                 CardModelObject = aDataModel;
-                LstCurrentMetaTags = aLstCurrentTags.Select(x=>new MutableTuple(x.Item1, x.Item2)).ToList();
-                LstNonUniqueAttrs = new List<MutableRestrictedList>();
+                LstCurrentMetaTags = 
+                    new ObservableCollection<MutableTuple>(aLstCurrentTags.Select(x => new MutableTuple(x.Item1, x.Item2)));
+                    
+                LstNonUniqueAttrs =
+                    new ObservableCollection<MutableRestrictedList>();
                 foreach (var aut in aDataModel.LstSpecifiedAttrs)
                 {
                     List<string> lstRestrictedVals = aDataModel
@@ -82,8 +85,8 @@ namespace CollectorsFrontEnd.Interfaces.Subs
             }
             public CardModel CardModelObject;
 
-            public List<MutableTuple> LstCurrentMetaTags { get; set; }
-            public List<MutableRestrictedList> LstNonUniqueAttrs { get; set; }
+            public ObservableCollection<MutableTuple> LstCurrentMetaTags { get; set; }
+            public ObservableCollection<MutableRestrictedList> LstNonUniqueAttrs { get; set; }
         }
         #endregion
 
@@ -100,7 +103,7 @@ namespace CollectorsFrontEnd.Interfaces.Subs
         #endregion
 
         #region Public Methods
-        public CompSubAttributeChanger(CardModel aDataModel)
+        public Module_AttributeChanger(CardModel aDataModel)
         {
             InitializeComponent();
 

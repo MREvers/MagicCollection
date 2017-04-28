@@ -139,7 +139,7 @@ namespace CollectorsFrontEnd.Interfaces
             showMainDisplay();
             if (DataModel.CollectionName != "")
             {
-                CompSubAddItemWindow ITI = new CompSubAddItemWindow();
+                Module_AddItemWindow ITI = new Module_AddItemWindow();
                 m_OverlayControl = ITI;
                 ITI.UnhandledEvent += RouteReceivedUnhandledEvent;
                 Panel.SetZIndex(CenterPanel, 2);
@@ -167,7 +167,7 @@ namespace CollectorsFrontEnd.Interfaces
             showMainDisplay();
             if (DataModel.CollectionName != "" && alstCardModels.Count > 0)
             {
-                CompSubAmountInterchanger ITI = new CompSubAmountInterchanger(alstCardModels);
+                Module_AmountInterchanger ITI = new Module_AmountInterchanger(alstCardModels);
                 m_OverlayControl = ITI;
                 ITI.UnhandledEvent += RouteReceivedUnhandledEvent;
                 Panel.SetZIndex(CenterPanel, 2);
@@ -181,7 +181,7 @@ namespace CollectorsFrontEnd.Interfaces
             showMainDisplay();
             if (DataModel.CollectionName != "")
             {
-                CompSubAttributeChanger ITI = new CompSubAttributeChanger(aDataModel);
+                Module_AttributeChanger ITI = new Module_AttributeChanger(aDataModel);
                 m_OverlayControl = ITI;
                 ITI.UnhandledEvent += RouteReceivedUnhandledEvent;
                 Panel.SetZIndex(CenterPanel, 2);
@@ -213,7 +213,7 @@ namespace CollectorsFrontEnd.Interfaces
             showMainDisplay();
         }
 
-        private void ecAddItem(CompSubAddItemWindow.AddItemDataModel aDataModel)
+        private void ecAddItem(Module_AddItemWindow.AddItemDataModel aDataModel)
         {
             //MainWindow.SCI.AddItem(ActiveCollection, m_CurrentAddItemWindow.ComboText, new List<Tuple<string, string>>());
             DataModel.AddItem(aDataModel.ComboBoxText, new List<Tuple<string, string>>());
@@ -254,14 +254,14 @@ namespace CollectorsFrontEnd.Interfaces
             showItemInterchangerWindow(lstCards);
         }
 
-        private void ecAmountInterchangerWindowAccept(CompSubAmountInterchanger.AmountInterchangerModel aDataModel)
+        private void ecAmountInterchangerWindowAccept(Module_AmountInterchanger.AmountInterchangerModel aDataModel)
         {
-            List<CompSubAmountChanger> ListChanges = aDataModel.LstGeneralizations;
+            List<Module_AmountChanger> ListChanges = aDataModel.LstGeneralizations;
 
-            foreach (CompSubAmountChanger AI in ListChanges)
+            foreach (Module_AmountChanger AI in ListChanges)
             {
-                CompSubAmountChanger.CompSubAmountChangerModel oAmountChangerModel =
-                    (CompSubAmountChanger.CompSubAmountChangerModel)AI.GetDataModel();
+                Module_AmountChanger.Data oAmountChangerModel =
+                    (Module_AmountChanger.Data)AI.GetDataModel();
                 int iChangeCount = 0;
                 if ((iChangeCount = (oAmountChangerModel.CurrentAmount - oAmountChangerModel.StartAmount)) > 0)
                 {
@@ -301,7 +301,7 @@ namespace CollectorsFrontEnd.Interfaces
             showMainDisplay();
         }
 
-        private void ecAttrChangerWindowAccept(CompSubAttributeChanger.CompSubAttributeChangerModel aDataModel)
+        private void ecAttrChangerWindowAccept(Module_AttributeChanger.CompSubAttributeChangerModel aDataModel)
         {
             // Calculate differences in meta tags
             // Calculate added tags
@@ -385,10 +385,10 @@ namespace CollectorsFrontEnd.Interfaces
         public void RouteReceivedUnhandledEvent(IDataModel aDataObject, string aszAction)
         {
 
-            if (aDataObject.GetType() == typeof(CompSubAddItemWindow.AddItemDataModel))
+            if (aDataObject.GetType() == typeof(Module_AddItemWindow.AddItemDataModel))
             {
-                CompSubAddItemWindow.AddItemDataModel oDataModel =
-                    (CompSubAddItemWindow.AddItemDataModel)aDataObject;
+                Module_AddItemWindow.AddItemDataModel oDataModel =
+                    (Module_AddItemWindow.AddItemDataModel)aDataObject;
                 if (aszAction == "AddItem")
                 {
                     ecAddItem(oDataModel);
@@ -411,10 +411,10 @@ namespace CollectorsFrontEnd.Interfaces
                 }
             }
             // From the attr changer
-            else if (aDataObject.GetType() == typeof(CompSubAttributeChanger.CompSubAttributeChangerModel))
+            else if (aDataObject.GetType() == typeof(Module_AttributeChanger.CompSubAttributeChangerModel))
             {
-                CompSubAttributeChanger.CompSubAttributeChangerModel oDataModel =
-                    (CompSubAttributeChanger.CompSubAttributeChangerModel)aDataObject;
+                Module_AttributeChanger.CompSubAttributeChangerModel oDataModel =
+                    (Module_AttributeChanger.CompSubAttributeChangerModel)aDataObject;
                 if (aszAction == "Cancel")
                 {
                     ecAttrChangerWindowClose();
@@ -425,7 +425,7 @@ namespace CollectorsFrontEnd.Interfaces
                 }
             }
             // From The AmountInterchanger
-            else if (aDataObject.GetType() == typeof(CompSubAmountInterchanger.AmountInterchangerModel))
+            else if (aDataObject.GetType() == typeof(Module_AmountInterchanger.AmountInterchangerModel))
             {
                 if (aszAction == "Close")
                 {
@@ -433,7 +433,7 @@ namespace CollectorsFrontEnd.Interfaces
                 }
                 else if (aszAction == "OK")
                 {
-                    ecAmountInterchangerWindowAccept((CompSubAmountInterchanger.AmountInterchangerModel)aDataObject);
+                    ecAmountInterchangerWindowAccept((Module_AmountInterchanger.AmountInterchangerModel)aDataObject);
                 }
             }
             else if (aDataObject.GetType() == typeof(Module_Generalization.Data))

@@ -129,9 +129,9 @@ namespace CollectorsFrontEnd.Interfaces
         // This gets subscribed to the unhandled event of its components
         public void RouteReceivedUnhandledEvent(IDataModel aDataObject, string aszAction)
         {
-            if (aDataObject.GetType() == typeof(CompSubEnterText.CompSubEnterTextDataModel))
+            if (aDataObject.GetType() == typeof(Module_EnterText.CompSubEnterTextDataModel))
             {
-                CompSubEnterText.CompSubEnterTextDataModel DM = (CompSubEnterText.CompSubEnterTextDataModel)aDataObject;
+                Module_EnterText.CompSubEnterTextDataModel DM = (Module_EnterText.CompSubEnterTextDataModel)aDataObject;
                 if (aszAction == "Cancel")
                 {
                     showMainDisplay();
@@ -185,7 +185,7 @@ namespace CollectorsFrontEnd.Interfaces
 
         private void showEnterTextWindow()
         {
-            CompSubEnterText ITI = new CompSubEnterText();
+            Module_EnterText ITI = new Module_EnterText();
             ITI.UnhandledEvent += RouteReceivedUnhandledEvent;
             m_Overlay.ShowOverlay(ITI);
         }
@@ -218,7 +218,6 @@ namespace CollectorsFrontEnd.Interfaces
 
             // Display OpenFileDialog by calling ShowDialog method 
             Nullable<bool> result = dlg.ShowDialog();
-
 
             // Get the selected file name and display in a TextBox 
             if (result == true)

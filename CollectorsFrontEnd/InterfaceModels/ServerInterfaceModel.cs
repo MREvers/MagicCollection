@@ -164,7 +164,7 @@ namespace CollectorsFrontEnd.InterfaceModels
                             new Uri(@"http://gatherer.wizards.com/Handlers/Image.ashx?name=" +
                             aoCardModel.CardName + "&type=card", UriKind.RelativeOrAbsolute);
                     }
-                    bi3.CacheOption = BitmapCacheOption.None;
+                    bi3.CacheOption = BitmapCacheOption.OnLoad;
                     bi3.EndInit();
                 }
                 else
@@ -175,7 +175,7 @@ namespace CollectorsFrontEnd.InterfaceModels
                     FileStream stream = File.OpenRead(szFullPath);
 
                     bi3.BeginInit();
-                    bi3.CacheOption = BitmapCacheOption.None;
+                    bi3.CacheOption = BitmapCacheOption.OnLoad;
                     bi3.StreamSource = stream;
                     bi3.EndInit();
                     bi3.Freeze();
@@ -204,7 +204,7 @@ namespace CollectorsFrontEnd.InterfaceModels
                 {
                     Directory.CreateDirectory(Path.GetDirectoryName(photolocation));
                 }
-
+                
                 using (var filestream = new FileStream(photolocation, FileMode.Create))
                     encoder.Save(filestream);
             }

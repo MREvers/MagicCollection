@@ -125,17 +125,17 @@
     <Compile Include="Interfaces\StoreFrontMain.xaml.cs">
       <DependentUpon>StoreFrontMain.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Interfaces\Subs\CompSubAddItemWindow.xaml.cs">
-      <DependentUpon>CompSubAddItemWindow.xaml</DependentUpon>
+    <Compile Include="Interfaces\Subs\Module_AddItemWindow.xaml.cs">
+      <DependentUpon>Module_AddItemWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Interfaces\Subs\CompSubAmountChanger.xaml.cs">
-      <DependentUpon>CompSubAmountChanger.xaml</DependentUpon>
+    <Compile Include="Interfaces\Subs\Module_AmountChanger.xaml.cs">
+      <DependentUpon>Module_AmountChanger.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Interfaces\Subs\CompSubAmountInterchanger.xaml.cs">
-      <DependentUpon>CompSubAmountInterchanger.xaml</DependentUpon>
+    <Compile Include="Interfaces\Subs\Module_AmountInterchanger.xaml.cs">
+      <DependentUpon>Module_AmountInterchanger.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Interfaces\Subs\CompSubAttributeChanger.xaml.cs">
-      <DependentUpon>CompSubAttributeChanger.xaml</DependentUpon>
+    <Compile Include="Interfaces\Subs\Module_AttributeChanger.xaml.cs">
+      <DependentUpon>Module_AttributeChanger.xaml</DependentUpon>
     </Compile>
     <Compile Include="Interfaces\Subs\Module_BulkEdits.xaml.cs">
       <DependentUpon>Module_BulkEdits.xaml</DependentUpon>
@@ -146,8 +146,8 @@
     <Compile Include="Interfaces\Components\Component_CardGroupList.xaml.cs">
       <DependentUpon>Component_CardGroupList.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Interfaces\Subs\CompSubEnterText.xaml.cs">
-      <DependentUpon>CompSubEnterText.xaml</DependentUpon>
+    <Compile Include="Interfaces\Subs\Module_EnterText.xaml.cs">
+      <DependentUpon>Module_EnterText.xaml</DependentUpon>
     </Compile>
     <Compile Include="Interfaces\Subs\Module_Generalization.xaml.cs">
       <DependentUpon>Module_Generalization.xaml</DependentUpon>
@@ -187,19 +187,19 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Interfaces\Subs\CompSubAddItemWindow.xaml">
+    <Page Include="Interfaces\Subs\Module_AddItemWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Interfaces\Subs\CompSubAmountChanger.xaml">
+    <Page Include="Interfaces\Subs\Module_AmountChanger.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Interfaces\Subs\CompSubAmountInterchanger.xaml">
+    <Page Include="Interfaces\Subs\Module_AmountInterchanger.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Interfaces\Subs\CompSubAttributeChanger.xaml">
+    <Page Include="Interfaces\Subs\Module_AttributeChanger.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -215,7 +215,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Interfaces\Subs\CompSubEnterText.xaml">
+    <Page Include="Interfaces\Subs\Module_EnterText.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

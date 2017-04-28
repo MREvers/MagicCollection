@@ -91,6 +91,6 @@
                 </Label>
             </Grid>
         </Grid>
-        <Image Panel.ZIndex="2" Source="{Binding Path=CardImage, UpdateSourceTrigger=PropertyChanged}"></Image>
+        <Image Panel.ZIndex="2" x:Name="ImageOverlay" Source="{Binding Path=CardImage, UpdateSourceTrigger=PropertyChanged}"></Image>
     </Grid>
 </UserControl>

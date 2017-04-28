@@ -162,6 +162,7 @@ namespace CollectorsFrontEnd.Interfaces
         }
         #endregion
 
+        #region UI Event Handlers
         private void eClose_Click(object sender, RoutedEventArgs e)
         {
             Close();
@@ -176,5 +177,6 @@ namespace CollectorsFrontEnd.Interfaces
         {
             ServerInterfaceModel.ImportJSONCollection();
         }
+        #endregion
     }
 }

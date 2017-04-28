@@ -21,7 +21,7 @@ namespace CollectorsFrontEnd.Interfaces.Subs
     /// <summary>
     /// Interaction logic for CompSubAmountChanger.xaml
     /// </summary>
-    public partial class CompSubAmountChanger : UserControl, IComponent, INotifyPropertyChanged
+    public partial class Module_AmountChanger : UserControl, IComponent, INotifyPropertyChanged
     {
         #region Bindings
         public string Title
@@ -56,23 +56,31 @@ namespace CollectorsFrontEnd.Interfaces.Subs
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
         #endregion
-        public class CompSubAmountChangerModel : IDataModel
+
+        #region Nested TYpes
+        public class Data : IDataModel
         {
             public string Title;
             public int CurrentAmount;
             public int StartAmount;
             public List<Tuple<string, string>> LstMetaTags;
         }
+        #endregion
 
-        CompSubAmountChangerModel DataModel;
-
+        #region Public Events
         public event ComponentEvent UnhandledEvent;
+        #endregion
 
-        public CompSubAmountChanger(string aszTitle, int aiAmount, List<Tuple<string, string>> alstMeta)
+        #region Public Fields
+        public Data DataModel;
+        #endregion
+
+        #region Public Functions
+        public Module_AmountChanger(string aszTitle, int aiAmount, List<Tuple<string, string>> alstMeta)
         {
             InitializeComponent();
             DataContext = this;
-            DataModel = new CompSubAmountChangerModel();
+            DataModel = new Data();
             DataModel.Title = aszTitle;
             DataModel.LstMetaTags = alstMeta;
             DataModel.StartAmount = aiAmount;
@@ -88,7 +96,9 @@ namespace CollectorsFrontEnd.Interfaces.Subs
         {
             return DataModel;
         }
+        #endregion
 
+        #region UI Event Handlers
         private void eBtnDecrement_Click(object sender, RoutedEventArgs e)
         {
             DataModel.CurrentAmount = Math.Max(0, DataModel.CurrentAmount - 1);
@@ -100,5 +110,6 @@ namespace CollectorsFrontEnd.Interfaces.Subs
             DataModel.CurrentAmount++;
             OnPropertyChanged("Count");
         }
+        #endregion
     }
 }
