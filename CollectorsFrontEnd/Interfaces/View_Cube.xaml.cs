@@ -58,11 +58,11 @@ namespace CollectorsFrontEnd.Interfaces
         // We can come up with a better solution in the future
         public List<string> LstSpecialGroups = new List<string>()
         {
-            "White",
-            "Red",
-            "Green",
-            "Blue",
-            "Black"
+            "G",
+            "R",
+            "W",
+            "U",
+            "B"
         };
 
         #endregion
@@ -81,7 +81,7 @@ namespace CollectorsFrontEnd.Interfaces
             {
                 DataModel = ServerInterfaceModel.GenerateCollectionModel(aszCollectionName);
             }
-            GroupingAttr = "colors";
+            GroupingAttr = "colorIdentity";
             LstGroups = new ObservableCollection<Component_CardGroupList>();
             Loaded += (o, e) =>
             {

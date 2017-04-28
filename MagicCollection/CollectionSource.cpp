@@ -3,7 +3,7 @@
 CollectionSource::CollectionSource()
 {
 	m_iAllCharBuffSize = 0;
-	m_AllCharBuff = new char[3550000];
+	m_AllCharBuff = new char[4000000];
 }
 
 CollectionSource::~CollectionSource()

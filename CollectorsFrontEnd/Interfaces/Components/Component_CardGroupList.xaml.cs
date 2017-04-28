@@ -78,7 +78,7 @@ namespace CollectorsFrontEnd.Interfaces.Subs
 
         public List<CardModel> LstCardModels = new List<CardModel>();
 
-        public List<string> LstSortingAttrs = new List<string>() { "manaCost","name" };
+        public List<string> LstSortingAttrs = new List<string>() { "manaCost", "name" };
 
         #endregion
 
@@ -100,8 +100,35 @@ namespace CollectorsFrontEnd.Interfaces.Subs
             GroupName = aszGroupName + " (" + alstModels.Count + ")";
             LstCardModels = alstModels;
             LstItems = new ObservableCollection<ListViewItem>();
-            for (int i = 0; i< alstModels.Count; i++)
+            List<CardModel> lstSorted = new List<CardModel>();
+
+            alstModels.Sort(CompareCMC);
+            int iCmc = -1;
+            string szCmc = alstModels.First().GetAttr("cmc");
+            if (int.TryParse(szCmc, out iCmc))
             {
+
+            }
+            for (int i = 0; i < alstModels.Count; i++)
+            {
+                int newCmc;
+                szCmc = alstModels[i].GetAttr("cmc");
+                if (int.TryParse(szCmc, out newCmc))
+                {
+                    if (newCmc != iCmc)
+                    {
+                        if (iCmc != -1)
+                        {
+                            ListViewItem blankItem = new ListViewItem();
+                            blankItem.Content = "";
+                            blankItem.MouseLeave += eItemList_MouseLeave;
+                            blankItem.MouseEnter += eItemList_MouseMove;
+                            LstItems.Add(blankItem);
+                        }
+
+                        iCmc = newCmc;
+                    }
+                }
                 ListViewItem newItem = new ListViewItem();
                 newItem.Content = alstModels[i].GetIdealIdentifier();
                 newItem.DataContext = this;
@@ -130,21 +157,64 @@ namespace CollectorsFrontEnd.Interfaces.Subs
 
         #endregion
 
+        #region Private Functions
+        private int CompareCMC(CardModel x, CardModel y)
+        {
+            int xCmc;
+            int yCmc;
+            string xszCmc = x.GetAttr("cmc");
+            string yszCmc = y.GetAttr("cmc");
+
+            bool xNum = int.TryParse(xszCmc, out xCmc);
+            bool yNum = int.TryParse(yszCmc, out yCmc);
+
+            if (xNum && yNum)
+            {
+                if (xCmc == yCmc)
+                {
+                    return 0;
+                }
+                else
+                {
+                    return (xCmc > yCmc) ? 1 : -1;
+                }
+            }
+            else if (xNum && !yNum)
+            {
+                return 1;
+            }
+            else if (!xNum && yNum)
+            {
+                return -1;
+            }
+            else
+            {
+                return 0;
+            }
+        }
+        #endregion
+
         #region UI event handlers
         private void eItemList_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            Data DM = (Data) GetDataModel();
+            Data DM = (Data)GetDataModel();
             if (UnhandledEvent != null)
             {
                 UnhandledEvent(DM, "Selection Changed");
             }
-            
+
         }
 
         private void eItemList_MouseMove(object sender, MouseEventArgs e)
         {
             ListViewItem item = (ListViewItem)sender;
             string ItemText = item.Content.ToString();
+            if (ItemText == "")
+            {
+                ToolTipDisplay = null;
+                return;
+            }
+
             if (ToolTipName != ItemText)
             {
                 ToolTipName = ItemText;

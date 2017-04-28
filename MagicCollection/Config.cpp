@@ -32,7 +32,8 @@ Config::Config()
 	m_lstKeyCodeMappings.push_back(std::make_pair("toughness", "tuf"));
 	m_lstKeyCodeMappings.push_back(std::make_pair("loyalty", "loy"));
 	m_lstKeyCodeMappings.push_back(std::make_pair("text", "txt"));
-
+	m_lstKeyCodeMappings.push_back(std::make_pair("cmc", "cmc"));
+	m_lstKeyCodeMappings.push_back(std::make_pair("colorIdentity", "cid"));
 	m_lstPerCollectionMetaTags.push_back("Generalization");
 }
 
