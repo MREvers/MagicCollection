@@ -46,9 +46,11 @@ public:
    void LoadBulkChanges(std::string aszCollection, std::vector<std::string> alstChanges);
 
    // Returns a string list of all the cards in long name form
-   std::vector<std::string> GetCollectionList(std::string aszCollection);
+   std::vector<std::string> 
+	   GetCollectionList(std::string aszCollection);
    std::vector<std::pair<std::string, std::vector<std::pair<std::string, std::string>>>>
       GetCollectionListWithMeta(std::string aszCollection);
+   std::string GetImagesPath();
 
    // Returns list of loaded collections
    std::vector<std::string> GetLoadedCollections();

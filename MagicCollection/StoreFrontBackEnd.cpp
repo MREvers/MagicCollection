@@ -5,7 +5,7 @@ CStoreFrontBackEnd::CStoreFrontBackEnd()
 {
 	// No Server for now
 	m_ColSource = new CollectionSource();
-	m_ColSource->LoadLib("AllSets.json.out");
+	m_ColSource->LoadLib(Config::GetConfigClass()->GetSourceFile());
 
 	m_ColFactory = new CollectionFactory(m_ColSource);
 }
@@ -132,22 +132,21 @@ std::vector<std::string> CStoreFrontBackEnd::GetCardAttributeRestriction(std::st
 
 std::string CStoreFrontBackEnd::LoadCollection(std::string aszCollection)
 {
-	// Check if the file exists.
-	std::ifstream f(aszCollection.c_str());
+	//std::string szFileName = Config::GetConfigClass()->GetCollectionsDirectory() + "\\" + aszCollection;
+	std::string szFileName = aszCollection;
+	std::ifstream f(szFileName);
 	if (f.good())
 	{
 		// If it does, continue.
 		// Check if the load is successful.
-		Collection* optrLoadedCol = m_ColFactory->LoadCollectionFromFile(aszCollection);
+		Collection* optrLoadedCol = m_ColFactory->LoadCollectionFromFile(szFileName);
 		if (optrLoadedCol != nullptr)
 		{
 			return optrLoadedCol->GetName();
 		}
-		else
-		{
-			return "";
-		}
 	}
+
+	return "";
 }
 
 void CStoreFrontBackEnd::LoadBulkChanges(std::string aszCollection, std::vector<std::string> alstChanges)
@@ -185,6 +184,11 @@ CStoreFrontBackEnd::GetCollectionListWithMeta(std::string aszCollection)
 		std::vector<std::pair<std::string, std::vector<std::pair<std::string, std::string>>>> lstEmpty;
 		return lstEmpty;
 	}
+}
+
+std::string CStoreFrontBackEnd::GetImagesPath()
+{
+	return Config::GetConfigClass()->GetImagesFolder();
 }
 
 std::vector<std::string> CStoreFrontBackEnd::GetLoadedCollections()
@@ -346,6 +350,6 @@ bool CStoreFrontBackEnd::IsSameMetaTags(std::vector<std::pair<std::string, std::
 void CStoreFrontBackEnd::ImportCollection()
 {
 	JSONImporter JI;
-	JI.ImportJSON("AllSets.json");
+	JI.ImportJSON(Config::GetConfigClass()->GetImportSourceFile());
 
 }

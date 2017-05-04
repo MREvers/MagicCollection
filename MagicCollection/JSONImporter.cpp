@@ -3,10 +3,6 @@
 
 JSONImporter::JSONImporter()
 {
-	m_NonUniqueKeys.push_back("set");
-	m_NonUniqueKeys.push_back("multiverseid");
-	m_PairedKeys.push_back("set");
-	m_PairedKeys.push_back("multiverseid");
 }
 
 
@@ -25,6 +21,9 @@ void JSONImporter::ImportJSON(std::string aszFileName)
 	{
 		return;
 	}
+
+	Config* config = Config::GetConfigClass();
+
 	nlohmann::json j;
 	i >> j;
 
@@ -76,11 +75,11 @@ void JSONImporter::ImportJSON(std::string aszFileName)
 			nlohmann::json jsonCard = iter_cards.value();
 			std::stringstream ssCardName;
 			ssCardName << jsonCard.at("name").begin().value();
-			std::string szCardName = str_trim(ssCardName.str(), '\"');
+			std::string szCardName = StringHelper::Str_Trim(ssCardName.str(), '\"');
 
 			std::vector<std::string> lstFoundPairedTags; // Used to see if we need to add blanks later
 			CardAttributes* oCA;
-			int iFound = findInBuffer(*lstCardNameNode, str_trim(szCardName, '\"'));
+			int iFound = findInBuffer(*lstCardNameNode, StringHelper::Str_Trim(szCardName, '\"'));
 			if (iFound == -1)
 			{
 				// Create the card node.
@@ -93,13 +92,13 @@ void JSONImporter::ImportJSON(std::string aszFileName)
 				oCA = new CardAttributes(szCardName);
 
 				std::pair<std::string, CardAttributes*>* pair_Name_CA =
-					new std::pair<std::string, CardAttributes*>(str_trim(szCardName, '\"'), oCA);
+					new std::pair<std::string, CardAttributes*>(StringHelper::Str_Trim(szCardName, '\"'), oCA);
 
 				oCA->XMLNode = xmlNode_Card;
 
 				// Add the set..
-				oCA->Keys[0] = str_trim("set", '\"');
-				oCA->Vals[0] = str_trim(szSetName, '\"');
+				oCA->Keys[0] = StringHelper::Str_Trim("set", '\"');
+				oCA->Vals[0] = StringHelper::Str_Trim(szSetName, '\"');
 				lstFoundPairedTags.push_back("set");
 
 				rapidxml::xml_node<>* xmlNode_CardAttribute = xmlCardDoc->allocate_node(rapidxml::node_element,
@@ -114,24 +113,14 @@ void JSONImporter::ImportJSON(std::string aszFileName)
 				{
 					std::string szKey = iter_card.key();
 
-					if (szKey == "set" ||
-						szKey == "power" ||
-						szKey == "toughness" ||
-						szKey == "manaCost" ||
-						szKey == "text" ||
-						szKey == "loyalty" ||
-						szKey == "cmc" ||
-						szKey == "name" ||
-						szKey == "colorIdentity" ||
-						szKey == "colors" ||
-						szKey == "multiverseid")
+					if (config->IsValidKey(szKey))
 					{
 						std::stringstream ss;
 						ss << iter_card.value();
 						std::string szValue = ss.str();
 
-						oCA->Keys[iNumKeyValPair] = str_clean(szKey);
-						oCA->Vals[iNumKeyValPair] = str_clean(szValue);
+						oCA->Keys[iNumKeyValPair] = StringHelper::Str_Clean(szKey);
+						oCA->Vals[iNumKeyValPair] = StringHelper::Str_Clean(szValue);
 
 						xmlNode_CardAttribute = xmlCardDoc->allocate_node(rapidxml::node_element,
 							oCA->Keys[iNumKeyValPair].c_str(), oCA->Vals[iNumKeyValPair].c_str());
@@ -142,7 +131,7 @@ void JSONImporter::ImportJSON(std::string aszFileName)
 						iNumKeyValPair++;
 
 						// Check if it's a paired tag, if so, record that we found a value for it.
-						if (list_Find(szKey, m_PairedKeys) != -1)
+						if (config->IsPairedKey(szKey))
 						{
 							lstFoundPairedTags.push_back(szKey);
 						}
@@ -159,11 +148,11 @@ void JSONImporter::ImportJSON(std::string aszFileName)
 				// Check if its a nonunique key. If so, log the additional value.
 				oCA = (CardAttributes*)(lstCardNameNode->at(iFound).second);
 				std::vector<std::string> lstCardNameNodeKeys(oCA->Keys, oCA->Keys + 35);
-				std::vector<std::string>::iterator iter_NonUniqueKeys = m_NonUniqueKeys.begin();
-				for (; iter_NonUniqueKeys != m_NonUniqueKeys.end(); ++iter_NonUniqueKeys)
+				std::vector<std::string>::iterator iter_NonUniqueKeys = config->GetIdentifyingAttributes().begin();
+				for (; iter_NonUniqueKeys != config->GetIdentifyingAttributes().end(); ++iter_NonUniqueKeys)
 				{
 					int iKeyIndex = -1;
-					if ((iKeyIndex = list_Find(*iter_NonUniqueKeys, lstCardNameNodeKeys)) != -1)
+					if ((iKeyIndex = config->List_Find(*iter_NonUniqueKeys, lstCardNameNodeKeys)) != -1)
 					{
 						std::string szValue;
 
@@ -220,7 +209,7 @@ void JSONImporter::ImportJSON(std::string aszFileName)
 							std::string szFinalValue = "";
 							int iDupsFound = 0;
 							int iStartCount = 0;
-							std::vector<std::string> lstSplitValues = str_Split(oCA->Vals[iKeyIndex], "::");
+							std::vector<std::string> lstSplitValues = StringHelper::Str_Split(oCA->Vals[iKeyIndex], "::");
 							if (lstSplitValues[0].size() > 0)
 							{
 								std::vector<std::string>::iterator iter_vals = lstSplitValues.begin();
@@ -279,7 +268,7 @@ void JSONImporter::ImportJSON(std::string aszFileName)
 							}
 
 							// Update the string buffer
-							oCA->Vals[iKeyIndex] = str_clean(szFinalValue);
+							oCA->Vals[iKeyIndex] = StringHelper::Str_Clean(szFinalValue);
 
 							// Update the node
 							rapidxml::xml_node<>* xmlNode_RemoveNode = oCA->XMLChildNodes[iKeyIndex];
@@ -296,7 +285,7 @@ void JSONImporter::ImportJSON(std::string aszFileName)
 							oCA->XMLChildNodes[iKeyIndex] = xmlNode_NewNode;
 
 							// Check if it's a paired tag, if so, record that we found a value for it.
-							if (list_Find(*iter_NonUniqueKeys, m_PairedKeys) != -1)
+							if (config->IsPairedKey(*iter_NonUniqueKeys))
 							{
 								lstFoundPairedTags.push_back(*iter_NonUniqueKeys);
 							}
@@ -307,20 +296,30 @@ void JSONImporter::ImportJSON(std::string aszFileName)
 			} // Card already in database
 
 			// Fill in blanks for all the paired tags not present.
-			std::vector<std::string>::iterator iter_PairedTags = m_PairedKeys.begin();
-			for (; iter_PairedTags != m_PairedKeys.end(); ++iter_PairedTags)
+			std::vector<std::pair<std::string,std::string>>::iterator iter_PairedTags = config->GetPairedKeysList().begin();
+			for (; iter_PairedTags != config->GetPairedKeysList().end(); ++iter_PairedTags)
 			{
-				if (list_Find(*iter_PairedTags, lstFoundPairedTags) == -1)
+				std::string szTargetKey = "";
+				if (config->List_Find(iter_PairedTags->first, lstFoundPairedTags) != -1)
+				{
+					szTargetKey = iter_PairedTags->first;
+				}
+				else if (config->List_Find(iter_PairedTags->second, lstFoundPairedTags) != -1)
+				{
+					szTargetKey = iter_PairedTags->second;
+				}
+
+				if (szTargetKey != "")
 				{
 					// We need to add a blank.
 					std::vector<std::string> lstCardNameNodeKeys(oCA->Keys, oCA->Keys + 35);
-					int iKeyIndex = list_Find(*iter_PairedTags, lstCardNameNodeKeys);
+					int iKeyIndex = config->List_Find(szTargetKey, lstCardNameNodeKeys);
 
 					// Perhaps this tag has not been encountered yet
 					if (iKeyIndex != -1)
 					{
 						// Update the string buffer
-						oCA->Vals[iKeyIndex] = str_clean(oCA->Vals[iKeyIndex] + ":: ");
+						oCA->Vals[iKeyIndex] = StringHelper::Str_Clean(oCA->Vals[iKeyIndex] + ":: ");
 
 						// Update the node
 						rapidxml::xml_node<>* xmlNode_RemoveNode = oCA->XMLChildNodes[iKeyIndex];
@@ -350,13 +349,11 @@ void JSONImporter::ImportJSON(std::string aszFileName)
 						}
 
 						oCA->Vals[iNumKeyVals] = " ";
-						oCA->Keys[iNumKeyVals] = *iter_PairedTags;
+						oCA->Keys[iNumKeyVals] = szTargetKey;
 
 						rapidxml::xml_node<>* xmlNode_NewNode = xmlCardDoc->allocate_node(rapidxml::node_element,
 							oCA->Keys[iNumKeyVals].c_str(),
 							oCA->Vals[iNumKeyVals].c_str());
-
-
 
 						// Swap out the old node for the new.
 						oCA->XMLNode->append_node(xmlNode_NewNode);
@@ -385,7 +382,7 @@ void JSONImporter::ImportJSON(std::string aszFileName)
 	rapidxml::print(std::back_inserter(xml_as_string), *xmlCardDoc);
 
 	// Save to file
-	std::ofstream file_stored(aszFileName + ".out");
+	std::ofstream file_stored(config->GetSourceFile());
 	file_stored << *xmlCardDoc;
 	file_stored.close();
 	xmlCardDoc->clear();
@@ -456,127 +453,4 @@ void JSONImporter::addToBuffer(std::vector<std::pair<std::string, CardAttributes
 
 	std::vector<std::pair<std::string, CardAttributes*>>::iterator iter = buffer.begin() + iLastSpot;
 	buffer.insert(iter, *element);
-}
-
-
-std::string JSONImporter::str_trim(const std::string& src, char removeChar)
-{
-	std::string rszOut = "";
-	for (int i = 0; i < src.length(); i++)
-	{
-		if (src[i] != removeChar)
-		{
-			char c = src.c_str()[i];
-			rszOut = rszOut + c;
-		}
-
-	}
-	return rszOut;
-}
-
-std::string JSONImporter::str_clean(const std::string& src)
-{
-	std::string szRetVal = "";
-	for (char c : src)
-	{
-		if (c == 145)
-		{
-			szRetVal += "ae";
-		}
-		else if (c == 146)
-		{
-			szRetVal += "AE";
-		}
-		else if (c == '\'' || c == '\"')
-		{
-			// leave out
-		}
-		else
-		{
-			szRetVal += c;
-		}
-	}
-
-	return szRetVal;
-}
-
-int JSONImporter::list_Find(std::string aszString, std::vector<std::string> alstSearch)
-{
-	std::vector<std::string>::iterator iter_list = alstSearch.begin();
-	int index = 0;
-	for (; iter_list != alstSearch.end(); iter_list++)
-	{
-		if (*iter_list == aszString)
-		{
-			return index;
-		}
-		index++;
-	}
-	return -1;
-}
-
-std::vector<std::string> JSONImporter::str_Split(std::string aszSplit, std::string aszDelim)
-{
-	if (aszSplit.size() < aszDelim.size())
-	{
-		std::vector<std::string> lstSZs;
-		lstSZs.push_back(aszSplit);
-		return lstSZs;
-	}
-	else
-	{
-		int iDelimSize = aszDelim.size();
-		int iSplitSize = aszSplit.size();
-		std::vector<std::string> lstSZs;
-		std::string szBefore = "";
-		std::string szFocus = "";
-
-		int i = 0;
-		while (i < iSplitSize)
-		{
-			if (szFocus.size() >= iDelimSize)
-			{
-				szBefore += szFocus[0];
-
-				for (int t = 0; t < iDelimSize - 1; t++)
-				{
-					szFocus[t] = szFocus[t + 1];
-				}
-
-				szFocus[aszDelim.size() - 1] = aszSplit[i];
-			}
-
-			if (szFocus.size() < iDelimSize)
-			{
-				szFocus += aszSplit[i];
-			}
-
-
-			if (szFocus == aszDelim)
-			{
-				lstSZs.push_back(szBefore);
-				szBefore = "";
-				szFocus = "";
-			}
-
-			// The Delimiter couldn't possibly be in the remaining chars because there aren't
-			// enough. So Add the remaining chars.
-			if (i + iDelimSize == iSplitSize)
-			{
-				szBefore += szFocus;
-
-				for (int t = 1; t < iDelimSize; t++)
-				{
-					szBefore += aszSplit[i + t];
-				}
-
-				lstSZs.push_back(szBefore);
-				break;
-			}
-
-			i++;
-		}
-
-		return lstSZs;
-	}
 }

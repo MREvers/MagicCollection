@@ -10,10 +10,10 @@ namespace CollectorsFrontEnd.InterfaceModels
 {
     public static class ServerInterfaceModel
     {
-        public const string SZ_IMAGE_CACHE_PATH = @"./Images/";
-
         private static ServerClientInterface SCI = new ServerClientInterface();
         private static List<CollectionModel> LstCollectionModels = new List<CollectionModel>();
+
+        public static string SZ_IMAGE_CACHE_PATH = SCI.GetImagesPath();
 
         #region Friend Interfaces
         public static class CollectionInterfaceModel
@@ -137,7 +137,7 @@ namespace CollectorsFrontEnd.InterfaceModels
                 string szSet = aoCardModel.GetAttr("set");
                 BitmapImage bi3;
 
-                string szBasePath = SZ_IMAGE_CACHE_PATH + szSet + "/";
+                string szBasePath = SZ_IMAGE_CACHE_PATH + "\\" + szSet + "/";
                 if (szMUID != "")
                 {
                     szBasePath += szMUID + "/";
@@ -192,7 +192,7 @@ namespace CollectorsFrontEnd.InterfaceModels
                 string szSet = cardModel.GetAttr("set");
 
                 JpegBitmapEncoder encoder = new JpegBitmapEncoder();
-                string szBasePath = SZ_IMAGE_CACHE_PATH + szSet + "/";
+                string szBasePath = SZ_IMAGE_CACHE_PATH + "\\" + szSet + "/";
                 if (szMUID != "")
                 {
                     szBasePath += szMUID + "/";

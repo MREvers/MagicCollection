@@ -22,6 +22,32 @@ std::string StringHelper::Str_Trim(const std::string& src, char removeChar)
    return src.substr(first, (last - first + 1));
 }
 
+std::string StringHelper::Str_Clean(const std::string& src)
+{
+	std::string szRetVal = "";
+	for (char c : src)
+	{
+		if (c == 145)
+		{
+			szRetVal += "ae";
+		}
+		else if (c == 146)
+		{
+			szRetVal += "AE";
+		}
+		else if (c == '\'' || c == '\"')
+		{
+			// leave out
+		}
+		else
+		{
+			szRetVal += c;
+		}
+	}
+
+	return szRetVal;
+}
+
 std::vector<std::string> StringHelper::Str_Split(std::string& aszSplit, std::string aszDelim)
 {
    if (aszSplit.size() < aszDelim.size())

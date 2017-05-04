@@ -113,7 +113,14 @@ ServerClientInterface::SetBaselineHistory(System::String^ ahszCollectionName)
    m_StoreFrontBackEnd->SetBaselineHistory(szCollectionName);
 }
 
-System::Collections::Generic::Dictionary<System::String^, System::String^>^ ServerClientInterface::GetCopyLocations(System::String^ ahszCollectionName, System::String^ ahszLongCardName)
+System::String^
+ServerClientInterface::GetImagesPath()
+{
+	return  gcnew System::String(m_StoreFrontBackEnd->GetImagesPath().c_str());
+}
+
+System::Collections::Generic::Dictionary<System::String^, System::String^>^
+ServerClientInterface::GetCopyLocations(System::String^ ahszCollectionName, System::String^ ahszLongCardName)
 {
 	System::Collections::Generic::Dictionary<System::String^, System::String^>^ hlstRetval = gcnew System::Collections::Generic::Dictionary<System::String^, System::String^>();
 	std::string szCollectionName = msclr::interop::marshal_as<std::string>(ahszCollectionName);
@@ -444,6 +451,7 @@ void ServerClientInterface::ImportCollection()
 {
 	m_StoreFrontBackEnd->ImportCollection();
 }
+
 System::Collections::Generic::List<System::String^>^ 
 ServerClientInterface::stringVectorToList(std::vector<std::string> alstTrans)
 {

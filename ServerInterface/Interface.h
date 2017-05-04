@@ -60,6 +60,9 @@ public:
    void
       SetBaselineHistory(System::String^ ahszCollectionName);
 
+   System::String^
+	   GetImagesPath();
+
 	System::Collections::Generic::Dictionary<System::String^, System::String^>^ 
       GetCopyLocations(System::String^ ahszCollectionName, System::String^ ahszLongCardName);
 

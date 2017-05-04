@@ -22,6 +22,7 @@ void CollectionSource::LoadLib(std::string aszFileName)
 	{
 		return;
 	}
+
 	std::stringstream buffer;
 	buffer << file.rdbuf();
 	file.close();

@@ -1,9 +1,12 @@
 ﻿using CollectorsFrontEnd.InterfaceModels;
 using System;
+using System.Xml;
+using System.IO;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
+using System.Net;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
@@ -74,8 +77,7 @@ namespace CollectorsFrontEnd.Interfaces
             InitializeComponent();
             DataContext = this;
 
-            ServerInterfaceModel.GenerateCollectionModel("Primary.txt");
-            ServerInterfaceModel.GenerateCollectionModel("Main.txt");
+            loadStartupCollections();
 
             LstViewOptions = new ObservableCollection<object>();
             ecSwitchToCollectionOverview();
@@ -160,6 +162,55 @@ namespace CollectorsFrontEnd.Interfaces
                 LstViewOptions.Add(mI);
             }
         }
+
+        private void loadStartupCollections()
+        {
+            XmlReader reader = XmlReader.Create(".\\Config\\Config.xml");
+            string szCollection = "";
+            // This is bad. Clean this in the future.
+            while (reader.Read())
+            {
+                if (reader.NodeType == XmlNodeType.Element)
+                {
+                    if (reader.Name == "Startup")
+                    {
+                        break;
+                    }
+                    else if (reader.Name == "CollectionFolder")
+                    {
+                        reader.Read();
+                        szCollection = reader.Value;
+                    }
+                }
+            }
+
+            List<string> lstStartup = new List<string>();
+
+            while (reader.Read())
+            {
+                if (reader.NodeType == XmlNodeType.Element)
+                {
+                    if (reader.Name == "FileName")
+                    {
+                        reader.Read();
+                        lstStartup.Add(reader.Value);
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+            }
+
+            if (szCollection != "")
+            {
+                foreach (string fileName in lstStartup)
+                {
+                    ServerInterfaceModel.GenerateCollectionModel(".\\" + szCollection + "\\" +fileName + ".txt");
+                }
+            }
+            
+        }
         #endregion
 
         #region UI Event Handlers
@@ -175,6 +226,28 @@ namespace CollectorsFrontEnd.Interfaces
 
         private void eImportCards_Click(object sender, RoutedEventArgs e)
         {
+            string szZipPath = AppDomain.CurrentDomain.BaseDirectory + @"\Config\Source\AllSets.json.zip";
+            string szExtractPath = AppDomain.CurrentDomain.BaseDirectory + @"\Config\Source";
+
+            if (Directory.Exists(szExtractPath))
+            {
+                foreach(var file in Directory.EnumerateFiles(szExtractPath))
+                {
+                    File.Delete(file);
+                }
+            }
+            else
+            {
+                Directory.CreateDirectory(szExtractPath);
+            }
+
+            using (var client = new WebClient())
+            {
+                client.DownloadFile("https://mtgjson.com/json/AllSets.json.zip", szZipPath);
+            }
+
+            System.IO.Compression.ZipFile.ExtractToDirectory(szZipPath, szExtractPath);
+
             ServerInterfaceModel.ImportJSONCollection();
         }
         #endregion
