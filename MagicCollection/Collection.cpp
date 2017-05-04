@@ -948,7 +948,8 @@ void Collection::loadCollectionFromFile(std::string aszFileName)
 
 void Collection::loadCollectionLines(std::vector<std::string>& alstLines)
 {
-	for (std::vector<std::string>::iterator iter_CardLine = alstLines.begin(); iter_CardLine != alstLines.end(); ++iter_CardLine)
+	std::vector<std::string>::iterator iter_CardLine = alstLines.begin();
+	for (; iter_CardLine != alstLines.end(); ++iter_CardLine)
 	{
 		this->loadCardLine(*iter_CardLine);
 	}
@@ -960,7 +961,7 @@ bool Collection::loadCardLine(std::string aszNewCardLine)
 {
 	int iNum;
 	std::string szName = "";
-	std::string szDetails;
+	std::string szDetails = "";
 	if (!ParseCardLine(aszNewCardLine, iNum, szName, szDetails))
 	{
 		m_lstUnreversibleChanges.push_back("Could Not Parse Line \"" + aszNewCardLine + "\"");

@@ -3,6 +3,7 @@
 
 JSONImporter::JSONImporter()
 {
+
 }
 
 
@@ -42,7 +43,7 @@ void JSONImporter::ImportJSON(std::string aszFileName)
 	//  Thus, resize the vector now so it is not moved later.
 	lstCardNameNode->reserve(17000); // 102,000 -- 17,000 cards * 9 fields each
 
-							 // Add the xml declaration.
+									 // Add the xml declaration.
 	rapidxml::xml_node<>* decl = xmlCardDoc->allocate_node(rapidxml::node_declaration);
 	decl->append_attribute(xmlCardDoc->allocate_attribute("version", "1.0"));
 	decl->append_attribute(xmlCardDoc->allocate_attribute("encoding", "utf-8"));
@@ -295,27 +296,34 @@ void JSONImporter::ImportJSON(std::string aszFileName)
 				}
 			} // Card already in database
 
-			// Fill in blanks for all the paired tags not present.
-			std::vector<std::pair<std::string,std::string>>::iterator iter_PairedTags = config->GetPairedKeysList().begin();
+			  // Fill in blanks for all the paired tags not present.
+			std::vector<std::pair<std::string, std::string>>::iterator iter_PairedTags = config->GetPairedKeysList().begin();
 			for (; iter_PairedTags != config->GetPairedKeysList().end(); ++iter_PairedTags)
 			{
+				// If we found one, but not the other paired key, then we need to add a space.
 				std::string szTargetKey = "";
-				if (config->List_Find(iter_PairedTags->first, lstFoundPairedTags) != -1)
-				{
-					szTargetKey = iter_PairedTags->first;
-				}
-				else if (config->List_Find(iter_PairedTags->second, lstFoundPairedTags) != -1)
+				if (config->List_Find(iter_PairedTags->first, lstFoundPairedTags) != -1 &&
+					config->List_Find(iter_PairedTags->second, lstFoundPairedTags) == -1)
 				{
 					szTargetKey = iter_PairedTags->second;
 				}
+				else if (config->List_Find(iter_PairedTags->first, lstFoundPairedTags) == -1 &&
+					     config->List_Find(iter_PairedTags->second, lstFoundPairedTags) != -1)
+				{
+					szTargetKey = iter_PairedTags->first;
+				}
+				// If They're both not in lstFoundPair tags.. well, it wasnt a found pair.
 
 				if (szTargetKey != "")
 				{
 					// We need to add a blank.
+
+					// Get the list of all keys so far for this card
 					std::vector<std::string> lstCardNameNodeKeys(oCA->Keys, oCA->Keys + 35);
 					int iKeyIndex = config->List_Find(szTargetKey, lstCardNameNodeKeys);
 
-					// Perhaps this tag has not been encountered yet
+					// Perhaps this tag has not been encountered yet for this card.
+					// So we need to add this field (in the case of == -1)
 					if (iKeyIndex != -1)
 					{
 						// Update the string buffer
@@ -338,6 +346,7 @@ void JSONImporter::ImportJSON(std::string aszFileName)
 					else
 					{
 						// Find the last item
+						// Add the blank to the end
 						int iNumKeyVals = 0;
 						for (int i = 34; i > 0; i--)
 						{
@@ -364,6 +373,7 @@ void JSONImporter::ImportJSON(std::string aszFileName)
 
 				} // End, Is paired tag needed
 			} // End, fill in paired tags
+
 
 		} // End Cards LIST for set
 
@@ -454,3 +464,4 @@ void JSONImporter::addToBuffer(std::vector<std::pair<std::string, CardAttributes
 	std::vector<std::pair<std::string, CardAttributes*>>::iterator iter = buffer.begin() + iLastSpot;
 	buffer.insert(iter, *element);
 }
+

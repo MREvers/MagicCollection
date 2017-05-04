@@ -19,7 +19,7 @@ Collection* CollectionFactory::LoadCollectionFromFile(std::string aszFileName)
 	std::pair<std::string,std::string> pairColNameParent = GetCollectionNameAndParentFromFile(aszFileName);
 	std::string szColName = pairColNameParent.first;
 	std::string szParentName = pairColNameParent.second;
-	if (!CollectionExists(szColName))
+	if (!CollectionExists(szColName) && szColName != "")
 	{
 		Collection* oCol = FindOrGenerateCollection(szColName);
 		oCol->LoadCollection(aszFileName, lstForcedChanges);

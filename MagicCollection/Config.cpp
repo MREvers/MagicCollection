@@ -114,7 +114,7 @@ bool Config::IsIdentifyingAttributes(std::string aszAttrs)
 
 bool Config::IsPairedKey(std::string aszKey)
 {
-	return List_Find(aszKey, m_lstIdentifyingAttributes) != -1;
+	return List_Find(aszKey, m_lstPairedKeys) != -1;
 }
 
 bool Config::IsValidKey(std::string aszKey)
@@ -164,7 +164,7 @@ int Config::List_Find(std::string aszFind, std::vector<std::pair<std::string, st
 	int index = 0;
 	for (; iter_list != alstFindList.end(); iter_list++)
 	{
-		if (iter_list->first == aszFind)
+		if (iter_list->first == aszFind || iter_list->second == aszFind)
 		{
 			return index;
 		}
