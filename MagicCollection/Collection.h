@@ -409,6 +409,8 @@ private:
 
 	void setTransactionsNoWrite();
 	std::vector<int>& getCollectionList();
+	std::string getMetaTagFile();
+	std::string getHistoryFile();
 };
 
 #pragma message ("Finish Collection.h")

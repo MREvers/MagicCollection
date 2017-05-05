@@ -875,6 +875,20 @@ std::vector<int>& Collection::getCollectionList()
 	return m_lstCollection;
 }
 
+std::string Collection::getMetaTagFile()
+{
+	Config* config = Config::GetConfigClass();
+	std::string szMetaFile = ".\\" + config->GetCollectionsDirectory() + "\\" + config->GetMetaFolderName() + "\\" + m_szMetaTagFileName + ".txt";
+	return szMetaFile;
+}
+
+std::string Collection::getHistoryFile()
+{
+	Config* config = Config::GetConfigClass();
+	std::string szMetaFile = ".\\" + config->GetCollectionsDirectory() + "\\" + config->GetHistoryFolderName() + "\\" + m_szHistoryFileName + ".txt";
+	return szMetaFile;
+}
+
 bool Collection::removeItem(std::string aszRemoveItem,
 	std::vector<std::pair<std::string, std::string>> alstAttrs,
 	std::vector<std::pair<std::string, std::string>> alstMeta)
@@ -1198,7 +1212,8 @@ void Collection::refreshCopyLinks(std::vector<std::pair<std::string, std::string
 void Collection::loadMetaTagsFromFile()
 {
 	// Now load meta tags
-	std::ifstream in(m_szMetaTagFileName + ".txt");
+	std::string szMetaFile = getMetaTagFile();
+	std::ifstream in(szMetaFile);
 	if (in.good())
 	{
 		std::stringstream buffer;
@@ -1351,7 +1366,7 @@ void Collection::SaveCollection(std::string aszFileName)
 		if (lstHistoryLines.size() > 0)
 		{
 			std::ofstream oHistFile;
-			oHistFile.open(m_szHistoryFileName + ".txt", std::ios_base::app);
+			oHistFile.open(getHistoryFile(), std::ios_base::app);
 
 			oHistFile << "[" << str << "] " << std::endl;
 
@@ -1370,7 +1385,7 @@ void Collection::SaveCollection(std::string aszFileName)
 	std::vector<std::pair<std::string, std::vector<std::pair<std::string, std::string>>>>
 		LstCardWithMeta = GetCollectionListWithMeta();
 	std::ofstream oMetaFile;
-	oMetaFile.open(m_szMetaTagFileName + ".txt");
+	oMetaFile.open(getMetaTagFile());
 	for (int i = 0; i < LstCardWithMeta.size(); i++)
 	{
 		if (LstCardWithMeta[i].second.size() > 0)
@@ -1487,7 +1502,7 @@ void Collection::CreateBaselineHistory()
 	str[strlen(str) - 1] = 0;
 
 	std::ofstream oHistFile;
-	oHistFile.open(m_szHistoryFileName + ".txt");
+	oHistFile.open(getHistoryFile());
 
 	oHistFile << "[" << str << "] " << std::endl;
 
