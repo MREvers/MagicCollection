@@ -2,6 +2,7 @@
 #pragma message ("Starting CollectionSource.h")
 #include "SourceObject.h"
 #include "CollectionObject.h"
+#include "Config.h"
 
 #include "rapidxml-1.13\rapidxml_print.hpp"
 #include "rapidxml-1.13\rapidxml.hpp"
@@ -15,6 +16,7 @@
 #include <map>
 #include <algorithm>
 #include <ctime>
+
 
 class CollectionObject;
 class Collection;

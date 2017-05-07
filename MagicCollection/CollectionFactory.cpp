@@ -96,7 +96,7 @@ std::pair<std::string, std::string>  CollectionFactory::GetCollectionNameAndPare
 		int iFoundLines = 0;
 		std::vector<std::string> lstLines;
 		std::string szLine = "";
-		for (int i = 0; i < contents.size(); i++)
+		for (unsigned int i = 0; i < contents.size(); i++)
 		{
 
 			if (contents[i] == '\n')

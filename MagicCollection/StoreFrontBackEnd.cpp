@@ -21,7 +21,7 @@ void CStoreFrontBackEnd::AddItem(
 	std::vector<std::pair<std::string, std::string>> alstMeta)
 {
 	std::string szName;
-	int iCount;
+	unsigned int iCount;
 	std::string szDetails;
 	if (Collection::ParseCardLine(aszCardNameLong, iCount, szName, szDetails))
 	{
@@ -109,7 +109,7 @@ std::vector<std::pair<std::string,std::string>> CStoreFrontBackEnd::GetCardAttri
 std::vector<std::string> CStoreFrontBackEnd::GetCardAttributeRestriction(std::string aszCardNameLong, std::string aszKey)
 {
 	std::string szCardName;
-	int iAmount;
+	unsigned int iAmount;
 	std::string szDetails;
 	if (Collection::ParseCardLine(aszCardNameLong, iAmount, szCardName, szDetails))
 	{
@@ -203,7 +203,7 @@ std::vector<std::pair<std::string, std::string>> CStoreFrontBackEnd::ParseAttrs(
 
 bool CStoreFrontBackEnd::ParseCardString(std::string aszCardString, int& riCount, std::string& rszName, std::string& rszDetails)
 {
-	int iNum = 0;
+	unsigned int iNum = 0;
 	std::string szName = "";
 	std::string szDetails = "";
 	bool bRetVal = Collection::ParseCardLine(aszCardString, iNum, szName, szDetails);
@@ -310,12 +310,12 @@ CStoreFrontBackEnd::GetMetaTags(std::string aszCollectionName, std::string aszLo
 bool CStoreFrontBackEnd::IsSameCard(std::string aszLongOne, std::string aszLongTwo)
 {
 	std::string szName;
-	int iAmount;
+	unsigned int iAmount;
 	std::string szDetails;
 	if (Collection::ParseCardLine(aszLongOne, iAmount, szName, szDetails))
 	{
 		std::string szNameTwo;
-		int iAmountTwo;
+		unsigned int iAmountTwo;
 		std::string szDetailsTwo;
 		if (Collection::ParseCardLine(aszLongTwo, iAmountTwo, szNameTwo, szDetailsTwo))
 		{

@@ -14,7 +14,8 @@ SourceObject::~SourceObject()
 {
 }
 
-unsigned int SourceObject::AddAttribute(std::string aszkey, std::string value, char* aplstCharBuf, unsigned int aiBufSize)
+unsigned int 
+SourceObject::AddAttribute(std::string aszkey, std::string value, char* aplstCharBuf, unsigned int aiBufSize)
 {
 	std::string key = aszkey;
 	std::string szFixedKey = Config::GetConfigClass()->GetKeyCode(key);
@@ -33,12 +34,12 @@ unsigned int SourceObject::AddAttribute(std::string aszkey, std::string value, c
 
    iKeyValPair = (iKeyValPair | iSize);
 
-   for (int i = 0; i < 3; i++)
+   for (unsigned int i = 0; i < 3; i++)
    {
       aplstCharBuf[aiBufSize + i] = key[i];
    }
    
-   for (int i = 0; i < value.size(); i++)
+   for (unsigned int i = 0; i < value.size(); i++)
    {
       aplstCharBuf[aiBufSize + i + 3] = value[i];
    }
@@ -50,12 +51,14 @@ unsigned int SourceObject::AddAttribute(std::string aszkey, std::string value, c
    return 3 + value.size();
 }
 
-std::string SourceObject::GetName(char* aiSearchBuffer)
+std::string 
+SourceObject::GetName(char* aiSearchBuffer)
 {
    return GetAttribute("nam", aiSearchBuffer);
 }
 
-std::string SourceObject::GetAttribute(std::string aszKey, char* aiSearchBuffer)
+std::string 
+SourceObject::GetAttribute(std::string aszKey, char* aiSearchBuffer)
 {
    unsigned short iLoopBufferOffset = 0;
    for (int i = 0; i < m_iKeyValArraySize; i++)
@@ -78,7 +81,8 @@ std::string SourceObject::GetAttribute(std::string aszKey, char* aiSearchBuffer)
 }
 
 // Only returns unique attrs
-std::vector<std::pair<std::string,std::string>> SourceObject::GetAttributes(char* aiSearchBuffer)
+std::vector<std::pair<std::string,std::string>> 
+SourceObject::GetAttributes(char* aiSearchBuffer)
 {
    std::vector<std::pair<std::string, std::string>> lstRetVal;
 
@@ -148,7 +152,7 @@ void SourceObject::FinalizeSize()
 
 bool SourceObject::isNonUniqueFlag(short aiCheck)
 {
-   return aiCheck & (1 << 15);
+   return (aiCheck & (1 << 15)) != 0;
 }
 
 unsigned short SourceObject::extractSize(short aiCheck)

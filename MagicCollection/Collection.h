@@ -15,95 +15,15 @@
 #include "CollectionSource.h"
 #include "StringHelper.h"
 #include "Config.h"
+#include "PseudoCopy.h"
+#include "Action.h"
+#include "Transaction.h"
 
+// PseudoCopy has to use some static functions that it uses. So we need to forward declare here.
+class PseudoCopy;
 
 class Collection
 {
-	/* Friend Class PseudoCopy
-	*  Used to store information needed to identify/construct a real copy.
-	*/
-	class PseudoCopy
-	{
-	public:
-		int Count;
-		std::string DetailsString;
-		std::string Name;
-		std::string LongName;
-		std::vector<std::pair<std::string, std::string>> IdentifyingAttributes;
-		std::vector<std::pair<std::string, std::string>> MetaList;
-		CopyObject* RealCopy;
-		CollectionObject* Prototype;
-		int CacheIndex;
-		bool Ok;
-		bool FoundCardClass;
-		bool FoundCardCopy;
-
-		PseudoCopy(std::string aszCollectionName,
-			CollectionSource* aoColSource,
-			std::string aszLongName,
-			std::vector<std::pair<std::string, std::string>> alstMeta);
-
-		PseudoCopy(std::string aszCollectionName,
-			CollectionSource* aoColSource,
-			std::string aszName,
-			std::vector<std::pair<std::string, std::string>> alstAttrs,
-			std::vector<std::pair<std::string, std::string>> alstMeta);
-
-		bool LoadCard();
-
-		bool FindCopy();
-
-		CopyObject GeneratePseudoCopy();
-
-		std::string ToString(bool bFullDets = false, bool bIncludeMeta = false);
-
-	private:
-		CollectionSource* m_ColSource;
-		std::string m_szCollectionName;
-
-		// Private Constructor for common features of the common constructors
-		PseudoCopy(std::string aszCollectionName,
-			CollectionSource* aoColSource,
-			std::vector<std::pair<std::string, std::string>> alstMeta);
-	};
-
-	/* Friend Class Action
-	 * Used to wrap an action that changes the collection with an action
-	 * that can undo it. Allows undo button.
-	 * Also maintains a string description of the action so that it can
-	 * be recorded in the .history.txt file.
-	 */
-	class Action
-	{
-	public:
-		std::string Identifier;
-		std::function<void()> Do;
-		std::function<void()> Undo;
-	};
-
-	/* Friend Class Transaction
-	* Wraps a list of actions. Provides interface for executing associated
-	* actions and rolling back those actions.
-	*/
-	class Transaction
-	{
-	public:
-		Transaction(Collection* aoCol);
-		~Transaction();
-
-		void AddAction(Action& aoAct);
-		void RemoveAction(int i);
-		void Finalize(bool abRecordable = true);
-		void Rollback();
-
-		bool IsOpen = true;
-		bool Recordable;
-		std::vector<Action> Actions;
-
-	private:
-		Collection* m_Col;
-	};
-
 public:
 	/* Collection (Version 1)
 	* @Param aszName Name of the collection
@@ -138,9 +58,9 @@ public:
 	* @Param alstMetaTags List of Meta-Tags that the added Item will have. None by default.
 	*/
 	void AddItem(std::string aszNewItem,
-		bool bFinal = true,
 		std::vector<std::pair<std::string, std::string>> alstAttrs = std::vector<std::pair<std::string, std::string>>(),
-		std::vector<std::pair<std::string, std::string>> alstMetaTags = std::vector<std::pair<std::string, std::string>>());
+		std::vector<std::pair<std::string, std::string>> alstMetaTags = std::vector<std::pair<std::string, std::string>>(),
+		bool bFinal = true);
 
 	/* Additem (Version 2) (Transaction)
 	* Uses the NonUniqueAttrs in the long name to add a card to the collection.
@@ -157,9 +77,9 @@ public:
 	* @Param alstMeta List of Meta-Tags identifying the copy to be removed.
 	*/
 	void RemoveItem(std::string aszRemoveItem,
-		bool bFinal = true,
 		std::vector<std::pair<std::string, std::string>> alstAttrs = std::vector<std::pair<std::string, std::string>>(),
-		std::vector<std::pair<std::string, std::string>> alstMeta = std::vector<std::pair<std::string, std::string>>());
+		std::vector<std::pair<std::string, std::string>> alstMeta = std::vector<std::pair<std::string, std::string>>(),
+		bool bFinal = true);
 
 	/* RemoveItem (Version 2) (Transaction)
 	* @Param aszRemoveItemLongName Long name of the item to be removed. Contains the identifying NonUniqueAttributes.
@@ -260,10 +180,7 @@ public:
 		GetCollectionListWithMeta();
 
 	static std::vector<std::pair<std::string, std::string>> ParseAttrs(std::string aszAttrs);
-	static bool ParseCardLine(std::string aszLine, int& riCount, std::string& rszName, std::string& rszDetails);
-
-	void PrintList();
-
+	static bool ParseCardLine(std::string aszLine, unsigned int& riCount, std::string& rszName, std::string& rszDetails);
 private:
 	CollectionSource* m_ColSource;
 
@@ -382,6 +299,8 @@ private:
 	*/
 	void loadMetaTagLines(std::vector<std::string>& alstLines);
 
+	void loadMetaTagLine(std::string& aszLine);
+
 	/* refreshCopyLinks
 	* If there are cards with parent collection == this but
 	* this is not in their residents, then that copy no longer exists.
@@ -393,22 +312,27 @@ private:
 	Transaction* openTransaction();
 	void finalizeTransaction(bool abRecord = true);
 
+	std::vector<std::pair<std::string, std::vector<std::pair<std::string, std::string>>>>
+		getCollectionList(bool abMapMeta);
+
 	CopyObject* forceAdd(std::string aszNewItem,
 		std::vector<std::pair<std::string, std::string>> alstAttrs,
 		std::vector<std::pair<std::string, std::string>> alstMeta = std::vector<std::pair<std::string, std::string>>());
 	// Only adds the collection object cache locations
 	void registerItem(int aiItem);
 
-	PseudoCopy generatePseudoCopy(std::string aszLongName,
+	PseudoCopy 
+		generatePseudoCopy(std::string aszLongName,
 		std::vector<std::pair<std::string, std::string>> alstMeta = std::vector<std::pair<std::string, std::string>>());
 
-	PseudoCopy generatePseudoCopy(
+	PseudoCopy 
+		generatePseudoCopy(
 		std::vector<std::pair<std::string, std::string>> alstAttrs,
 		std::string aszName,
 		std::vector<std::pair<std::string, std::string>> alstMeta = std::vector<std::pair<std::string, std::string>>());
 
 	void setTransactionsNoWrite();
-	std::vector<int>& getCollectionList();
+	std::vector<int>& getCollection();
 	std::string getMetaTagFile();
 	std::string getHistoryFile();
 };

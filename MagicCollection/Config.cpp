@@ -128,24 +128,10 @@ bool Config::IsStaticAttribute(std::string aszAttr)
 	return List_Find(aszAttr, m_lstStaticAttributes) != -1;
 }
 
-int Config::List_Find(int aiFind, std::vector<int>& alstFindList)
+template<typename T> 
+int Config::List_Find(T aszFind, std::vector<T>& alstFindList)
 {
-	std::vector<int>::iterator iter_list = alstFindList.begin();
-	int index = 0;
-	for (; iter_list != alstFindList.end(); iter_list++)
-	{
-		if (*iter_list == aiFind)
-		{
-			return index;
-		}
-		index++;
-	}
-	return -1;
-}
-
-int Config::List_Find(std::string aszFind, std::vector<std::string>& alstFindList)
-{
-	std::vector<std::string>::iterator iter_list = alstFindList.begin();
+	std::vector<T>::iterator iter_list = alstFindList.begin();
 	int index = 0;
 	for (; iter_list != alstFindList.end(); iter_list++)
 	{

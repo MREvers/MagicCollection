@@ -158,11 +158,14 @@
     <ClCompile Include="CollectionObject.cpp" />
     <ClCompile Include="CollectionSource.cpp" />
     <ClCompile Include="Config.cpp" />
+    <ClCompile Include="CopyObject.cpp" />
     <ClCompile Include="jsoncpp.cpp" />
     <ClCompile Include="JSONImporter.cpp">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MaxSpeed</Optimization>
     </ClCompile>
+    <ClCompile Include="ListHelper.cpp" />
     <ClCompile Include="MagicCollection.cpp" />
+    <ClCompile Include="PseudoCopy.cpp" />
     <ClCompile Include="ServerIFace.cpp" />
     <ClCompile Include="ServerIFace\ClientSocket.cpp" />
     <ClCompile Include="ServerIFace\ProgramServer.cpp" />
@@ -173,14 +176,19 @@
     <ClCompile Include="SourceObject.cpp" />
     <ClCompile Include="StoreFrontBackEnd.cpp" />
     <ClCompile Include="StringHelper.cpp" />
+    <ClCompile Include="Transaction.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Action.h" />
     <ClInclude Include="Collection.h" />
     <ClInclude Include="CollectionFactory.h" />
     <ClInclude Include="CollectionObject.h" />
     <ClInclude Include="CollectionSource.h" />
     <ClInclude Include="Config.h" />
+    <ClInclude Include="CopyObject.h" />
     <ClInclude Include="JSONImporter.h" />
+    <ClInclude Include="ListHelper.h" />
+    <ClInclude Include="PseudoCopy.h" />
     <ClInclude Include="ServerIFace.h" />
     <ClInclude Include="ServerIFace\ClientSocket.h" />
     <ClInclude Include="ServerIFace\ProgramServer.h" />
@@ -191,6 +199,7 @@
     <ClInclude Include="SourceObject.h" />
     <ClInclude Include="StoreFrontBackEnd.h" />
     <ClInclude Include="StringHelper.h" />
+    <ClInclude Include="Transaction.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -36,8 +36,8 @@ public:
 	bool IsStaticAttribute(std::string aszAttrs);
 	bool IsIdentifyingAttributes(std::string aszAttrs);
 
-	int List_Find(int aiFind, std::vector<int>& alstFindList);
-	int List_Find(std::string aszFind, std::vector<std::string>& alstFindList);
+	template<typename T>
+	int List_Find(T aiFind, std::vector<T>& alstFindList);
 	int List_Find(std::string aszFind, std::vector<std::pair<std::string, std::string>>& alstFindList);
 
 	static Config* GetConfigClass();
@@ -65,3 +65,5 @@ private:
 	static Config* Config::ms_pConfig;
 };
 
+template int Config::List_Find<int>(int aiFind, std::vector<int>& alstFind);
+template int Config::List_Find<std::string>(std::string aiFind, std::vector<std::string>& alstFind);
