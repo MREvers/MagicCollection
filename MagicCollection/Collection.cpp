@@ -112,8 +112,8 @@ void Collection::RemoveItem(std::string aszRemoveItem,
 }
 
 void
-Collection::RemoveItem(std::string aszNewItemLongName,
-	std::vector<std::pair<std::string, std::string>> alstMetaTags)
+Collection::RemoveItem(
+	std::vector<std::pair<std::string, std::string>> alstMetaTags, std::string aszNewItemLongName)
 {
 	PseudoCopy oPseudoCopy = generatePseudoCopy(aszNewItemLongName, alstMetaTags);
 	if (oPseudoCopy.SuccessfulParse)

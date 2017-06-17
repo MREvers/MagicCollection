@@ -131,7 +131,7 @@ bool CollectionObject::RemoveCopy(std::string aszCollectionName,
 	{
 		if (IsSameIdentity(&oNewCopy, &(*iter)))
 		{
-			if (CopyObject::IsSameMetaTags(iter->GetMetaTags(aszCollectionName), alstMeta))
+			if (IsSameMetaTags(iter->GetMetaTags(aszCollectionName), alstMeta))
 			{
 				m_lstCopies.erase(iter);
 				return true;
@@ -243,7 +243,7 @@ bool CollectionObject::FindCopy(
 	{
 		if (IsSameIdentity(&oCompare, *iter_copies))
 		{
-			if (CopyObject::IsSameMetaTags(aszCollectionName, &oCompare, *iter_copies, true))
+			if (IsSameMetaTags(aszCollectionName, &oCompare, *iter_copies, true))
 			{
 				bFound = true;
 				roCO = *iter_copies;

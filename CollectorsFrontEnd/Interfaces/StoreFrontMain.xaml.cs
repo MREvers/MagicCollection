@@ -18,17 +18,19 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using CollectorsFrontEnd.StoreFrontSupport;
+using CollectorsFrontEnd.Views;
 
 namespace CollectorsFrontEnd.Interfaces
 {
     /// <summary>
     /// Interaction logic for StoreFrontMain.xaml
     /// </summary>
-    public partial class StoreFrontMain : Window, INotifyPropertyChanged, IComponent
+    public partial class StoreFrontMain : Window, INotifyPropertyChanged
     {
         #region Bindings
-        private IMenuBarComponent _OperationWindow;
-        public IMenuBarComponent OperationWindow
+        private MultiDisplay _OperationWindow = new MultiDisplay();
+        public MultiDisplay OperationWindow
         {
             get
             {
@@ -41,35 +43,12 @@ namespace CollectorsFrontEnd.Interfaces
             }
         }
 
-        private ObservableCollection<object> _LstViewOptions;
-        public ObservableCollection<object> LstViewOptions
-        {
-            get
-            {
-                return _LstViewOptions;
-            }
-            set
-            {
-                _LstViewOptions = value;
-            }
-        }
-        #endregion
-
-        #region Property Change Notifiers
         public event PropertyChangedEventHandler PropertyChanged;
-        public event ComponentEvent UnhandledEvent;
-
         protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
         #endregion
-
-        #region Data Model
-        // This must contain all data necessary for all windows and user controls up the chain
-        //  to perform any needed functions.
-
-        #endregion Data Model
 
         #region Public Functions
         public StoreFrontMain()
@@ -79,20 +58,22 @@ namespace CollectorsFrontEnd.Interfaces
 
             loadStartupCollections();
 
-            LstViewOptions = new ObservableCollection<object>();
-            ecSwitchToCollectionOverview();
-        }
-
-        public IDataModel GetDataModel()
-        {
-            throw new NotImplementedException();
+            switchToCollectionOverview();
         }
         #endregion
 
-        #region Default Functions (Component Functionality)
+        #region Public Methods
+
+        public void switchToCollectionOverview()
+        {
+            OperationWindow.SetNewDisplay(
+                Name: "CollectionOverview", 
+                NewDisplay: new ViewCollectionsMenu());
+        }
+
         // In the hierarchy of usercontrols and windows, the default functions are accessed
         //  by events fired from children components.
-
+        /*
         public void ecSwitchToCollectionOverview()
         {
             OperationWindow = new View_CollectionsOverview(ServerInterfaceModel.GetLoadedCollectionList());
@@ -129,40 +110,41 @@ namespace CollectorsFrontEnd.Interfaces
             }
         }
 
-
+*/
 
         #endregion Default Functions (Component Functionality)
 
         #region Private FUnctions
-        private void getViewOptions()
+        /*
+    private void getViewOptions()
+    {
+        LstViewOptions.Clear();
+        List<Tuple<string, MenuAction>> LstActions = new List<Tuple<string, MenuAction>>();
+        LstActions = OperationWindow.GetMenuActions();
+        foreach (var act in LstActions)
         {
-            LstViewOptions.Clear();
-            List<Tuple<string, MenuAction>> LstActions = new List<Tuple<string, MenuAction>>();
-            LstActions = OperationWindow.GetMenuActions();
-            foreach (var act in LstActions)
-            {
-                if (act.Item1 != "Separator")
-                {
-                    MenuItem mI = new MenuItem();
-                    mI.Header = act.Item1;
-                    mI.Click += (o, e) => { act.Item2(); };
-                    LstViewOptions.Add(mI);
-                }
-                else
-                {
-                    LstViewOptions.Add(new Separator());
-                }
-
-
-            }
-            if (LstActions.Count == 0)
+            if (act.Item1 != "Separator")
             {
                 MenuItem mI = new MenuItem();
-                mI.Header = "Empty";
-                LstViewOptions.Add(mI);
+                mI.Header = act.Item1;
+                mI.Click += (o, e) => { act.Item2(); };
+                //LstViewOptions.Add(mI);
             }
-        }
+            else
+            {
+                //LstViewOptions.Add(new Separator());
+            }
 
+
+        }
+        if (LstActions.Count == 0)
+        {
+            MenuItem mI = new MenuItem();
+            mI.Header = "Empty";
+            //LstViewOptions.Add(mI);
+        }
+    }
+    */
         private void loadStartupCollections()
         {
             XmlReader reader = XmlReader.Create(".\\Config\\Config.xml");
@@ -206,11 +188,12 @@ namespace CollectorsFrontEnd.Interfaces
             {
                 foreach (string fileName in lstStartup)
                 {
-                    ServerInterfaceModel.GenerateCollectionModel(".\\" + szCollection + "\\" +fileName + ".txt");
+                    ServerInterface.Server.GenerateCollectionModel(".\\" + szCollection + "\\" +fileName + ".txt");
                 }
             }
             
         }
+        
         #endregion
 
         #region UI Event Handlers
@@ -221,7 +204,7 @@ namespace CollectorsFrontEnd.Interfaces
 
         private void eViewCollectionsOverview_Click(object sender, RoutedEventArgs e)
         {
-            ecSwitchToCollectionOverview();
+            //ecSwitchToCollectionOverview();
         }
 
         private void eImportCards_Click(object sender, RoutedEventArgs e)
@@ -248,7 +231,7 @@ namespace CollectorsFrontEnd.Interfaces
 
             System.IO.Compression.ZipFile.ExtractToDirectory(szZipPath, szExtractPath);
 
-            ServerInterfaceModel.ImportJSONCollection();
+            ServerInterface.Server.ImportJSONCollection();
         }
         #endregion
     }

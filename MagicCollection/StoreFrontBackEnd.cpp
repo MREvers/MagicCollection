@@ -32,7 +32,7 @@ void CStoreFrontBackEnd::AddItem(
 			std::vector<std::pair<std::string, std::string>> lstCardAttrs;
 			lstCardAttrs = Collection::ParseAttrs(szDetails);
 
-			oCol->AddItem(szName, true, lstCardAttrs, alstMeta);
+			oCol->AddItem(szName, lstCardAttrs, alstMeta, true);
 		}
 
 	}
@@ -44,7 +44,7 @@ void CStoreFrontBackEnd::RemoveItem(std::string aszCollectionName,
 {
 	if (m_ColFactory->CollectionExists(aszCollectionName))
 	{
-		m_ColFactory->FindOrGenerateCollection(aszCollectionName)->RemoveItem(aszCardLong, alstMeta);
+		m_ColFactory->FindOrGenerateCollection(aszCollectionName)->RemoveItem( alstMeta, aszCardLong );
 	}
 }
 
@@ -344,7 +344,7 @@ bool CStoreFrontBackEnd::IsSameCard(std::string aszLongOne, std::string aszLongT
 bool CStoreFrontBackEnd::IsSameMetaTags(std::vector<std::pair<std::string, std::string>> aLstOne,
 	std::vector<std::pair<std::string, std::string>> aLstTwo)
 {
-	return CopyObject::IsSameMetaTags(aLstOne, aLstTwo);
+	return CollectionObject::IsSameMetaTags(aLstOne, aLstTwo);
 }
 
 void CStoreFrontBackEnd::ImportCollection()

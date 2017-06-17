@@ -12,10 +12,8 @@
             <RowDefinition/>
             <RowDefinition Height="24"/>
         </Grid.RowDefinitions>
-        
-        <ContentPresenter Grid.Row="1" Content="{Binding OperationWindow}">
 
-        </ContentPresenter>
+        <ContentPresenter Grid.Row="1" Content="{Binding OperationWindow}"/>
         <DockPanel Grid.Row="0" >
             <Border BorderBrush="Black" BorderThickness="1">
                 <Menu DockPanel.Dock="Top" Height="20">

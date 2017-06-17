@@ -160,6 +160,21 @@
       <DependentUpon>Module_KeyValCreater.xaml</DependentUpon>
     </Compile>
     <Compile Include="ServerIFace.cs" />
+    <Compile Include="StoreFrontSupport\SSICardInterface.cs" />
+    <Compile Include="StoreFrontSupport\SSICollectionInterface.cs" />
+    <Compile Include="StoreFrontSupport\IView.cs" />
+    <Compile Include="StoreFrontSupport\MultiDisplay.xaml.cs">
+      <DependentUpon>MultiDisplay.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="StoreFrontSupport\SSIServerInterface.cs" />
+    <Compile Include="StoreFrontSupport\ViewModel.cs" />
+    <Compile Include="Views\ViewCollectionsMenu.xaml.cs">
+      <DependentUpon>ViewCollectionsMenu.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\ViewComponents\VCCollectionsMenuList.xaml.cs">
+      <DependentUpon>VCCollectionsMenuList.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\VMCollectionsMenu.cs" />
     <Page Include="Interfaces\Controls\Control_OverlayPanel.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -236,6 +251,18 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="StoreFrontSupport\MultiDisplay.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\ViewCollectionsMenu.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\ViewComponents\VCCollectionsMenuList.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs">

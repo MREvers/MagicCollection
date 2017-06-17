@@ -8,9 +8,9 @@ using System.Net;
 
 namespace CollectorsFrontEnd
 {
-    class ServerIFace
+    class ToBeRemovedServerIFace
     {
-        public ServerIFace()
+        public ToBeRemovedServerIFace()
         {
            
         }

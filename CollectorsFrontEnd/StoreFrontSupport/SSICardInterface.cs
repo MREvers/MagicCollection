@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CollectorsFrontEnd.InterfaceModels;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -6,67 +7,15 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Media.Imaging;
 
-namespace CollectorsFrontEnd.InterfaceModels
+namespace CollectorsFrontEnd.StoreFrontSupport
 {
-    public static class ServerInterfaceModel
+    public static partial class ServerInterface
     {
-        public static ServerClientInterface SCI = new ServerClientInterface();
-        private static List<CollectionModel> LstCollectionModels = new List<CollectionModel>();
-
-        public static string SZ_IMAGE_CACHE_PATH = SCI.GetImagesPath();
-
-        #region Friend Interfaces
-        public static class CollectionInterfaceModel
+        public static class Card
         {
-            public static void SaveCollection(string aszCollectionName)
-            {
-                SCI.SaveCollection(aszCollectionName);
-            }
+            public static string SZ_IMAGE_CACHE_PATH = SCI.GetImagesPath();
 
-            public static void AddItem(string aszCollectionName, string aszCardNameLong, List<Tuple<string,string>> lstMeta)
-            {
-                SCI.AddItem(aszCollectionName, aszCardNameLong, lstMeta);
-            }
-
-            public static void RemoveItem(string aszCollectionName, string aszCardNameLong, List<Tuple<string, string>> lstMeta)
-            {
-                SCI.RemoveItem(aszCollectionName, aszCardNameLong, lstMeta);
-            }
-
-            public static void SetBaselineHistory(string aszCollection)
-            {
-                SCI.SetBaselineHistory(aszCollection);
-            }
-
-            public static void LoadBulkChanges(string aszCollection, List<string> alstChanges)
-            {
-                SCI.LoadBulkChanges(aszCollection, alstChanges);
-            }
-
-            /// <summary>
-            /// Calls the server for the most up to date list of copies.
-            /// </summary>
-            /// <param name="aszCollectionName"></param>
-            public static void Refresh(string aszCollectionName)
-            {
-                if (GetCollectionModel(aszCollectionName) != null)
-                {
-                    // List of [ { CardNameLong, [Tags, ...] }, ... ]
-                    List<Tuple<string, List<Tuple<string, string>>>> lstCards =
-                        SCI.GetCollectionListWithMeta(aszCollectionName);
-                    CollectionModel CMCurrent = LstCollectionModels.FirstOrDefault(x => x.CollectionName == aszCollectionName);
-                    if (CMCurrent != null)
-                    {
-                        CMCurrent.BuildCopyModelList(lstCards);
-                    }
-                }
-            }
-        }
-
-        // Deals with all interface calls at the card class and copy level
-        public static class CardClassInterfaceModel
-        {
-            private class ImageDownloadedEventArgs: EventArgs
+            private class ImageDownloadedEventArgs : EventArgs
             {
                 public ImageDownloadedEventArgs(CardModel aDataModel, EventArgs ae)
                 {
@@ -87,7 +36,7 @@ namespace CollectorsFrontEnd.InterfaceModels
                 return SCI.IsSameIdentity(aoCardOne.CardNameLong, aoCardTwo.CardNameLong);
             }
 
-            public static bool AreMetaTagsSame(List<Tuple<string,string>> alstTupOne, List<Tuple<string, string>> alstTupTwo)
+            public static bool AreMetaTagsSame(List<Tuple<string, string>> alstTupOne, List<Tuple<string, string>> alstTupTwo)
             {
                 return SCI.IsSameMetaTags(alstTupOne, alstTupTwo);
             }
@@ -96,13 +45,13 @@ namespace CollectorsFrontEnd.InterfaceModels
                 string aszLongCardName,
                 string aszKey,
                 string aszVal,
-                List<Tuple<string,string>> aLstMatchMeta)
+                List<Tuple<string, string>> aLstMatchMeta)
             {
                 SCI.AddMetaTag(aszCollectionName, aszLongCardName, aszKey, aszVal, aLstMatchMeta);
             }
 
             public static void SubmitMetaTagChangesToServer(string aszCollectionName, string aszLongName,
-                List<Tuple<string, string>> alstNewMeta, List<Tuple<string,string>> alstMeta)
+                List<Tuple<string, string>> alstNewMeta, List<Tuple<string, string>> alstMeta)
             {
                 SCI.SetMetaTags(aszCollectionName, aszLongName, alstNewMeta, alstMeta);
             }
@@ -181,7 +130,7 @@ namespace CollectorsFrontEnd.InterfaceModels
                     bi3.Freeze();
                     aeHandlerCallback(bi3, null);
                 }
-                
+
             }
 
             private static void eModelImage_DownloadCompleted(object sender, ImageDownloadedEventArgs ie)
@@ -204,7 +153,7 @@ namespace CollectorsFrontEnd.InterfaceModels
                 {
                     Directory.CreateDirectory(Path.GetDirectoryName(photolocation));
                 }
-                
+
                 using (var filestream = new FileStream(photolocation, FileMode.Create))
                     encoder.Save(filestream);
             }
@@ -219,86 +168,6 @@ namespace CollectorsFrontEnd.InterfaceModels
             {
                 return SCI.GetCardAttributeRestrictions(aszLongName, aszKey);
             }
-        }
-        #endregion
-
-        /// <summary>
-        /// Creates a new collection model from data from the server, if that collection model
-        ///  doesn't already exist. If it exists, it updates the model.
-        /// </summary>
-        /// <param name="aszCollectionFileName"></param>
-        /// <returns></returns>
-        public static CollectionModel GenerateCollectionModel(string aszCollectionFileName)
-        {
-            string szColName = SCI.LoadCollection(aszCollectionFileName);
-            if (szColName != "")
-            {
-                // List of [ { CardNameLong, [Tags, ...] }, ... ]
-                List<Tuple<string, List<Tuple<string, string>>>> lstCards =
-                    SCI.GetCollectionListWithMeta(szColName);
-                CollectionModel CMNew = new CollectionModel(szColName, lstCards);
-                CollectionModel CMCurrent = LstCollectionModels.FirstOrDefault(x => x.CollectionName == szColName);
-                if (CMCurrent == null)
-                {
-                    LstCollectionModels.Add(CMNew);
-                }
-                else
-                {
-                    CMCurrent.LstCopyModels = CMNew.LstCopyModels;
-                }
-
-                return CMNew;
-            }
-            return null;
-        }
-
-        public static CardModel GenerateCopyModel(string aszCardNameLong, string aszCollectionName, List<Tuple<string, string>> aLstMetaTags)
-        {
-            // Really, this SCI function just parses the long name.
-            MCopyObject oParsed = ServerInterfaceModel.SCI.ConvertItemToCopyObject(aszCardNameLong);
-            List<Tuple<string, string>> lstIdentifiedAttrs =
-                ServerInterfaceModel.SCI.GetCardAttributes(aszCardNameLong);
-            // We also need the rest identified attrs
-            CardModel CopyM = new CardModel(
-                oParsed.Name,
-                aszCollectionName,
-                oParsed.Attributes.Select(x => new Tuple<string, string>(x.Key,x.Value)).ToList(),
-                lstIdentifiedAttrs,
-                aLstMetaTags);
-            CopyM.SetAuxData(oParsed.Amount, aszCardNameLong);
-
-            return CopyM;
-        }
-
-        /// <summary>
-        /// Returns the collection model if it exists. Null otherwise.
-        /// </summary>
-        /// <param name="aszCollectionName"></param>
-        /// <returns></returns>
-        public static CollectionModel GetCollectionModel(string aszCollectionName)
-        {
-            return LstCollectionModels.FirstOrDefault(x => x.CollectionName == aszCollectionName);
-        }
-
-        public static List<string> GetLoadedCollectionList()
-        {
-            return LstCollectionModels.Select(x => x.CollectionName).ToList();
-        }
-
-        public static List<string> GetAllCardsStartingWith(string aszStart)
-        {
-            return SCI.GetAllCardsStartingWith(aszStart);
-        }
-       
-        public static void ImportJSONCollection()
-        {
-            SCI.ImportCollection();
-        }
-
-        public static void CreateCollection(string aszName)
-        {
-            SCI.CreateCollection(aszName);
-            GenerateCollectionModel(aszName + ".txt");
         }
     }
 }

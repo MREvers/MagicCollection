@@ -85,7 +85,7 @@ public:
 	* @Param aszRemoveItemLongName Long name of the item to be removed. Contains the identifying NonUniqueAttributes.
 	* @Param alstMetaTags List of Meta-Tags identifying the copy to be removed.
 	*/
-	void RemoveItem(std::string aszRemoveItemLongName, std::vector<std::pair<std::string, std::string>> alstMeta);
+	void RemoveItem(std::vector<std::pair<std::string, std::string>> alstMeta, std::string aszRemoveItemLongName);
 
 	/* ReplaceItem (Transaction)
 	* @Param aszRemoveItemLongName  Long name of the item to be removed. Contains the identifying NonUniqueAttributes.
