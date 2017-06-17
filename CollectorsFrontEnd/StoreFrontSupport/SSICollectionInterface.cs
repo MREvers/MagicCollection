@@ -7,32 +7,32 @@ using System.Threading.Tasks;
 
 namespace CollectorsFrontEnd.StoreFrontSupport
 {
-    public static partial class ServerInterface
+    public partial class ServerInterface
     {
 
-        public static class Collection
+        public class CollectionIFace
         {
-            public static void SaveCollection(string aszCollectionName)
+            public void SaveCollection(string aszCollectionName)
             {
                 SCI.SaveCollection(aszCollectionName);
             }
 
-            public static void AddItem(string aszCollectionName, string aszCardNameLong, List<Tuple<string, string>> lstMeta)
+            public void AddItem(string aszCollectionName, string aszCardNameLong, List<Tuple<string, string>> lstMeta)
             {
                 SCI.AddItem(aszCollectionName, aszCardNameLong, lstMeta);
             }
 
-            public static void RemoveItem(string aszCollectionName, string aszCardNameLong, List<Tuple<string, string>> lstMeta)
+            public void RemoveItem(string aszCollectionName, string aszCardNameLong, List<Tuple<string, string>> lstMeta)
             {
                 SCI.RemoveItem(aszCollectionName, aszCardNameLong, lstMeta);
             }
 
-            public static void SetBaselineHistory(string aszCollection)
+            public void SetBaselineHistory(string aszCollection)
             {
                 SCI.SetBaselineHistory(aszCollection);
             }
 
-            public static void LoadBulkChanges(string aszCollection, List<string> alstChanges)
+            public void LoadBulkChanges(string aszCollection, List<string> alstChanges)
             {
                 SCI.LoadBulkChanges(aszCollection, alstChanges);
             }
@@ -41,9 +41,9 @@ namespace CollectorsFrontEnd.StoreFrontSupport
             /// Calls the server for the most up to date list of copies.
             /// </summary>
             /// <param name="aszCollectionName"></param>
-            public static void Refresh(string aszCollectionName)
+            public void Refresh(string aszCollectionName)
             {
-                if (Server.GetCollectionModel(aszCollectionName) != null)
+                if (ServerIFace.GetCollectionModel(aszCollectionName) != null)
                 {
                     // List of [ { CardNameLong, [Tags, ...] }, ... ]
                     List<Tuple<string, List<Tuple<string, string>>>> lstCards =

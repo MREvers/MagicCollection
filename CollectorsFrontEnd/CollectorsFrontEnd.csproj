@@ -99,67 +99,12 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="IComponent.cs" />
-    <Compile Include="IDataModel.cs" />
-    <Compile Include="IMenuBarComponent.cs" />
     <Compile Include="InterfaceModels\CollectionModel.cs" />
     <Compile Include="InterfaceModels\CardModel.cs" />
-    <Compile Include="InterfaceModels\ServerInterfaceModel.cs" />
-    <Compile Include="Interfaces\Controls\Control_OverlayPanel.xaml.cs">
-      <DependentUpon>Control_OverlayPanel.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Interfaces\Components\Component_GroupView.xaml.cs">
-      <DependentUpon>Component_GroupView.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Interfaces\Components\Component_OverviewList.xaml.cs">
-      <DependentUpon>Component_OverviewList.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Interfaces\View_CollectionsOverview.xaml.cs">
-      <DependentUpon>View_CollectionsOverview.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Interfaces\View_Collection.xaml.cs">
-      <DependentUpon>View_Collection.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Interfaces\View_Cube.xaml.cs">
-      <DependentUpon>View_Cube.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Interfaces\StoreFrontMain.xaml.cs">
+    <Compile Include="StoreFrontSupport\SSIServer.cs" />
+    <Compile Include="Views\StoreFrontMain.xaml.cs">
       <DependentUpon>StoreFrontMain.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Interfaces\Subs\Module_AddItemWindow.xaml.cs">
-      <DependentUpon>Module_AddItemWindow.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Interfaces\Subs\Module_AmountChanger.xaml.cs">
-      <DependentUpon>Module_AmountChanger.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Interfaces\Subs\Module_AmountInterchanger.xaml.cs">
-      <DependentUpon>Module_AmountInterchanger.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Interfaces\Subs\Module_AttributeChanger.xaml.cs">
-      <DependentUpon>Module_AttributeChanger.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Interfaces\Subs\Module_BulkEdits.xaml.cs">
-      <DependentUpon>Module_BulkEdits.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Interfaces\Subs\Module_CardDisplayer.xaml.cs">
-      <DependentUpon>Module_CardDisplayer.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Interfaces\Components\Component_CardGroupList.xaml.cs">
-      <DependentUpon>Component_CardGroupList.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Interfaces\Subs\Module_EnterText.xaml.cs">
-      <DependentUpon>Module_EnterText.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Interfaces\Subs\Module_Generalization.xaml.cs">
-      <DependentUpon>Module_Generalization.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Interfaces\Subs\Module_ItemDisplayer.xaml.cs">
-      <DependentUpon>Module_ItemDisplayer.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Interfaces\Subs\Module_KeyValCreater.xaml.cs">
-      <DependentUpon>Module_KeyValCreater.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="ServerIFace.cs" />
     <Compile Include="StoreFrontSupport\SSICardInterface.cs" />
     <Compile Include="StoreFrontSupport\SSICollectionInterface.cs" />
     <Compile Include="StoreFrontSupport\IView.cs" />
@@ -175,75 +120,7 @@
       <DependentUpon>VCCollectionsMenuList.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\VMCollectionsMenu.cs" />
-    <Page Include="Interfaces\Controls\Control_OverlayPanel.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Interfaces\Components\Component_GroupView.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Interfaces\Components\Component_OverviewList.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Interfaces\View_CollectionsOverview.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Interfaces\View_Collection.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Interfaces\View_Cube.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Interfaces\StoreFrontMain.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Interfaces\Subs\Module_AddItemWindow.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Interfaces\Subs\Module_AmountChanger.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Interfaces\Subs\Module_AmountInterchanger.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Interfaces\Subs\Module_AttributeChanger.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Interfaces\Subs\Module_BulkEdits.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Interfaces\Subs\Module_CardDisplayer.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Interfaces\Components\Component_CardGroupList.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Interfaces\Subs\Module_EnterText.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Interfaces\Subs\Module_Generalization.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Interfaces\Subs\Module_ItemDisplayer.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Interfaces\Subs\Module_KeyValCreater.xaml">
+    <Page Include="Views\StoreFrontMain.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

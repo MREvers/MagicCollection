@@ -9,11 +9,11 @@ using System.Windows.Media.Imaging;
 
 namespace CollectorsFrontEnd.StoreFrontSupport
 {
-    public static partial class ServerInterface
+    public partial class ServerInterface
     {
-        public static class Card
+        public class CardIFace
         {
-            public static string SZ_IMAGE_CACHE_PATH = SCI.GetImagesPath();
+            public string SZ_IMAGE_CACHE_PATH = SCI.GetImagesPath();
 
             private class ImageDownloadedEventArgs : EventArgs
             {
@@ -27,7 +27,7 @@ namespace CollectorsFrontEnd.StoreFrontSupport
             }
 
             // Compares long name
-            public static bool AreCardsSame(CardModel aoCardOne, CardModel aoCardTwo)
+            public bool AreCardsSame(CardModel aoCardOne, CardModel aoCardTwo)
             {
                 if (aoCardOne.CardNameLong == null || aoCardTwo.CardNameLong == null)
                 {
@@ -36,12 +36,12 @@ namespace CollectorsFrontEnd.StoreFrontSupport
                 return SCI.IsSameIdentity(aoCardOne.CardNameLong, aoCardTwo.CardNameLong);
             }
 
-            public static bool AreMetaTagsSame(List<Tuple<string, string>> alstTupOne, List<Tuple<string, string>> alstTupTwo)
+            public bool AreMetaTagsSame(List<Tuple<string, string>> alstTupOne, List<Tuple<string, string>> alstTupTwo)
             {
                 return SCI.IsSameMetaTags(alstTupOne, alstTupTwo);
             }
 
-            public static void AddMetaTag(string aszCollectionName,
+            public void AddMetaTag(string aszCollectionName,
                 string aszLongCardName,
                 string aszKey,
                 string aszVal,
@@ -50,13 +50,13 @@ namespace CollectorsFrontEnd.StoreFrontSupport
                 SCI.AddMetaTag(aszCollectionName, aszLongCardName, aszKey, aszVal, aLstMatchMeta);
             }
 
-            public static void SubmitMetaTagChangesToServer(string aszCollectionName, string aszLongName,
+            public void SubmitMetaTagChangesToServer(string aszCollectionName, string aszLongName,
                 List<Tuple<string, string>> alstNewMeta, List<Tuple<string, string>> alstMeta)
             {
                 SCI.SetMetaTags(aszCollectionName, aszLongName, alstNewMeta, alstMeta);
             }
 
-            public static void SubmitFeatureChangesToServer(string aszCollectionName, string aszLongName,
+            public void SubmitFeatureChangesToServer(string aszCollectionName, string aszLongName,
                 List<Tuple<string, string>> alstNewMeta,
                 List<Tuple<string, string>> alstNewAttrs,
                 List<Tuple<string, string>> alstMeta)
@@ -64,7 +64,7 @@ namespace CollectorsFrontEnd.StoreFrontSupport
                 SCI.SetFeatures(aszCollectionName, aszLongName, alstNewMeta, alstNewAttrs, alstMeta);
             }
 
-            public static void RemoveMetaTag(string aszCollectionName,
+            public void RemoveMetaTag(string aszCollectionName,
                 string aszLongCardName,
                 string aszKey,
                 List<Tuple<string, string>> aLstMatchMeta)
@@ -78,7 +78,7 @@ namespace CollectorsFrontEnd.StoreFrontSupport
             // I used the ANTS profiler and it looks like I am not leaking memory. It just seems that
             // the process will hold onto memory after its no longer needed. So when viewing lots of images
             // we may not expect it to return to its previous usage.
-            public static void DownloadAndCacheImage(EventHandler aeHandlerCallback, CardModel aoCardModel)
+            public void DownloadAndCacheImage(EventHandler aeHandlerCallback, CardModel aoCardModel)
             {
                 // Save in set
 
@@ -133,7 +133,7 @@ namespace CollectorsFrontEnd.StoreFrontSupport
 
             }
 
-            private static void eModelImage_DownloadCompleted(object sender, ImageDownloadedEventArgs ie)
+            private void eModelImage_DownloadCompleted(object sender, ImageDownloadedEventArgs ie)
             {
                 EventArgs e = ie.e;
                 CardModel cardModel = ie.DataModel;
@@ -158,13 +158,13 @@ namespace CollectorsFrontEnd.StoreFrontSupport
                     encoder.Save(filestream);
             }
 
-            private static void eModelImage_DownloadFailed(object sender, EventArgs e)
+            private void eModelImage_DownloadFailed(object sender, EventArgs e)
             {
 
             }
 
             // Use sparingly. Eventually include attributes in metatags?
-            public static List<string> GetCardAttributesRestrictions(string aszLongName, string aszKey)
+            public List<string> GetCardAttributesRestrictions(string aszLongName, string aszKey)
             {
                 return SCI.GetCardAttributeRestrictions(aszLongName, aszKey);
             }

@@ -12,12 +12,9 @@ namespace CollectorsFrontEnd.StoreFrontSupport
     /// S => Static
     /// SI => Server Interface
     /// </summary>
-    public static partial class ServerInterface
+    public partial class ServerInterface
     {
-        private static ServerClientInterface SCI = ServerInterfaceModel.SCI;
-        private static List<CollectionModel> ms_lstCollectionModels = new List<CollectionModel>();
-
-        public static class Server
+        public class ServerIFace
         {
             /// <summary>
             /// Creates a new collection model from data from the server, if that collection model
@@ -25,7 +22,7 @@ namespace CollectorsFrontEnd.StoreFrontSupport
             /// </summary>
             /// <param name="aszCollectionFileName"></param>
             /// <returns></returns>
-            public static CollectionModel GenerateCollectionModel(string aszCollectionFileName)
+            public CollectionModel GenerateCollectionModel(string aszCollectionFileName)
             {
                 string szColName = SCI.LoadCollection(aszCollectionFileName);
                 if (szColName != "")
@@ -49,7 +46,7 @@ namespace CollectorsFrontEnd.StoreFrontSupport
                 return null;
             }
 
-            public static CardModel GenerateCopyModel(string aszCardNameLong, string aszCollectionName, List<Tuple<string, string>> aLstMetaTags)
+            public CardModel GenerateCopyModel(string aszCardNameLong, string aszCollectionName, List<Tuple<string, string>> aLstMetaTags)
             {
                 // Really, this SCI function just parses the long name.
                 MCopyObject oParsed = SCI.ConvertItemToCopyObject(aszCardNameLong);
@@ -72,27 +69,27 @@ namespace CollectorsFrontEnd.StoreFrontSupport
             /// </summary>
             /// <param name="aszCollectionName"></param>
             /// <returns></returns>
-            public static CollectionModel GetCollectionModel(string aszCollectionName)
+            public CollectionModel GetCollectionModel(string aszCollectionName)
             {
                 return ms_lstCollectionModels.FirstOrDefault(x => x.CollectionName == aszCollectionName);
             }
 
-            public static List<string> GetLoadedCollectionList()
+            public List<string> GetLoadedCollectionList()
             {
                 return ms_lstCollectionModels.Select(x => x.CollectionName).ToList();
             }
 
-            public static List<string> GetAllCardsStartingWith(string aszStart)
+            public List<string> GetAllCardsStartingWith(string aszStart)
             {
                 return SCI.GetAllCardsStartingWith(aszStart);
             }
 
-            public static void ImportJSONCollection()
+            public void ImportJSONCollection()
             {
                 SCI.ImportCollection();
             }
 
-            public static void CreateCollection(string aszName)
+            public void CreateCollection(string aszName)
             {
                 SCI.CreateCollection(aszName);
                 GenerateCollectionModel(aszName + ".txt");

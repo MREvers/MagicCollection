@@ -231,7 +231,7 @@ namespace CollectorsFrontEnd.Interfaces
 
             System.IO.Compression.ZipFile.ExtractToDirectory(szZipPath, szExtractPath);
 
-            ServerInterface.Server.ImportJSONCollection();
+            ServerInterface.ServerIFace.ImportJSONCollection();
         }
         #endregion
     }

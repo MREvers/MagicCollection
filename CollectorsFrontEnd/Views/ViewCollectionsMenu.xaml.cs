@@ -66,8 +66,6 @@ namespace CollectorsFrontEnd.Views
                     DataContext: this.DataContext,
                     Persist: false);
             
-
-            refreshCollectionListDisplay(ServerInterface.Server.GetLoadedCollectionList());
         }
         #endregion
 

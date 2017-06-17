@@ -10,7 +10,7 @@ using System.Windows.Media.Imaging;
 
 namespace CollectorsFrontEnd.InterfaceModels
 {
-    public class CardModel : IDataModel, INotifyPropertyChanged
+    public class CardModel : INotifyPropertyChanged
     {
         public static List<string> TEMP_LST_IMPORTANT_IDENTS = new List<string>() { "set" };
 
@@ -73,6 +73,7 @@ namespace CollectorsFrontEnd.InterfaceModels
 
         public void AddMetaTag(Tuple<string,string> aTupKeyVal)
         {
+            /*
             ServerInterfaceModel
                 .CardClassInterfaceModel
                 .AddMetaTag(
@@ -81,10 +82,12 @@ namespace CollectorsFrontEnd.InterfaceModels
                 aTupKeyVal.Item1,
                 aTupKeyVal.Item2,
                 LstMetaTags);
+                */
         }
 
         public void RemoveMetaTag(string aszKey)
         {
+            /*
             ServerInterfaceModel
                 .CardClassInterfaceModel
                 .RemoveMetaTag(
@@ -92,17 +95,21 @@ namespace CollectorsFrontEnd.InterfaceModels
                 CardNameLong,
                 aszKey,
                 LstMetaTags);
+                */
         }
 
         public void SubmitMetaTagChangesToServer(List<Tuple<string, string>> alstNewMeta)
         {
+            /*
             ServerInterfaceModel
                 .CardClassInterfaceModel.SubmitMetaTagChangesToServer(TargetCollection, CardNameLong, alstNewMeta, LstMetaTags);
-        }
+    */    
+    }
 
         public void SubmitFeatureChangesToServer(List<Tuple<string, string>> alstNewMeta,
             List<Tuple<string, string>> alstNewAttrs)
         {
+            /*
             ServerInterfaceModel
                 .CardClassInterfaceModel
                 .SubmitFeatureChangesToServer(
@@ -112,6 +119,7 @@ namespace CollectorsFrontEnd.InterfaceModels
                 alstNewAttrs,
                 LstMetaTags);
             CardImage = null;
+            */
         }
 
         public string GetFullIdentifier()
@@ -196,19 +204,19 @@ namespace CollectorsFrontEnd.InterfaceModels
         // Does not count meta tags
         public bool IsSameAs(CardModel aoCardModel)
         {
-            return ServerInterfaceModel.CardClassInterfaceModel.AreCardsSame(this, aoCardModel);
+            return false;// ServerInterfaceModel.CardClassInterfaceModel.AreCardsSame(this, aoCardModel);
         }
 
         public bool IsSameMetaTags(List<Tuple<string, string>> alstTupOne, List<Tuple<string, string>> alstTupTwo)
         {
-            return ServerInterfaceModel.CardClassInterfaceModel.AreMetaTagsSame(alstTupOne, alstTupTwo);
+            return false;// ServerInterfaceModel.CardClassInterfaceModel.AreMetaTagsSame(alstTupOne, alstTupTwo);
         }
 
         public void GetImage()
         {
             if (CardImage == null)
             {
-                ServerInterfaceModel.CardClassInterfaceModel.DownloadAndCacheImage(ImageLoaded, this);
+             //   ServerInterfaceModel.CardClassInterfaceModel.DownloadAndCacheImage(ImageLoaded, this);
             }
             else
             {
@@ -236,7 +244,7 @@ namespace CollectorsFrontEnd.InterfaceModels
 
         private List<string> getCardAttributeRestrictions(string aszKey)
         {
-            return ServerInterfaceModel.CardClassInterfaceModel.GetCardAttributesRestrictions(CardNameLong, aszKey);
+            return null;// ServerInterfaceModel.CardClassInterfaceModel.GetCardAttributesRestrictions(CardNameLong, aszKey);
         }
     }
 }
