@@ -19,9 +19,10 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using CollectorsFrontEnd.StoreFrontSupport;
-using CollectorsFrontEnd.Views;
+using System.Windows.Threading;
+using System.Threading;
 
-namespace CollectorsFrontEnd.Interfaces
+namespace CollectorsFrontEnd.Views
 {
     /// <summary>
     /// Interaction logic for StoreFrontMain.xaml
@@ -231,7 +232,7 @@ namespace CollectorsFrontEnd.Interfaces
 
             System.IO.Compression.ZipFile.ExtractToDirectory(szZipPath, szExtractPath);
 
-            ServerInterface.ServerIFace.ImportJSONCollection();
+            ServerInterface.Server.ImportJSONCollection();
         }
         #endregion
     }

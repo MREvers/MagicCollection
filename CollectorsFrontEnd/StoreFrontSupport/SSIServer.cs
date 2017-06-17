@@ -4,6 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using CollectorsFrontEnd.InterfaceModels;
+using System.Threading;
+using System.Windows.Threading;
+using System.Windows;
 
 namespace CollectorsFrontEnd.StoreFrontSupport
 {
@@ -24,7 +27,7 @@ namespace CollectorsFrontEnd.StoreFrontSupport
         {
             get
             {
-                if (Singleton == null) { Singleton = new ServerInterface(); }
+                if (Singleton == null) { InitServer(); }
                 return Singleton._Server;
             }
         }
@@ -32,7 +35,7 @@ namespace CollectorsFrontEnd.StoreFrontSupport
         {
             get
             {
-                if (Singleton == null) { Singleton = new ServerInterface(); }
+                if (Singleton == null) { InitServer(); }
                 return Singleton._Card;
             }
         }
@@ -40,10 +43,19 @@ namespace CollectorsFrontEnd.StoreFrontSupport
         {
             get
             {
-                if (Singleton == null) { Singleton = new ServerInterface(); }
+                if (Singleton == null) { InitServer(); }
                 return Singleton._Collection;
             }
         }
+
+        private static void InitServer()
+        {
+            Singleton = new ServerInterface();
+        }
+
+        // The action arguments are curried at call-time.
+        private List<Action> m_lstServerQueue;
+        private Mutex m_QueueLock;
 
         private ServerIFace _Server;
         private CardIFace _Card;
@@ -51,14 +63,63 @@ namespace CollectorsFrontEnd.StoreFrontSupport
 
         /// <summary>
         /// The Constructor initilizes all the objects in the correct order.
+        /// The SCI can be added as a service here becuase the thread ensures
+        /// that the SCI is present before any other services can run.
         /// </summary>
         private ServerInterface()
         {
-            SCI = new ServerClientInterface();
-
             _Server = new ServerIFace();
             _Card = new CardIFace();
             _Collection = new CollectionIFace();
+
+            m_QueueLock = new Mutex();
+            m_lstServerQueue = new List<Action>();
+
+            Thread pServiceThread = new Thread(pServices);
+            pServiceThread.IsBackground = true;
+            pServiceThread.Start();
+        }
+
+        private void pServices()
+        {
+            if (SCI == null) { SCI = new ServerClientInterface(); }
+
+            while (true)
+            {
+                m_QueueLock.WaitOne();
+                if (m_lstServerQueue.Count == 0) { continue; }
+                Action currentTask = m_lstServerQueue.First();
+                m_lstServerQueue.RemoveAt(0);
+                m_QueueLock.ReleaseMutex();
+
+                currentTask();
+            }
+        }
+
+        private void enqueueService(Action aTask, bool UICallback = false)
+        {
+
+            Action queueAction;
+            if (UICallback)
+            {
+                queueAction = () =>
+                {
+                    if (!Application.Current.Dispatcher.CheckAccess())
+                    {
+                        Application.Current.Dispatcher.BeginInvoke(aTask);
+                        return;
+                    }
+                    aTask();
+                };
+            }
+            else
+            {
+                queueAction = aTask;
+            }
+
+            m_QueueLock.WaitOne();
+            m_lstServerQueue.Add(queueAction);
+            m_QueueLock.ReleaseMutex();
         }
     }
 }

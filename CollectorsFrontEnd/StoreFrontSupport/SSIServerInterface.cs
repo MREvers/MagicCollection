@@ -16,13 +16,23 @@ namespace CollectorsFrontEnd.StoreFrontSupport
     {
         public class ServerIFace
         {
+            private List<CollectionModel> m_lstCollectionModels = new List<CollectionModel>();
+
             /// <summary>
             /// Creates a new collection model from data from the server, if that collection model
             ///  doesn't already exist. If it exists, it updates the model.
             /// </summary>
             /// <param name="aszCollectionFileName"></param>
             /// <returns></returns>
-            public CollectionModel GenerateCollectionModel(string aszCollectionFileName)
+            public void GenerateCollectionModel(string aszCollectionFileName)
+            {
+                Singleton.enqueueService(() =>
+                {
+                    inGenerateCollectionModel(aszCollectionFileName);
+                });
+            }
+
+            private void inGenerateCollectionModel(string aszCollectionFileName)
             {
                 string szColName = SCI.LoadCollection(aszCollectionFileName);
                 if (szColName != "")
@@ -31,19 +41,17 @@ namespace CollectorsFrontEnd.StoreFrontSupport
                     List<Tuple<string, List<Tuple<string, string>>>> lstCards =
                         SCI.GetCollectionListWithMeta(szColName);
                     CollectionModel CMNew = new CollectionModel(szColName, lstCards);
-                    CollectionModel CMCurrent = ms_lstCollectionModels.FirstOrDefault(x => x.CollectionName == szColName);
+                    CollectionModel CMCurrent = m_lstCollectionModels.FirstOrDefault(x => x.CollectionName == szColName);
                     if (CMCurrent == null)
                     {
-                        ms_lstCollectionModels.Add(CMNew);
+                        m_lstCollectionModels.Add(CMNew);
                     }
                     else
                     {
                         CMCurrent.LstCopyModels = CMNew.LstCopyModels;
                     }
 
-                    return CMNew;
                 }
-                return null;
             }
 
             public CardModel GenerateCopyModel(string aszCardNameLong, string aszCollectionName, List<Tuple<string, string>> aLstMetaTags)
@@ -71,12 +79,15 @@ namespace CollectorsFrontEnd.StoreFrontSupport
             /// <returns></returns>
             public CollectionModel GetCollectionModel(string aszCollectionName)
             {
-                return ms_lstCollectionModels.FirstOrDefault(x => x.CollectionName == aszCollectionName);
+                return m_lstCollectionModels.FirstOrDefault(x => x.CollectionName == aszCollectionName);
             }
 
-            public List<string> GetLoadedCollectionList()
+            public void GetLoadedCollectionList(Action<List<string>> aCallback, bool UICallback = false)
             {
-                return ms_lstCollectionModels.Select(x => x.CollectionName).ToList();
+                Singleton.enqueueService(() =>
+                {
+                    aCallback(SCI.GetLoadedCollections());
+                }, UICallback);
             }
 
             public List<string> GetAllCardsStartingWith(string aszStart)

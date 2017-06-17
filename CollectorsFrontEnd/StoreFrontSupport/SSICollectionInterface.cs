@@ -41,10 +41,11 @@ namespace CollectorsFrontEnd.StoreFrontSupport
             /// Calls the server for the most up to date list of copies.
             /// </summary>
             /// <param name="aszCollectionName"></param>
-            public void Refresh(string aszCollectionName)
+            public void Sync(string aszCollectionName)
             {
-                if (ServerIFace.GetCollectionModel(aszCollectionName) != null)
+                if (ServerInterface.Server.GetCollectionModel(aszCollectionName) != null)
                 {
+                    /*
                     // List of [ { CardNameLong, [Tags, ...] }, ... ]
                     List<Tuple<string, List<Tuple<string, string>>>> lstCards =
                         SCI.GetCollectionListWithMeta(aszCollectionName);
@@ -53,6 +54,7 @@ namespace CollectorsFrontEnd.StoreFrontSupport
                     {
                         CMCurrent.BuildCopyModelList(lstCards);
                     }
+                    */
                 }
             }
         }

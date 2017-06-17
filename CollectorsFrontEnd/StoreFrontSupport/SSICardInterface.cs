@@ -13,7 +13,7 @@ namespace CollectorsFrontEnd.StoreFrontSupport
     {
         public class CardIFace
         {
-            public string SZ_IMAGE_CACHE_PATH = SCI.GetImagesPath();
+            public string SZ_IMAGE_CACHE_PATH = "";
 
             private class ImageDownloadedEventArgs : EventArgs
             {

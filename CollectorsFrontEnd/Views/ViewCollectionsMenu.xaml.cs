@@ -65,7 +65,9 @@ namespace CollectorsFrontEnd.Views
                     NewDisplay: new VCCollectionsMenuList(),
                     DataContext: this.DataContext,
                     Persist: false);
-            
+            // Call the server function which takes the callback and whatever args.
+            // The server queues up that function and the call back.
+            ServerInterface.Server.GetLoadedCollectionList(refreshCollectionListDisplay, UICallback: true);
         }
         #endregion
 
