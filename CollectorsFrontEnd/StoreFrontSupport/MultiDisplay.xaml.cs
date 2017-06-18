@@ -19,6 +19,10 @@ namespace CollectorsFrontEnd.StoreFrontSupport
 {
     /// <summary>
     /// Interaction logic for MultiDisplay.xaml
+    /// Views that utilize this class have a few requirements for full functionality.
+    /// One requirement is the the utilizing class must implement a displayEvent handler.
+    /// The display will fire events that it can't handle so that the 'real' view may
+    /// handle it as it pleases.
     /// </summary>
     public partial class MultiDisplay : UserControl, INotifyPropertyChanged, IView
     {
@@ -33,6 +37,7 @@ namespace CollectorsFrontEnd.StoreFrontSupport
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
+
         protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
@@ -48,6 +53,10 @@ namespace CollectorsFrontEnd.StoreFrontSupport
 
         private Dictionary<string, UserControl> m_mapPersistantDisplays = new Dictionary<string, UserControl>();
 
+        #endregion
+
+        #region Events
+        public event DisplayEventHandler DisplayEvent;
         #endregion
 
         #region Public Methods
@@ -78,11 +87,23 @@ namespace CollectorsFrontEnd.StoreFrontSupport
             }
 
             // Need to make sure there are no events hooked on the old display.
+            if (Display is IView)
+            {
+                IView ivDisplay = Display as IView;
+                ivDisplay.DisplayEvent -= displayFireEvent;
+            }
+
             DisplayName = Name;
             Display = NewDisplay;
             if (DataContext != null)
             {
                 Display.DataContext = DataContext;
+            }
+
+            if (Display is IView)
+            {
+                IView ivDisplay = Display as IView;
+                ivDisplay.DisplayEvent += displayFireEvent;
             }
         }
 
@@ -120,6 +141,11 @@ namespace CollectorsFrontEnd.StoreFrontSupport
             Display.IsEnabled = true;
             CenterPanel.Children.Remove(m_oOverlay);
             m_oOverlay = null;
+        }
+
+        private void displayFireEvent(string aszEvent, UserControl aoSource)
+        {
+            DisplayEvent(Event: aszEvent, Source: aoSource);
         }
 
         #endregion

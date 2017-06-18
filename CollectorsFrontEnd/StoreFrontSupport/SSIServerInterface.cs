@@ -54,7 +54,19 @@ namespace CollectorsFrontEnd.StoreFrontSupport
                 }
             }
 
-            public CardModel GenerateCopyModel(string aszCardNameLong, string aszCollectionName, List<Tuple<string, string>> aLstMetaTags)
+            public void GenerateCopyModel(string LongName,
+                string CollectionName, 
+                List<Tuple<string, string>> MetaTags, 
+                Action<CardModel> Callback,
+                bool UICallback = false)
+            {
+                Singleton.enqueueService(() =>
+                {
+                    Callback(inGenerateCopyModel(LongName, CollectionName, MetaTags));
+                }, UICallback);
+            }
+
+            private CardModel inGenerateCopyModel(string aszCardNameLong, string aszCollectionName, List<Tuple<string, string>> aLstMetaTags)
             {
                 // Really, this SCI function just parses the long name.
                 MCopyObject oParsed = SCI.ConvertItemToCopyObject(aszCardNameLong);
@@ -75,18 +87,22 @@ namespace CollectorsFrontEnd.StoreFrontSupport
             /// <summary>
             /// Returns the collection model if it exists. Null otherwise.
             /// </summary>
-            /// <param name="aszCollectionName"></param>
+            /// <param name="CollectionName"></param>
             /// <returns></returns>
-            public CollectionModel GetCollectionModel(string aszCollectionName)
-            {
-                return m_lstCollectionModels.FirstOrDefault(x => x.CollectionName == aszCollectionName);
-            }
-
-            public void GetLoadedCollectionList(Action<List<string>> aCallback, bool UICallback = false)
+            public void GetCollectionModel(string CollectionName, Action<CollectionModel> Callback, bool UICallback = false)
             {
                 Singleton.enqueueService(() =>
                 {
-                    aCallback(SCI.GetLoadedCollections());
+                    Callback(
+                        m_lstCollectionModels.FirstOrDefault(x => x.CollectionName == CollectionName));
+                }, UICallback);
+            }
+
+            public void GetLoadedCollectionList(Action<List<string>> Callback, bool UICallback = false)
+            {
+                Singleton.enqueueService(() =>
+                {
+                    Callback(SCI.GetLoadedCollections());
                 }, UICallback);
             }
 

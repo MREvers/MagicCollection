@@ -87,11 +87,15 @@ namespace CollectorsFrontEnd.StoreFrontSupport
             while (true)
             {
                 m_QueueLock.WaitOne();
-                if (m_lstServerQueue.Count == 0) { continue; }
+                if (m_lstServerQueue.Count == 0) { m_QueueLock.ReleaseMutex(); continue; }
                 Action currentTask = m_lstServerQueue.First();
                 m_lstServerQueue.RemoveAt(0);
                 m_QueueLock.ReleaseMutex();
 
+                // On concern I have is if the object on which this method is called is 
+                // garbage collected between queuing and execution. I tested it breifly
+                // and it seems like it may not be a problem. I'd like to profile this
+                // in the future but the ANTS profiler trial ran out.
                 currentTask();
             }
         }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CollectorsFrontEnd.StoreFrontSupport;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -28,8 +29,12 @@ namespace CollectorsFrontEnd.InterfaceModels
             LstCopyModels.Clear();
             foreach (var LongNameTagsPair in aLstCards)
             {
-                //CardModel oCopy = ServerInterfaceModel.GenerateCopyModel(LongNameTagsPair.Item1, CollectionName, LongNameTagsPair.Item2);
-                //LstCopyModels.Add(oCopy);
+                ServerInterface.Server.GenerateCopyModel(
+                    LongName: LongNameTagsPair.Item1,
+                    CollectionName: CollectionName,
+                    MetaTags: LongNameTagsPair.Item2,
+                    Callback: (aoCardModel) => { LstCopyModels.Add(aoCardModel); },
+                    UICallback: false);
             }
         }
 

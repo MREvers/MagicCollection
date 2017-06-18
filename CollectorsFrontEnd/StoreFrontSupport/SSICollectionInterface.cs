@@ -43,9 +43,10 @@ namespace CollectorsFrontEnd.StoreFrontSupport
             /// <param name="aszCollectionName"></param>
             public void Sync(string aszCollectionName)
             {
+                /*
                 if (ServerInterface.Server.GetCollectionModel(aszCollectionName) != null)
                 {
-                    /*
+                    
                     // List of [ { CardNameLong, [Tags, ...] }, ... ]
                     List<Tuple<string, List<Tuple<string, string>>>> lstCards =
                         SCI.GetCollectionListWithMeta(aszCollectionName);
@@ -54,8 +55,9 @@ namespace CollectorsFrontEnd.StoreFrontSupport
                     {
                         CMCurrent.BuildCopyModelList(lstCards);
                     }
-                    */
+                    
                 }
+                */
             }
         }
 

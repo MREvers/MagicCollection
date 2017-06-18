@@ -17,14 +17,32 @@ using System.Windows.Shapes;
 namespace CollectorsFrontEnd.Views.ViewComponents
 {
     /// <summary>
-    /// View Component Data Context is usually set by the constructing object.
+    /// View Component (VC) Data Context is usually set by the constructing object.
     /// Interaction logic for VCCollectionsMenuList.xaml
     /// </summary>
-    public partial class VCCollectionsMenuList : UserControl
+    public partial class VCCollectionsMenuList : UserControl, IView
     {
+        public event DisplayEventHandler DisplayEvent;
+
         public VCCollectionsMenuList()
         {
             InitializeComponent();
+        }
+
+        public List<object> GetViewHook(ViewComponentHandles ViewHandle)
+        {
+            switch (ViewHandle)
+            {
+                case ViewComponentHandles.Buttons:
+                    return new List<object>() { DisplayEvent };
+                default:
+                    return null;
+            }
+        }
+
+        private void eCollectionSelection_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            DisplayEvent("VCCollectionsMenuList.CollectionSelection.SelectionChanged", Source: this);
         }
     }
 }

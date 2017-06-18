@@ -21,6 +21,8 @@
             </Label>
         </Border>
         <ListBox
+                SelectedValue="{Binding SelectedCollection}"
+                SelectionChanged="eCollectionSelection_SelectionChanged"
                 Grid.Row="1" 
                 ItemsSource="{Binding AvailableCollections}"
                 VerticalAlignment="Stretch"/>

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CollectorsFrontEnd.StoreFrontSupport;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
@@ -19,10 +20,10 @@ namespace CollectorsFrontEnd.InterfaceModels
         public string CardNameLong;
         public string TargetCollection;
 
-        public List<Tuple<string, string>> LstMetaTags;
-        public List<Tuple<string, string>> LstSpecifiedAttrs; // Attrs that can change between copy such as 'Set'
-        public List<Tuple<string, string>> LstIdentifiedAttrs; // Attrs that define a copy into a card class.
-        public List<Tuple<string, List<string>>> LstSpecifiedAttrsRestrictions;
+        public List<Tuple<string, string>> MetaTagList;
+        public List<Tuple<string, string>> SpecifiedAttrList; // Attrs that can change between copy such as 'Set'
+        public List<Tuple<string, string>> IdentifiedAttrList; // Attrs that define a copy into a card class.
+        public List<Tuple<string, List<string>>> SpecifiedAttrsRestrictionList;
 
         public event PropertyChangedEventHandler PropertyChanged;
         protected virtual void OnPropertyChanged(string propertyName)
@@ -51,22 +52,22 @@ namespace CollectorsFrontEnd.InterfaceModels
         {
             CardName = aszCardName;
             TargetCollection = aszTargetCollection;
-            LstMetaTags = aLstMetaTags;
-            LstSpecifiedAttrs = aLstSpecifiedAttrs;
-            LstIdentifiedAttrs = aLstIdentifiedAttrs;
+            MetaTagList = aLstMetaTags;
+            SpecifiedAttrList = aLstSpecifiedAttrs;
+            IdentifiedAttrList = aLstIdentifiedAttrs;
         }
 
         public void SetAuxData(int aiAmount, string aszCardNameLong)
         {
             Amount = aiAmount;
             CardNameLong = aszCardNameLong;
-            LstSpecifiedAttrsRestrictions = new List<Tuple<string, List<string>>>();
-            foreach (Tuple<string, string> TupKeyVal in LstSpecifiedAttrs)
+            SpecifiedAttrsRestrictionList = new List<Tuple<string, List<string>>>();
+            foreach (Tuple<string, string> TupKeyVal in SpecifiedAttrList)
             {
                 List<string> lstRestrictions = getCardAttributeRestrictions(TupKeyVal.Item1);
                 if (lstRestrictions[0] != "*")
                 {
-                    LstSpecifiedAttrsRestrictions.Add(new Tuple<string, List<string>>(TupKeyVal.Item1, lstRestrictions));
+                    SpecifiedAttrsRestrictionList.Add(new Tuple<string, List<string>>(TupKeyVal.Item1, lstRestrictions));
                 }
             }
         }
@@ -125,7 +126,7 @@ namespace CollectorsFrontEnd.InterfaceModels
         public string GetFullIdentifier()
         {
             string szMetaList = "{ ";
-            foreach(Tuple<string,string> MTag in LstMetaTags)
+            foreach(Tuple<string,string> MTag in MetaTagList)
             {
                 szMetaList += MTag.Item1 + "=\"" + MTag.Item2 + "\" ";
             }
@@ -163,7 +164,7 @@ namespace CollectorsFrontEnd.InterfaceModels
         public string GetMetaTag(string aszKey)
         {
             string szRetVal = "";
-            foreach (Tuple<string, string> KeyVal in LstMetaTags)
+            foreach (Tuple<string, string> KeyVal in MetaTagList)
             {
                 if (KeyVal.Item1 == aszKey)
                 {
@@ -177,7 +178,7 @@ namespace CollectorsFrontEnd.InterfaceModels
         public string GetAttr(string aszKey)
         {
             string szRetVal = "";
-            foreach(var tup in LstIdentifiedAttrs)
+            foreach(var tup in IdentifiedAttrList)
             {
                 if (tup.Item1 == aszKey)
                 {
@@ -188,7 +189,7 @@ namespace CollectorsFrontEnd.InterfaceModels
 
             if (szRetVal == "")
             {
-                foreach (var tup in LstSpecifiedAttrs)
+                foreach (var tup in SpecifiedAttrList)
                 {
                     if (tup.Item1 == aszKey)
                     {
@@ -244,7 +245,7 @@ namespace CollectorsFrontEnd.InterfaceModels
 
         private List<string> getCardAttributeRestrictions(string aszKey)
         {
-            return null;// ServerInterfaceModel.CardClassInterfaceModel.GetCardAttributesRestrictions(CardNameLong, aszKey);
+            return ServerInterface.Card.GetCardAttributesRestrictions(CardNameLong, aszKey);
         }
     }
 }
