@@ -119,7 +119,18 @@
     <Compile Include="Views\ViewComponents\VCCollectionsMenuList.xaml.cs">
       <DependentUpon>VCCollectionsMenuList.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\ViewComponents\VCGroupListView.xaml.cs">
+      <DependentUpon>VCGroupListView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\ViewComponents\VCIGroupList.xaml.cs">
+      <DependentUpon>VCIGroupList.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\ViewComponents\VMVCIGroupList.cs" />
+    <Compile Include="Views\ViewCube.xaml.cs">
+      <DependentUpon>ViewCube.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\VMCollectionsMenu.cs" />
+    <Compile Include="Views\VMCube.cs" />
     <Page Include="Views\StoreFrontMain.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -137,6 +148,18 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\ViewComponents\VCCollectionsMenuList.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\ViewComponents\VCGroupListView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\ViewComponents\VCIGroupList.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\ViewCube.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

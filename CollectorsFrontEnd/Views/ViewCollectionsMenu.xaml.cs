@@ -23,7 +23,7 @@ namespace CollectorsFrontEnd.Views
     /// <summary>
     /// Interaction logic for ViewCollectionsMenu.xaml
     /// </summary>
-    public partial class ViewCollectionsMenu : UserControl, INotifyPropertyChanged
+    public partial class ViewCollectionsMenu : UserControl, INotifyPropertyChanged, IView
     {
         #region Bindings
         private MultiDisplay _OperationWindow = new MultiDisplay();
@@ -41,6 +41,7 @@ namespace CollectorsFrontEnd.Views
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
+
         protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
@@ -51,6 +52,10 @@ namespace CollectorsFrontEnd.Views
         
         public VMCollectionsMenu VMCollectionsMenu { get; set; }
 
+        #endregion
+
+        #region Events
+        public event DisplayEventHandler DisplayEvent;
         #endregion
 
         #region Public Methods
@@ -70,6 +75,11 @@ namespace CollectorsFrontEnd.Views
             // Call the server function which takes the callback and whatever args.
             // The server queues up that function and the call back.
             ServerInterface.Server.GetLoadedCollectionList(refreshCollectionListDisplay, UICallback: true);
+        }
+
+        public List<object> GetViewHook(ViewComponentHandles ViewHandle)
+        {
+            throw new NotImplementedException();
         }
         #endregion
 
@@ -111,16 +121,11 @@ namespace CollectorsFrontEnd.Views
         /// to know about this class.
         /// </summary>
         /// <param name="aszEvent"></param>
-        private void eMultiDisplayEventHandler(string aszEvent, UserControl aoSource)
+        private void eMultiDisplayEventHandler(object aoSource, DisplayEventArgs aoEvent)
         {
-            List<string> lstEventAddress = aszEvent.Split('.').ToList();
-            string szObject = lstEventAddress[0];
-            string szProperty = lstEventAddress[1];
-            string szEvent = lstEventAddress[2];
-
-            if (szObject == "VCCollectionsMenuList")
+            if (aoEvent.Source == "VCCollectionsMenuList")
             {
-                eCollectionsMenuListEventHandler(Property: szProperty, Event: szEvent, Source: aoSource);
+                eCollectionsMenuListEventHandler(aoSource, aoEvent);
             }
         }
 
@@ -129,13 +134,21 @@ namespace CollectorsFrontEnd.Views
         /// </summary>
         /// <param name="Property"></param>
         /// <param name="Event"></param>
-        private void eCollectionsMenuListEventHandler(string Property, string Event, UserControl Source)
+        private void eCollectionsMenuListEventHandler(object aoSource, DisplayEventArgs aoEvent)
         {
-            if (Property == "CollectionSelection")
+            if (aoEvent.Property == "CollectionSelection")
             {
-                if (Event == "SelectionChanged")
+                if (aoEvent.Event == "SelectionChanged")
                 {
-                    eCollectionSelection_SelectionChanged(Source);
+                    eCollectionSelection_SelectionChanged();
+                }
+            }
+            else if (aoEvent.Property == "ViewCollectionButton")
+            {
+                if (aoEvent.Event == "Clicked")
+                {
+                    aoEvent.Add("Selection", VMCollectionsMenu.SelectedCollection);
+                    DisplayEvent(Source: aoSource, Event: aoEvent);
                 }
             }
         }
@@ -146,13 +159,12 @@ namespace CollectorsFrontEnd.Views
         // These need not be called directly from the UI. If they are the end result of a
         // UI event, then it belongs here.
 
-        private void eCollectionSelection_SelectionChanged(UserControl aoSource)
+        private void eCollectionSelection_SelectionChanged()
         {
-            VCCollectionsMenuList oCollectionMenuList = aoSource as VCCollectionsMenuList;
             string szSelectedCollection = this.VMCollectionsMenu.SelectedCollection;
             ServerInterface.Server.GetCollectionModel(
                 CollectionName: szSelectedCollection,
-                Callback: (aoCM) => { refreshCollectionPreview(aoCM.LstCopyModels.Select(x => x.GetIdealIdentifier())); },
+                Callback: (aoCM) => { refreshCollectionPreview(aoCM.CollectionItems.Select(x => x.GetIdealIdentifier())); },
                 UICallback: true);
         }
 

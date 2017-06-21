@@ -48,7 +48,7 @@ namespace CollectorsFrontEnd.StoreFrontSupport
                     }
                     else
                     {
-                        CMCurrent.LstCopyModels = CMNew.LstCopyModels;
+                        CMCurrent.CollectionItems = CMNew.CollectionItems;
                     }
 
                 }

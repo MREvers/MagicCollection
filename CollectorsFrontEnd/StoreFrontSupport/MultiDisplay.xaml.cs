@@ -143,9 +143,9 @@ namespace CollectorsFrontEnd.StoreFrontSupport
             m_oOverlay = null;
         }
 
-        private void displayFireEvent(string aszEvent, UserControl aoSource)
+        private void displayFireEvent(object aoSource, DisplayEventArgs aoEvent)
         {
-            DisplayEvent(Event: aszEvent, Source: aoSource);
+            DisplayEvent(Event: aoEvent, Source: aoSource);
         }
 
         #endregion

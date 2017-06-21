@@ -34,7 +34,7 @@
         <Button Grid.Row="3"  HorizontalAlignment="Stretch">
             <TextBlock>Add Collection</TextBlock>
         </Button>
-        <Button Grid.Row="4"  HorizontalAlignment="Stretch">
+        <Button Grid.Row="4"  HorizontalAlignment="Stretch" Click="eViewCollection_Click">
             <TextBlock>View Collection</TextBlock>
         </Button>
     </Grid>

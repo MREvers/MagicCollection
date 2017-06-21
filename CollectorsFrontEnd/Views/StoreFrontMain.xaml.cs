@@ -63,89 +63,25 @@ namespace CollectorsFrontEnd.Views
         }
         #endregion
 
-        #region Public Methods
-
+        #region Private Functions
         public void switchToCollectionOverview()
         {
             OperationWindow.SetNewDisplay(
-                Name: "CollectionOverview", 
+                Name: "CollectionOverview",
                 NewDisplay: new ViewCollectionsMenu());
+            OperationWindow.DisplayEvent += eMultiDisplayEventHandler;
         }
 
-        // In the hierarchy of usercontrols and windows, the default functions are accessed
-        //  by events fired from children components.
-        /*
-        public void ecSwitchToCollectionOverview()
+        public void switchToCubeView(CollectionModel aoCollectionModel)
         {
-            OperationWindow = new View_CollectionsOverview(ServerInterfaceModel.GetLoadedCollectionList());
-            OperationWindow.UnhandledEvent += RouteReceivedUnhandledEvent;
-            getViewOptions();
+            if (aoCollectionModel == null) { return; }
+
+            OperationWindow.SetNewDisplay(
+                Name: "CubeView."+aoCollectionModel.CollectionName,
+                NewDisplay: new ViewCube(aoCollectionModel));
+            OperationWindow.DisplayEvent += eMultiDisplayEventHandler;
         }
 
-        public void ecSwitchToCollectionView(string aszCollectionName)
-        {
-            
-            OperationWindow = new View_Cube(aszCollectionName);
-            // OperationWindow = new CompCollectionView(aszCollectionName);
-            OperationWindow.UnhandledEvent += RouteReceivedUnhandledEvent;
-            getViewOptions();
-        }
-
-        public void ecSwitchToCubeView(string aszCollectionName)
-        {
-            OperationWindow = new View_Cube(aszCollectionName);
-            OperationWindow.UnhandledEvent += RouteReceivedUnhandledEvent;
-            getViewOptions();
-        }
-
-        public void RouteReceivedUnhandledEvent(IDataModel aDataObject, string aszAction)
-        {
-            if (aDataObject.GetType() == typeof(View_CollectionsOverview.CollectionsOverviewerModel))
-            {
-                View_CollectionsOverview.CollectionsOverviewerModel CCM =
-                        (View_CollectionsOverview.CollectionsOverviewerModel)aDataObject;
-                if (aszAction == "ViewCollection")
-                {
-                    ecSwitchToCollectionView(CCM.SelectedCollection);
-                }
-            }
-        }
-
-*/
-
-        #endregion Default Functions (Component Functionality)
-
-        #region Private FUnctions
-        /*
-    private void getViewOptions()
-    {
-        LstViewOptions.Clear();
-        List<Tuple<string, MenuAction>> LstActions = new List<Tuple<string, MenuAction>>();
-        LstActions = OperationWindow.GetMenuActions();
-        foreach (var act in LstActions)
-        {
-            if (act.Item1 != "Separator")
-            {
-                MenuItem mI = new MenuItem();
-                mI.Header = act.Item1;
-                mI.Click += (o, e) => { act.Item2(); };
-                //LstViewOptions.Add(mI);
-            }
-            else
-            {
-                //LstViewOptions.Add(new Separator());
-            }
-
-
-        }
-        if (LstActions.Count == 0)
-        {
-            MenuItem mI = new MenuItem();
-            mI.Header = "Empty";
-            //LstViewOptions.Add(mI);
-        }
-    }
-    */
         private void loadStartupCollections()
         {
             XmlReader reader = XmlReader.Create(".\\Config\\Config.xml");
@@ -194,13 +130,42 @@ namespace CollectorsFrontEnd.Views
             }
             
         }
-        
+        #endregion
+
+        #region Event Handlers
+        private void eMultiDisplayEventHandler(object aoSource, DisplayEventArgs aoEvent)
+        {
+            if (aoEvent.Source == "VCCollectionsMenuList")
+            {
+                eCollectionsMenuListEventHandler(aoSource, aoEvent);
+            }
+        }
+
+        private void eCollectionsMenuListEventHandler(object aoSource, DisplayEventArgs aoEvent)
+        {
+            if (aoEvent.Property == "ViewCollectionButton")
+            {
+                if (aoEvent.Event == "Clicked")
+                {
+                    eViewCollectionCubeView_Click(aoSource, aoEvent);
+                }
+            }
+        }
         #endregion
 
         #region UI Event Handlers
         private void eClose_Click(object sender, RoutedEventArgs e)
         {
             Close();
+        }
+
+        private void eViewCollectionCubeView_Click(object aoSource, DisplayEventArgs aoEvent)
+        {
+            string szNewSet = aoEvent.Get("Selection")as String;
+            ServerInterface.Server.GetCollectionModel(
+                CollectionName: szNewSet, 
+                Callback: switchToCubeView,
+                UICallback: true);
         }
 
         private void eViewCollectionsOverview_Click(object sender, RoutedEventArgs e)

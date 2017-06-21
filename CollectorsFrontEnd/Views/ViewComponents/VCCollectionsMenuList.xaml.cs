@@ -42,7 +42,20 @@ namespace CollectorsFrontEnd.Views.ViewComponents
 
         private void eCollectionSelection_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            DisplayEvent("VCCollectionsMenuList.CollectionSelection.SelectionChanged", Source: this);
+            DisplayEventArgs eventDetails = new DisplayEventArgs(
+                Source: "VCCollectionsMenuList",
+                Property: "CollectionSelection",
+                Event: "SelectionChanged");
+            DisplayEvent(Source: this, Event: eventDetails);
+        }
+
+        private void eViewCollection_Click(object sender, RoutedEventArgs e)
+        {
+            DisplayEventArgs eventDetails = new DisplayEventArgs(
+                Source: "VCCollectionsMenuList",
+                Property: "ViewCollectionButton",
+                Event: "Clicked");
+            DisplayEvent(Source: this, Event: eventDetails);
         }
     }
 }

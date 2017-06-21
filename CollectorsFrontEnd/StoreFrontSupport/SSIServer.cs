@@ -86,8 +86,8 @@ namespace CollectorsFrontEnd.StoreFrontSupport
 
             while (true)
             {
+                if (m_lstServerQueue.Count == 0) { continue; }
                 m_QueueLock.WaitOne();
-                if (m_lstServerQueue.Count == 0) { m_QueueLock.ReleaseMutex(); continue; }
                 Action currentTask = m_lstServerQueue.First();
                 m_lstServerQueue.RemoveAt(0);
                 m_QueueLock.ReleaseMutex();

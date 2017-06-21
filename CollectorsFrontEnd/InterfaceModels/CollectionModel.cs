@@ -12,13 +12,13 @@ namespace CollectorsFrontEnd.InterfaceModels
     public class CollectionModel
     {
         public string CollectionName;
-        public List<CardModel> LstCopyModels;
+        public List<CardModel> CollectionItems;
         public List<CardModel> LstLastQuery;
 
         public CollectionModel(string aszName, List<Tuple<string, List<Tuple<string, string>>>> aLstCards)
         {
             CollectionName = aszName;
-            LstCopyModels = new List<CardModel>();
+            CollectionItems = new List<CardModel>();
             LstLastQuery = new List<CardModel>();
             BuildCopyModelList(aLstCards);
 
@@ -26,14 +26,14 @@ namespace CollectorsFrontEnd.InterfaceModels
 
         public void BuildCopyModelList(List<Tuple<string, List<Tuple<string, string>>>> aLstCards)
         {
-            LstCopyModels.Clear();
+            CollectionItems.Clear();
             foreach (var LongNameTagsPair in aLstCards)
             {
                 ServerInterface.Server.GenerateCopyModel(
                     LongName: LongNameTagsPair.Item1,
                     CollectionName: CollectionName,
                     MetaTags: LongNameTagsPair.Item2,
-                    Callback: (aoCardModel) => { LstCopyModels.Add(aoCardModel); },
+                    Callback: (aoCardModel) => { CollectionItems.Add(aoCardModel); },
                     UICallback: false);
             }
         }
@@ -72,7 +72,7 @@ namespace CollectorsFrontEnd.InterfaceModels
         {
             List<CardModel> LstStartingStrings = new List<CardModel>();
             List<CardModel> LstContainingStrings = new List<CardModel>();
-            foreach (CardModel CM in LstCopyModels)
+            foreach (CardModel CM in CollectionItems)
             {
                 string szShortName = CM.CardName.ToLower();
                 if (szShortName.Contains(aszString))

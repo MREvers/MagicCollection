@@ -88,39 +88,18 @@ namespace CollectorsFrontEnd.InterfaceModels
 
         public void RemoveMetaTag(string aszKey)
         {
-            /*
-            ServerInterfaceModel
-                .CardClassInterfaceModel
-                .RemoveMetaTag(
-                TargetCollection,
-                CardNameLong,
-                aszKey,
-                LstMetaTags);
-                */
+
         }
 
         public void SubmitMetaTagChangesToServer(List<Tuple<string, string>> alstNewMeta)
         {
-            /*
-            ServerInterfaceModel
-                .CardClassInterfaceModel.SubmitMetaTagChangesToServer(TargetCollection, CardNameLong, alstNewMeta, LstMetaTags);
-    */    
-    }
+ 
+        }
 
         public void SubmitFeatureChangesToServer(List<Tuple<string, string>> alstNewMeta,
             List<Tuple<string, string>> alstNewAttrs)
         {
-            /*
-            ServerInterfaceModel
-                .CardClassInterfaceModel
-                .SubmitFeatureChangesToServer(
-                TargetCollection,
-                CardNameLong,
-                alstNewMeta,
-                alstNewAttrs,
-                LstMetaTags);
-            CardImage = null;
-            */
+
         }
 
         public string GetFullIdentifier()
