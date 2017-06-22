@@ -130,6 +130,33 @@ namespace CollectorsFrontEnd.Views
             }
             
         }
+
+        private void downloadLatestMTGJSON()
+        {
+            string szZipPath = AppDomain.CurrentDomain.BaseDirectory + @"\Config\Source\AllSets.json.zip";
+            string szExtractPath = AppDomain.CurrentDomain.BaseDirectory + @"\Config\Source";
+
+            if (Directory.Exists(szExtractPath))
+            {
+                foreach (var file in Directory.EnumerateFiles(szExtractPath))
+                {
+                    File.Delete(file);
+                }
+            }
+            else
+            {
+                Directory.CreateDirectory(szExtractPath);
+            }
+
+            using (var client = new WebClient())
+            {
+                client.DownloadFile("https://mtgjson.com/json/AllSets.json.zip", szZipPath);
+            }
+
+            System.IO.Compression.ZipFile.ExtractToDirectory(szZipPath, szExtractPath);
+
+            ServerInterface.Server.ImportJSONCollection();
+        }
         #endregion
 
         #region Event Handlers
@@ -175,29 +202,10 @@ namespace CollectorsFrontEnd.Views
 
         private void eImportCards_Click(object sender, RoutedEventArgs e)
         {
-            string szZipPath = AppDomain.CurrentDomain.BaseDirectory + @"\Config\Source\AllSets.json.zip";
-            string szExtractPath = AppDomain.CurrentDomain.BaseDirectory + @"\Config\Source";
-
-            if (Directory.Exists(szExtractPath))
-            {
-                foreach(var file in Directory.EnumerateFiles(szExtractPath))
-                {
-                    File.Delete(file);
-                }
-            }
-            else
-            {
-                Directory.CreateDirectory(szExtractPath);
-            }
-
-            using (var client = new WebClient())
-            {
-                client.DownloadFile("https://mtgjson.com/json/AllSets.json.zip", szZipPath);
-            }
-
-            System.IO.Compression.ZipFile.ExtractToDirectory(szZipPath, szExtractPath);
-
-            ServerInterface.Server.ImportJSONCollection();
+            // In the future, disable necessary features.
+            Thread downloadAndImportThread = new Thread(downloadLatestMTGJSON);
+            downloadAndImportThread.IsBackground = true;
+            downloadAndImportThread.Start();
         }
         #endregion
     }

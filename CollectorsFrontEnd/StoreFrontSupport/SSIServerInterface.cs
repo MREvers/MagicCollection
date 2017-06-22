@@ -26,7 +26,7 @@ namespace CollectorsFrontEnd.StoreFrontSupport
             /// <returns></returns>
             public void GenerateCollectionModel(string aszCollectionFileName)
             {
-                Singleton.enqueueService(() =>
+                singleton.enqueueService(() =>
                 {
                     inGenerateCollectionModel(aszCollectionFileName);
                 });
@@ -60,7 +60,7 @@ namespace CollectorsFrontEnd.StoreFrontSupport
                 Action<CardModel> Callback,
                 bool UICallback = false)
             {
-                Singleton.enqueueService(() =>
+                singleton.enqueueService(() =>
                 {
                     Callback(inGenerateCopyModel(LongName, CollectionName, MetaTags));
                 }, UICallback);
@@ -91,7 +91,7 @@ namespace CollectorsFrontEnd.StoreFrontSupport
             /// <returns></returns>
             public void GetCollectionModel(string CollectionName, Action<CollectionModel> Callback, bool UICallback = false)
             {
-                Singleton.enqueueService(() =>
+                singleton.enqueueService(() =>
                 {
                     Callback(
                         m_lstCollectionModels.FirstOrDefault(x => x.CollectionName == CollectionName));
@@ -100,7 +100,7 @@ namespace CollectorsFrontEnd.StoreFrontSupport
 
             public void GetLoadedCollectionList(Action<List<string>> Callback, bool UICallback = false)
             {
-                Singleton.enqueueService(() =>
+                singleton.enqueueService(() =>
                 {
                     Callback(SCI.GetLoadedCollections());
                 }, UICallback);
@@ -113,7 +113,10 @@ namespace CollectorsFrontEnd.StoreFrontSupport
 
             public void ImportJSONCollection()
             {
-                SCI.ImportCollection();
+                singleton.enqueueService(() =>
+                {
+                    SCI.ImportCollection();
+                }, false);
             }
 
             public void CreateCollection(string aszName)

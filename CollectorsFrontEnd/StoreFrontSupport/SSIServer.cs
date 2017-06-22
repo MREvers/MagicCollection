@@ -16,7 +16,7 @@ namespace CollectorsFrontEnd.StoreFrontSupport
         // The Singleton's constructor ensures that the private static member SCI is initiated prior
         // to use. 3 Different public exposures for groups of functions gives the flat interface 
         // structure that is more readable.
-        private static ServerInterface Singleton;
+        private static ServerInterface singleton;
 
         // SCI is the Managed C++ interface. It is a flat interface, meaning ALL available server
         // functions are here. It acts as a BLOB class for ease of use due to the nature of 
@@ -27,30 +27,30 @@ namespace CollectorsFrontEnd.StoreFrontSupport
         {
             get
             {
-                if (Singleton == null) { InitServer(); }
-                return Singleton._Server;
+                if (singleton == null) { InitServer(); }
+                return singleton._Server;
             }
         }
         public static CardIFace Card
         {
             get
             {
-                if (Singleton == null) { InitServer(); }
-                return Singleton._Card;
+                if (singleton == null) { InitServer(); }
+                return singleton._Card;
             }
         }
         public static CollectionIFace Collection
         {
             get
             {
-                if (Singleton == null) { InitServer(); }
-                return Singleton._Collection;
+                if (singleton == null) { InitServer(); }
+                return singleton._Collection;
             }
         }
 
         private static void InitServer()
         {
-            Singleton = new ServerInterface();
+            singleton = new ServerInterface();
         }
 
         // The action arguments are curried at call-time.
