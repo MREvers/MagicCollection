@@ -5,26 +5,21 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
-using System.Windows.Controls;
 
-namespace CollectorsFrontEnd.StoreFrontSupport
+namespace StoreFrontPro.Views
 {
-    public class ViewModel: INotifyPropertyChanged
+    class ViewModel<T>: INotifyPropertyChanged
     {
-        protected UserControl _Model;
-        public UserControl Model
-        {
-            get { return _Model; }
-            set { _Model = value; OnPropertyChanged(); }
-        }
-
         public event PropertyChangedEventHandler PropertyChanged;
         protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
-        public ViewModel(UserControl Model)
+        // This MAY be exposed via a prettier property with the appropriate type in child classes.
+        public T Model { get; private set; }
+
+        public ViewModel(T Model)
         {
             this.Model = Model;
         }

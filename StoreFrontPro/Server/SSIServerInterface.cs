@@ -1,11 +1,10 @@
-﻿using CollectorsFrontEnd.InterfaceModels;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CollectorsFrontEnd.StoreFrontSupport
+namespace StoreFrontPro.Server
 {
     /// <summary>
     /// File Name explanation.
@@ -38,19 +37,17 @@ namespace CollectorsFrontEnd.StoreFrontSupport
                 if (szColName != "")
                 {
                     // List of [ { CardNameLong, [Tags, ...] }, ... ]
-                    List<Tuple<string, List<Tuple<string, string>>>> lstCards =
-                        SCI.GetCollectionListWithMeta(szColName);
-                    CollectionModel CMNew = new CollectionModel(szColName, lstCards);
-                    CollectionModel CMCurrent = m_lstCollectionModels.FirstOrDefault(x => x.CollectionName == szColName);
-                    if (CMCurrent == null)
+                    List<Tuple<string, List<Tuple<string, string>>>> lstCards = SCI.GetCollectionListWithMeta(szColName);
+                    CollectionModel newCM = new CollectionModel(szColName, lstCards);
+                    CollectionModel currentCM = m_lstCollectionModels.FirstOrDefault(x => x.CollectionName == szColName);
+                    if (currentCM == null)
                     {
-                        m_lstCollectionModels.Add(CMNew);
+                        m_lstCollectionModels.Add(newCM);
                     }
                     else
                     {
-                        CMCurrent.CollectionItems = CMNew.CollectionItems;
+                        currentCM.CollectionItems = newCM.CollectionItems;
                     }
-
                 }
             }
 
@@ -131,6 +128,14 @@ namespace CollectorsFrontEnd.StoreFrontSupport
             {
                 SCI.CreateCollection(aszName);
                 GenerateCollectionModel(aszName + ".txt");
+            }
+
+            /// <summary>
+            /// Function that does nothing. May be called to initialize the singleton.
+            /// </summary>
+            public void Start()
+            {
+
             }
         }
     }

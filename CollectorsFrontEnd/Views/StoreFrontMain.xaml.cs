@@ -84,6 +84,10 @@ namespace CollectorsFrontEnd.Views
 
         private void loadStartupCollections()
         {
+            // There should be a config object at some point in the future!!!!
+
+            if (!File.Exists(".\\Config\\Config.xml")) { return; }
+
             XmlReader reader = XmlReader.Create(".\\Config\\Config.xml");
             string szCollection = "";
             // This is bad. Clean this in the future.
