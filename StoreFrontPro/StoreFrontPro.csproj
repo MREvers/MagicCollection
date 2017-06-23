@@ -130,6 +130,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Tools\" />
+    <Folder Include="Views\CollectionViews\Cube\" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ServerInterface\ServerInterface.vcxproj">
