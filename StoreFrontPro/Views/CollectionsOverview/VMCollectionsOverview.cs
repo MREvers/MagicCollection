@@ -1,5 +1,6 @@
 ﻿using StoreFrontPro.Server;
 using StoreFrontPro.Support.MultiDisplay;
+using StoreFrontPro.Views.CollectionViews.Cube;
 using StoreFrontPro.Views.Components;
 using System;
 using System.Collections.Generic;
@@ -11,7 +12,7 @@ using System.Windows.Input;
 
 namespace StoreFrontPro.Views.CollectionsOverview
 {
-    class VMCollectionsOverview : ViewModel<List<CollectionModel>>
+    class VMCollectionsOverview : ViewModel<List<CollectionModel>>, IViewComponent
     {
         #region Binding
         private MultiDisplay _OperationWindow = new MultiDisplay();
@@ -22,6 +23,7 @@ namespace StoreFrontPro.Views.CollectionsOverview
         }
 
         private string _SelectedCollection = "";
+
         public string SelectedCollection
         {
             get
@@ -41,6 +43,10 @@ namespace StoreFrontPro.Views.CollectionsOverview
         public ObservableCollection<string> AvailableCollections { get; set; } = new ObservableCollection<string>();
         public ObservableCollection<string> CollectionPreview { get; set; } = new ObservableCollection<string>();
         #endregion Binding
+
+        #region Events
+        public event DisplayEventHandler DisplayEvent;
+        #endregion
 
         #region Public Methods
         /// <summary>
@@ -81,6 +87,12 @@ namespace StoreFrontPro.Views.CollectionsOverview
 
         private void eCollectionViewCommand(object aoCanExecute)
         {
+            if (!string.IsNullOrEmpty(SelectedCollection))
+            {
+                DisplayEventArgs eventArgs = new DisplayEventArgs("VCollectionsOverview","ViewCollection","Clicked");
+                eventArgs.Add(Key: "Collection", Value: Model.Where(x => x.CollectionName == SelectedCollection).First());
+                DisplayEvent(this, eventArgs);
+            }
 
         }
         #endregion

@@ -77,6 +77,19 @@
       <DependentUpon>VCollectionsOverview.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\CollectionsOverview\VMCollectionsOverview.cs" />
+    <Compile Include="Views\CollectionViews\Cube\MCardGroupList.cs" />
+    <Compile Include="Views\CollectionViews\Cube\VCardGroupDisplay.xaml.cs">
+      <DependentUpon>VCardGroupDisplay.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\CollectionViews\Cube\VCardGroupList.xaml.cs">
+      <DependentUpon>VCardGroupList.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\CollectionViews\Cube\VCollectionCube.xaml.cs">
+      <DependentUpon>VCollectionCube.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\CollectionViews\Cube\VMCardGroupDisplay.cs" />
+    <Compile Include="Views\CollectionViews\Cube\VMCardGroupList.cs" />
+    <Compile Include="Views\CollectionViews\Cube\VMCollectionCube.cs" />
     <Compile Include="Views\Components\VCCollectionsMenuList.xaml.cs">
       <DependentUpon>VCCollectionsMenuList.xaml</DependentUpon>
     </Compile>
@@ -123,6 +136,18 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Views\CollectionViews\Cube\VCardGroupDisplay.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\CollectionViews\Cube\VCardGroupList.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\CollectionViews\Cube\VCollectionCube.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\Components\VCCollectionsMenuList.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -130,7 +155,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Tools\" />
-    <Folder Include="Views\CollectionViews\Cube\" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ServerInterface\ServerInterface.vcxproj">

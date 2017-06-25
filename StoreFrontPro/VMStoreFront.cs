@@ -1,6 +1,8 @@
-﻿using StoreFrontPro.Support.MultiDisplay;
+﻿using StoreFrontPro.Server;
+using StoreFrontPro.Support.MultiDisplay;
 using StoreFrontPro.Views;
 using StoreFrontPro.Views.CollectionsOverview;
+using StoreFrontPro.Views.CollectionViews.Cube;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,12 +23,7 @@ namespace StoreFrontPro
 
         public VMStoreFront(StoreFront Model) : base(Model)
         {
-            VMCollectionsOverview collectionsOverviewVM = new VMCollectionsOverview(Model.Collections);
-            OperationWindow.SetNewDisplay(
-                Name: "Overview",
-                NewDisplay: new VCollectionsOverview(),
-                DataContext: collectionsOverviewVM,
-                Persist: false);
+            showCollectionsOverview();
             // Should be hooked onto OPERATION window events
         }
 
@@ -35,6 +32,37 @@ namespace StoreFrontPro
             // do other updates here
 
             notifyMultiDisplay();
+        }
+
+        private void showCollectionsOverview()
+        {
+            OperationWindow.DisplayEvent -= viewDisplayEventHandler;
+            VMCollectionsOverview collectionsOverviewVM = new VMCollectionsOverview(Model.Collections);
+            OperationWindow.SetNewDisplay(
+                Name: "Overview",
+                NewDisplay: new VCollectionsOverview(),
+                DataContext: collectionsOverviewVM,
+                Persist: false);
+            OperationWindow.DisplayEvent += viewDisplayEventHandler; 
+        }
+
+        private void showCollectionCubeView(CollectionModel CollectionModel)
+        {
+            OperationWindow.DisplayEvent -= viewDisplayEventHandler;
+            VMCollectionCube collectionCubeVM = new VMCollectionCube(CollectionModel);
+            OperationWindow.SetNewDisplay(
+                            Name: "Overview",
+                            NewDisplay: new VCollectionCube(),
+                            DataContext: collectionCubeVM,
+                            Persist: false);
+        }
+
+        private void viewDisplayEventHandler(object Source, DisplayEventArgs e)
+        {
+            if (e.Source == "VCollectionsOverview" && e.Property == "ViewCollection" && e.Event == "Clicked")
+            {
+                showCollectionCubeView((CollectionModel)e.Get("Collection"));
+            }
         }
 
         private void notifyMultiDisplay()

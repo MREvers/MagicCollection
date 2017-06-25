@@ -86,9 +86,9 @@ namespace StoreFrontPro.Support.MultiDisplay
             }
 
             // Need to make sure there are no events hooked on the old display.
-            if (Display is IViewComponent)
+            if (DataContext is IViewComponent)
             {
-                IViewComponent ivDisplay = Display as IViewComponent;
+                IViewComponent ivDisplay = DataContext as IViewComponent;
                 ivDisplay.DisplayEvent -= displayFireEvent;
             }
 
@@ -100,9 +100,9 @@ namespace StoreFrontPro.Support.MultiDisplay
             }
             DisplayViewModel = Display.DataContext;
 
-            if (Display is IViewComponent)
+            if (DataContext is IViewComponent)
             {
-                IViewComponent ivDisplay = Display as IViewComponent;
+                IViewComponent ivDisplay = DataContext as IViewComponent;
                 ivDisplay.DisplayEvent += displayFireEvent;
             }
         }
@@ -137,7 +137,10 @@ namespace StoreFrontPro.Support.MultiDisplay
 
         private void displayFireEvent(object aoSource, DisplayEventArgs aoEvent)
         {
-            DisplayEvent(Event: aoEvent, Source: aoSource);
+            if (DisplayEvent != null)
+            {
+                DisplayEvent(Event: aoEvent, Source: aoSource);
+            }
         }
         #endregion
     }
