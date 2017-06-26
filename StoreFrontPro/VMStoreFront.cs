@@ -3,6 +3,7 @@ using StoreFrontPro.Support.MultiDisplay;
 using StoreFrontPro.Views;
 using StoreFrontPro.Views.CollectionsOverview;
 using StoreFrontPro.Views.CollectionViews.Cube;
+using StoreFrontPro.Views.Interfaces.CollectionChanger;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,6 +15,8 @@ namespace StoreFrontPro
 {
     class VMStoreFront : ViewModel<StoreFront>
     {
+        public RelayCommand CloseCommand { get; set; }
+
         private MultiDisplay _OperationWindow = new MultiDisplay();
         public MultiDisplay OperationWindow
         {
@@ -23,8 +26,9 @@ namespace StoreFrontPro
 
         public VMStoreFront(StoreFront Model) : base(Model)
         {
+            CloseCommand = new RelayCommand(eCloseCommand);
+
             showCollectionsOverview();
-            // Should be hooked onto OPERATION window events
         }
 
         public void Notify()
@@ -36,6 +40,7 @@ namespace StoreFrontPro
 
         private void showCollectionsOverview()
         {
+            /*
             OperationWindow.DisplayEvent -= viewDisplayEventHandler;
             VMCollectionsOverview collectionsOverviewVM = new VMCollectionsOverview(Model.Collections);
             OperationWindow.SetNewDisplay(
@@ -44,6 +49,13 @@ namespace StoreFrontPro
                 DataContext: collectionsOverviewVM,
                 Persist: false);
             OperationWindow.DisplayEvent += viewDisplayEventHandler; 
+            */
+            VMCollectionEditor collectionsOverviewVM = new VMCollectionEditor(new CollectionModel("Test", new List<Tuple<string, List<Tuple<string, string>>>>()));
+            OperationWindow.SetNewDisplay(
+                Name: "Overview",
+                NewDisplay: new VCollectionEditor(),
+                DataContext: collectionsOverviewVM,
+                Persist: false);
         }
 
         private void showCollectionCubeView(CollectionModel CollectionModel)
@@ -75,6 +87,11 @@ namespace StoreFrontPro
                 VMCollectionsOverview collectionsOverviewVM = OperationWindow.DisplayViewModel as VMCollectionsOverview;
                 collectionsOverviewVM.SyncWithModel();
             }
+        }
+
+        private void eCloseCommand(object aoCanExecute)
+        {
+            Model.CloseApplication();
         }
     }
 }

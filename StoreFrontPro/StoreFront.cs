@@ -6,6 +6,8 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Controls;
 using System.Xml;
 
 namespace StoreFrontPro
@@ -18,16 +20,24 @@ namespace StoreFrontPro
         public List<CollectionModel> Collections { get; private set; }
         public CollectionModel ActiveCollection { get; private set; }
 
+        private Window m_ucMainWindow;
+
         // Maintain a reference to the ViewModel.
         public VMStoreFront StoreFrontVM { get; private set; }
 
-        public StoreFront()
+        public StoreFront(Window MainWindow)
         {
+            m_ucMainWindow = MainWindow;
             Collections = new List<CollectionModel>();
             ActiveCollection = null;
             StoreFrontVM = new VMStoreFront(Model: this);
             
             initializeStoreFront();
+        }
+
+        public void CloseApplication()
+        {
+            m_ucMainWindow.Close();
         }
 
         private void initializeStoreFront()

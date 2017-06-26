@@ -17,10 +17,10 @@
             <Border BorderBrush="Black" BorderThickness="1">
                 <Menu DockPanel.Dock="Top" Height="20">
                     <MenuItem Header="_File" Height="20">
-                        <MenuItem Header="Collections Overview"/>
-                        <MenuItem Header="Download Latest Sets"/>
+                        <MenuItem Header="Collections Overview" Command="{Binding CollectionsOverviewCommand}"/>
+                        <MenuItem Header="Download Latest Sets" Command="{Binding DownloadSetsCommand}"/>
                         <Separator/>
-                        <MenuItem Header="Close"/>
+                        <MenuItem Header="Close" Command="{Binding CloseCommand}"/>
                     </MenuItem>
                     <MenuItem Header="View Options" Height="20" ItemsSource="{Binding ViewOptions}"/>
                 </Menu>

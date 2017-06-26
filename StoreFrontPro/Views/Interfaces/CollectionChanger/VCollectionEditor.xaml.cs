@@ -10,25 +10,19 @@ using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace StoreFrontPro
+namespace StoreFrontPro.Views.Interfaces.CollectionChanger
 {
     /// <summary>
-    /// Interaction logic for StoreFrontMain.xaml
+    /// Interaction logic for VCollectionEditor.xaml
     /// </summary>
-    public partial class StoreFrontMain : Window
+    public partial class VCollectionEditor : UserControl
     {
-        /// <summary>
-        /// This is the entry point of the program. This is required by wpf... I think.
-        /// </summary>
-        public StoreFrontMain()
+        public VCollectionEditor()
         {
             InitializeComponent();
-
-            // The main program.
-            StoreFront programModel = new StoreFront(this);
-            DataContext = programModel.StoreFrontVM;
         }
     }
 }
