@@ -17,7 +17,7 @@ namespace StoreFrontPro
     {
         public RelayCommand CloseCommand { get; set; }
 
-        private MultiDisplay _OperationWindow = new MultiDisplay();
+        private MultiDisplay _OperationWindow;
         public MultiDisplay OperationWindow
         {
             get { return _OperationWindow; }
@@ -26,6 +26,7 @@ namespace StoreFrontPro
 
         public VMStoreFront(StoreFront Model) : base(Model)
         {
+            OperationWindow = new MultiDisplay();
             CloseCommand = new RelayCommand(eCloseCommand);
 
             showCollectionsOverview();
@@ -34,13 +35,12 @@ namespace StoreFrontPro
         public void Notify()
         {
             // do other updates here
-
             notifyMultiDisplay();
         }
 
         private void showCollectionsOverview()
         {
-            /*
+            
             OperationWindow.DisplayEvent -= viewDisplayEventHandler;
             VMCollectionsOverview collectionsOverviewVM = new VMCollectionsOverview(Model.Collections);
             OperationWindow.SetNewDisplay(
@@ -49,7 +49,8 @@ namespace StoreFrontPro
                 DataContext: collectionsOverviewVM,
                 Persist: false);
             OperationWindow.DisplayEvent += viewDisplayEventHandler; 
-            */
+            
+            /*
             ServerInterface.Server.GenerateCollectionModel("Collections\\Primary.txt");
             ServerInterface.Server.GetCollectionModel("Primary",
                 (o) =>
@@ -61,7 +62,7 @@ namespace StoreFrontPro
                         DataContext: collectionsOverviewVM,
                         Persist: false);
                 }, true);
-            
+            */
         }
 
         private void showCollectionCubeView(CollectionModel CollectionModel)
@@ -98,6 +99,11 @@ namespace StoreFrontPro
         private void eCloseCommand(object aoCanExecute)
         {
             Model.CloseApplication();
+        }
+
+        private void eDisplayNewOptions()
+        {
+            // Get view options here.
         }
     }
 }

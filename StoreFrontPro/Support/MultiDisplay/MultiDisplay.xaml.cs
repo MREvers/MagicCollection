@@ -52,6 +52,8 @@ namespace StoreFrontPro.Support.MultiDisplay
 
         private UserControl m_oOverlay = null;
 
+        private Action m_fnNewDisplayCallback = null;
+
         private Dictionary<string, UserControl> m_mapPersistantDisplays = new Dictionary<string, UserControl>();
         #endregion
 
@@ -60,10 +62,10 @@ namespace StoreFrontPro.Support.MultiDisplay
         #endregion
 
         #region Public Methods
-        public MultiDisplay()
+        public MultiDisplay(Action NewDisplayCallback = null)
         {
             InitializeComponent();
-
+            m_fnNewDisplayCallback = NewDisplayCallback;
             DataContext = this;
         }
 
@@ -104,6 +106,11 @@ namespace StoreFrontPro.Support.MultiDisplay
             {
                 IViewComponent ivDisplay = DataContext as IViewComponent;
                 ivDisplay.DisplayEvent += displayFireEvent;
+            }
+
+            if (m_fnNewDisplayCallback != null)
+            {
+                m_fnNewDisplayCallback();
             }
         }
 

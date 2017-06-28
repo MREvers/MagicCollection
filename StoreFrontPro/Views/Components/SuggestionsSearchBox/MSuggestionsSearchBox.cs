@@ -10,12 +10,14 @@ namespace StoreFrontPro.Views.Components.SuggestionsSearchBox
     {
         public string ActionName;
 
-        private List<string> m_lstCollection = null;
+        private IEnumerable<string> m_lstCollection = null;
         private Func<string, List<string>> m_fnSearchCollection = null;
 
-        public MSuggestionsSearchBox(string ActionName, List<string> SearchCollection)
+        // IEnumerable stores a reference to the underlying data used to create the enumerable. THus
+        // changes made to that list will affect this Enumerable.
+        public MSuggestionsSearchBox(string ActionName, IEnumerable<string> Collection)
         {
-            m_lstCollection = SearchCollection;
+            m_lstCollection = Collection;
             this.ActionName = ActionName;
         }
 

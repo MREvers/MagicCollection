@@ -34,14 +34,26 @@ namespace StoreFrontPro.Views.Interfaces.CollectionChanger
                 SearchCollection: (szSearch) => { return ServerInterface.Server.GetAllCardsStartingWith(szSearch); });
             VMSuggestionsSearchBox ssBoxVMA = new VMSuggestionsSearchBox(ssBoxMA);
             AddCardSearchBox = new VSuggestionsSearchBox() { DataContext = ssBoxVMA };
+            ssBoxVMA.DisplayEvent += eAddCardEventHandler;
 
             MSuggestionsSearchBox ssBoxMR = new MSuggestionsSearchBox(
                 ActionName: "Remove/Replace Card",
-                SearchCollection: Model.CollectionItems.Select(x => x.CardName).ToList());
-
+                Collection: Model.CollectionItems.Select(x => x.CardName));
             VMSuggestionsSearchBox ssBoxVMR = new VMSuggestionsSearchBox(ssBoxMR);
             RemoveCardSearchBox = new VSuggestionsSearchBox() { DataContext = ssBoxVMR };
+            ssBoxVMR.DisplayEvent += eRemoveCardEventHandler;
         }
+
+        private void eRemoveCardEventHandler(object Source, DisplayEventArgs Event)
+        {
+            // Only one event comes from the SSBox so we dont have to worry about checking.
+        }
+
+        private void eAddCardEventHandler(object Source, DisplayEventArgs Event)
+        {
+            throw new NotImplementedException();
+        }
+
         private void eAcceptCommand(object canExecute)
         {
 

@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace StoreFrontPro.Views.Components.SuggestionsSearchBox
 {
-    class VMSuggestionsSearchBox: ViewModel<MSuggestionsSearchBox>
+    class VMSuggestionsSearchBox: ViewModel<MSuggestionsSearchBox>, IViewComponent
     {
         public ObservableCollection<string> ComboBoxList { get; set; } = new ObservableCollection<string>();
 
@@ -49,7 +49,9 @@ namespace StoreFrontPro.Views.Components.SuggestionsSearchBox
         }
         
         public RelayCommand OKCommand { get; set; }
-        
+
+        public event DisplayEventHandler DisplayEvent;
+
         public VMSuggestionsSearchBox(MSuggestionsSearchBox Model) : base(Model)
         {
             OKCommand = new RelayCommand(eOKCommand);
@@ -59,7 +61,8 @@ namespace StoreFrontPro.Views.Components.SuggestionsSearchBox
 
         public void eOKCommand(object canExecute)
         {
-
+            DisplayEventArgs eventArgs = new DisplayEventArgs("VMSuggestionsSearchBox", "OKCommand", "Execute");
+            DisplayEvent(this, eventArgs);
         }
 
         private void propertyChangedEventHandler(object sender, PropertyChangedEventArgs e)
