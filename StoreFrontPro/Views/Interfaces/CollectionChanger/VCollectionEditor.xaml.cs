@@ -20,6 +20,9 @@ namespace StoreFrontPro.Views.Interfaces.CollectionChanger
     /// </summary>
     public partial class VCollectionEditor : UserControl
     {
+        public readonly DependencyProperty AddComboboxTabCommand = DependencyProperty.Register("AddComboboxTabCommand", typeof(ICommand), typeof(VCollectionEditor));
+
+
         public VCollectionEditor()
         {
             InitializeComponent();

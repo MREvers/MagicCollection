@@ -50,12 +50,18 @@ namespace StoreFrontPro
                 Persist: false);
             OperationWindow.DisplayEvent += viewDisplayEventHandler; 
             */
-            VMCollectionEditor collectionsOverviewVM = new VMCollectionEditor(new CollectionModel("Test", new List<Tuple<string, List<Tuple<string, string>>>>()));
-            OperationWindow.SetNewDisplay(
-                Name: "Overview",
-                NewDisplay: new VCollectionEditor(),
-                DataContext: collectionsOverviewVM,
-                Persist: false);
+            ServerInterface.Server.GenerateCollectionModel("Collections\\Primary.txt");
+            ServerInterface.Server.GetCollectionModel("Primary",
+                (o) =>
+                {
+                    VMCollectionEditor collectionsOverviewVM = new VMCollectionEditor(o);
+                    OperationWindow.SetNewDisplay(
+                        Name: "Overview",
+                        NewDisplay: new VCollectionEditor(),
+                        DataContext: collectionsOverviewVM,
+                        Persist: false);
+                }, true);
+            
         }
 
         private void showCollectionCubeView(CollectionModel CollectionModel)
