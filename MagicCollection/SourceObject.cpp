@@ -18,7 +18,7 @@ unsigned int
 SourceObject::AddAttribute(std::string aszkey, std::string value, char* aplstCharBuf, unsigned int aiBufSize)
 {
 	std::string key = aszkey;
-	std::string szFixedKey = Config::GetConfigClass()->GetKeyCode(key);
+	std::string szFixedKey = Config::Instance()->GetKeyCode(key);
 	if (szFixedKey != "")
 	{
 		key = szFixedKey;
@@ -27,7 +27,7 @@ SourceObject::AddAttribute(std::string aszkey, std::string value, char* aplstCha
    unsigned short iKeyValPair = 0;
    unsigned short iSize = value.size();
 
-   if (Config::GetConfigClass()->IsIdentifyingAttributes(Config::GetConfigClass()->GetFullKey(key)))
+   if (Config::Instance()->IsIdentifyingAttributes(Config::Instance()->GetFullKey(key)))
    {
 	   iKeyValPair = 1 << 15;
    }

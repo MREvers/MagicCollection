@@ -40,7 +40,7 @@ public:
 	int List_Find(T aiFind, std::vector<T>& alstFindList);
 	int List_Find(std::string aszFind, std::vector<std::pair<std::string, std::string>>& alstFindList);
 
-	static Config* GetConfigClass();
+	static Config* Instance();
 
 private:
 	std::vector<std::pair<std::string, std::string>> m_lstKeyCodeMappings;

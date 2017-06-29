@@ -36,9 +36,11 @@ namespace StoreFrontPro.Views.CollectionViews.Cube
         {
             List<StoreFrontMenuItem> lstRetVal = new List<StoreFrontMenuItem>();
 
-            StoreFrontMenuItem openCollectionEditor = new StoreFrontMenuItem("Edit Collection", displayCollectionEditorCommand);
+            StoreFrontMenuItem openCollectionEditor = new StoreFrontMenuItem("Edit Collection", eDisplayCollectionEditorCommand);
+            StoreFrontMenuItem saveCollection = new StoreFrontMenuItem("Save Collection", eSaveCollection);
 
             lstRetVal.Add(openCollectionEditor);
+            lstRetVal.Add(saveCollection);
 
             return lstRetVal;
         }
@@ -62,11 +64,16 @@ namespace StoreFrontPro.Views.CollectionViews.Cube
             }
         }
 
-        private void displayCollectionEditorCommand(object canExecute)
+        private void eDisplayCollectionEditorCommand(object canExecute)
         {
             VMCollectionEditor collectionsOverviewVM = new VMCollectionEditor(Model);
             OperationWindow.ShowOverlay(new VCollectionEditor() { DataContext = collectionsOverviewVM });
             collectionsOverviewVM.DisplayEvent += displayEventHandler;
+        }
+
+        private void eSaveCollection(object canExecute)
+        {
+            Model.SaveCollection();
         }
     }
 }

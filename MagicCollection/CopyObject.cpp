@@ -39,7 +39,7 @@ void CopyObject::SetNonUniqueAttributesRestrictionsReference(std::map<std::strin
 
 void CopyObject::AddResidentCollection(std::string aszCollectionName)
 {
-	if (Config::GetConfigClass()->List_Find(aszCollectionName, ResidentCollections) == -1)
+	if (Config::Instance()->List_Find(aszCollectionName, ResidentCollections) == -1)
 	{
 		ResidentCollections.push_back(aszCollectionName);
 	}
@@ -64,7 +64,7 @@ std::vector<std::pair<std::string, std::string>> CopyObject::GetMetaTags(std::st
 
 bool CopyObject::IsPerCollectionTag(std::string aszKeyValName)
 {
-	std::vector<std::string> lstTags = Config::GetConfigClass()->GetPerCollectionMetaTags();
+	std::vector<std::string> lstTags = Config::Instance()->GetPerCollectionMetaTags();
 	std::vector<std::string>::iterator iter_KeyVals = lstTags.begin();
 	for (; iter_KeyVals != lstTags.end(); ++iter_KeyVals)
 	{
@@ -92,7 +92,7 @@ void CopyObject::RemoveMetaTag(std::string aszCollection, std::string aszKey)
 	if (targetRemoveList != nullptr)
 	{
 		int iFound;
-		if ((iFound = Config::GetConfigClass()->List_Find(aszKey, *targetRemoveList)) != -1)
+		if ((iFound = Config::Instance()->List_Find(aszKey, *targetRemoveList)) != -1)
 		{
 			std::vector<std::pair<std::string, std::string>> lstNewMetaTags;
 			std::vector<std::pair<std::string, std::string>>::iterator iter_MetaTags =
@@ -126,7 +126,7 @@ void CopyObject::SetMetaTag(std::string aszCollection, std::string aszKey, std::
 	{
 		if (HasPerCollectionTag(aszCollection, aszKey))
 		{
-			int iFind = Config::GetConfigClass()->List_Find(aszKey, PerCollectionMetaTags[aszCollection]);
+			int iFind = Config::Instance()->List_Find(aszKey, PerCollectionMetaTags[aszCollection]);
 			if (iFind == -1)
 			{
 				PerCollectionMetaTags[aszCollection].push_back(std::make_pair(aszKey, aszVal));
@@ -152,7 +152,7 @@ void CopyObject::SetMetaTag(std::string aszCollection, std::string aszKey, std::
 		}
 		else
 		{
-			int iFound = Config::GetConfigClass()->List_Find(aszKey, MetaTags);
+			int iFound = Config::Instance()->List_Find(aszKey, MetaTags);
 			MetaTags[iFound].second = aszVal;
 		}
 	}
@@ -167,7 +167,7 @@ void CopyObject::SetMetaTag(std::string aszCollection, std::string aszKey, std::
 
 bool CopyObject::HasMetaTag(std::string aszKey)
 {
-	return Config::GetConfigClass()->List_Find(aszKey, MetaTags) != -1;
+	return Config::Instance()->List_Find(aszKey, MetaTags) != -1;
 }
 
 std::pair<std::string, std::string> CopyObject::GetMetaTag(std::string aszCollection, std::string aszKey)
@@ -221,7 +221,7 @@ bool CopyObject::HasPerCollectionTag(std::string aszCollection, std::string aszK
 
 void CopyObject::SetNonUniqueAttr(std::string aszKey, std::string aszValue)
 {
-	if (!Config::GetConfigClass()->IsIdentifyingAttributes(aszKey))
+	if (!Config::Instance()->IsIdentifyingAttributes(aszKey))
 	{
 		return;
 	}
@@ -236,7 +236,7 @@ void CopyObject::SetNonUniqueAttr(std::string aszKey, std::string aszValue)
 	{
 		// Check to make sure that the attribute is restricted
 		// If it is, make sure the value is a legal value
-		if ((iIndexOfAllowedTrait = Config::GetConfigClass()->List_Find(aszValue, lstRestrictions->second)) != -1)
+		if ((iIndexOfAllowedTrait = Config::Instance()->List_Find(aszValue, lstRestrictions->second)) != -1)
 		{
 			// It is a legal value
 			if (NonUniqueTraits[aszKey] != aszValue)
@@ -280,7 +280,7 @@ void CopyObject::SetNonUniqueAttr(std::string aszKey, std::string aszValue)
 				}
 
 				if (pszTargetStr != nullptr &&
-					Config::GetConfigClass()->List_Find(*pszTargetStr, lstSetTraits) == -1)
+					Config::Instance()->List_Find(*pszTargetStr, lstSetTraits) == -1)
 				{
 					if (bRestrictedMatch)
 					{

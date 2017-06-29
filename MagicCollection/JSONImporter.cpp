@@ -23,7 +23,7 @@ void JSONImporter::ImportJSON(std::string aszFileName)
 		return;
 	}
 
-	Config* config = Config::GetConfigClass();
+	Config* config = Config::Instance();
 
 	nlohmann::json j;
 	i >> j;

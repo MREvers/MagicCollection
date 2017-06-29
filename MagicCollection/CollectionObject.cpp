@@ -95,7 +95,7 @@ CopyObject CollectionObject::GenerateCopy(std::string aszCollectionName, std::ve
 		{
 			// We only need to store the non-unique traits.
 			//  All other traits are stored in the collectionobj.
-			if (Config::GetConfigClass()->IsIdentifyingAttributes(pszs.first))
+			if (Config::Instance()->IsIdentifyingAttributes(pszs.first))
 			{
 				oNewCopy.SetNonUniqueAttr(pszs.first, pszs.second);
 			}
@@ -303,7 +303,7 @@ bool CollectionObject::IsSameMetaTags(
 	std::vector<std::pair<std::string, std::string>> alstTagsTwo,
 	bool abUseIgnore)
 {
-	Config* config = Config::GetConfigClass();
+	Config* config = Config::Instance();
 
 	std::vector<std::pair<std::string, std::string>> lstUnignoredTagsOne;
 	std::vector<std::pair<std::string, std::string>> lstUnignoredTagsTwo;
@@ -357,7 +357,7 @@ std::vector<std::pair<std::string, std::string>> CollectionObject::FilterOutUniq
 	std::vector<std::pair<std::string, std::string>>::iterator iter_Traits = alstAttrs.begin();
 	for (; iter_Traits != alstAttrs.end(); ++iter_Traits)
 	{
-		if (Config::GetConfigClass()->IsIdentifyingAttributes(iter_Traits->first))
+		if (Config::Instance()->IsIdentifyingAttributes(iter_Traits->first))
 		{
 			lstRetVal.push_back(*iter_Traits);
 		}

@@ -159,7 +159,7 @@ int Config::List_Find(std::string aszFind, std::vector<std::pair<std::string, st
 	return -1;
 }
 
-Config* Config::GetConfigClass()
+Config* Config::Instance()
 {
 	if (ms_pConfig == nullptr)
 	{

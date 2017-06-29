@@ -5,7 +5,7 @@ CStoreFrontBackEnd::CStoreFrontBackEnd()
 {
 	// No Server for now
 	m_ColSource = new CollectionSource();
-	m_ColSource->LoadLib(Config::GetConfigClass()->GetSourceFile());
+	m_ColSource->LoadLib(Config::Instance()->GetSourceFile());
 
 	m_ColFactory = new CollectionFactory(m_ColSource);
 }
@@ -188,7 +188,7 @@ CStoreFrontBackEnd::GetCollectionListWithMeta(std::string aszCollection)
 
 std::string CStoreFrontBackEnd::GetImagesPath()
 {
-	return Config::GetConfigClass()->GetImagesFolder();
+	return Config::Instance()->GetImagesFolder();
 }
 
 std::vector<std::string> CStoreFrontBackEnd::GetLoadedCollections()
@@ -350,6 +350,6 @@ bool CStoreFrontBackEnd::IsSameMetaTags(std::vector<std::pair<std::string, std::
 void CStoreFrontBackEnd::ImportCollection()
 {
 	JSONImporter JI;
-	JI.ImportJSON(Config::GetConfigClass()->GetImportSourceFile());
+	JI.ImportJSON(Config::Instance()->GetImportSourceFile());
 
 }

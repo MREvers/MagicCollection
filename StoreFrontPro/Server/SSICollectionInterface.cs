@@ -13,7 +13,10 @@ namespace StoreFrontPro.Server
         {
             public void SaveCollection(string aszCollectionName)
             {
-                SCI.SaveCollection(aszCollectionName);
+                singleton.enqueueService(() =>
+                {
+                    SCI.SaveCollection(aszCollectionName);
+                });
             }
 
             public void AddItem(string aszCollectionName, string aszCardNameLong, List<Tuple<string, string>> lstMeta)

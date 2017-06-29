@@ -45,6 +45,7 @@ namespace CollectorsFrontEnd.InterfaceModels
 
         public void SaveCollection()
         {
+            ServerInterface.Collection.SaveCollection(CollectionName);
             //ServerInterfaceModel.CollectionInterfaceModel.SaveCollection(CollectionName);
         }
 

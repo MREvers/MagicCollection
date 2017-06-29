@@ -654,14 +654,14 @@ std::vector<int>& Collection::getCollection()
 
 std::string Collection::getMetaTagFile()
 {
-	Config* config = Config::GetConfigClass();
+	Config* config = Config::Instance();
 	std::string szMetaFile = ".\\" + config->GetCollectionsDirectory() + "\\" + config->GetMetaFolderName() + "\\" + m_szMetaTagFileName + ".txt";
 	return szMetaFile;
 }
 
 std::string Collection::getHistoryFile()
 {
-	Config* config = Config::GetConfigClass();
+	Config* config = Config::Instance();
 	std::string szMetaFile = ".\\" + config->GetCollectionsDirectory() + "\\" + config->GetHistoryFolderName() + "\\" + m_szHistoryFileName + ".txt";
 	return szMetaFile;
 }
@@ -782,7 +782,7 @@ bool Collection::loadCardLine(std::string aszNewCardLine)
 			{
 				// The only way a copy could possibly have this collection as a resi. is if this collection created it
 				//  or used it. If that is the case, then we should not use it as the copy.
-				if (Config::GetConfigClass()->List_Find(m_szName, (*iter_ExistingCopy)->ResidentCollections) == -1)
+				if (Config::Instance()->List_Find(m_szName, (*iter_ExistingCopy)->ResidentCollections) == -1)
 				{
 					// This copy is not used by this collection. Check if this copy is identical to the target copy.
 					if (CollectionObject::IsSameIdentity(&oTargetCopy, *iter_ExistingCopy))
@@ -807,7 +807,7 @@ bool Collection::loadCardLine(std::string aszNewCardLine)
 				// Just add the copy if it is in this collection or
 				// the collection is loaded.
 				if (oTargetCopy.ParentCollection == m_szName ||
-					(Config::GetConfigClass()->List_Find(oTargetCopy.ParentCollection, *m_lstLoadedCollectionsBuffer) == -1))
+					(Config::Instance()->List_Find(oTargetCopy.ParentCollection, *m_lstLoadedCollectionsBuffer) == -1))
 				{
 					std::vector<std::pair<std::string, std::string>> lstDummy;
 					AddItem(oPseudoCopy.Name, oPseudoCopy.IdentifyingAttributes, lstDummy, false);
@@ -940,7 +940,7 @@ void Collection::refreshCopyLinks(std::vector<std::pair<std::string, std::string
 	std::vector<std::pair<std::string, CopyObject*>> ::iterator iter_ColOs = lstFullCol.begin();
 	for (; iter_ColOs != lstFullCol.end(); ++iter_ColOs)
 	{
-		if (Config::GetConfigClass()->List_Find(m_szName, (*iter_ColOs).second->ResidentCollections) == -1)
+		if (Config::Instance()->List_Find(m_szName, (*iter_ColOs).second->ResidentCollections) == -1)
 		{
 			std::vector<std::string> lstAffectedCols = (*iter_ColOs).second->ResidentCollections;
 			std::vector<std::string>::iterator iter_affected_col = lstAffectedCols.begin();
@@ -1152,7 +1152,7 @@ void Collection::SaveCollection(std::string aszFileName)
 	oMetaFile.close();
 
 	std::ofstream oColFile;
-	oColFile.open(aszFileName);
+	oColFile.open(Config::Instance()->GetCollectionsFolderName() + "\\" + aszFileName);
 	oColFile << ": Name=\"" + m_szName + "\" \n";
 
 	if (m_szParentName != "")

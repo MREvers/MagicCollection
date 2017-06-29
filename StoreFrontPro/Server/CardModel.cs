@@ -195,6 +195,7 @@ namespace StoreFrontPro.Server
         {
             if (CardImage == null)
             {
+                //ServerInterface.Card.DownloadAndCacheImage()
              //   ServerInterfaceModel.CardClassInterfaceModel.DownloadAndCacheImage(ImageLoaded, this);
             }
             else

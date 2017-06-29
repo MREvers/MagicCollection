@@ -39,7 +39,7 @@ void CollectionSource::LoadLib(std::string aszFileName)
 	// With the xml example above this is the <document/> node
 	rapidxml::xml_node<> *xmlNode_Cards = xmlNode_CardDatabase->first_node("cards");
 	rapidxml::xml_node<> *xmlNode_Card = xmlNode_Cards->first_node();
-	std::string szNameKeyCode = Config::GetConfigClass()->GetKeyCode("name");
+	std::string szNameKeyCode = Config::Instance()->GetKeyCode("name");
 	while (xmlNode_Card != 0)
 	{
 		rapidxml::xml_node<> *xmlNode_CardAttribute = xmlNode_Card->first_node();
@@ -57,7 +57,7 @@ void CollectionSource::LoadLib(std::string aszFileName)
 		while (xmlNode_CardAttribute != 0)
 		{
 			std::string szCardKey = xmlNode_CardAttribute->name();
-			std::string keyCode = Config::GetConfigClass()->GetKeyCode(szCardKey);
+			std::string keyCode = Config::Instance()->GetKeyCode(szCardKey);
 			if (keyCode != "" && keyCode != szNameKeyCode)
 			{
 				m_iAllCharBuffSize += sO->AddAttribute(
@@ -106,7 +106,7 @@ int CollectionSource::LoadCard(std::string aszCardName)
 			bool bHasAllAttributes = false;
 			for (; att_iter != lstAttrs.end() && !bHasAllAttributes; ++att_iter)
 			{
-				bHasAllAttributes = oCard.MapAttributes(Config::GetConfigClass()->GetFullKey(att_iter->first), att_iter->second);
+				bHasAllAttributes = oCard.MapAttributes(Config::Instance()->GetFullKey(att_iter->first), att_iter->second);
 			}
 
 			std::map<std::string, std::vector<std::string>> lstUnfixedAttrs = oSource->GetNonUniqueAttributeRestrictions(m_AllCharBuff);
@@ -116,11 +116,11 @@ int CollectionSource::LoadCard(std::string aszCardName)
 			std::map<std::string, std::vector<std::string>>::iterator iter_UnfixedAttrs = lstUnfixedAttrs.begin();
 			for (; iter_UnfixedAttrs != lstUnfixedAttrs.end(); ++iter_UnfixedAttrs)
 			{
-				lstFixedAttrs[Config::GetConfigClass()->GetFullKey(iter_UnfixedAttrs->first)] = iter_UnfixedAttrs->second;
+				lstFixedAttrs[Config::Instance()->GetFullKey(iter_UnfixedAttrs->first)] = iter_UnfixedAttrs->second;
 			}
 
 			oCard.SetNonUniqueAttributeRestrictions(lstFixedAttrs);
-			oCard.SetPairedNonUniqueAttrs(Config::GetConfigClass()->GetPairedKeysList());
+			oCard.SetPairedNonUniqueAttrs(Config::Instance()->GetPairedKeysList());
 
 			// Store the location of the CollectionObject in the cache
 			iCacheLocation = m_lstoCardCache.size();
@@ -214,7 +214,7 @@ CollectionSource::GetCollectionCache(std::string aszCollectionName, bool abOnlyC
 	{
 		int iCacheNum = LoadCard(iter_ObjCol->first);
 
-		if (Config::GetConfigClass()->List_Find(iCacheNum, lstRetVal) == -1)
+		if (Config::Instance()->List_Find(iCacheNum, lstRetVal) == -1)
 		{
 			lstRetVal.push_back(iCacheNum);
 		}

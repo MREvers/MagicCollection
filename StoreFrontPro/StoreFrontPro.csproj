@@ -90,6 +90,10 @@
     <Compile Include="Views\CollectionViews\Cube\VMCardGroupDisplay.cs" />
     <Compile Include="Views\CollectionViews\Cube\VMCardGroupList.cs" />
     <Compile Include="Views\CollectionViews\Cube\VMCollectionCube.cs" />
+    <Compile Include="Views\Components\CardImageDisplayer\VCardImageDisplayer.xaml.cs">
+      <DependentUpon>VCardImageDisplayer.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Components\CardImageDisplayer\VMCardImageDisplayer.cs" />
     <Compile Include="Views\Components\SuggestionsSearchBox\MSuggestionsSearchBox.cs" />
     <Compile Include="Views\Components\SuggestionsSearchBox\VMSuggestionsSearchBox.cs" />
     <Compile Include="Views\Components\SuggestionsSearchBox\VSuggestionsSearchBox.xaml.cs">
@@ -154,6 +158,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\CollectionViews\Cube\VCollectionCube.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Components\CardImageDisplayer\VCardImageDisplayer.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
