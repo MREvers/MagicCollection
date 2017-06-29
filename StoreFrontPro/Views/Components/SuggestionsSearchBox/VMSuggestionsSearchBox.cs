@@ -59,6 +59,11 @@ namespace StoreFrontPro.Views.Components.SuggestionsSearchBox
             ActionName = Model.ActionName;
         }
 
+        public List<StoreFrontMenuItem> GetMenuItems()
+        {
+            return new List<StoreFrontMenuItem>();
+        }
+
         public void eOKCommand(object canExecute)
         {
             DisplayEventArgs eventArgs = new DisplayEventArgs("VMSuggestionsSearchBox", "OKCommand", "Execute");

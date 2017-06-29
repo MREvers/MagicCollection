@@ -32,6 +32,18 @@ namespace StoreFrontPro.Views
             return m_lstParms.ContainsKey(aszKey) ? m_lstParms[aszKey] : null;
         }
     }
+
+    public class StoreFrontMenuItem
+    {
+        public RelayCommand Operation;
+        public string MenuName;
+
+        public StoreFrontMenuItem(string Name, Action<object> Operation)
+        {
+            this.Operation = new RelayCommand(Operation);
+            this.MenuName = Name;
+        }
+    }
     #endregion
 
     #region Events & Delegates
@@ -41,11 +53,9 @@ namespace StoreFrontPro.Views
     interface IViewComponent
     {
         #region Interface
-        /// <summary>
-        /// Fires whenever the VC cannot handle a UI Event.
-        /// Views should fire the event as "<ComponentName>.<VarName>.<Event>"
-        /// </summary>
         event DisplayEventHandler DisplayEvent;
+
+        List<StoreFrontMenuItem> GetMenuItems();
         #endregion
     }
 }

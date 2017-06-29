@@ -70,6 +70,11 @@ namespace StoreFrontPro.Views.CollectionsOverview
             AvailableCollections.Clear();
             Model.ForEach((x) => { AvailableCollections.Add(x.CollectionName); });
         }
+
+        public List<StoreFrontMenuItem> GetMenuItems()
+        {
+            return new List<StoreFrontMenuItem>();
+        }
         #endregion Public Methods
 
         #region Event Handlers
@@ -89,7 +94,7 @@ namespace StoreFrontPro.Views.CollectionsOverview
         {
             if (!string.IsNullOrEmpty(SelectedCollection))
             {
-                DisplayEventArgs eventArgs = new DisplayEventArgs("VCollectionsOverview","ViewCollection","Clicked");
+                DisplayEventArgs eventArgs = new DisplayEventArgs("VCollectionsOverview", "ViewCollection", "Clicked");
                 eventArgs.Add(Key: "Collection", Value: Model.Where(x => x.CollectionName == SelectedCollection).First());
                 DisplayEvent(this, eventArgs);
             }

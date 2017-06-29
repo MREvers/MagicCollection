@@ -47,8 +47,10 @@ namespace StoreFrontPro.Server
             //ServerInterfaceModel.CollectionInterfaceModel.SaveCollection(CollectionName);
         }
 
-        public void SubmitBulkEdits(List<string> alstEdits)
+        public void SubmitBulkEdits(List<string> alstEdits, Action aCallBack = null)
         {
+            ServerInterface.Collection.LoadBulkChanges(this.CollectionName, alstEdits,
+                ()=> { Sync(); aCallBack?.Invoke(); }, true);
             //ServerInterfaceModel.CollectionInterfaceModel.LoadBulkChanges(this.CollectionName, alstEdits);
         }
 
@@ -90,6 +92,11 @@ namespace StoreFrontPro.Server
             LstLastQuery = LstStartingStrings.Concat(LstContainingStrings).ToList();
 
             return LstLastQuery.Select(x => x.CardNameLong).ToList();
+        }
+
+        public void Sync()
+        {
+            ServerInterface.Collection.Sync(this.CollectionName);
         }
 
     }

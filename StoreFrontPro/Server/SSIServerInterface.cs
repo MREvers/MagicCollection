@@ -91,16 +91,26 @@ namespace StoreFrontPro.Server
                 singleton.enqueueService(() =>
                 {
                     Callback(
-                        m_lstCollectionModels.FirstOrDefault(x => x.CollectionName == CollectionName));
+                        GetCollectionModel(CollectionName));
                 }, UICallback);
+            }
+
+            public CollectionModel GetCollectionModel(string CollectionName)
+            {
+                return m_lstCollectionModels.FirstOrDefault(x => x.CollectionName == CollectionName);
             }
 
             public void GetCollectionModels(Action<List<CollectionModel>> Callback, bool UICallback = false)
             {
                 singleton.enqueueService(() =>
                 {
-                    Callback(m_lstCollectionModels);
+                    Callback(GetCollectionModels());
                 }, UICallback);
+            }
+            
+            public List<CollectionModel> GetCollectionModels()
+            {
+                return m_lstCollectionModels;
             }
 
             public void GetLoadedCollectionList(Action<List<string>> Callback, bool UICallback = false)

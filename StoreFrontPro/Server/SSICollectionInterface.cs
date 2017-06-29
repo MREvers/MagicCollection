@@ -31,9 +31,17 @@ namespace StoreFrontPro.Server
                 SCI.SetBaselineHistory(aszCollection);
             }
 
-            public void LoadBulkChanges(string aszCollection, List<string> alstChanges)
+            public void LoadBulkChanges(string aszCollection, List<string> alstChanges, Action aTask, bool UICallback = false)
             {
-                SCI.LoadBulkChanges(aszCollection, alstChanges);
+                singleton.enqueueService(() =>
+                {
+                    if (alstChanges != null)
+                    {
+                        SCI.LoadBulkChanges(aszCollection, alstChanges);
+                        aTask();
+                    }
+                }, UICallback);
+
             }
 
             /// <summary>
@@ -42,7 +50,17 @@ namespace StoreFrontPro.Server
             /// <param name="aszCollectionName"></param>
             public void Sync(string aszCollectionName)
             {
-
+                if (ServerInterface.Server.GetCollectionModel(aszCollectionName) != null)
+                {
+                    // List of [ { CardNameLong, [Tags, ...] }, ... ]
+                    List<Tuple<string, List<Tuple<string, string>>>> lstCards =
+                        SCI.GetCollectionListWithMeta(aszCollectionName);
+                    CollectionModel CMCurrent = Server.GetCollectionModels().FirstOrDefault(x => x.CollectionName == aszCollectionName);
+                    if (CMCurrent != null)
+                    {
+                        CMCurrent.BuildCopyModelList(lstCards);
+                    }
+                }
             }
         }
 

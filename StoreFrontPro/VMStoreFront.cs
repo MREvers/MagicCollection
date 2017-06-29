@@ -6,6 +6,7 @@ using StoreFrontPro.Views.CollectionViews.Cube;
 using StoreFrontPro.Views.Interfaces.CollectionChanger;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -16,6 +17,9 @@ namespace StoreFrontPro
     class VMStoreFront : ViewModel<StoreFront>
     {
         public RelayCommand CloseCommand { get; set; }
+        public RelayCommand CollectionsOverviewCommand { get; set; }
+
+        public ObservableCollection<MenuItem> ViewOptions { get; set; } = new ObservableCollection<MenuItem>();
 
         private MultiDisplay _OperationWindow;
         public MultiDisplay OperationWindow
@@ -27,7 +31,9 @@ namespace StoreFrontPro
         public VMStoreFront(StoreFront Model) : base(Model)
         {
             OperationWindow = new MultiDisplay();
+            OperationWindow.DisplayEvent += viewDisplayEventHandler;
             CloseCommand = new RelayCommand(eCloseCommand);
+            CollectionsOverviewCommand = new RelayCommand((o) => { showCollectionsOverview(); });
 
             showCollectionsOverview();
         }
@@ -40,15 +46,12 @@ namespace StoreFrontPro
 
         private void showCollectionsOverview()
         {
-            
-            OperationWindow.DisplayEvent -= viewDisplayEventHandler;
             VMCollectionsOverview collectionsOverviewVM = new VMCollectionsOverview(Model.Collections);
             OperationWindow.SetNewDisplay(
                 Name: "Overview",
                 NewDisplay: new VCollectionsOverview(),
                 DataContext: collectionsOverviewVM,
                 Persist: false);
-            OperationWindow.DisplayEvent += viewDisplayEventHandler; 
             
             /*
             ServerInterface.Server.GenerateCollectionModel("Collections\\Primary.txt");
@@ -67,7 +70,6 @@ namespace StoreFrontPro
 
         private void showCollectionCubeView(CollectionModel CollectionModel)
         {
-            OperationWindow.DisplayEvent -= viewDisplayEventHandler;
             VMCollectionCube collectionCubeVM = new VMCollectionCube(CollectionModel);
             OperationWindow.SetNewDisplay(
                             Name: "Overview",
@@ -81,6 +83,10 @@ namespace StoreFrontPro
             if (e.Source == "VCollectionsOverview" && e.Property == "ViewCollection" && e.Event == "Clicked")
             {
                 showCollectionCubeView((CollectionModel)e.Get("Collection"));
+            }
+            else if (e.Source == "MultiDisplay")
+            {
+                eDisplayNewViewOptions();
             }
         }
 
@@ -96,14 +102,16 @@ namespace StoreFrontPro
             }
         }
 
+        private void eDisplayNewViewOptions()
+        {
+            List<StoreFrontMenuItem> lstViewOptions = OperationWindow.GetMenuItems();
+            ViewOptions.Clear();
+            lstViewOptions.ForEach(x => ViewOptions.Add(new MenuItem() { Header = x.MenuName, Command = x.Operation }));
+        }
+
         private void eCloseCommand(object aoCanExecute)
         {
             Model.CloseApplication();
-        }
-
-        private void eDisplayNewOptions()
-        {
-            // Get view options here.
         }
     }
 }

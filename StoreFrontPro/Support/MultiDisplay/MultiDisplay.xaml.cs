@@ -21,7 +21,7 @@ namespace StoreFrontPro.Support.MultiDisplay
     /// <summary>
     /// Interaction logic for MultiDisplay.xaml
     /// </summary>
-    public partial class MultiDisplay : UserControl, INotifyPropertyChanged
+    public partial class MultiDisplay : UserControl, INotifyPropertyChanged, IViewComponent
     {
         #region Bindings
         private UserControl _Display = null;
@@ -71,8 +71,15 @@ namespace StoreFrontPro.Support.MultiDisplay
 
         public void ShowOverlay(UserControl Overlay)
         {
+            CloseOverlay();
             m_oOverlay = Overlay;
             displaySendToBack();
+            fireUpdateMenuItems();
+        }
+
+        public void CloseOverlay()
+        {
+            displayBringToFront();
         }
 
         public void SetNewDisplay(string Name, UserControl NewDisplay, bool Persist = false)
@@ -112,6 +119,8 @@ namespace StoreFrontPro.Support.MultiDisplay
             {
                 m_fnNewDisplayCallback();
             }
+
+            fireUpdateMenuItems();
         }
 
         public void RecoverDisplay(string Name, bool Persist = false)
@@ -121,6 +130,22 @@ namespace StoreFrontPro.Support.MultiDisplay
             SetNewDisplay(Name, m_mapPersistantDisplays[Name], Persist);
 
             m_mapPersistantDisplays.Remove(Name);
+        }
+
+        public List<StoreFrontMenuItem> GetMenuItems()
+        {
+            IEnumerable<StoreFrontMenuItem> lstRetVal = new List<StoreFrontMenuItem>();
+            if (Display?.DataContext is IViewComponent)
+            {
+                lstRetVal = (Display.DataContext as IViewComponent).GetMenuItems();
+            }
+
+            if (m_oOverlay?.DataContext is IViewComponent)
+            {
+                lstRetVal = lstRetVal.Concat((m_oOverlay.DataContext as IViewComponent).GetMenuItems());
+            }
+
+            return lstRetVal.ToList();
         }
         #endregion
 
@@ -140,6 +165,14 @@ namespace StoreFrontPro.Support.MultiDisplay
             Display.IsEnabled = true;
             MultiDisplayPanel.Children.Remove(m_oOverlay);
             m_oOverlay = null;
+
+            fireUpdateMenuItems();
+        }
+
+        private void fireUpdateMenuItems()
+        {
+            DisplayEventArgs eventArgs = new DisplayEventArgs("MultiDisplay", "Change", "Event");
+            displayFireEvent(this, eventArgs);
         }
 
         private void displayFireEvent(object aoSource, DisplayEventArgs aoEvent)
