@@ -900,19 +900,8 @@ bool Collection::loadChangeCardLine(std::string aszChangeCardLine)
 
 			if (oRemoveTarget.Ok) { oRemoveTarget.LoadCard(); }
 			if (oRemoveTarget.Ok) { oRemoveTarget.FindCopy(); }
-			std::string szRemoveLong;
-			if (oRemoveTarget.Ok)
-			{
-				szRemoveLong = oRemoveTarget.ToString();
-			}
 
 			if (oAddTarget.Ok) { oAddTarget.LoadCard(); }
-			if (oAddTarget.Ok) { oAddTarget.FindCopy(); }
-			std::string szAddLong;
-			if (oAddTarget.Ok)
-			{
-				szRemoveLong = oAddTarget.ToString();
-			}
 
 			if (oRemoveTarget.Ok && oAddTarget.Ok)
 			{

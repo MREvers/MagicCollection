@@ -36,6 +36,10 @@ namespace StoreFrontPro.Views.CollectionViews.Cube
                 if (oExistingDisplay != null)
                 {
                     ((VMCardGroupList)oExistingDisplay.DataContext).SyncWithModel();
+                    if (((VMCardGroupList)oExistingDisplay.DataContext).CategoryList.Count == 0)
+                    {
+                        CategoryGroups.Remove(oExistingDisplay);
+                    }
                 }
                 else
                 {
