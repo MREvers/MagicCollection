@@ -31,7 +31,7 @@ namespace StoreFrontPro.Views.Components.SuggestionsSearchBox
             VMSuggestionsSearchBox context = (DataContext as VMSuggestionsSearchBox);
             if (e.Key == Key.Tab && context.ComboBoxList.Count > 0)
             {
-                context.TextBoxValue = context.ComboBoxList[0];
+                context.TextBoxValue = (string)context.ComboBoxList[0];
             }
         }
     }

@@ -6,6 +6,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Controls;
 
 namespace StoreFrontPro.Views.Components.SuggestionsSearchBox
 {
@@ -82,21 +83,27 @@ namespace StoreFrontPro.Views.Components.SuggestionsSearchBox
         private void eTextBoxValueChanged()
         {
             string szDropDownText = TextBoxValue;
+
+            // These need to be out here because otherwise, when the down arrow is used to select from the dropdown. Entries get duplicated.
+            // I don't know why.
+            PropertyChanged -= propertyChangedEventHandler;
+
             ComboBoxList.Clear();
-            //m_bTabbedAddCard = false;
             if (szDropDownText.Length > 3)
             {
-                PropertyChanged -= propertyChangedEventHandler;
                 ComboBoxIsEditable = false;
                 ComboBoxDropDown = true;
+
+                // This line is needed. When the comboboxlist is cleared, it causes problems with the text in the textbox.
+                TextBoxValue = szDropDownText;
 
                 List<string> lstCards = Model.GetMatchingCollectionItems(szDropDownText.ToLower());
                 lstCards.ForEach(x => ComboBoxList.Add(x));
 
                 ComboBoxIsEditable = true;
-                PropertyChanged += propertyChangedEventHandler;
             }
 
+            PropertyChanged += propertyChangedEventHandler;
         }
     }
 }

@@ -118,7 +118,7 @@
                        Grid.Column="0"
                        ItemsSource="{Binding ComboBoxList}"
                        IsDropDownOpen="{Binding ComboBoxDropDown,Mode=TwoWay}"
-                       SelectedIndex="{Binding ComboBoxSelectedIndex}"
+                       SelectedIndex="{Binding ComboBoxSelectedIndex, Mode=TwoWay}"
                        Text="{Binding TextBoxValue}"
                        HorizontalAlignment="Stretch"
                        IsEditable="{Binding ComboBoxIsEditable}"

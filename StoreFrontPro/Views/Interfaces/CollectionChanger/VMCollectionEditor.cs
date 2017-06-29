@@ -51,7 +51,7 @@ namespace StoreFrontPro.Views.Interfaces.CollectionChanger
             // Only one event comes from the SSBox so we dont have to worry about checking.
             VMSuggestionsSearchBox removeBoxVM = (RemoveCardSearchBox.DataContext as VMSuggestionsSearchBox);
             if (removeBoxVM.ComboBoxList.Count > 0 &&
-                removeBoxVM.ComboBoxList[0] == removeBoxVM.TextBoxValue)
+                (string)removeBoxVM.ComboBoxList[0] == removeBoxVM.TextBoxValue)
             {
                 string szBaseCard = removeBoxVM.TextBoxValue;
                 string szCmdString = "";
@@ -63,7 +63,7 @@ namespace StoreFrontPro.Views.Interfaces.CollectionChanger
                     VMSuggestionsSearchBox addBoxVM = (AddCardSearchBox.DataContext as VMSuggestionsSearchBox);
 
                     if (addBoxVM.ComboBoxList.Count > 0 &&
-                        addBoxVM.ComboBoxList[0] == addBoxVM.TextBoxValue)
+                        (string)addBoxVM.ComboBoxList[0] == addBoxVM.TextBoxValue)
                     {
                         string szAddBaseCard = addBoxVM.TextBoxValue;
 
@@ -92,7 +92,7 @@ namespace StoreFrontPro.Views.Interfaces.CollectionChanger
             // This gets the first item in the dropdown box list.
             VMSuggestionsSearchBox addBoxVM = (AddCardSearchBox.DataContext as VMSuggestionsSearchBox);
             if (addBoxVM.ComboBoxList.Count > 0 &&
-                addBoxVM.ComboBoxList[0] == addBoxVM.TextBoxValue)
+                (string)addBoxVM.ComboBoxList[0] == addBoxVM.TextBoxValue)
             {
                 string szBaseCard = addBoxVM.TextBoxValue;
                 string szCmdString = "";
