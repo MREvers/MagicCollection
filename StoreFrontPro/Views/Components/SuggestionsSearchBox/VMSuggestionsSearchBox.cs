@@ -10,7 +10,7 @@ using System.Windows.Controls;
 
 namespace StoreFrontPro.Views.Components.SuggestionsSearchBox
 {
-    class VMSuggestionsSearchBox: ViewModel<MSuggestionsSearchBox>, IViewComponent
+    class VMSuggestionsSearchBox : ViewModel<MSuggestionsSearchBox>, IViewComponent
     {
         public ObservableCollection<string> ComboBoxList { get; set; } = new ObservableCollection<string>();
 
@@ -48,7 +48,7 @@ namespace StoreFrontPro.Views.Components.SuggestionsSearchBox
             get { return _ComboBoxIsEditable; }
             set { _ComboBoxIsEditable = value; OnPropertyChanged(); }
         }
-        
+
         public RelayCommand OKCommand { get; set; }
 
         public event DisplayEventHandler DisplayEvent;
@@ -88,7 +88,6 @@ namespace StoreFrontPro.Views.Components.SuggestionsSearchBox
             // I don't know why.
             PropertyChanged -= propertyChangedEventHandler;
 
-            ComboBoxList.Clear();
             if (szDropDownText.Length > 3)
             {
                 ComboBoxIsEditable = false;
@@ -97,11 +96,19 @@ namespace StoreFrontPro.Views.Components.SuggestionsSearchBox
                 // This line is needed. When the comboboxlist is cleared, it causes problems with the text in the textbox.
                 TextBoxValue = szDropDownText;
 
-                List<string> lstCards = Model.GetMatchingCollectionItems(szDropDownText.ToLower());
-                lstCards.ForEach(x => ComboBoxList.Add(x));
+                // If there combobox contains the text value exactly, then the user is using the up/down keys to select.
+                // This is because the combobox default behavior is to populate the text field with a preview of the
+                // current selection.
+                if (!ComboBoxList.Contains(TextBoxValue))
+                {
+                    ComboBoxList.Clear();
+                    List<string> lstCards = Model.GetMatchingCollectionItems(szDropDownText.ToLower());
+                    lstCards.ForEach(x => ComboBoxList.Add(x));
+                }
 
                 ComboBoxIsEditable = true;
             }
+            else { ComboBoxList.Clear(); }
 
             PropertyChanged += propertyChangedEventHandler;
         }
