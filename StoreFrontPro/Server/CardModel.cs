@@ -30,20 +30,6 @@ namespace StoreFrontPro.Server
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
-        private BitmapImage _CardImage;
-        public BitmapImage CardImage
-        {
-            get
-            {
-                return _CardImage;
-            }
-            set
-            {
-                _CardImage = value;
-                OnPropertyChanged("CardImage");
-            }
-        }
-
         public CardModel(string aszCardName, string aszTargetCollection,
             List<Tuple<string, string>> aLstSpecifiedAttrs,
             List<Tuple<string, string>> aLstIdentifiedAttrs,
@@ -191,35 +177,9 @@ namespace StoreFrontPro.Server
             return false;// ServerInterfaceModel.CardClassInterfaceModel.AreMetaTagsSame(alstTupOne, alstTupTwo);
         }
 
-        public void GetImage()
+        public void GetImage(Action<BitmapImage> aCallBack)
         {
-            if (CardImage == null)
-            {
-                //ServerInterface.Card.DownloadAndCacheImage()
-             //   ServerInterfaceModel.CardClassInterfaceModel.DownloadAndCacheImage(ImageLoaded, this);
-            }
-            else
-            {
-                OnPropertyChanged("CardImage");
-            }
-        }
-
-        public void UnloadImage()
-        {
-            if (_CardImage != null)
-            {
-                if (_CardImage.StreamSource != null)
-                {
-                    _CardImage.StreamSource.Close();
-                    _CardImage.StreamSource.Dispose();
-                }
-                _CardImage = null;
-            }
-        }
-
-        private void ImageLoaded(object sender, EventArgs e)
-        {
-            CardImage = (BitmapImage)sender;
+            ServerInterface.Card.DownloadAndCacheImage(aCallBack, this);
         }
 
         private List<string> getCardAttributeRestrictions(string aszKey)

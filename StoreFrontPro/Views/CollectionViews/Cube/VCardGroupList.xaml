@@ -7,11 +7,32 @@
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="300">
     <Grid>
+        <Grid.Style>
+            <Style TargetType="Grid">
+                <Style.Triggers>
+                    <DataTrigger Binding="{Binding IsFullSize}" Value="True" >
+                        <Setter Property="Height" Value="{Binding Path=ActualHeight,RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=WrapPanel}}"/>
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+        </Grid.Style>
         <Grid.RowDefinitions>
             <RowDefinition Height="28"/>
             <RowDefinition/>
         </Grid.RowDefinitions>
         <Label Content="{Binding GroupName}" HorizontalContentAlignment="Center"></Label>
-        <ListView Grid.Row="1" ItemsSource="{Binding CategoryList}"/>
+        <ListView Grid.Row="1" ItemsSource="{Binding CategoryList}">
+            <ListView.ItemContainerStyle>
+                <Style TargetType="{x:Type ListViewItem}">
+                    <Setter Property="ToolTip">
+                        <Setter.Value>
+                            <UniformGrid Columns="1" x:Name="ToolTipGrid">
+                                <ContentControl Content="{Binding ToolTipDisplay}"/>
+                            </UniformGrid>
+                        </Setter.Value>
+                    </Setter>
+                </Style>
+            </ListView.ItemContainerStyle>
+        </ListView>
     </Grid>
 </UserControl>

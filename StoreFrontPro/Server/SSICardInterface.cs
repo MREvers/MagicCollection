@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Media.Imaging;
@@ -77,95 +78,77 @@ namespace StoreFrontPro.Server
             // I used the ANTS profiler and it looks like I am not leaking memory. It just seems that
             // the process will hold onto memory after its no longer needed. So when viewing lots of images
             // we may not expect it to return to its previous usage.
-            public void DownloadAndCacheImage(EventHandler aeHandlerCallback, CardModel aoCardModel)
+            public void DownloadAndCacheImage(Action<BitmapImage> aCallback, CardModel aoCardModel)
             {
-                // Save in set
+                singleton.enqueueService(() =>
+                {
+                    inDownloadAndCacheImage(aCallback, aoCardModel);
+                });
+            }
 
+            private void inDownloadAndCacheImage(Action<BitmapImage> aCallback, CardModel aoCardModel)
+            {
+                //Download the image.
                 string szMUID = aoCardModel.GetAttr("multiverseid");
                 string szSet = aoCardModel.GetAttr("set");
-                BitmapImage bi3;
-
-                string szBasePath = SZ_IMAGE_CACHE_PATH + "\\" + szSet + "/";
-                if (szMUID != "")
+                if (SZ_IMAGE_CACHE_PATH == "")
                 {
-                    szBasePath += szMUID + "/";
+                    SZ_IMAGE_CACHE_PATH = SCI.GetImagesPath();
                 }
+                string szBasePath = SZ_IMAGE_CACHE_PATH + "/_" + szSet + "/";
                 string szFilePath = szBasePath + aoCardModel.CardName + ".jpg";
+
+                // Check if we already have the image
+                string szDirectoryName = Path.GetDirectoryName(szFilePath);
+                if (!Directory.Exists(szDirectoryName))
+                {
+                    Directory.CreateDirectory(szDirectoryName);
+                }
+
                 if (!File.Exists(szFilePath))
                 {
-                    bi3 = new BitmapImage();
-                    bi3.DownloadCompleted += aeHandlerCallback;
-                    bi3.DownloadFailed += eModelImage_DownloadFailed;
-                    bi3.BeginInit();
-                    bi3.DownloadCompleted +=
-                            ((object sender, EventArgs e) =>
-                            { eModelImage_DownloadCompleted(sender, new ImageDownloadedEventArgs(aoCardModel, e)); });
-                    if (!string.IsNullOrEmpty(szMUID))
+                    using (WebClient client = new WebClient())
                     {
-                        bi3.UriSource =
-                            new Uri(@"http://gatherer.wizards.com/Handlers/Image.ashx?multiverseid=" +
-                            szMUID + @"&type=card", UriKind.RelativeOrAbsolute);
+                        string szURL;
+                        if (!string.IsNullOrEmpty(szMUID))
+                        {
+                            szURL = @"http://gatherer.wizards.com/Handlers/Image.ashx?multiverseid=" + szMUID + @"&type=card";
+                        }
+                        else
+                        {
+                            szURL = @"http://gatherer.wizards.com/Handlers/Image.ashx?name=" + aoCardModel.CardName + "&type=card";
+                        }
+
+                        // Download synchronously.
+                        client.DownloadFile(new Uri(szURL, UriKind.RelativeOrAbsolute), szFilePath);
                     }
-                    else
-                    {
-                        bi3.UriSource =
-                            new Uri(@"http://gatherer.wizards.com/Handlers/Image.ashx?name=" +
-                            aoCardModel.CardName + "&type=card", UriKind.RelativeOrAbsolute);
-                    }
-                    bi3.CacheOption = BitmapCacheOption.OnLoad;
-                    bi3.EndInit();
-                }
-                else
-                {
-                    string szFullPath = Path.GetFullPath(szFilePath);
-
-                    bi3 = new BitmapImage();
-                    FileStream stream = File.OpenRead(szFullPath);
-
-                    bi3.BeginInit();
-                    bi3.CacheOption = BitmapCacheOption.OnLoad;
-                    bi3.StreamSource = stream;
-                    bi3.EndInit();
-                    bi3.Freeze();
-                    aeHandlerCallback(bi3, null);
                 }
 
-            }
-
-            private void eModelImage_DownloadCompleted(object sender, ImageDownloadedEventArgs ie)
-            {
-                EventArgs e = ie.e;
-                CardModel cardModel = ie.DataModel;
-                string szMUID = cardModel.GetAttr("multiverseid");
-                string szSet = cardModel.GetAttr("set");
-
-                JpegBitmapEncoder encoder = new JpegBitmapEncoder();
-                string szBasePath = SZ_IMAGE_CACHE_PATH + "\\" + szSet + "/";
-                if (szMUID != "")
-                {
-                    szBasePath += szMUID + "/";
-                }
-                String photolocation = szBasePath + cardModel.CardName + ".jpg";
-                encoder.Frames.Add(BitmapFrame.Create((BitmapImage)sender));
-
-                if (!Directory.Exists(Path.GetDirectoryName(photolocation)))
-                {
-                    Directory.CreateDirectory(Path.GetDirectoryName(photolocation));
-                }
-
-                using (var filestream = new FileStream(photolocation, FileMode.Create))
-                    encoder.Save(filestream);
-            }
-
-            private void eModelImage_DownloadFailed(object sender, EventArgs e)
-            {
-
+                loadImageFromFile(szFilePath, aCallback);
             }
 
             // Use sparingly. Eventually include attributes in metatags?
             public List<string> GetCardAttributesRestrictions(string aszLongName, string aszKey)
             {
                 return SCI.GetCardAttributeRestrictions(aszLongName, aszKey);
+            }
+
+            private void loadImageFromFile(string aszFileName, Action<BitmapImage> aCallback)
+            {
+                if (!File.Exists(aszFileName)) { return; }
+
+                BitmapImage bitmap = new BitmapImage();
+
+                using (FileStream stream = File.OpenRead(aszFileName))
+                {
+                    bitmap.BeginInit();
+                    bitmap.StreamSource = stream;
+                    bitmap.CacheOption = BitmapCacheOption.OnLoad;
+                    bitmap.EndInit();
+                    bitmap.Freeze();
+                }
+
+                aCallback(bitmap);
             }
         }
     }

@@ -17,15 +17,24 @@ namespace StoreFrontPro.Views.CollectionViews.Cube
             }
         }
 
-        public string ExpectedAttribute;
+        public string GroupName;
+        public List<string> ExpectedAttributes;
         private string m_szFilteringAttribute;
+        private List<string> m_szAttributeSet;
 
-        public MCardGroupList(string FilteredAttribute, string ExpectedAttributes, List<CardModel> BaseList)
+        public MCardGroupList(string FilteredAttribute, string ExpectedAttribute, List<string> AttributeSet, List<CardModel> BaseList)
         {
+
             _ungroupedList = BaseList;
 
             m_szFilteringAttribute = FilteredAttribute;
-            ExpectedAttribute = ExpectedAttributes;
+
+            // Split the expected attributes on '/'
+            ExpectedAttributes = ExpectedAttribute.Split('\\').ToList();
+
+            m_szAttributeSet = AttributeSet;
+
+            GroupName = ExpectedAttribute;
         }
 
         // Can eventually use a strategy pattern to decide how to filter. TODO
@@ -42,7 +51,14 @@ namespace StoreFrontPro.Views.CollectionViews.Cube
             foreach (CardModel oCardModel in alstNew)
             {
                 string szKeyAttr = oCardModel.GetAttr(m_szFilteringAttribute);
-                if (szKeyAttr.Contains(ExpectedAttribute))
+
+                bool isNotElement = false;
+                foreach(string attr in m_szAttributeSet)
+                {
+                    isNotElement |= ExpectedAttributes.Contains(attr) != szKeyAttr.Contains(attr);
+                }
+
+                if (!isNotElement)
                 {
                     lstRetVal.Add(oCardModel);
                 }

@@ -85,6 +85,8 @@ namespace StoreFrontPro.Server
 
             while (true)
             {
+                Thread.Sleep(40);
+
                 if (m_lstServerQueue.Count == 0) { continue; }
                 m_QueueLock.WaitOne();
                 Action currentTask = m_lstServerQueue.First();

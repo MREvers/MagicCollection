@@ -81,6 +81,11 @@ namespace StoreFrontPro.Server
                 return CopyM;
             }
 
+            public void SyncServerTask(Action aCallback)
+            {
+                singleton.enqueueService(() => { aCallback?.Invoke(); });
+            }
+
             /// <summary>
             /// Returns the collection model if it exists. Null otherwise.
             /// </summary>

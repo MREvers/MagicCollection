@@ -23,6 +23,7 @@ namespace StoreFrontPro.Views.CollectionViews.Cube
         public VCardGroupDisplay()
         {
             InitializeComponent();
+            
         }
     }
 }

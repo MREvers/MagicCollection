@@ -51,7 +51,7 @@ namespace StoreFrontPro.Server
             /// Calls the server for the most up to date list of copies.
             /// </summary>
             /// <param name="aszCollectionName"></param>
-            public void Sync(string aszCollectionName)
+            public void Sync(string aszCollectionName, Action aCallback = null)
             {
                 if (ServerInterface.Server.GetCollectionModel(aszCollectionName) != null)
                 {
@@ -61,7 +61,7 @@ namespace StoreFrontPro.Server
                     CollectionModel CMCurrent = Server.GetCollectionModels().FirstOrDefault(x => x.CollectionName == aszCollectionName);
                     if (CMCurrent != null)
                     {
-                        CMCurrent.BuildCopyModelList(lstCards);
+                        CMCurrent.BuildCopyModelList(lstCards, aCallback);
                     }
                 }
             }

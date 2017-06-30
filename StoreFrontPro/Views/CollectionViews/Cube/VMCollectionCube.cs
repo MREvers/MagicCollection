@@ -3,9 +3,12 @@ using StoreFrontPro.Support.MultiDisplay;
 using StoreFrontPro.Views.Interfaces.CollectionChanger;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Controls.Primitives;
 
 namespace StoreFrontPro.Views.CollectionViews.Cube
 {
@@ -47,13 +50,25 @@ namespace StoreFrontPro.Views.CollectionViews.Cube
 
         private void displayEventHandler(object source, DisplayEventArgs e)
         {
-            if (e.Source == "VMCollectionEditor" )
+            if (!Application.Current.Dispatcher.CheckAccess())
+            {
+                Action aAction = new Action(() => { inDisplayEventHandler(source, e); });
+                Application.Current.Dispatcher.BeginInvoke(aAction);
+                return;
+            }
+
+            inDisplayEventHandler(source, e);
+        }
+
+        private void inDisplayEventHandler(object source, DisplayEventArgs e)
+        {
+            if (e.Source == "VMCollectionEditor")
             {
                 if (e.Property == "AcceptCommand")
                 {
                     if (OperationWindow.Display.DataContext is VMCardGroupDisplay)
                     {
-                        (OperationWindow.Display.DataContext as VMCardGroupDisplay).SyncWithModel();
+                        (OperationWindow.Display.DataContext as VMCardGroupDisplay).SyncWithModel();                    
                     }
                     OperationWindow.CloseOverlay();
                 }

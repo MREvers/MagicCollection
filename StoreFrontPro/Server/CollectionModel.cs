@@ -23,7 +23,7 @@ namespace StoreFrontPro.Server
 
         }
 
-        public void BuildCopyModelList(List<Tuple<string, List<Tuple<string, string>>>> aLstCards)
+        public void BuildCopyModelList(List<Tuple<string, List<Tuple<string, string>>>> aLstCards, Action aCallback = null)
         {
             CollectionItems.Clear();
             foreach (var LongNameTagsPair in aLstCards)
@@ -32,9 +32,10 @@ namespace StoreFrontPro.Server
                     LongName: LongNameTagsPair.Item1,
                     CollectionName: CollectionName,
                     MetaTags: LongNameTagsPair.Item2,
-                    Callback: (aoCardModel) => { CollectionItems.Add(aoCardModel); },
+                    Callback: (aoCardModel) => { CollectionItems.Add(aoCardModel);  },
                     UICallback: false);
             }
+            ServerInterface.Server.SyncServerTask(aCallback);
         }
 
         public void SetBaselineHistory()
@@ -51,7 +52,9 @@ namespace StoreFrontPro.Server
         public void SubmitBulkEdits(List<string> alstEdits, Action aCallBack = null)
         {
             ServerInterface.Collection.LoadBulkChanges(this.CollectionName, alstEdits,
-                ()=> { Sync(); aCallBack?.Invoke(); }, true);
+                ()=> {
+                    Sync(aCallBack);
+                }, true);
             //ServerInterfaceModel.CollectionInterfaceModel.LoadBulkChanges(this.CollectionName, alstEdits);
         }
 
@@ -95,9 +98,9 @@ namespace StoreFrontPro.Server
             return LstLastQuery.Select(x => x.CardNameLong).ToList();
         }
 
-        public void Sync()
+        public void Sync(Action aCallback = null)
         {
-            ServerInterface.Collection.Sync(this.CollectionName);
+            ServerInterface.Collection.Sync(this.CollectionName, aCallback);
         }
 
     }
