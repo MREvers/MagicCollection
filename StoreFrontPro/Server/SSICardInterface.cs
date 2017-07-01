@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Media.Imaging;
 
@@ -80,10 +81,9 @@ namespace StoreFrontPro.Server
             // we may not expect it to return to its previous usage.
             public void DownloadAndCacheImage(Action<BitmapImage> aCallback, CardModel aoCardModel)
             {
-                singleton.enqueueService(() =>
-                {
-                    inDownloadAndCacheImage(aCallback, aoCardModel);
-                });
+                Thread downloadAndLoadImageThread = new Thread(()=> { inDownloadAndCacheImage(aCallback, aoCardModel); });
+                downloadAndLoadImageThread.IsBackground = true;
+                downloadAndLoadImageThread.Start();
             }
 
             private void inDownloadAndCacheImage(Action<BitmapImage> aCallback, CardModel aoCardModel)

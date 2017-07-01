@@ -27,15 +27,24 @@ namespace StoreFrontPro.Views.Components.SuggestionsSearchBox
 
         private void ComboBox_PreviewKeyDown(object sender, KeyEventArgs e)
         {
-            if (DataContext == null) { return; }
-            VMSuggestionsSearchBox context = (DataContext as VMSuggestionsSearchBox);
-            if (e.Key == Key.Tab && context.ComboBoxList.Count > 0)
+            if (e.Key == Key.Tab)
             {
-                if (!context.ComboBoxList.Contains(context.TextBoxValue))
+                e.Handled = true;
+
+                SuggestionsButton.Focus();
+
+                if (DataContext == null) { return; }
+                VMSuggestionsSearchBox context = (DataContext as VMSuggestionsSearchBox);
+                if (context.ComboBoxList.Count > 0 && !context.ComboBoxList.Contains(context.TextBoxValue))
                 {
                     context.TextBoxValue = (string)context.ComboBoxList[0];
                 }
             }
+        }
+
+        private void eButton_Click(object sender, RoutedEventArgs e)
+        {
+            SuggestionsComboBox.Focus();
         }
     }
 }

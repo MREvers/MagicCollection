@@ -114,7 +114,7 @@
             <RowDefinition/>
             <RowDefinition/>
         </Grid.RowDefinitions>
-        <ComboBox
+        <ComboBox      x:Name="SuggestionsComboBox"
                        Grid.Column="0"
                        ItemsSource="{Binding ComboBoxList}"
                        IsDropDownOpen="{Binding ComboBoxDropDown,Mode=TwoWay}"
@@ -129,11 +129,12 @@
                        PreviewKeyDown="ComboBox_PreviewKeyDown"
                        VerticalAlignment="Center" Height="27"
                        TabIndex="0"/>
-        <Button
+        <Button x:Name="SuggestionsButton"
                 Grid.Row="1" 
                 Margin="10"
                 Command="{Binding OKCommand}"
                 Content="{Binding ActionName}"
+                Click="eButton_Click"
                 TabIndex="1"/>
     </Grid>
 </UserControl>
