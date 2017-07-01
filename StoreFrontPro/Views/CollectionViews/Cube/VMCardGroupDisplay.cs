@@ -94,7 +94,7 @@ namespace StoreFrontPro.Views.CollectionViews.Cube
                 int i = 0;
                 for (; i < CategoryGroups.Count(); i++)
                 {
-                    if (((VMCardGroupList)CategoryGroups[i].DataContext).GroupName.Length > ((VMCardGroupList)VList.DataContext).GroupName.Length)
+                    if (((VMCardGroupList)VList.DataContext).GroupName.Length <= ((VMCardGroupList)CategoryGroups[i].DataContext).GroupName.Length)
                     {
                         break;
                     }
@@ -102,10 +102,14 @@ namespace StoreFrontPro.Views.CollectionViews.Cube
 
                 if ( i == CategoryGroups.Count() - 1)
                 {
-                    i++;
+                    CategoryGroups.Add(VList);
+                }
+                else
+                {
+                    CategoryGroups.Insert(i, VList);
                 }
 
-                CategoryGroups.Insert(i, VList);
+                
             }
         }
     }
