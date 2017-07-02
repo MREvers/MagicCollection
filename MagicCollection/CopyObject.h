@@ -26,7 +26,7 @@ public:
 		std::map<std::string, std::vector<std::string>>* alstRestrictions);
 
 	// Non-unique in the sense that the trait itself can have more than one value.
-	std::vector<std::pair<std::string, std::string>> GetNonUniqueTraits(bool bWithParent);
+	std::vector<std::pair<std::string, std::string>> GetNonUniqueTraits(bool bWithParent) const;
 
 	// Attr Controlling Function
 	void SetPairedTraitsReference(std::vector<std::pair<std::string, std::string>>* aLstPairedTraits);
@@ -35,7 +35,7 @@ public:
 	void AddResidentCollection(std::string aszCollectionName);
 
 	// Meta Tag Controlling Functions
-	std::vector<std::pair<std::string, std::string>> GetMetaTags(std::string aszCollection);
+	std::vector<std::pair<std::string, std::string>> GetMetaTags(std::string aszCollection) const;
 	std::pair<std::string, std::string> GetMetaTag(std::string aszCollection, std::string aszKey);
 	bool IsPerCollectionTag(std::string aszKeyName);
 	void RemoveMetaTag(std::string aszCollection, std::string aszKey);
@@ -45,6 +45,8 @@ public:
 	bool HasPerCollectionTag(std::string aszCollection, std::string aszKey);
 
 	void SetNonUniqueAttr(std::string aszKey, std::string aszValue);
+
+	static std::string GetHash(CopyObject const * aoHashing);
 
 private:
 	std::vector<std::pair<std::string, std::string>>* m_LstPairedTraits;

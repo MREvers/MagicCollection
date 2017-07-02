@@ -129,16 +129,12 @@ bool CollectionObject::RemoveCopy(std::string aszCollectionName,
 	CopyObject oNewCopy = GenerateCopy(aszCollectionName, alstAttrs, alstMeta);
 	for (std::vector<CopyObject>::iterator iter = m_lstCopies.begin(); iter != m_lstCopies.end(); ++iter)
 	{
-		if (IsSameIdentity(&oNewCopy, &(*iter)))
+		if (IsSameIdentity(&oNewCopy, &(*iter)) &&
+			IsSameMetaTags(iter->GetMetaTags(aszCollectionName), alstMeta))
 		{
-			if (IsSameMetaTags(iter->GetMetaTags(aszCollectionName), alstMeta))
-			{
-				m_lstCopies.erase(iter);
-				return true;
-			}
-
+			m_lstCopies.erase(iter);
+			return true;
 		}
-
 	}
 
 	return false;
@@ -249,7 +245,6 @@ bool CollectionObject::FindCopy(
 				roCO = *iter_copies;
 				break;
 			}
-
 		}
 	}
 

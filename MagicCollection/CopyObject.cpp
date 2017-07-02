@@ -17,7 +17,7 @@ CopyObject::CopyObject(
 	}
 }
 
-std::vector<std::pair<std::string, std::string>> CopyObject::GetNonUniqueTraits(bool bWithParent)
+std::vector<std::pair<std::string, std::string>>  CopyObject::GetNonUniqueTraits(bool bWithParent) const
 {
 	std::vector<std::pair<std::string, std::string>> lstRetVal;
 	lstRetVal = ListHelper::ConvertMapToList(NonUniqueTraits);
@@ -45,15 +45,15 @@ void CopyObject::AddResidentCollection(std::string aszCollectionName)
 	}
 }
 
-std::vector<std::pair<std::string, std::string>> CopyObject::GetMetaTags(std::string aszCollection)
+std::vector<std::pair<std::string, std::string>> CopyObject::GetMetaTags(std::string aszCollection) const
 {
 	std::vector<std::pair<std::string, std::string>> lstRetVal;
 	if (PerCollectionMetaTags.find(aszCollection) != PerCollectionMetaTags.end())
 	{
-		lstRetVal = PerCollectionMetaTags[aszCollection];
+		lstRetVal = PerCollectionMetaTags.at(aszCollection);
 	}
 
-	std::vector<std::pair<std::string, std::string>>::iterator iter_NUTags = MetaTags.begin();
+	std::vector<std::pair<std::string, std::string>>::const_iterator iter_NUTags = MetaTags.begin();
 	for (; iter_NUTags != MetaTags.end(); ++iter_NUTags)
 	{
 		lstRetVal.push_back(*iter_NUTags);
@@ -211,7 +211,7 @@ bool CopyObject::HasPerCollectionTag(std::string aszCollection, std::string aszK
 		{
 			if (iter_Tags->first == aszKey)
 			{
-				return true;
+			return true;
 			}
 		}
 	}
@@ -300,4 +300,29 @@ void CopyObject::SetNonUniqueAttr(std::string aszKey, std::string aszValue)
 		}
 
 	}
+}
+
+std::string CopyObject::GetHash(CopyObject const * aoHashing)
+{
+	std::vector<std::pair<std::string, std::string>> lstIdentifiers = aoHashing->GetNonUniqueTraits(false);
+	std::vector<std::pair<std::string, std::string>> lstMetaTags = aoHashing->GetMetaTags(aoHashing->ParentCollection);
+
+	std::vector<std::pair<std::string, std::string>>::const_iterator iter_tags;
+
+	std::string szSourceString = "";
+
+	iter_tags = lstIdentifiers.begin();
+	for (; iter_tags != lstIdentifiers.end(); ++iter_tags) 
+	{
+		szSourceString.append(iter_tags->second);
+	}
+
+	iter_tags = lstMetaTags.begin();
+	for (; iter_tags != lstMetaTags.end(); ++iter_tags)
+	{
+		szSourceString.append(iter_tags->first);
+		szSourceString.append(iter_tags->second);
+	}
+
+	return Config::Instance()->GetHash(szSourceString);
 }

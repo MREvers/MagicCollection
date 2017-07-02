@@ -7,6 +7,7 @@
 #include "rapidxml-1.13\rapidxml_print.hpp"
 #include "rapidxml-1.13\rapidxml.hpp"
 #include "rapidxml-1.13\rapidxml_utils.hpp"
+#include "MD5.h"
 
 class Config
 {
@@ -25,6 +26,8 @@ public:
 
 	std::string GetKeyCode(std::string aszFullKey);
 	std::string GetFullKey(std::string aszKeyCode);
+
+	std::string GetHash(std::string& const aszHashingString);
 
 	std::vector<std::pair<std::string, std::string>>& GetPairedKeysList();
 	std::vector < std::string>& GetIdentifyingAttributes();

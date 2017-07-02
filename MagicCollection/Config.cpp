@@ -89,6 +89,14 @@ std::string Config::GetFullKey(std::string aszKeyCode)
 	return "";
 }
 
+std::string Config::GetHash(std::string& const aszHashingString)
+{
+	MD5* md5Hasher = new MD5(aszHashingString);
+	std::string szResult = md5Hasher->hexdigest();
+	delete md5Hasher;
+	return szResult;
+}
+
 std::vector<std::pair<std::string, std::string>>& Config::GetPairedKeysList()
 {
 	return m_lstPairedKeys;
