@@ -16,7 +16,6 @@ class MetaTag
 public:
 	MetaTag(Tag aTag, MetaTagType atagType);
 	MetaTag(std::string aszKey, std::string aszVal, MetaTagType atagType);
-	~MetaTag();
 
 	std::string GetKey();
 	std::string GetVal(MetaTagType atagType = Any);

@@ -14,7 +14,7 @@ namespace StoreFrontPro.Server
         public List<CardModel> CollectionItems;
         public List<CardModel> LstLastQuery;
 
-        public CollectionModel(string aszName, List<Tuple<string, List<Tuple<string, string>>>> aLstCards)
+        public CollectionModel(string aszName, List<string> aLstCards)
         {
             CollectionName = aszName;
             CollectionItems = new List<CardModel>();
@@ -23,15 +23,14 @@ namespace StoreFrontPro.Server
 
         }
 
-        public void BuildCopyModelList(List<Tuple<string, List<Tuple<string, string>>>> aLstCards, Action aCallback = null)
+        public void BuildCopyModelList(List<string> aLstCards, Action aCallback = null)
         {
             CollectionItems.Clear();
             foreach (var LongNameTagsPair in aLstCards)
             {
                 ServerInterface.Server.GenerateCopyModel(
-                    LongName: LongNameTagsPair.Item1,
+                    Identifier: LongNameTagsPair,
                     CollectionName: CollectionName,
-                    MetaTags: LongNameTagsPair.Item2,
                     Callback: (aoCardModel) => { CollectionItems.Add(aoCardModel);  },
                     UICallback: false);
             }

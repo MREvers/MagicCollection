@@ -37,7 +37,7 @@ namespace StoreFrontPro.Server
                 if (szColName != "")
                 {
                     // List of [ { CardNameLong, [Tags, ...] }, ... ]
-                    List<Tuple<string, List<Tuple<string, string>>>> lstCards = SCI.GetCollectionListWithMeta(szColName);
+                    List<string> lstCards = SCI.GetCollectionListWithMeta(szColName);
                     CollectionModel newCM = new CollectionModel(szColName, lstCards);
                     CollectionModel currentCM = m_lstCollectionModels.FirstOrDefault(x => x.CollectionName == szColName);
                     if (currentCM == null)
@@ -51,32 +51,42 @@ namespace StoreFrontPro.Server
                 }
             }
 
-            public void GenerateCopyModel(string LongName,
+            public void GenerateCopyModel(string Identifier,
                 string CollectionName, 
-                List<Tuple<string, string>> MetaTags, 
                 Action<CardModel> Callback,
                 bool UICallback = false)
             {
                 singleton.enqueueService(() =>
                 {
-                    Callback(inGenerateCopyModel(LongName, CollectionName, MetaTags));
+                    Callback(inGenerateCopyModel(Identifier, CollectionName));
                 }, UICallback);
             }
 
-            private CardModel inGenerateCopyModel(string aszCardNameLong, string aszCollectionName, List<Tuple<string, string>> aLstMetaTags)
+            private CardModel inGenerateCopyModel(string aszIdentifier, string aszCollectionName)
             {
-                // Really, this SCI function just parses the long name.
-                MCopyObject oParsed = SCI.ConvertItemToCopyObject(aszCardNameLong);
-                List<Tuple<string, string>> lstIdentifiedAttrs =
-                    SCI.GetCardAttributes(aszCardNameLong);
+                List<string> lstSplit = aszIdentifier.Split(':').ToList();
+                string szLongName = lstSplit[0];
+                string szMetaTags = "";
+                if (lstSplit.Count > 0)
+                {
+                    szMetaTags = lstSplit[1];
+                }
+
+                List<string> lstNameAttrs = szLongName.Split('{').ToList();
+                string szName = lstNameAttrs[0];
+                string szDetails = "";
+                if (lstNameAttrs.Count > 0)
+                {
+                    szDetails = lstNameAttrs[1];
+                }
+
                 // We also need the rest identified attrs
                 CardModel CopyM = new CardModel(
-                    oParsed.Name,
+                    szName,
                     aszCollectionName,
-                    oParsed.Attributes.Select(x => new Tuple<string, string>(x.Key, x.Value)).ToList(),
-                    lstIdentifiedAttrs,
-                    aLstMetaTags);
-                CopyM.SetAuxData(oParsed.Amount, aszCardNameLong);
+                    new List<Tuple<string, string>>(),
+                    new List<Tuple<string, string>>(),
+                    new List<Tuple<string, string>>());
 
                 return CopyM;
             }
@@ -141,8 +151,8 @@ namespace StoreFrontPro.Server
 
             public void CreateCollection(string aszName)
             {
-                SCI.CreateCollection(aszName);
-                GenerateCollectionModel(aszName + ".txt");
+                //SCI.CreateCollection(aszName);
+                //GenerateCollectionModel(aszName + ".txt");
             }
 
             /// <summary>

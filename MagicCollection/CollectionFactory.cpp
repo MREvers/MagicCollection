@@ -13,7 +13,7 @@ CollectionFactory::~CollectionFactory()
 {
 }
 
-ItemCollection* CollectionFactory::LoadCollectionFromFile(std::string aszFileName)
+std::string CollectionFactory::LoadCollectionFromFile(std::string aszFileName)
 {
 	std::vector<std::pair<std::string, std::string>> lstForcedChanges;
 	std::pair<std::string,std::string> pairColNameParent = GetCollectionNameAndParentFromFile(aszFileName);
@@ -23,17 +23,7 @@ ItemCollection* CollectionFactory::LoadCollectionFromFile(std::string aszFileNam
 	{
 		ItemCollection* oCol = FindOrGenerateCollection(szColName);
 		oCol->LoadCollection(aszFileName);
-
-		std::vector<std::pair<std::string, std::string>>::iterator iter_change = lstForcedChanges.begin();
-		for (; iter_change != lstForcedChanges.end(); ++iter_change)
-		{
-			if (CollectionExists(iter_change->first))
-			{
-				ItemCollection* oChangedCol = FindOrGenerateCollection(iter_change->first, szParentName);
-			}
-		}
-		return oCol;
-
+		return szColName;
 	}
 	return nullptr;
 }

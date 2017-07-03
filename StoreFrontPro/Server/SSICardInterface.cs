@@ -34,12 +34,12 @@ namespace StoreFrontPro.Server
                 {
                     return false;
                 }
-                return SCI.IsSameIdentity(aoCardOne.CardNameLong, aoCardTwo.CardNameLong);
+                return false;// SCI.IsSameIdentity(aoCardOne.CardNameLong, aoCardTwo.CardNameLong);
             }
 
             public bool AreMetaTagsSame(List<Tuple<string, string>> alstTupOne, List<Tuple<string, string>> alstTupTwo)
             {
-                return SCI.IsSameMetaTags(alstTupOne, alstTupTwo);
+                return false;// SCI.IsSameMetaTags(alstTupOne, alstTupTwo);
             }
 
             public void AddMetaTag(string aszCollectionName,
@@ -48,13 +48,13 @@ namespace StoreFrontPro.Server
                 string aszVal,
                 List<Tuple<string, string>> aLstMatchMeta)
             {
-                SCI.AddMetaTag(aszCollectionName, aszLongCardName, aszKey, aszVal, aLstMatchMeta);
+                //SCI.AddMetaTag(aszCollectionName, aszLongCardName, aszKey, aszVal, aLstMatchMeta);
             }
 
             public void SubmitMetaTagChangesToServer(string aszCollectionName, string aszLongName,
                 List<Tuple<string, string>> alstNewMeta, List<Tuple<string, string>> alstMeta)
             {
-                SCI.SetMetaTags(aszCollectionName, aszLongName, alstNewMeta, alstMeta);
+                //SCI.SetMetaTags(aszCollectionName, aszLongName, alstNewMeta, alstMeta);
             }
 
             public void SubmitFeatureChangesToServer(string aszCollectionName, string aszLongName,
@@ -62,7 +62,7 @@ namespace StoreFrontPro.Server
                 List<Tuple<string, string>> alstNewAttrs,
                 List<Tuple<string, string>> alstMeta)
             {
-                SCI.SetFeatures(aszCollectionName, aszLongName, alstNewMeta, alstNewAttrs, alstMeta);
+                //SCI.SetFeatures(aszCollectionName, aszLongName, alstNewMeta, alstNewAttrs, alstMeta);
             }
 
             public void RemoveMetaTag(string aszCollectionName,
@@ -70,7 +70,7 @@ namespace StoreFrontPro.Server
                 string aszKey,
                 List<Tuple<string, string>> aLstMatchMeta)
             {
-                SCI.RemoveMetaTag(aszCollectionName, aszLongCardName, aszKey, aLstMatchMeta);
+                //SCI.RemoveMetaTag(aszCollectionName, aszLongCardName, aszKey, aLstMatchMeta);
             }
 
             // Passes the image to the callback.
@@ -130,7 +130,7 @@ namespace StoreFrontPro.Server
             // Use sparingly. Eventually include attributes in metatags?
             public List<string> GetCardAttributesRestrictions(string aszLongName, string aszKey)
             {
-                return SCI.GetCardAttributeRestrictions(aszLongName, aszKey);
+                return null;//SCI.GetCardAttributeRestrictions(aszLongName, aszKey);
             }
 
             private void loadImageFromFile(string aszFileName, Action<BitmapImage> aCallback)

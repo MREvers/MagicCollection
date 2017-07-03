@@ -2,8 +2,7 @@
 #using <mscorlib.dll>
 #using <System.dll>
 #include <msclr\marshal_cppstd.h>
-#include "../MagicCollection/StoreFrontBackEnd.h"
-
+#include "..\MagicCollection\StoreFrontBackEnd.h"
 // This class is how the C# client will access the native c++ code.
 // There is a native ServerIFace class that exposes members for this class.
 // This "Wraps" the native Server IFace Class.
@@ -14,11 +13,6 @@ public:
 	ServerClientInterface();
 	~ServerClientInterface();
 
-	/* LoadCollection
-	*  Loads specified collection into memory by file name. If fail, return an empty string.
-	*  @param aszCollectionToLoad
-	*  @return Name of collection if successful, "" if not.
-	*/
 	System::String^ 
       LoadCollection(System::String^ aszCollectionName);
 
@@ -44,6 +38,6 @@ private:
       tupleListToVector(System::Collections::Generic::List<System::Tuple<System::String^, System::String^>^>^ hlstMetaTagsOne);
    std::vector<std::string>
       stringListToVector(System::Collections::Generic::List<System::String^>^ hlstChanges);
-
+  
 };
 

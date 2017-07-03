@@ -17,7 +17,7 @@ CStoreFrontBackEnd::~CStoreFrontBackEnd()
 
 std::string CStoreFrontBackEnd::LoadCollection(std::string aszCollectionFile)
 {
-	return m_ColFactory->LoadCollectionFromFile(aszCollectionFile)->GetName();
+	return m_ColFactory->LoadCollectionFromFile(aszCollectionFile);
 }
 
 std::vector<std::string> CStoreFrontBackEnd::GetLoadedCollections()

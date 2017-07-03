@@ -142,7 +142,7 @@ void ItemCollection::LoadCollection(std::string aszFileName)
 	std::vector<std::string> lstPreprocessLines;
 	std::vector<std::string> lstCardLines = loader.GetPreprocessLines(lstLines, lstPreprocessLines);
 
-	loadPreprocessingLines(lstPreprocessLines);
+	//loadPreprocessingLines(lstPreprocessLines);
 
 	loadLines(lstCardLines);
 

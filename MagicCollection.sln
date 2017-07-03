@@ -8,6 +8,9 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ServerInterface", "ServerInterface\ServerInterface.vcxproj", "{B3E17E4D-3395-42FB-BF66-0AF21C59DB36}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StoreFrontPro", "StoreFrontPro\StoreFrontPro.csproj", "{8D211318-BFE3-4F35-AC68-613176B92162}"
+	ProjectSection(ProjectDependencies) = postProject
+		{D6BC9C69-9220-4F9A-A83B-31C7B97EA5D4} = {D6BC9C69-9220-4F9A-A83B-31C7B97EA5D4}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

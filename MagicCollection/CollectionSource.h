@@ -13,6 +13,7 @@
 #include <algorithm>
 #include <ctime>
 
+#include "MetaTag.h"
 #include "SourceObject.h"
 #include "CollectionItem.h"
 #include "Config.h"

@@ -10,7 +10,6 @@ ServerClientInterface::~ServerClientInterface()
 
 }
 
-
 System::String^ ServerClientInterface::LoadCollection(System::String^ ahszCollectionFileName)
 {
 	std::string szCollectionFileName = msclr::interop::marshal_as<std::string>(ahszCollectionFileName);
@@ -28,12 +27,11 @@ ServerClientInterface::GetImagesPath()
 System::Collections::Generic::List<System::String^>^
 ServerClientInterface::GetCollectionListWithMeta(System::String^ ahszCollectionName)
 {
-	System::Collections::Generic::List<System::String^>^ hlstCollection;
-
 	std::string szCollectionName = msclr::interop::marshal_as<std::string>(ahszCollectionName);
 
 	std::vector<std::string> lstCollection = m_StoreFrontBackEnd->GetCollectionList(szCollectionName);
 
+	System::Collections::Generic::List<System::String^>^ hlstCollection;
 	hlstCollection = stringVectorToList(lstCollection);
 
 	return hlstCollection;

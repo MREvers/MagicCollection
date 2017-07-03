@@ -1,7 +1,5 @@
 #include "MetaTag.h"
 
-
-
 MetaTag::MetaTag(Tag aTag, MetaTagType atagType)
 {
 	m_Type = atagType;
@@ -10,11 +8,6 @@ MetaTag::MetaTag(Tag aTag, MetaTagType atagType)
 
 MetaTag::MetaTag(std::string aszKey, std::string aszVal, MetaTagType atagType) :
 	MetaTag(std::make_pair(aszKey, aszVal), atagType)
-{
-}
-
-
-MetaTag::~MetaTag()
 {
 }
 

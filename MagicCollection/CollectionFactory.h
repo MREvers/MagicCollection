@@ -17,7 +17,7 @@ public:
    *  @Param aszColFile File name of collection to load.
    *  @return Pointer to a successfully loaded collection, nullptr if fail.
    */
-   ItemCollection* LoadCollectionFromFile( std::string aszColFile);
+   std::string LoadCollectionFromFile( std::string aszColFile);
 
    std::vector<std::string> GetLoadedCollections();
 

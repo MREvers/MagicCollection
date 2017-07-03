@@ -15,23 +15,23 @@ namespace StoreFrontPro.Server
             {
                 singleton.enqueueService(() =>
                 {
-                    SCI.SaveCollection(aszCollectionName);
+                    //SCI.SaveCollection(aszCollectionName);
                 });
             }
 
             public void AddItem(string aszCollectionName, string aszCardNameLong, List<Tuple<string, string>> lstMeta)
             {
-                SCI.AddItem(aszCollectionName, aszCardNameLong, lstMeta);
+                //SCI.AddItem(aszCollectionName, aszCardNameLong, lstMeta);
             }
 
             public void RemoveItem(string aszCollectionName, string aszCardNameLong, List<Tuple<string, string>> lstMeta)
             {
-                SCI.RemoveItem(aszCollectionName, aszCardNameLong, lstMeta);
+                //SCI.RemoveItem(aszCollectionName, aszCardNameLong, lstMeta);
             }
 
             public void SetBaselineHistory(string aszCollection)
             {
-                SCI.SetBaselineHistory(aszCollection);
+                //SCI.SetBaselineHistory(aszCollection);
             }
 
             public void LoadBulkChanges(string aszCollection, List<string> alstChanges, Action aTask, bool UICallback = false)
@@ -40,7 +40,7 @@ namespace StoreFrontPro.Server
                 {
                     if (alstChanges != null)
                     {
-                        SCI.LoadBulkChanges(aszCollection, alstChanges);
+                        //SCI.LoadBulkChanges(aszCollection, alstChanges);
                         aTask();
                     }
                 }, UICallback);
@@ -56,7 +56,7 @@ namespace StoreFrontPro.Server
                 if (ServerInterface.Server.GetCollectionModel(aszCollectionName) != null)
                 {
                     // List of [ { CardNameLong, [Tags, ...] }, ... ]
-                    List<Tuple<string, List<Tuple<string, string>>>> lstCards =
+                    List<string> lstCards =
                         SCI.GetCollectionListWithMeta(aszCollectionName);
                     CollectionModel CMCurrent = Server.GetCollectionModels().FirstOrDefault(x => x.CollectionName == aszCollectionName);
                     if (CMCurrent != null)

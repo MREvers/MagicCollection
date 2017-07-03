@@ -79,7 +79,6 @@
     </CollectionDefinitions>
     <Startup>
       <FileName>Primary</FileName>
-      <FileName>Main</FileName>
     </Startup>
   </Collection>
   <Images>
