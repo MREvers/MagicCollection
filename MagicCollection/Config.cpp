@@ -10,7 +10,7 @@ const char * const CollectionObject::LstNonUniqueTraits[] = { "set", "multiverse
 Config* Config::ms_pConfig = nullptr;
 char* Config::HashKey = "__hash";
 char* Config::NotFoundString = "NF";
-char* Config::CollectionDefinitionKey = ":=";
+char* Config::CollectionDefinitionKey = ":";
 
 Config::Config()
 {

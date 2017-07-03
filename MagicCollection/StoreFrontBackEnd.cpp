@@ -49,3 +49,9 @@ std::string CStoreFrontBackEnd::GetImagesPath()
 {
 	return Config::Instance()->GetImagesFolder();
 }
+
+void CStoreFrontBackEnd::ImportCollection()
+{
+	JSONImporter JI;
+	JI.ImportJSON(Config::Instance()->GetImportSourceFile());
+}

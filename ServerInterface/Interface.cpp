@@ -68,7 +68,7 @@ System::Collections::Generic::List<System::String^>^ ServerClientInterface::GetA
 
 void ServerClientInterface::ImportCollection()
 {
-	//m_StoreFrontBackEnd->ImportCollection();
+	m_StoreFrontBackEnd->ImportCollection();
 }
 
 System::Collections::Generic::List<System::String^>^ 

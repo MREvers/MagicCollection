@@ -31,7 +31,7 @@ void ItemCollection::AddItem(std::string aszName,
 		CollectionItem* item = m_ptrCollectionSource->GetCardPrototype(iValidItem);
 
 		// This is needed for removal
-		std::string szHash = item->GetHash(aszName, alstAttrs, alstMetaTags);
+		std::string szHash = item->GetHash(m_szName, alstAttrs, alstMetaTags);
 
 		std::function<void()> fnDo;
 		fnDo = std::bind(&ItemCollection::addItem, this, aszName, alstAttrs, alstMetaTags);
@@ -330,7 +330,7 @@ void ItemCollection::loadAdditionLine(std::string aszLine)
 
 	std::vector<Tag> lstIdentifiers = sudoItem.Identifiers;
 
-
+	AddItem(sudoItem.Name, lstIdentifiers, lstMetaTags);
 }
 
 void ItemCollection::loadRemoveLine(std::string aszLine)

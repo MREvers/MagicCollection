@@ -23,6 +23,8 @@ public:
    std::vector<std::string> GetAllCardsStartingWith(std::string aszSearch);
 
    std::string GetImagesPath();
+   
+   void ImportCollection();
 
 private:
    CollectionFactory* m_ColFactory; // This will be the main interaction.

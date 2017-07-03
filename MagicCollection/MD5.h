@@ -35,6 +35,9 @@ documentation and/or software.
 
 #include <cstring>
 #include <iostream>
+#include <iomanip>
+#include <sstream>
+#include <string>
 
 
 // a small class for calculating MD5 hashes of strings or byte arrays

@@ -46,7 +46,7 @@ std::string CopyItem::GetHash()
 		m_lstMetaTags,
 		fnExtractor);
 
-	if (iMetaHash != -1)
+	if (iMetaHash == -1)
 	{
 		std::string szHashString = "";
 		std::vector<Tag>::iterator iter_Tags = m_lstIdentifyingTags.begin();
@@ -62,10 +62,10 @@ std::string CopyItem::GetHash()
 		{
 			szHashString += iter_MetaTags->GetKey() + iter_MetaTags->GetVal();
 		}
+		std::string szHash = Config::Instance()->GetHash(szHashString);
+		AddMetaTag(Config::HashKey, szHash, Hidden);
 
-		AddMetaTag(Config::HashKey, szHashString, Hidden);
-
-		return Config::Instance()->GetHash(szHashString);
+		return szHash;
 	}
 	else
 	{
