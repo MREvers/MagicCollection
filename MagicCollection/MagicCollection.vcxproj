@@ -155,9 +155,11 @@
   <ItemGroup>
     <ClCompile Include="Collection.cpp" />
     <ClCompile Include="CollectionFactory.cpp" />
+    <ClCompile Include="CollectionItem.cpp" />
     <ClCompile Include="CollectionObject.cpp" />
     <ClCompile Include="CollectionSource.cpp" />
     <ClCompile Include="Config.cpp" />
+    <ClCompile Include="CopyItem.cpp" />
     <ClCompile Include="CopyObject.cpp" />
     <ClCompile Include="jsoncpp.cpp" />
     <ClCompile Include="JSONImporter.cpp">
@@ -166,6 +168,7 @@
     <ClCompile Include="ListHelper.cpp" />
     <ClCompile Include="MagicCollection.cpp" />
     <ClCompile Include="MD5.cpp" />
+    <ClCompile Include="MetaTag.cpp" />
     <ClCompile Include="PseudoCopy.cpp" />
     <ClCompile Include="ServerIFace.cpp" />
     <ClCompile Include="ServerIFace\ClientSocket.cpp" />
@@ -183,13 +186,16 @@
     <ClInclude Include="Action.h" />
     <ClInclude Include="Collection.h" />
     <ClInclude Include="CollectionFactory.h" />
+    <ClInclude Include="CollectionItem.h" />
     <ClInclude Include="CollectionObject.h" />
     <ClInclude Include="CollectionSource.h" />
     <ClInclude Include="Config.h" />
+    <ClInclude Include="CopyItem.h" />
     <ClInclude Include="CopyObject.h" />
     <ClInclude Include="JSONImporter.h" />
     <ClInclude Include="ListHelper.h" />
     <ClInclude Include="MD5.h" />
+    <ClInclude Include="MetaTag.h" />
     <ClInclude Include="PseudoCopy.h" />
     <ClInclude Include="ServerIFace.h" />
     <ClInclude Include="ServerIFace\ClientSocket.h" />

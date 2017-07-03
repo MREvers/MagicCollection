@@ -94,6 +94,7 @@ int CollectionSource::LoadCard(std::string aszCardName)
 	if (iCacheLocation == -1)
 	{
 		// Look in the Source Object Buffer for a matching item.
+		// If the card is found in the buffer, create a CollectionObject and cache it.
 		int iFound = findInBuffer(szCardName, false);
 		if (iFound != -1)
 		{

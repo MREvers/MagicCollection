@@ -4,10 +4,14 @@
 #include <fstream>
 #include <sstream>
 #include <iostream>
+#include <functional>
+
 #include "rapidxml-1.13\rapidxml_print.hpp"
 #include "rapidxml-1.13\rapidxml.hpp"
 #include "rapidxml-1.13\rapidxml_utils.hpp"
 #include "MD5.h"
+
+typedef std::pair<std::string, std::string> Tag;
 
 class Config
 {
@@ -29,8 +33,8 @@ public:
 
 	std::string GetHash(std::string& const aszHashingString);
 
-	std::vector<std::pair<std::string, std::string>>& GetPairedKeysList();
-	std::vector < std::string>& GetIdentifyingAttributes();
+	std::vector<Tag>& GetPairedKeysList();
+	std::vector<std::string>& GetIdentifyingAttributes();
 	std::vector<std::string>& GetStaticAttributes();
 	std::vector<std::string>& GetPerCollectionMetaTags();
 
@@ -42,12 +46,14 @@ public:
 	template<typename T>
 	int List_Find(T aiFind, std::vector<T>& alstFindList);
 	int List_Find(std::string aszFind, std::vector<std::pair<std::string, std::string>>& alstFindList);
+	template<class T, class R >
+	int List_Find(T aiFind, std::vector<R> alstFindList, std::function<T (R)> afuncExtractor);
 
 	static Config* Instance();
 
 private:
-	std::vector<std::pair<std::string, std::string>> m_lstKeyCodeMappings;
-	std::vector<std::pair<std::string, std::string>> m_lstPairedKeys;
+	std::vector<Tag> m_lstKeyCodeMappings;
+	std::vector<Tag> m_lstPairedKeys;
 	std::vector<std::string> m_lstIdentifyingAttributes;
 	std::vector<std::string> m_lstStaticAttributes;
 	std::vector<std::string> m_lstPerCollectionMetaTags;
