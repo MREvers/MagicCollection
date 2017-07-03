@@ -31,7 +31,7 @@ public:
 	std::string GetKeyCode(std::string aszFullKey);
 	std::string GetFullKey(std::string aszKeyCode);
 
-	std::string GetHash(std::string& const aszHashingString);
+	std::string GetHash(std::string& aszHashingString);
 
 	std::vector<Tag>& GetPairedKeysList();
 	std::vector<std::string>& GetIdentifyingAttributes();
@@ -46,8 +46,35 @@ public:
 	template<typename T>
 	int List_Find(T aiFind, std::vector<T>& alstFindList);
 	int List_Find(std::string aszFind, std::vector<std::pair<std::string, std::string>>& alstFindList);
-	template<class T, class R >
-	int List_Find(T aiFind, std::vector<R> alstFindList, std::function<T (R)> afuncExtractor);
+
+	template<class T, class R>
+	int List_Find(T& aiFind, std::vector<R>& alstFindList, std::function<T (R)> afuncExtractor)
+	{
+		std::vector<R>::iterator iter_list = alstFindList.begin();
+		int index = 0;
+		for (; iter_list != alstFindList.end(); iter_list++)
+		{
+			if (aiFind == afuncExtractor(*iter_list))
+			{
+				return index;
+			}
+			index++;
+		}
+		return -1;
+	}
+
+	template<class T> inline
+	void List_Insert(T& aInsert, std::vector<T>& alstInsertList, std::function<int(T, T)> afuncComparer)
+	{
+		std::vector<T>::iterator iter = alstInsertList.begin();
+		for (; iter != alstInsertList.end(); ++iter)
+		{
+			int iCmp = afuncComparer(aInsert, *iter);
+			if (iCmp >= 0) { break; }
+		}
+
+		alstInsertList.insert(iter, aInsert);
+	}
 
 	static Config* Instance();
 

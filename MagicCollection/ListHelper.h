@@ -10,6 +10,7 @@ public:
 	ListHelper();
 	~ListHelper();
 
+
 	static 
 		std::vector<std::pair<std::string, std::string>>
 		ConvertMapToList(std::map<std::string, std::string>  aMap);

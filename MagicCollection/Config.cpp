@@ -89,7 +89,7 @@ std::string Config::GetFullKey(std::string aszKeyCode)
 	return "";
 }
 
-std::string Config::GetHash(std::string& const aszHashingString)
+std::string Config::GetHash(std::string& aszHashingString)
 {
 	MD5* md5Hasher = new MD5(aszHashingString);
 	std::string szResult = md5Hasher->hexdigest();
@@ -159,24 +159,6 @@ int Config::List_Find(std::string aszFind, std::vector<std::pair<std::string, st
 	for (; iter_list != alstFindList.end(); iter_list++)
 	{
 		if (iter_list->first == aszFind || iter_list->second == aszFind)
-		{
-			return index;
-		}
-		index++;
-	}
-	return -1;
-}
-
-
-
-template<class T, class R>
-int Config::List_Find(T aiFind, std::vector<R> alstFindList, std::function<T(R)> afuncExtractor)
-{
-	std::vector<R>::iterator iter_list = alstFindList.begin();
-	int index = 0;
-	for (; iter_list != alstFindList.end(); iter_list++)
-	{
-		if (aiFind == afuncExtractor(*iter_list))
 		{
 			return index;
 		}

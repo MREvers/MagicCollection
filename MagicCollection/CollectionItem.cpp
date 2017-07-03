@@ -21,7 +21,7 @@ CopyObject* CollectionItem::AddCopyItem(std::string aszCollectionName,
 	std::vector<std::pair<std::string, std::string>> alstAttrs,
 	std::vector<std::pair<std::string, std::string>> alstMetaTags)
 {
-
+	return nullptr;
 }
 
 CopyObject* CollectionItem::FindCopyItem(std::string aszHash)
@@ -32,4 +32,6 @@ CopyObject* CollectionItem::FindCopyItem(std::string aszHash)
 	{
 
 	}
+
+	return nullptr;
 }

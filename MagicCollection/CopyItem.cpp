@@ -17,7 +17,7 @@ std::string CopyItem::GetHash()
 		= [](MetaTag tag)-> std::string { return tag.GetKey(); };
 	int iMetaHash = Config::Instance()->List_Find(
 		std::string("__Hash"),
-		m_lstMetaTag,
+		m_lstMetaTags,
 		fnExtractor);
 
 	if (iMetaHash != -1)
@@ -31,8 +31,8 @@ std::string CopyItem::GetHash()
 			szHashString += iter_Tags->second;
 		}
 
-		std::vector<MetaTag>::iterator iter_MetaTags = m_lstMetaTag.begin();
-		for (; iter_MetaTags != m_lstMetaTag.end(); ++iter_MetaTags)
+		std::vector<MetaTag>::iterator iter_MetaTags = m_lstMetaTags.begin();
+		for (; iter_MetaTags != m_lstMetaTags.end(); ++iter_MetaTags)
 		{
 			szHashString += iter_MetaTags->GetKey() + iter_MetaTags->GetVal();
 		}
@@ -41,8 +41,14 @@ std::string CopyItem::GetHash()
 	}
 	else
 	{
-		return m_lstMetaTag[iMetaHash].GetVal();
+		return m_lstMetaTags[iMetaHash].GetVal();
 	}
+}
 
-
+void CopyItem::AddMetaTag(std::string aszKey, std::string aszVal, MetaTagType atagType)
+{
+	MetaTag newMeta(aszKey, aszVal, atagType);
+	std::function<int(MetaTag, MetaTag)> fnComparer =
+		[](MetaTag atag1, MetaTag atag2)-> int {return atag1.GetKey().compare(atag2.GetKey()); };
+	Config::Instance()->List_Insert(newMeta, m_lstMetaTags, fnComparer);
 }
