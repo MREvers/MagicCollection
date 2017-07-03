@@ -30,12 +30,6 @@
     <ClCompile Include="MagicCollection.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Collection.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="CollectionObject.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="CollectionSource.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -81,13 +75,7 @@
     <ClCompile Include="jsoncpp.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="PseudoCopy.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Transaction.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="CopyObject.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ListHelper.cpp">
@@ -105,14 +93,20 @@
     <ClCompile Include="MetaTag.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="TraitItem.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ItemCollection.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CollectionIO.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Action.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Collection.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="CollectionObject.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="CollectionSource.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -155,16 +149,10 @@
     <ClInclude Include="Config.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="PseudoCopy.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Action.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Transaction.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="CopyObject.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ListHelper.h">
@@ -180,6 +168,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="MetaTag.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TraitItem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ItemCollection.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CollectionIO.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

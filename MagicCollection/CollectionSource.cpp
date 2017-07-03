@@ -1,4 +1,3 @@
-
 #include "CollectionSource.h"
 CollectionSource::CollectionSource()
 {
@@ -94,20 +93,19 @@ int CollectionSource::LoadCard(std::string aszCardName)
 	if (iCacheLocation == -1)
 	{
 		// Look in the Source Object Buffer for a matching item.
-		// If the card is found in the buffer, create a CollectionObject and cache it.
+		// If the card is found in the buffer, create a CollectionItem and cache it.
 		int iFound = findInBuffer(szCardName, false);
 		if (iFound != -1)
 		{
 			SourceObject* oSource = &m_lstCardBuffer.at(iFound);
 
-			// The card is already cached.
-			CollectionObject oCard(aszCardName);
-			std::vector<std::pair<std::string, std::string>> lstAttrs = oSource->GetAttributes(m_AllCharBuff);
-			std::vector<std::pair<std::string, std::string>>::iterator att_iter = lstAttrs.begin();
-			bool bHasAllAttributes = false;
-			for (; att_iter != lstAttrs.end() && !bHasAllAttributes; ++att_iter)
+			std::vector<Tag> lstStaticAttrs;
+			std::vector<Tag> lstAttrs = oSource->GetAttributes(m_AllCharBuff);
+
+			std::vector<Tag>::iterator att_iter = lstAttrs.begin();
+			for (; att_iter != lstAttrs.end(); ++att_iter)
 			{
-				bHasAllAttributes = oCard.MapAttributes(Config::Instance()->GetFullKey(att_iter->first), att_iter->second);
+				lstStaticAttrs.push_back(std::make_pair(Config::Instance()->GetFullKey(att_iter->first), att_iter->second));
 			}
 
 			std::map<std::string, std::vector<std::string>> lstUnfixedAttrs = oSource->GetNonUniqueAttributeRestrictions(m_AllCharBuff);
@@ -120,14 +118,21 @@ int CollectionSource::LoadCard(std::string aszCardName)
 				lstFixedAttrs[Config::Instance()->GetFullKey(iter_UnfixedAttrs->first)] = iter_UnfixedAttrs->second;
 			}
 
-			oCard.SetNonUniqueAttributeRestrictions(lstFixedAttrs);
-			oCard.SetPairedNonUniqueAttrs(Config::Instance()->GetPairedKeysList());
+			std::vector<TraitItem> lstIdentifyingTraits;
+			std::map<std::string, std::vector<std::string>>::iterator iter_Traits = lstFixedAttrs.begin();
+			for (; iter_Traits != lstFixedAttrs.end(); ++iter_Traits)
+			{
+				TraitItem newTrait(iter_Traits->first, iter_Traits->second, Config::Instance()->GetPairedKeysList());
+				lstIdentifyingTraits.push_back(newTrait);
+			}
 
-			// Store the location of the CollectionObject in the cache
+			CollectionItem oCard(aszCardName, lstStaticAttrs, lstIdentifyingTraits);
+
+			// Store the location of the CollectionItem in the cache
 			iCacheLocation = m_lstoCardCache.size();
 			oSource->Cache(iCacheLocation);
 
-			// Cache the collectionobject
+			// Cache the CollectionItem
 			m_lstoCardCache.push_back(oCard);
 		}
 	}
@@ -135,7 +140,7 @@ int CollectionSource::LoadCard(std::string aszCardName)
 	return iCacheLocation;
 }
 
-CollectionObject* CollectionSource::GetCardPrototype(int aiCacheIndex)
+CollectionItem* CollectionSource::GetCardPrototype(int aiCacheIndex)
 {
 	if (aiCacheIndex < m_lstoCardCache.size())
 	{
@@ -173,51 +178,37 @@ bool CollectionSource::IsSyncNeeded(std::string aszCollectionName)
 	}
 }
 
-std::vector<std::pair<std::string, CopyObject*>> 
-CollectionSource::GetCollection(std::string aszCollectionName, bool abOnlyCopiesWithParent)
-{
-	m_mapSync[aszCollectionName] = false;
-	std::vector<std::pair<std::string, CopyObject*>>  lstCopies;
-	std::vector<CollectionObject>::iterator iter_colObjs = m_lstoCardCache.begin();
-	for (; iter_colObjs != m_lstoCardCache.end(); ++iter_colObjs)
-	{
-		std::vector<CopyObject*> lstFoundCopies;
-
-		if (abOnlyCopiesWithParent)
-		{
-			lstFoundCopies = iter_colObjs->GetLocalCopies(aszCollectionName);
-		}
-		else
-		{
-			lstFoundCopies = iter_colObjs->GetCopies(aszCollectionName);
-		}
-
-		std::vector<CopyObject*>::iterator iter_copies = lstFoundCopies.begin();
-		for (; iter_copies != lstFoundCopies.end(); ++iter_copies)
-		{
-			lstCopies.push_back(std::make_pair(iter_colObjs->GetName(), *iter_copies));
-		}
-	}
-
-	return lstCopies;
-}
-
 std::vector<int>
 CollectionSource::GetCollectionCache(std::string aszCollectionName, bool abOnlyCopiesWithParent)
 {
 	std::vector<int> lstRetVal;
 
-	std::vector<std::pair<std::string, CopyObject*>> lstObjCol = 
-		GetCollection(aszCollectionName, abOnlyCopiesWithParent);
-
-	std::vector<std::pair<std::string, CopyObject*>>::iterator iter_ObjCol = lstObjCol.begin();
-	for (; iter_ObjCol != lstObjCol.end(); ++iter_ObjCol)
+	for (size_t i = 0; i < m_lstoCardCache.size(); i++)
 	{
-		int iCacheNum = LoadCard(iter_ObjCol->first);
-
-		if (Config::Instance()->List_Find(iCacheNum, lstRetVal) == -1)
+		if (m_lstoCardCache[i].GetCopiesForCollection(aszCollectionName, All).size() > 0)
 		{
-			lstRetVal.push_back(iCacheNum);
+			lstRetVal.push_back(i);
+		}
+	}
+
+	return lstRetVal;
+}
+
+std::vector<CopyItem*>
+	CollectionSource::GetCollection(std::string aszCollectionName, bool abOnlyCopiesWithParent)
+{
+	std::vector<CopyItem*> lstRetVal;
+
+	for (size_t i = 0; i < m_lstoCardCache.size(); i++)
+	{
+		std::vector<CopyItem*> lstCopies = m_lstoCardCache[i].GetCopiesForCollection(aszCollectionName, All);
+		if (lstCopies.size() > 0)
+		{
+			std::vector<CopyItem*>::iterator iter_Copy = lstCopies.begin();
+			for (; iter_Copy != lstCopies.end(); ++iter_Copy)
+			{
+				lstRetVal.push_back(*iter_Copy);
+			}
 		}
 	}
 
@@ -362,7 +353,7 @@ int CollectionSource::findInBuffer(std::string aszCardName, bool abCaseSensitive
 
 int CollectionSource::findInCache(std::string aszName, bool abCaseSensitive)
 {
-	std::vector<CollectionObject>::iterator iter_ColObj = m_lstoCardCache.begin();
+	std::vector<CollectionItem>::iterator iter_ColObj = m_lstoCardCache.begin();
 	int index = 0;
 	for (; iter_ColObj != m_lstoCardCache.end(); ++iter_ColObj)
 	{

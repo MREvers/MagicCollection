@@ -1,13 +1,8 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.26403.7
+# Visual Studio 14
+VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CollectorsFrontEnd", "CollectorsFrontEnd\CollectorsFrontEnd.csproj", "{A557C722-029A-47B3-B86E-308878641289}"
-	ProjectSection(ProjectDependencies) = postProject
-		{D6BC9C69-9220-4F9A-A83B-31C7B97EA5D4} = {D6BC9C69-9220-4F9A-A83B-31C7B97EA5D4}
-	EndProjectSection
-EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MagicCollection", "MagicCollection\MagicCollection.vcxproj", "{D6BC9C69-9220-4F9A-A83B-31C7B97EA5D4}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ServerInterface", "ServerInterface\ServerInterface.vcxproj", "{B3E17E4D-3395-42FB-BF66-0AF21C59DB36}"
@@ -26,20 +21,6 @@ Global
 		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{A557C722-029A-47B3-B86E-308878641289}.Debug|Any CPU.ActiveCfg = Debug|x64
-		{A557C722-029A-47B3-B86E-308878641289}.Debug|Build.ActiveCfg = Debug|x64
-		{A557C722-029A-47B3-B86E-308878641289}.Debug|Build.Build.0 = Debug|x64
-		{A557C722-029A-47B3-B86E-308878641289}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{A557C722-029A-47B3-B86E-308878641289}.Debug|x64.Build.0 = Debug|Any CPU
-		{A557C722-029A-47B3-B86E-308878641289}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{A557C722-029A-47B3-B86E-308878641289}.Debug|x86.Build.0 = Debug|Any CPU
-		{A557C722-029A-47B3-B86E-308878641289}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{A557C722-029A-47B3-B86E-308878641289}.Release|Build.ActiveCfg = Release|Any CPU
-		{A557C722-029A-47B3-B86E-308878641289}.Release|Build.Build.0 = Release|Any CPU
-		{A557C722-029A-47B3-B86E-308878641289}.Release|x64.ActiveCfg = Release|Any CPU
-		{A557C722-029A-47B3-B86E-308878641289}.Release|x64.Build.0 = Release|Any CPU
-		{A557C722-029A-47B3-B86E-308878641289}.Release|x86.ActiveCfg = Release|Any CPU
-		{A557C722-029A-47B3-B86E-308878641289}.Release|x86.Build.0 = Release|Any CPU
 		{D6BC9C69-9220-4F9A-A83B-31C7B97EA5D4}.Debug|Any CPU.ActiveCfg = Debug|Win32
 		{D6BC9C69-9220-4F9A-A83B-31C7B97EA5D4}.Debug|Any CPU.Build.0 = Debug|Win32
 		{D6BC9C69-9220-4F9A-A83B-31C7B97EA5D4}.Debug|Build.ActiveCfg = Debug|x64

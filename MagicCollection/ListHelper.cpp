@@ -1,5 +1,7 @@
 #include "ListHelper.h"
 
+ListHelper* ListHelper::ms_Instance = nullptr;
+
 ListHelper::ListHelper()
 {
 }
@@ -52,4 +54,14 @@ bool ListHelper::CompareKeyValPairList(std::vector<std::pair<std::string, std::s
 		}
 	}
 	return bMatch;
+}
+
+ListHelper* ListHelper::Instance()
+{
+	if (ms_Instance == nullptr)
+	{
+		ms_Instance = new ListHelper();
+	}
+
+	return ms_Instance;
 }

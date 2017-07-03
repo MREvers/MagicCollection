@@ -1,9 +1,5 @@
 #pragma once
 #pragma message ("Starting CollectionSource.h")
-#include "SourceObject.h"
-#include "CollectionObject.h"
-#include "Config.h"
-
 #include "rapidxml-1.13\rapidxml_print.hpp"
 #include "rapidxml-1.13\rapidxml.hpp"
 #include "rapidxml-1.13\rapidxml_utils.hpp"
@@ -17,8 +13,11 @@
 #include <algorithm>
 #include <ctime>
 
+#include "SourceObject.h"
+#include "CollectionItem.h"
+#include "Config.h"
 
-class CollectionObject;
+class CollectionItem;
 class Collection;
 
 
@@ -35,30 +34,23 @@ public:
    int LoadCard(std::string aszCardName);
 
    // Expose the Collection Object to get copies etc..
-   CollectionObject* GetCardPrototype(int aiCacheIndex);
+   CollectionItem* GetCardPrototype(int aiCacheIndex);
 
    // This needs to be called whenever a child collection adds a card.
    // It will let other collections know that they need to check their lists.
    void NotifyNeedToSync(std::string aszCollectionName);
    bool IsSyncNeeded(std::string aszCollectionName);
 
-   /* GetCollection
-   *  Returns all copies with parent == name if abOnlyCopiesWithParent == true.
-   *  @Param aszCollectionName Name of collection to look for in copies.
-   *  @Param abOnlyCopiesWithParent Only return copies with their parent == to the
-   *			collection specified.
-   */
-   std::vector<std::pair<std::string, CopyObject*>> 
-	   GetCollection(std::string aszCollectionName, bool abOnlyCopiesWithParent = true);
-
    std::vector<int> 
 	   GetCollectionCache(std::string aszCollectionName, bool abOnlyCopiesWithParent = true);
+   std::vector<CopyItem*>
+	   GetCollection(std::string aszCollectionName, bool abOnlyCopiesWithParent = true);
 
    std::vector<std::string> GetAllCardsStartingWith(std::string aszText);
 
 private:
    std::vector<SourceObject> m_lstCardBuffer;
-   std::vector<CollectionObject> m_lstoCardCache;
+   std::vector<CollectionItem> m_lstoCardCache;
    
    // This is used to track whether or not a collection has the most up to date
    //  list of its cards. A collection should only come out of sync if a child

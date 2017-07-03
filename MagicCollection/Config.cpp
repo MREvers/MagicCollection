@@ -8,9 +8,15 @@ const char * const CollectionObject::LstNonUniqueTraits[] = { "set", "multiverse
 */
 
 Config* Config::ms_pConfig = nullptr;
+char* Config::HashKey = "__hash";
+char* Config::NotFoundString = "NF";
+char* Config::CollectionDefinitionKey = ":=";
 
 Config::Config()
 {
+	m_fnKeyExtractor = [](Tag atag)->std::string { return atag.first; };
+	m_fnValueExtractor = [](Tag atag)->std::string { return atag.second; };
+
 	std::ifstream file(".\\Config\\Config.xml");
 	if (!file.good())
 	{
@@ -115,56 +121,39 @@ std::vector<std::string>& Config::GetPerCollectionMetaTags()
 	return m_lstPerCollectionMetaTags;
 }
 
+std::function<std::string(Tag)> Config::GetTagHelper(TagHelperType aiMode)
+{
+	if (aiMode == Key)
+	{
+		return m_fnKeyExtractor;
+	}
+	else
+	{
+		return m_fnValueExtractor;
+	}
+}
+
 bool Config::IsIdentifyingAttributes(std::string aszAttrs)
 {
-	return List_Find(aszAttrs, m_lstIdentifyingAttributes) != -1;
+	return ListHelper::Instance()->List_Find(aszAttrs, m_lstIdentifyingAttributes) != -1;
 }
 
 bool Config::IsPairedKey(std::string aszKey)
 {
-	return List_Find(aszKey, m_lstPairedKeys) != -1;
+	return ListHelper::Instance()->List_Find(aszKey, m_lstPairedKeys, m_fnKeyExtractor) != -1 || 
+		   ListHelper::Instance()->List_Find(aszKey, m_lstPairedKeys, m_fnValueExtractor) != -1;
 }
 
 bool Config::IsValidKey(std::string aszKey)
 {
 	// A valid key is either a static attr or identifying attr
-	return List_Find(aszKey, m_lstStaticAttributes) != -1 || List_Find(aszKey, m_lstIdentifyingAttributes) != -1;
+	return ListHelper::Instance()->List_Find(aszKey, m_lstStaticAttributes) != -1 ||
+		   ListHelper::Instance()->List_Find(aszKey, m_lstIdentifyingAttributes) != -1;
 }
 
 bool Config::IsStaticAttribute(std::string aszAttr)
 {
-	return List_Find(aszAttr, m_lstStaticAttributes) != -1;
-}
-
-template<typename T> 
-int Config::List_Find(T aszFind, std::vector<T>& alstFindList)
-{
-	std::vector<T>::iterator iter_list = alstFindList.begin();
-	int index = 0;
-	for (; iter_list != alstFindList.end(); iter_list++)
-	{
-		if (*iter_list == aszFind)
-		{
-			return index;
-		}
-		index++;
-	}
-	return -1;
-}
-
-int Config::List_Find(std::string aszFind, std::vector<std::pair<std::string, std::string>>& alstFindList)
-{
-	std::vector<std::pair<std::string, std::string>>::iterator iter_list = alstFindList.begin();
-	int index = 0;
-	for (; iter_list != alstFindList.end(); iter_list++)
-	{
-		if (iter_list->first == aszFind || iter_list->second == aszFind)
-		{
-			return index;
-		}
-		index++;
-	}
-	return -1;
+	return ListHelper::Instance()->List_Find(aszAttr, m_lstStaticAttributes) != -1;
 }
 
 Config* Config::Instance()

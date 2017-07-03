@@ -278,9 +278,9 @@ bool CollectionObject::IsSameIdentity(CopyObject* aoCOne, CopyObject* aoCTwo, bo
 
 	if (bMatch)
 	{
-		bMatch &= ListHelper::CompareKeyValPairList(
-			ListHelper::ConvertMapToList(aoCOne->NonUniqueTraits),
-			ListHelper::ConvertMapToList(aoCTwo->NonUniqueTraits)
+		bMatch &= ListHelper::Instance()->CompareKeyValPairList(
+			ListHelper::Instance()->ConvertMapToList(aoCOne->NonUniqueTraits),
+			ListHelper::Instance()->ConvertMapToList(aoCTwo->NonUniqueTraits)
 		);
 	}
 
@@ -298,14 +298,18 @@ bool CollectionObject::IsSameMetaTags(
 	std::vector<std::pair<std::string, std::string>> alstTagsTwo,
 	bool abUseIgnore)
 {
-	Config* config = Config::Instance();
+	ListHelper* listHelper = ListHelper::Instance();
 
 	std::vector<std::pair<std::string, std::string>> lstUnignoredTagsOne;
 	std::vector<std::pair<std::string, std::string>> lstUnignoredTagsTwo;
 
+	std::string szIgnoreKey("_ignore");
+
+	std::function<std::string(Tag)> fnKeyExtractor = [](Tag atag)->std::string { return atag.first; };
+
 	std::vector<std::string> lstIgnoredTags;
 	int iFindIgnore;
-	if (abUseIgnore && (iFindIgnore = config->List_Find("_ignore", alstTagsOne)) != -1)
+	if (abUseIgnore && (iFindIgnore = listHelper->List_Find(szIgnoreKey, alstTagsOne, fnKeyExtractor)) != -1)
 	{
 		std::pair<std::string, std::string> pair_szIgnored = alstTagsOne[iFindIgnore];
 		std::string szIgnored = pair_szIgnored.second;
@@ -318,13 +322,13 @@ bool CollectionObject::IsSameMetaTags(
 		// It is a multitiag if the split list is > 1
 		std::vector<std::string> lstSplitString = StringHelper::Str_Split(iter_UnignoredTagsOne->first, ".");
 		std::string szKey = lstSplitString[0];
-		if (szKey.size() > 0 && szKey[0] != '_' && config->List_Find(szKey, lstIgnoredTags) == -1)
+		if (szKey.size() > 0 && szKey[0] != '_' && listHelper->List_Find(szKey, lstIgnoredTags) == -1)
 		{
 			lstUnignoredTagsOne.push_back(*iter_UnignoredTagsOne);
 		}
 	}
 
-	if (abUseIgnore && (iFindIgnore = config->List_Find("_ignore", alstTagsTwo)) != -1)
+	if (abUseIgnore && (iFindIgnore = listHelper->List_Find(szIgnoreKey, alstTagsTwo, fnKeyExtractor)) != -1)
 	{
 		std::pair<std::string, std::string> pair_szIgnored = alstTagsTwo[iFindIgnore];
 		std::string szIgnored = pair_szIgnored.second;
@@ -337,13 +341,13 @@ bool CollectionObject::IsSameMetaTags(
 		// It is a multitiag if the split list is > 1
 		std::vector<std::string> lstSplitString = StringHelper::Str_Split(iter_UnignoredTagsTwo->first, ".");
 		std::string szKey = lstSplitString[0];
-		if (szKey.size() > 0 && szKey[0] != '_' &&  config->List_Find(szKey, lstIgnoredTags) == -1)
+		if (szKey.size() > 0 && szKey[0] != '_' &&  listHelper->List_Find(szKey, lstIgnoredTags) == -1)
 		{
 			lstUnignoredTagsTwo.push_back(*iter_UnignoredTagsTwo);
 		}
 	}
 
-	return ListHelper::CompareKeyValPairList(lstUnignoredTagsTwo, lstUnignoredTagsOne);
+	return ListHelper::Instance()->CompareKeyValPairList(lstUnignoredTagsTwo, lstUnignoredTagsOne);
 }
 
 std::vector<std::pair<std::string, std::string>> CollectionObject::FilterOutUniqueTraits(std::vector<std::pair<std::string, std::string>> alstAttrs)

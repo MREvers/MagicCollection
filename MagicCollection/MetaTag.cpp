@@ -23,9 +23,16 @@ std::string MetaTag::GetKey()
 	return m_Tag.first;
 }
 
-std::string MetaTag::GetVal()
+std::string MetaTag::GetVal(MetaTagType atagType)
 {
-	return m_Tag.second;
+	if (CanView(atagType))
+	{
+		return m_Tag.second;
+	}
+	else
+	{
+		return "";
+	}
 }
 
 bool MetaTag::CanView(MetaTagType atagType)

@@ -10,8 +10,15 @@
 #include "rapidxml-1.13\rapidxml.hpp"
 #include "rapidxml-1.13\rapidxml_utils.hpp"
 #include "MD5.h"
+#include "ListHelper.h"
 
 typedef std::pair<std::string, std::string> Tag;
+
+enum TagHelperType : int
+{
+	Key = 0x0,
+	Value = 0x1
+};
 
 class Config
 {
@@ -38,45 +45,18 @@ public:
 	std::vector<std::string>& GetStaticAttributes();
 	std::vector<std::string>& GetPerCollectionMetaTags();
 
+	std::function<std::string(Tag)> GetTagHelper(TagHelperType aiMode = Key);
+
 	bool IsPairedKey(std::string aszKey);
 	bool IsValidKey(std::string aszKey);
 	bool IsStaticAttribute(std::string aszAttrs);
 	bool IsIdentifyingAttributes(std::string aszAttrs);
 
-	template<typename T>
-	int List_Find(T aiFind, std::vector<T>& alstFindList);
-	int List_Find(std::string aszFind, std::vector<std::pair<std::string, std::string>>& alstFindList);
-
-	template<class T, class R>
-	int List_Find(T& aiFind, std::vector<R>& alstFindList, std::function<T (R)> afuncExtractor)
-	{
-		std::vector<R>::iterator iter_list = alstFindList.begin();
-		int index = 0;
-		for (; iter_list != alstFindList.end(); iter_list++)
-		{
-			if (aiFind == afuncExtractor(*iter_list))
-			{
-				return index;
-			}
-			index++;
-		}
-		return -1;
-	}
-
-	template<class T> inline
-	void List_Insert(T& aInsert, std::vector<T>& alstInsertList, std::function<int(T, T)> afuncComparer)
-	{
-		std::vector<T>::iterator iter = alstInsertList.begin();
-		for (; iter != alstInsertList.end(); ++iter)
-		{
-			int iCmp = afuncComparer(aInsert, *iter);
-			if (iCmp >= 0) { break; }
-		}
-
-		alstInsertList.insert(iter, aInsert);
-	}
-
 	static Config* Instance();
+
+	static char* Config::HashKey;
+	static char* Config::NotFoundString;
+	static char* Config::CollectionDefinitionKey;
 
 private:
 	std::vector<Tag> m_lstKeyCodeMappings;
@@ -92,14 +72,13 @@ private:
 	std::string m_szCollectionsFolder;
 	std::string m_szHistoryFolder;
 	std::string m_szMetaFolder;
-
 	std::string m_szImagesFolder;
+
+	std::function<std::string(Tag)> m_fnKeyExtractor;
+	std::function<std::string(Tag)> m_fnValueExtractor;
 
 	void initDefaultSettings();
 	void initConfigSettings(std::ifstream& asConfig);
 
 	static Config* Config::ms_pConfig;
 };
-
-template int Config::List_Find<int>(int aiFind, std::vector<int>& alstFind);
-template int Config::List_Find<std::string>(std::string aiFind, std::vector<std::string>& alstFind);

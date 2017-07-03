@@ -16,20 +16,20 @@ public:
 	std::string ParentCollection;
 	std::vector<std::string> ResidentCollections;
 
-	std::map<std::string, std::vector<std::pair<std::string, std::string>>> PerCollectionMetaTags;
-	std::vector<std::pair<std::string, std::string>> MetaTags;
+	std::map<std::string, std::vector<Tag>> PerCollectionMetaTags;
+	std::vector<Tag> MetaTags;
 
 	std::map<std::string, std::string> NonUniqueTraits;
 
 	CopyObject(std::string aszParent,
-		std::vector<std::pair<std::string, std::string>>* alstPairedTags,
+		std::vector<Tag>* alstPairedTags,
 		std::map<std::string, std::vector<std::string>>* alstRestrictions);
 
 	// Non-unique in the sense that the trait itself can have more than one value.
-	std::vector<std::pair<std::string, std::string>> GetNonUniqueTraits(bool bWithParent) const;
+	std::vector<Tag> GetNonUniqueTraits(bool bWithParent) const;
 
 	// Attr Controlling Function
-	void SetPairedTraitsReference(std::vector<std::pair<std::string, std::string>>* aLstPairedTraits);
+	void SetPairedTraitsReference(std::vector<Tag>* aLstPairedTraits);
 	void SetNonUniqueAttributesRestrictionsReference(std::map<std::string, std::vector<std::string>>* aMapNonUAttrRestr);
 
 	void AddResidentCollection(std::string aszCollectionName);

@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <functional>
 
 #include "Config.h"
 #include "StringHelper.h"

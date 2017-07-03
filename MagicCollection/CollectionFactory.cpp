@@ -13,7 +13,7 @@ CollectionFactory::~CollectionFactory()
 {
 }
 
-Collection* CollectionFactory::LoadCollectionFromFile(std::string aszFileName)
+ItemCollection* CollectionFactory::LoadCollectionFromFile(std::string aszFileName)
 {
 	std::vector<std::pair<std::string, std::string>> lstForcedChanges;
 	std::pair<std::string,std::string> pairColNameParent = GetCollectionNameAndParentFromFile(aszFileName);
@@ -21,16 +21,15 @@ Collection* CollectionFactory::LoadCollectionFromFile(std::string aszFileName)
 	std::string szParentName = pairColNameParent.second;
 	if (!CollectionExists(szColName) && szColName != "")
 	{
-		Collection* oCol = FindOrGenerateCollection(szColName);
-		oCol->LoadCollection(aszFileName, lstForcedChanges);
+		ItemCollection* oCol = FindOrGenerateCollection(szColName);
+		oCol->LoadCollection(aszFileName);
 
 		std::vector<std::pair<std::string, std::string>>::iterator iter_change = lstForcedChanges.begin();
 		for (; iter_change != lstForcedChanges.end(); ++iter_change)
 		{
 			if (CollectionExists(iter_change->first))
 			{
-				Collection* oChangedCol = FindOrGenerateCollection(iter_change->first, szParentName);
-				oChangedCol->RecordForcedTransaction(iter_change->second);
+				ItemCollection* oChangedCol = FindOrGenerateCollection(iter_change->first, szParentName);
 			}
 		}
 		return oCol;
@@ -39,10 +38,21 @@ Collection* CollectionFactory::LoadCollectionFromFile(std::string aszFileName)
 	return nullptr;
 }
 
-Collection* CollectionFactory::FindOrGenerateCollection(std::string aszCollectionName, std::string aszParent)
+std::vector<std::string> CollectionFactory::GetLoadedCollections()
+{
+	std::vector<std::string> lstRetval;
+	auto iter_Colo = m_lstCollections.begin();
+	for (; iter_Colo != m_lstCollections.end(); ++iter_Colo)
+	{
+		lstRetval.push_back(iter_Colo->GetName());
+	}
+	return lstRetval;
+}
+
+ItemCollection* CollectionFactory::FindOrGenerateCollection(std::string aszCollectionName, std::string aszParent)
 {
 	// Check if we have the collection already.
-	std::vector<Collection>::iterator iter_cols = m_lstCollections.begin();
+	std::vector<ItemCollection>::iterator iter_cols = m_lstCollections.begin();
 	for (; iter_cols != m_lstCollections.end(); ++iter_cols)
 	{
 		if (aszCollectionName == iter_cols->GetName())
@@ -54,23 +64,21 @@ Collection* CollectionFactory::FindOrGenerateCollection(std::string aszCollectio
 	// If not, create one.
 	if (aszParent != "")
 	{
-		Collection oCol(aszCollectionName, aszParent, m_ColSource, &LoadedCollections);
+		ItemCollection oCol(aszCollectionName, m_ColSource);
 		m_lstCollections.push_back(oCol);
 	}
 	else
 	{
-		Collection oCol(aszCollectionName, m_ColSource, &LoadedCollections);
+		ItemCollection oCol(aszCollectionName, m_ColSource);
 		m_lstCollections.push_back(oCol);
 	}
-
-	LoadedCollections.push_back(aszCollectionName);
 
 	return &m_lstCollections.at(m_lstCollections.size() - 1);
 }
 
 bool CollectionFactory::CollectionExists(std::string aszCollectionName)
 {
-	std::vector<Collection>::iterator iter_cols = m_lstCollections.begin();
+	std::vector<ItemCollection>::iterator iter_cols = m_lstCollections.begin();
 	for (; iter_cols != m_lstCollections.end(); ++iter_cols)
 	{
 		if (aszCollectionName == iter_cols->GetName())

@@ -6,7 +6,7 @@
 #include <iterator>
 #include <process.h>
 
-#include "Collection.h"
+#include "ItemCollection.h"
 #include "JSONImporter.h"
 #include "CollectionSource.h"
 #include "CollectionFactory.h"

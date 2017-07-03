@@ -153,14 +153,14 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Collection.cpp" />
+    <ClCompile Include="Action.cpp" />
     <ClCompile Include="CollectionFactory.cpp" />
+    <ClCompile Include="CollectionIO.cpp" />
     <ClCompile Include="CollectionItem.cpp" />
-    <ClCompile Include="CollectionObject.cpp" />
     <ClCompile Include="CollectionSource.cpp" />
     <ClCompile Include="Config.cpp" />
     <ClCompile Include="CopyItem.cpp" />
-    <ClCompile Include="CopyObject.cpp" />
+    <ClCompile Include="ItemCollection.cpp" />
     <ClCompile Include="jsoncpp.cpp" />
     <ClCompile Include="JSONImporter.cpp">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MaxSpeed</Optimization>
@@ -169,7 +169,6 @@
     <ClCompile Include="MagicCollection.cpp" />
     <ClCompile Include="MD5.cpp" />
     <ClCompile Include="MetaTag.cpp" />
-    <ClCompile Include="PseudoCopy.cpp" />
     <ClCompile Include="ServerIFace.cpp" />
     <ClCompile Include="ServerIFace\ClientSocket.cpp" />
     <ClCompile Include="ServerIFace\ProgramServer.cpp" />
@@ -180,23 +179,22 @@
     <ClCompile Include="SourceObject.cpp" />
     <ClCompile Include="StoreFrontBackEnd.cpp" />
     <ClCompile Include="StringHelper.cpp" />
+    <ClCompile Include="TraitItem.cpp" />
     <ClCompile Include="Transaction.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Action.h" />
-    <ClInclude Include="Collection.h" />
     <ClInclude Include="CollectionFactory.h" />
+    <ClInclude Include="CollectionIO.h" />
     <ClInclude Include="CollectionItem.h" />
-    <ClInclude Include="CollectionObject.h" />
     <ClInclude Include="CollectionSource.h" />
     <ClInclude Include="Config.h" />
     <ClInclude Include="CopyItem.h" />
-    <ClInclude Include="CopyObject.h" />
+    <ClInclude Include="ItemCollection.h" />
     <ClInclude Include="JSONImporter.h" />
     <ClInclude Include="ListHelper.h" />
     <ClInclude Include="MD5.h" />
     <ClInclude Include="MetaTag.h" />
-    <ClInclude Include="PseudoCopy.h" />
     <ClInclude Include="ServerIFace.h" />
     <ClInclude Include="ServerIFace\ClientSocket.h" />
     <ClInclude Include="ServerIFace\ProgramServer.h" />
@@ -207,6 +205,7 @@
     <ClInclude Include="SourceObject.h" />
     <ClInclude Include="StoreFrontBackEnd.h" />
     <ClInclude Include="StringHelper.h" />
+    <ClInclude Include="TraitItem.h" />
     <ClInclude Include="Transaction.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

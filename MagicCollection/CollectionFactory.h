@@ -2,7 +2,7 @@
 #include <vector>
 #include <string>
 
-#include "Collection.h"
+#include "ItemCollection.h"
 #include "StringHelper.h"
 #include "CollectionSource.h"
 class CollectionFactory
@@ -17,10 +17,12 @@ public:
    *  @Param aszColFile File name of collection to load.
    *  @return Pointer to a successfully loaded collection, nullptr if fail.
    */
-   Collection* LoadCollectionFromFile( std::string aszColFile);
+   ItemCollection* LoadCollectionFromFile( std::string aszColFile);
+
+   std::vector<std::string> GetLoadedCollections();
 
    // Returns the collection if loaded. Returns an empty collection otherwise.
-   Collection* FindOrGenerateCollection(std::string aszCollectionName, std::string aszParent = "");
+   ItemCollection* FindOrGenerateCollection(std::string aszCollectionName, std::string aszParent = "");
 
    // Returns true if the collection is loaded into memory.
    bool CollectionExists(std::string aszCollectionName);
@@ -31,10 +33,8 @@ public:
    *			If no parent exists, "" is returned as the parent name.
    */
    std::pair<std::string,std::string> GetCollectionNameAndParentFromFile(std::string aszCollectionFileName);
-
-   std::vector<std::string> LoadedCollections;
 private:
-   std::vector<Collection> m_lstCollections;
+   std::vector<ItemCollection> m_lstCollections;
    CollectionSource* m_ColSource;
 };
 

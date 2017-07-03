@@ -19,7 +19,7 @@ public:
 	~MetaTag();
 
 	std::string GetKey();
-	std::string GetVal();
+	std::string GetVal(MetaTagType atagType = Any);
 
 	bool CanView(MetaTagType atagType);
 

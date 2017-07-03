@@ -543,9 +543,9 @@ std::vector<std::vector<std::pair<std::string, std::string>>> Collection::GetMet
 		std::vector<CopyObject*>::iterator iter_Copies = LstCopies.begin();
 		for (; iter_Copies != LstCopies.end(); ++iter_Copies)
 		{
-			if (ListHelper::CompareKeyValPairList(
+			if (ListHelper::Instance()->CompareKeyValPairList(
 				CollectionObject::FilterOutUniqueTraits(oPseudoTarget.IdentifyingAttributes),
-				ListHelper::ConvertMapToList((*iter_Copies)->NonUniqueTraits)))
+				ListHelper::Instance()->ConvertMapToList((*iter_Copies)->NonUniqueTraits)))
 			{
 				lstRetVal.push_back((*iter_Copies)->GetMetaTags(m_szName));
 			}
@@ -638,7 +638,7 @@ void Collection::setTransactionsNoWrite()
 	std::vector<Transaction>::iterator iter_Trans = m_lstTransactions.begin();
 	for (; iter_Trans != m_lstTransactions.end(); iter_Trans++)
 	{
-		iter_Trans->Recordable = false;
+		iter_Trans->IsRecordable = false;
 	}
 }
 
@@ -709,7 +709,7 @@ std::string Collection::changeItemAttribute_string(
 	bool bIsParentCol)
 {
 	PseudoCopy oBefore = generatePseudoCopy(
-		ListHelper::ConvertMapToList(aoCO->NonUniqueTraits),
+		ListHelper::Instance()->ConvertMapToList(aoCO->NonUniqueTraits),
 		aszCardname);
 	std::string szBefore = oBefore.ToString();
 
@@ -717,7 +717,7 @@ std::string Collection::changeItemAttribute_string(
 	setItemAttr(&oDummyCopy, aszKey, aszNewVal);
 
 	PseudoCopy oAfter = generatePseudoCopy(
-		ListHelper::ConvertMapToList(oDummyCopy.NonUniqueTraits),
+		ListHelper::Instance()->ConvertMapToList(oDummyCopy.NonUniqueTraits),
 		aszCardname);
 	std::string szAfter = oAfter.ToString();
 
@@ -782,7 +782,7 @@ bool Collection::loadCardLine(std::string aszNewCardLine)
 			{
 				// The only way a copy could possibly have this collection as a resi. is if this collection created it
 				//  or used it. If that is the case, then we should not use it as the copy.
-				if (Config::Instance()->List_Find(m_szName, (*iter_ExistingCopy)->ResidentCollections) == -1)
+				if (ListHelper::Instance()->List_Find(m_szName, (*iter_ExistingCopy)->ResidentCollections) == -1)
 				{
 					// This copy is not used by this collection. Check if this copy is identical to the target copy.
 					if (CollectionObject::IsSameIdentity(&oTargetCopy, *iter_ExistingCopy))
@@ -807,7 +807,7 @@ bool Collection::loadCardLine(std::string aszNewCardLine)
 				// Just add the copy if it is in this collection or
 				// the collection is loaded.
 				if (oTargetCopy.ParentCollection == m_szName ||
-					(Config::Instance()->List_Find(oTargetCopy.ParentCollection, *m_lstLoadedCollectionsBuffer) == -1))
+					(ListHelper::Instance()->List_Find(oTargetCopy.ParentCollection, *m_lstLoadedCollectionsBuffer) == -1))
 				{
 					std::vector<std::pair<std::string, std::string>> lstDummy;
 					AddItem(oPseudoCopy.Name, oPseudoCopy.IdentifyingAttributes, lstDummy, false);
@@ -940,7 +940,7 @@ void Collection::refreshCopyLinks(std::vector<std::pair<std::string, std::string
 	std::vector<std::pair<std::string, CopyObject*>> ::iterator iter_ColOs = lstFullCol.begin();
 	for (; iter_ColOs != lstFullCol.end(); ++iter_ColOs)
 	{
-		if (Config::Instance()->List_Find(m_szName, (*iter_ColOs).second->ResidentCollections) == -1)
+		if (ListHelper::Instance()->List_Find(m_szName, (*iter_ColOs).second->ResidentCollections) == -1)
 		{
 			std::vector<std::string> lstAffectedCols = (*iter_ColOs).second->ResidentCollections;
 			std::vector<std::string>::iterator iter_affected_col = lstAffectedCols.begin();
@@ -1100,14 +1100,14 @@ void Collection::SaveCollection(std::string aszFileName)
 		std::vector<Transaction>::iterator iter_transactions = m_lstTransactions.begin();
 		for (; iter_transactions != m_lstTransactions.end(); ++iter_transactions)
 		{
-			if (iter_transactions->Recordable)
+			if (iter_transactions->IsRecordable)
 			{
 				std::vector<Action>::iterator iter_actions = iter_transactions->Actions.begin();
 				for (; iter_actions != iter_transactions->Actions.end(); ++iter_actions)
 				{
 					lstHistoryLines.push_back(iter_actions->Identifier);
 				}
-				iter_transactions->Recordable = false;
+				iter_transactions->IsRecordable = false;
 			}
 		}
 

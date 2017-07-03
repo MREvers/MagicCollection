@@ -1,9 +1,9 @@
 #include "Transaction.h"
 
-Transaction::Transaction(Collection* aoCol)
+Transaction::Transaction(ItemCollection* aoCol)
 {
 	m_Col = aoCol;
-	Recordable = true;
+	IsRecordable = true;
 
 }
 
@@ -18,7 +18,6 @@ void Transaction::AddAction(Action& aoAct)
 	{
 		Actions.push_back(aoAct);
 	}
-
 }
 
 void Transaction::RemoveAction(int i)
@@ -37,9 +36,9 @@ void Transaction::Finalize(bool abRecordable)
 		int iSize = Actions.size();
 		for (int i = 0; i < iSize; i++)
 		{
-			Actions.at(i).Do();
+			Actions.at(i).Execute();
 		}
-		Recordable = abRecordable;
+		IsRecordable = abRecordable;
 	}
 
 }
@@ -51,7 +50,7 @@ void Transaction::Rollback()
 		int iSize = Actions.size();
 		for (int i = 0; i < iSize; i++)
 		{
-			Actions.at(i).Undo();
+			Actions.at(i).Rollback();
 		}
 	}
 }
