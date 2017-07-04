@@ -28,9 +28,10 @@ std::vector<std::string> CollectionIO::GetPreprocessLines(std::vector<std::strin
 	std::vector<std::string> lstRetVal;
 	std::vector<std::string> lstPreprocessLines;
 	std::vector<std::string>::iterator iter_Lines = alstAllLines.begin();
+	std::string szDefKey(Config::CollectionDefinitionKey);
 	for (; iter_Lines != alstAllLines.end(); ++iter_Lines)
 	{
-		if (iter_Lines->size() > 2 && iter_Lines->substr(0, 2) == Config::CollectionDefinitionKey)
+		if (iter_Lines->size() > 2 && iter_Lines->substr(0, szDefKey.size()) == szDefKey)
 		{
 			lstPreprocessLines.push_back(*iter_Lines);
 		}

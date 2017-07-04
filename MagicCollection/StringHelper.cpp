@@ -13,12 +13,12 @@ StringHelper::~StringHelper()
 
 std::string StringHelper::Str_Trim(const std::string& src, char removeChar)
 {
-   size_t first = src.find_first_not_of(' ');
+   size_t first = src.find_first_not_of(removeChar);
    if (std::string::npos == first)
    {
       return src;
    }
-   size_t last = src.find_last_not_of(' ');
+   size_t last = src.find_last_not_of(removeChar);
    return src.substr(first, (last - first + 1));
 }
 

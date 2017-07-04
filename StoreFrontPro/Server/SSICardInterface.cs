@@ -27,52 +27,6 @@ namespace StoreFrontPro.Server
                 public EventArgs e;
             }
 
-            // Compares long name
-            public bool AreCardsSame(CardModel aoCardOne, CardModel aoCardTwo)
-            {
-                if (aoCardOne.CardNameLong == null || aoCardTwo.CardNameLong == null)
-                {
-                    return false;
-                }
-                return false;// SCI.IsSameIdentity(aoCardOne.CardNameLong, aoCardTwo.CardNameLong);
-            }
-
-            public bool AreMetaTagsSame(List<Tuple<string, string>> alstTupOne, List<Tuple<string, string>> alstTupTwo)
-            {
-                return false;// SCI.IsSameMetaTags(alstTupOne, alstTupTwo);
-            }
-
-            public void AddMetaTag(string aszCollectionName,
-                string aszLongCardName,
-                string aszKey,
-                string aszVal,
-                List<Tuple<string, string>> aLstMatchMeta)
-            {
-                //SCI.AddMetaTag(aszCollectionName, aszLongCardName, aszKey, aszVal, aLstMatchMeta);
-            }
-
-            public void SubmitMetaTagChangesToServer(string aszCollectionName, string aszLongName,
-                List<Tuple<string, string>> alstNewMeta, List<Tuple<string, string>> alstMeta)
-            {
-                //SCI.SetMetaTags(aszCollectionName, aszLongName, alstNewMeta, alstMeta);
-            }
-
-            public void SubmitFeatureChangesToServer(string aszCollectionName, string aszLongName,
-                List<Tuple<string, string>> alstNewMeta,
-                List<Tuple<string, string>> alstNewAttrs,
-                List<Tuple<string, string>> alstMeta)
-            {
-                //SCI.SetFeatures(aszCollectionName, aszLongName, alstNewMeta, alstNewAttrs, alstMeta);
-            }
-
-            public void RemoveMetaTag(string aszCollectionName,
-                string aszLongCardName,
-                string aszKey,
-                List<Tuple<string, string>> aLstMatchMeta)
-            {
-                //SCI.RemoveMetaTag(aszCollectionName, aszLongCardName, aszKey, aLstMatchMeta);
-            }
-
             // Passes the image to the callback.
             // There is notably a memory leak in wpf bitmap images. read here.
             //http://stackoverflow.com/questions/21877221/memory-not-getting-released-in-wpf-image
@@ -125,12 +79,6 @@ namespace StoreFrontPro.Server
                 }
 
                 loadImageFromFile(szFilePath, aCallback);
-            }
-
-            // Use sparingly. Eventually include attributes in metatags?
-            public List<string> GetCardAttributesRestrictions(string aszLongName, string aszKey)
-            {
-                return null;//SCI.GetCardAttributeRestrictions(aszLongName, aszKey);
             }
 
             private void loadImageFromFile(string aszFileName, Action<BitmapImage> aCallback)

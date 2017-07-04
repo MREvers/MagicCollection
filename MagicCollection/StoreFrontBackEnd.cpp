@@ -31,7 +31,7 @@ CStoreFrontBackEnd::GetCollectionList(std::string aszCollection)
 	std::vector<std::string> lstList;
 	if (m_ColFactory->CollectionExists(aszCollection))
 	{
-		return m_ColFactory->FindOrGenerateCollection(aszCollection)->GetCollectionList();
+		return m_ColFactory->GetCollection(aszCollection)->GetCollectionList();
 	}
 	else
 	{

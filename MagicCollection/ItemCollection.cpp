@@ -142,11 +142,11 @@ void ItemCollection::LoadCollection(std::string aszFileName)
 	std::vector<std::string> lstPreprocessLines;
 	std::vector<std::string> lstCardLines = loader.GetPreprocessLines(lstLines, lstPreprocessLines);
 
-	//loadPreprocessingLines(lstPreprocessLines);
+	loadPreprocessingLines(lstPreprocessLines);
 
 	loadLines(lstCardLines);
 
-	IsLoaded = true;
+	IsLoaded = (m_szName != Config::NotFoundString);	
 }
 
 std::vector<std::string> ItemCollection::GetCollectionList()
@@ -242,8 +242,9 @@ void ItemCollection::loadPreprocessingLines(std::vector<std::string>  alstLines)
 
 void ItemCollection::loadPreprocessingLine(std::string aszLine)
 {
+	std::string szDefKey(Config::CollectionDefinitionKey);
 	if (aszLine.size() < 2) { return; }
-	if (aszLine.substr(0, 2) != Config::CollectionDefinitionKey) { return; }
+	if (aszLine.substr(0, szDefKey.size()) != szDefKey) { return; }
 
 	std::string szBaseLine = aszLine.substr(2);
 	std::vector<std::string> lstSplitLine = StringHelper::Str_Split(szBaseLine, "=");
@@ -258,6 +259,7 @@ void ItemCollection::loadPreprocessingLine(std::string aszLine)
 
 	std::string szKey = lstSplitLine.at(0);
 	std::string szValue = lstSplitLine.at(1);
+	szValue = StringHelper::Str_Trim(szValue, '\"');
 
 	if (szKey == "Name")
 	{

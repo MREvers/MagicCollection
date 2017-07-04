@@ -42,45 +42,6 @@ namespace StoreFrontPro.Server
             IdentifiedAttrList = aLstIdentifiedAttrs;
         }
 
-        public void SetAuxData(int aiAmount, string aszCardNameLong)
-        {
-            Amount = aiAmount;
-            CardNameLong = aszCardNameLong;
-            SpecifiedAttrsRestrictionList = new List<Tuple<string, List<string>>>();
-            foreach (Tuple<string, string> TupKeyVal in SpecifiedAttrList)
-            {
-                List<string> lstRestrictions = getCardAttributeRestrictions(TupKeyVal.Item1);
-                if (lstRestrictions[0] != "*")
-                {
-                    SpecifiedAttrsRestrictionList.Add(new Tuple<string, List<string>>(TupKeyVal.Item1, lstRestrictions));
-                }
-            }
-        }
-
-        public void AddMetaTag(Tuple<string,string> aTupKeyVal)
-        {
-            /*
-            ServerInterfaceModel
-                .CardClassInterfaceModel
-                .AddMetaTag(
-                TargetCollection,
-                CardNameLong,
-                aTupKeyVal.Item1,
-                aTupKeyVal.Item2,
-                LstMetaTags);
-                */
-        }
-
-        public void RemoveMetaTag(string aszKey)
-        {
-
-        }
-
-        public void SubmitMetaTagChangesToServer(List<Tuple<string, string>> alstNewMeta)
-        {
- 
-        }
-
         public void SubmitFeatureChangesToServer(List<Tuple<string, string>> alstNewMeta,
             List<Tuple<string, string>> alstNewAttrs)
         {
@@ -166,25 +127,9 @@ namespace StoreFrontPro.Server
             return szRetVal;
         }
 
-        // Does not count meta tags
-        public bool IsSameAs(CardModel aoCardModel)
-        {
-            return false;// ServerInterfaceModel.CardClassInterfaceModel.AreCardsSame(this, aoCardModel);
-        }
-
-        public bool IsSameMetaTags(List<Tuple<string, string>> alstTupOne, List<Tuple<string, string>> alstTupTwo)
-        {
-            return false;// ServerInterfaceModel.CardClassInterfaceModel.AreMetaTagsSame(alstTupOne, alstTupTwo);
-        }
-
         public void GetImage(Action<BitmapImage> aCallBack)
         {
             ServerInterface.Card.DownloadAndCacheImage(aCallBack, this);
-        }
-
-        private List<string> getCardAttributeRestrictions(string aszKey)
-        {
-            return ServerInterface.Card.GetCardAttributesRestrictions(CardNameLong, aszKey);
         }
     }
 }
