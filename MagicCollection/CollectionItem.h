@@ -52,6 +52,7 @@ public:
 		std::vector<Tag> alstMetaTags = std::vector<Tag>());
 
 	std::string GetCardString(CopyItem* aItem);
+	std::string GetProtoTypeString();
 
 	static bool ParseCardLine(std::string aszLine, PseudoIdentifier& rPIdentifier);
 	static bool ParseTagString(std::string aszDetails, std::vector<Tag>& rlstTags);

@@ -96,13 +96,13 @@
     <ClCompile Include="TraitItem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ItemCollection.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="CollectionIO.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Action.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Collection.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -173,10 +173,10 @@
     <ClInclude Include="TraitItem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ItemCollection.h">
+    <ClInclude Include="CollectionIO.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="CollectionIO.h">
+    <ClInclude Include="Collection.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

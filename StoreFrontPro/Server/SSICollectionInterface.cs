@@ -40,7 +40,7 @@ namespace StoreFrontPro.Server
                 {
                     if (alstChanges != null)
                     {
-                        //SCI.LoadBulkChanges(aszCollection, alstChanges);
+                        SCI.SubmitBulkChanges(aszCollection, alstChanges);
                         aTask();
                     }
                 }, UICallback);
@@ -53,12 +53,11 @@ namespace StoreFrontPro.Server
             /// <param name="aszCollectionName"></param>
             public void Sync(string aszCollectionName, Action aCallback = null)
             {
-                if (ServerInterface.Server.GetCollectionModel(aszCollectionName) != null)
+                CollectionModel CMCurrent;
+                if ((CMCurrent = Server.GetCollectionModel(aszCollectionName)) != null)
                 {
                     // List of [ { CardNameLong, [Tags, ...] }, ... ]
-                    List<string> lstCards =
-                        SCI.GetCollectionListWithMeta(aszCollectionName);
-                    CollectionModel CMCurrent = Server.GetCollectionModels().FirstOrDefault(x => x.CollectionName == aszCollectionName);
+                    List<string> lstCards = SCI.GetCollectionListWithMeta(aszCollectionName);
                     if (CMCurrent != null)
                     {
                         CMCurrent.BuildCopyModelList(lstCards, aCallback);

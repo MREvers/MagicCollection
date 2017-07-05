@@ -107,6 +107,11 @@ std::string CollectionItem::GetCardString(CopyItem* aItem)
 	return CollectionItem::ToCardLine(aItem->GetParent(), m_szName, aItem->GetIdentifyingAttributes(), aItem->GetMetaTags(Visible));
 }
 
+std::string CollectionItem::GetProtoTypeString()
+{
+	return CollectionItem::ToCardLine("", "", m_lstCommonTraits);
+}
+
 bool CollectionItem::ParseCardLine(std::string aszLine, PseudoIdentifier& rPIdentifier)
 {
 	unsigned int iCount;

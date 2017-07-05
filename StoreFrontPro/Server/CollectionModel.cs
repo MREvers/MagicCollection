@@ -32,7 +32,7 @@ namespace StoreFrontPro.Server
                     Identifier: LongNameTagsPair,
                     CollectionName: CollectionName,
                     Callback: (aoCardModel) => { CollectionItems.Add(aoCardModel);  },
-                    UICallback: false);
+                    UICallback: true);
             }
             ServerInterface.Server.SyncServerTask(aCallback);
         }
@@ -50,11 +50,11 @@ namespace StoreFrontPro.Server
 
         public void SubmitBulkEdits(List<string> alstEdits, Action aCallBack = null)
         {
-            ServerInterface.Collection.LoadBulkChanges(this.CollectionName, alstEdits,
-                ()=> {
-                    Sync(aCallBack);
-                }, true);
-            //ServerInterfaceModel.CollectionInterfaceModel.LoadBulkChanges(this.CollectionName, alstEdits);
+            ServerInterface.Collection.LoadBulkChanges(
+                this.CollectionName,
+                alstEdits,
+                () => { Sync(aCallBack); },
+                false);
         }
 
         public void AddItem(string aszCardNameLong, List<Tuple<string, string>> alstMeta)

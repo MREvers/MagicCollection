@@ -13,20 +13,18 @@ public:
 	ServerClientInterface();
 	~ServerClientInterface();
 
-	System::String^ 
-      LoadCollection(System::String^ aszCollectionName);
+	System::String^ LoadCollection(System::String^ aszCollectionName);
 
-   System::String^
-	   GetImagesPath();
-
+    System::String^ GetImagesPath();
+	System::String^ GetCardPrototype(System::String^ ahszCardName);
 
 	System::Collections::Generic::List<System::String^>^ GetLoadedCollections();
 
-	System::Collections::Generic::List<System::String^>^ 
-      GetAllCardsStartingWith(System::String^ ahszText);
+	System::Collections::Generic::List<System::String^>^ GetAllCardsStartingWith(System::String^ ahszText);
 
-	System::Collections::Generic::List<System::String^>^
-		GetCollectionListWithMeta(System::String^ ahszCollectionName);
+	System::Collections::Generic::List<System::String^>^ GetCollectionListWithMeta(System::String^ ahszCollectionName);
+
+	void SubmitBulkChanges(System::String^ ahszCollectionName, System::Collections::Generic::List<System::String^>^ ahlstBulkChanges);
 
 	void ImportCollection();
 private:

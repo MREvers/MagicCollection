@@ -20,7 +20,13 @@ System::String^ ServerClientInterface::LoadCollection(System::String^ ahszCollec
 System::String^
 ServerClientInterface::GetImagesPath()
 {
-	return  gcnew System::String(m_StoreFrontBackEnd->GetImagesPath().c_str());
+	return gcnew System::String(m_StoreFrontBackEnd->GetImagesPath().c_str());
+}
+
+System::String^ ServerClientInterface::GetCardPrototype(System::String^ ahszCardName)
+{
+	std::string szCardName = msclr::interop::marshal_as<std::string>(ahszCardName);
+	return gcnew System::String(m_StoreFrontBackEnd->GetCardPrototype(szCardName).c_str());
 }
 
 // [ { card name - long, [ <tags> ] }, ... }
@@ -64,6 +70,13 @@ System::Collections::Generic::List<System::String^>^ ServerClientInterface::GetA
 		hlstCardList->Add(hszCard);
 	}
 	return hlstCardList;
+}
+
+void ServerClientInterface::SubmitBulkChanges(System::String^ ahszCollectionName, System::Collections::Generic::List<System::String^>^ ahlstBulkChanges)
+{
+	std::string szCollection = msclr::interop::marshal_as<std::string>(ahszCollectionName);
+	std::vector<std::string> lstChanges = stringListToVector(ahlstBulkChanges);
+	m_StoreFrontBackEnd->SubmitBulkChanges(szCollection, lstChanges);
 }
 
 void ServerClientInterface::ImportCollection()

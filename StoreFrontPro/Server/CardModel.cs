@@ -10,36 +10,30 @@ using System.Windows.Media.Imaging;
 
 namespace StoreFrontPro.Server
 {
-    public class CardModel : INotifyPropertyChanged
+    public class CardModel
     {
         public static List<string> TEMP_LST_IMPORTANT_IDENTS = new List<string>() { "set" };
 
         public string CardName { get; set; }
-        public int Amount { get; set; }
         public string CardNameLong;
         public string TargetCollection;
 
-        public List<Tuple<string, string>> MetaTagList;
-        public List<Tuple<string, string>> SpecifiedAttrList; // Attrs that can change between copy such as 'Set'
-        public List<Tuple<string, string>> IdentifiedAttrList; // Attrs that define a copy into a card class.
-        public List<Tuple<string, List<string>>> SpecifiedAttrsRestrictionList;
+        public List<Tuple<string, string>> MetaTags;
+        public List<Tuple<string, string>> CommonAttributes; // Attrs that can change between copy such as 'Set'
+        public List<Tuple<string, string>> IdentifyingAttributes; // Attrs that define a copy into a card class.
 
-        public event PropertyChangedEventHandler PropertyChanged;
-        protected virtual void OnPropertyChanged(string propertyName)
+        private object m_oLock = new object();
+        private bool _bCardImageIsLoading = false;
+        private bool m_bCardImageIsLoading
         {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+            get { lock (m_oLock) { return _bCardImageIsLoading; } }
+            set { lock (m_oLock) { _bCardImageIsLoading = value; } }
         }
 
-        public CardModel(string aszCardName, string aszTargetCollection,
-            List<Tuple<string, string>> aLstSpecifiedAttrs,
-            List<Tuple<string, string>> aLstIdentifiedAttrs,
-            List<Tuple<string, string>> aLstMetaTags)
+        public CardModel(string aszIdentifier, string aszParent)
         {
-            CardName = aszCardName;
-            TargetCollection = aszTargetCollection;
-            MetaTagList = aLstMetaTags;
-            SpecifiedAttrList = aLstSpecifiedAttrs;
-            IdentifiedAttrList = aLstIdentifiedAttrs;
+            TargetCollection = aszParent;
+            parseIdentifier(aszIdentifier);
         }
 
         public void SubmitFeatureChangesToServer(List<Tuple<string, string>> alstNewMeta,
@@ -51,7 +45,7 @@ namespace StoreFrontPro.Server
         public string GetFullIdentifier()
         {
             string szMetaList = "{ ";
-            foreach(Tuple<string,string> MTag in MetaTagList)
+            foreach(Tuple<string,string> MTag in MetaTags)
             {
                 szMetaList += MTag.Item1 + "=\"" + MTag.Item2 + "\" ";
             }
@@ -89,7 +83,7 @@ namespace StoreFrontPro.Server
         public string GetMetaTag(string aszKey)
         {
             string szRetVal = "";
-            foreach (Tuple<string, string> KeyVal in MetaTagList)
+            foreach (Tuple<string, string> KeyVal in MetaTags)
             {
                 if (KeyVal.Item1 == aszKey)
                 {
@@ -103,7 +97,7 @@ namespace StoreFrontPro.Server
         public string GetAttr(string aszKey)
         {
             string szRetVal = "";
-            foreach(var tup in IdentifiedAttrList)
+            foreach(var tup in IdentifyingAttributes)
             {
                 if (tup.Item1 == aszKey)
                 {
@@ -114,7 +108,7 @@ namespace StoreFrontPro.Server
 
             if (szRetVal == "")
             {
-                foreach (var tup in SpecifiedAttrList)
+                foreach (var tup in CommonAttributes)
                 {
                     if (tup.Item1 == aszKey)
                     {
@@ -129,7 +123,64 @@ namespace StoreFrontPro.Server
 
         public void GetImage(Action<BitmapImage> aCallBack)
         {
-            ServerInterface.Card.DownloadAndCacheImage(aCallBack, this);
+            if (!m_bCardImageIsLoading)
+            {
+                m_bCardImageIsLoading = true;
+                Action<BitmapImage> actionWrapper = (image) => { m_bCardImageIsLoading = false; aCallBack(image); };
+                ServerInterface.Card.DownloadAndCacheImage(actionWrapper, this);
+            }
+        }
+
+        private void parseIdentifier(string aszIdentifier)
+        {
+            List<string> lstIdentifierAndTags = aszIdentifier.Split(':').ToList();
+            string szIdentifier = lstIdentifierAndTags[0].Trim();
+            string szMeta = "";
+            if (lstIdentifierAndTags.Count > 1)
+            {
+                szMeta = lstIdentifierAndTags[1].Trim();
+                MetaTags = parseTagList(szMeta);
+            }
+            else
+            {
+                MetaTags = new List<Tuple<string, string>>();
+            }
+
+            List<string> lstNameAndIDs = szIdentifier.Split('{').ToList();
+            string szName = lstNameAndIDs[0].Trim();
+            CardName = szName;
+
+            string szDetails = "";
+            if (lstNameAndIDs.Count > 1)
+            {
+                szDetails = lstNameAndIDs[1].Trim();
+                IdentifyingAttributes = parseTagList(szDetails);
+            }
+            else
+            {
+                IdentifyingAttributes = new List<Tuple<string, string>>();
+            }
+
+            CommonAttributes = parseTagList(ServerInterface.Card.GetProtoType(CardName));
+        }
+
+        private List<Tuple<string,string>> parseTagList(string szTags)
+        {
+            string szRetval = szTags.Trim(' ', '{', '}', ' ');
+            List<string> lstTuples = szRetval.Split(' ').ToList();
+            List<Tuple<string, string>> lstRealTuples = new List<Tuple<string, string>>();
+            foreach(string tup in lstTuples)
+            {
+                List<string> lstKeyAndVal = tup.Split('=').ToList();
+                if (lstKeyAndVal.Count == 2)
+                {
+                    string szKey = lstKeyAndVal[0].Trim(' ');
+                    string szVal = lstKeyAndVal[1].Trim(' ', '\"');
+                    lstRealTuples.Add(new Tuple<string, string>(szKey, szVal));
+                }
+            }
+
+            return lstRealTuples;
         }
     }
 }

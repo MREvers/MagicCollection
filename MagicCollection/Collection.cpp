@@ -1,8 +1,8 @@
-#include "ItemCollection.h"
+#include "Collection.h"
 
 
 
-ItemCollection::ItemCollection(std::string aszName, CollectionSource* aoSource, std::string aszParentCollectionName)
+Collection::Collection(std::string aszName, CollectionSource* aoSource, std::string aszParentCollectionName)
 {
 	m_szName = aszName;
 	m_ptrCollectionSource = aoSource;
@@ -10,16 +10,16 @@ ItemCollection::ItemCollection(std::string aszName, CollectionSource* aoSource, 
 }
 
 
-ItemCollection::~ItemCollection()
+Collection::~Collection()
 {
 }
 
-std::string ItemCollection::GetName()
+std::string Collection::GetName()
 {
 	return m_szName;
 }
 
-void ItemCollection::AddItem(std::string aszName,
+void Collection::AddItem(std::string aszName,
 	std::vector<Tag> alstAttrs,
 	std::vector<Tag> alstMetaTags,
 	bool abCloseTransaction)
@@ -34,10 +34,10 @@ void ItemCollection::AddItem(std::string aszName,
 		std::string szHash = item->GetHash(m_szName, alstAttrs, alstMetaTags);
 
 		std::function<void()> fnDo;
-		fnDo = std::bind(&ItemCollection::addItem, this, aszName, alstAttrs, alstMetaTags);
+		fnDo = std::bind(&Collection::addItem, this, aszName, alstAttrs, alstMetaTags);
 
 		std::function<void()> fnUndo;
-		fnUndo = std::bind(&ItemCollection::removeItem, this, aszName, szHash);
+		fnUndo = std::bind(&Collection::removeItem, this, aszName, szHash);
 
 		Action action(fnDo, fnUndo);
 
@@ -55,7 +55,7 @@ void ItemCollection::AddItem(std::string aszName,
 	}
 }
 
-void ItemCollection::RemoveItem(std::string aszName, std::string aszIdentifyingHash, bool abCloseTransaction)
+void Collection::RemoveItem(std::string aszName, std::string aszIdentifyingHash, bool abCloseTransaction)
 {
 	int iValidItem = m_ptrCollectionSource->LoadCard(aszName);
 	if (iValidItem != -1) { return; }
@@ -65,12 +65,12 @@ void ItemCollection::RemoveItem(std::string aszName, std::string aszIdentifyingH
 	if (copy == nullptr) { return; }
 
 	std::function<void()> fnDo;
-	fnDo = std::bind(&ItemCollection::removeItem, this, aszName, aszIdentifyingHash);
+	fnDo = std::bind(&Collection::removeItem, this, aszName, aszIdentifyingHash);
 
 	std::vector<Tag> lstAttrs = copy->GetIdentifyingAttributes();
 	std::vector<Tag> lstMetas = copy->GetMetaTags(Visible);
 	std::function<void()> fnUndo;
-	fnUndo = std::bind(&ItemCollection::addItem, this, aszName, lstAttrs, lstMetas);
+	fnUndo = std::bind(&Collection::addItem, this, aszName, lstAttrs, lstMetas);
 
 	Action action(fnDo, fnUndo);
 
@@ -86,7 +86,7 @@ void ItemCollection::RemoveItem(std::string aszName, std::string aszIdentifyingH
 	}
 }
 
-void ItemCollection::ChangeItem(std::string aszName, std::string aszIdentifyingHash, std::vector<Tag> alstChanges, bool abCloseTransaction)
+void Collection::ChangeItem(std::string aszName, std::string aszIdentifyingHash, std::vector<Tag> alstChanges, bool abCloseTransaction)
 {
 	int iValidItem = m_ptrCollectionSource->LoadCard(aszName);
 	if (iValidItem != -1) { return; }
@@ -96,7 +96,7 @@ void ItemCollection::ChangeItem(std::string aszName, std::string aszIdentifyingH
 	if (copy == nullptr) { return; }
 
 	std::function<void()> fnDo;
-	fnDo = std::bind(&ItemCollection::changeItem, this, aszName, aszIdentifyingHash, alstChanges);
+	fnDo = std::bind(&Collection::changeItem, this, aszName, aszIdentifyingHash, alstChanges);
 
 	std::vector<Tag> lstUndoChanges;
 	std::vector<Tag>::iterator iter_Changes = alstChanges.begin();
@@ -117,7 +117,7 @@ void ItemCollection::ChangeItem(std::string aszName, std::string aszIdentifyingH
 	}
 
 	std::function<void()> fnUndo;
-	fnUndo = std::bind(&ItemCollection::changeItem, this, aszName, aszIdentifyingHash, lstUndoChanges);
+	fnUndo = std::bind(&Collection::changeItem, this, aszName, aszIdentifyingHash, lstUndoChanges);
 
 	Action action(fnDo, fnUndo);
 
@@ -133,7 +133,7 @@ void ItemCollection::ChangeItem(std::string aszName, std::string aszIdentifyingH
 	}
 }
 
-void ItemCollection::LoadCollection(std::string aszFileName)
+void Collection::LoadCollection(std::string aszFileName)
 {
 	CollectionIO loader;
 
@@ -144,12 +144,21 @@ void ItemCollection::LoadCollection(std::string aszFileName)
 
 	loadPreprocessingLines(lstPreprocessLines);
 
-	loadLines(lstCardLines);
+	LoadChanges(lstCardLines);
 
 	IsLoaded = (m_szName != Config::NotFoundString);	
 }
 
-std::vector<std::string> ItemCollection::GetCollectionList()
+void Collection::LoadChanges(std::vector<std::string> lstLines)
+{
+	std::vector<std::string>::iterator iter_Lines = lstLines.begin();
+	for (; iter_Lines != lstLines.end(); ++iter_Lines)
+	{
+		loadInterfaceLine(*iter_Lines);
+	}
+}
+
+std::vector<std::string> Collection::GetCollectionList()
 {
 	std::vector<std::string> lstRetVal;
 	std::vector<int> lstCol = getCollection();
@@ -170,7 +179,7 @@ std::vector<std::string> ItemCollection::GetCollectionList()
 	return lstRetVal;
 }
 
-std::vector<int> ItemCollection::getCollection()
+std::vector<int> Collection::getCollection()
 {
 	if (m_ptrCollectionSource->IsSyncNeeded(m_szName))
 	{
@@ -179,7 +188,7 @@ std::vector<int> ItemCollection::getCollection()
 	return m_lstItemCacheIndexes;
 }
 
-void ItemCollection::addItem(std::string aszName, std::vector<Tag> alstAttrs, std::vector<Tag> alstMetaTags)
+void Collection::addItem(std::string aszName, std::vector<Tag> alstAttrs, std::vector<Tag> alstMetaTags)
 {
 	int iCache = m_ptrCollectionSource->LoadCard(aszName);
 
@@ -189,17 +198,17 @@ void ItemCollection::addItem(std::string aszName, std::vector<Tag> alstAttrs, st
 	registerItem(iCache);
 }
 
-void ItemCollection::removeItem(std::string aszName, std::string aszIdentifyingHash)
+void Collection::removeItem(std::string aszName, std::string aszIdentifyingHash)
 {
 
 }
 
-void ItemCollection::changeItem(std::string aszName, std::string aszIdentifyingHash, std::vector<Tag> alstChanges)
+void Collection::changeItem(std::string aszName, std::string aszIdentifyingHash, std::vector<Tag> alstChanges)
 {
 
 }
 
-void ItemCollection::registerItem(int aiCacheIndex)
+void Collection::registerItem(int aiCacheIndex)
 {
 	int iFound = ListHelper::Instance()->List_Find(aiCacheIndex, m_lstItemCacheIndexes);
 	if (iFound == -1)
@@ -208,7 +217,7 @@ void ItemCollection::registerItem(int aiCacheIndex)
 	}
 }
 
-Transaction* ItemCollection::getOpenTransaction()
+Transaction* Collection::getOpenTransaction()
 {
 	if (m_lstTransactions.size() == 0 ||
 		!m_lstTransactions.at(m_lstTransactions.size() - 1).IsOpen)
@@ -219,7 +228,7 @@ Transaction* ItemCollection::getOpenTransaction()
 	return &m_lstTransactions.at(m_lstTransactions.size() - 1);
 }
 
-void ItemCollection::finalizeTransaction()
+void Collection::finalizeTransaction()
 {
 	Transaction* transaction = getOpenTransaction();
 	if (transaction->IsOpen)
@@ -229,7 +238,7 @@ void ItemCollection::finalizeTransaction()
 }
 
 
-void ItemCollection::loadPreprocessingLines(std::vector<std::string>  alstLines)
+void Collection::loadPreprocessingLines(std::vector<std::string>  alstLines)
 {
 	std::vector<std::string>::iterator iter_Lines = alstLines.begin();
 	for (; iter_Lines != alstLines.end(); ++iter_Lines)
@@ -240,7 +249,7 @@ void ItemCollection::loadPreprocessingLines(std::vector<std::string>  alstLines)
 
 
 
-void ItemCollection::loadPreprocessingLine(std::string aszLine)
+void Collection::loadPreprocessingLine(std::string aszLine)
 {
 	std::string szDefKey(Config::CollectionDefinitionKey);
 	if (aszLine.size() < 2) { return; }
@@ -271,32 +280,24 @@ void ItemCollection::loadPreprocessingLine(std::string aszLine)
 	}
 }
 
-
-void ItemCollection::loadLines(std::vector<std::string> lstLines)
-{
-	std::vector<std::string>::iterator iter_Lines = lstLines.begin();
-	for (; iter_Lines != lstLines.end(); ++iter_Lines)
-	{
-		loadInterfaceLine(*iter_Lines);
-	}
-}
-
-void ItemCollection::loadInterfaceLine(std::string aszLine)
+void Collection::loadInterfaceLine(std::string aszLine)
 {
 	if (aszLine.size() <= 2) { return; }
 
 	std::string szTrimmedLine = StringHelper::Str_Trim(aszLine, ' ');
 
 	std::string szLoadDirective = szTrimmedLine.substr(0, 1);
-
+	
 	if (szLoadDirective == "-") // REMOVE
 	{
+		szTrimmedLine = szTrimmedLine.substr(1);
 		// Of the form
 		// Sylvan Card Name [{ set="val" color="val2" } ][: { metatag1="val" metatag2="val2" }]
 		loadRemoveLine(szTrimmedLine);
 	}
 	else if (szLoadDirective == "%") // CHANGE
 	{
+		szTrimmedLine = szTrimmedLine.substr(1);
 		// Of the form
 		// Sylvan Card Name [{ set="val" color="val2" } ][: { metatag1="val" metatag2="val2" }] ->
 		//   Another Card Name [{ set="val" color="val2" } ][: { metatag1="val" metatag2="val2" }]
@@ -304,13 +305,17 @@ void ItemCollection::loadInterfaceLine(std::string aszLine)
 	}
 	else // ADD
 	{
+		if (szLoadDirective == "+") 
+		{
+			szTrimmedLine = szTrimmedLine.substr(1);
+		}
 		// Of the form
 		// Sylvan Card Name [{ set="val" color="val2" } ][: { metatag1="val" metatag2="val2" }]
 		loadAdditionLine(szTrimmedLine);
 	}
 }
 
-void ItemCollection::loadAdditionLine(std::string aszLine)
+void Collection::loadAdditionLine(std::string aszLine)
 {
 	// Sylvan Card Name[{ set = "val" color = "val2" }][: { metatag1 = "val" metatag2 = "val2" }]
 	std::string szIdentifierString;
@@ -335,12 +340,12 @@ void ItemCollection::loadAdditionLine(std::string aszLine)
 	AddItem(sudoItem.Name, lstIdentifiers, lstMetaTags);
 }
 
-void ItemCollection::loadRemoveLine(std::string aszLine)
+void Collection::loadRemoveLine(std::string aszLine)
 {
 
 }
 
-void ItemCollection::loadDeltaLine(std::string aszLine)
+void Collection::loadDeltaLine(std::string aszLine)
 {
 
 }

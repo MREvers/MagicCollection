@@ -16,7 +16,7 @@ CollectionFactory::~CollectionFactory()
 std::string CollectionFactory::LoadCollectionFromFile(std::string aszFileName)
 {
 	std::string szRetVal = Config::NotFoundString;
-	ItemCollection* oCol = new ItemCollection(Config::NotFoundString, m_ColSource);
+	Collection* oCol = new Collection(Config::NotFoundString, m_ColSource);
 	oCol->LoadCollection(aszFileName);
 	std::string szFoundName = oCol->GetName();
 	if (oCol->IsLoaded && !CollectionExists(szFoundName))
@@ -45,7 +45,7 @@ std::vector<std::string> CollectionFactory::GetLoadedCollections()
 
 bool CollectionFactory::CollectionExists(std::string aszCollectionName)
 {
-	std::vector<ItemCollection*>::iterator iter_cols = m_lstCollections.begin();
+	std::vector<Collection*>::iterator iter_cols = m_lstCollections.begin();
 	for (; iter_cols != m_lstCollections.end(); ++iter_cols)
 	{
 		if (aszCollectionName == (*iter_cols)->GetName())
@@ -56,9 +56,9 @@ bool CollectionFactory::CollectionExists(std::string aszCollectionName)
 	return false;
 }
 
-ItemCollection* CollectionFactory::GetCollection(std::string aszCollectionName)
+Collection* CollectionFactory::GetCollection(std::string aszCollectionName)
 {
-	std::vector<ItemCollection*>::iterator iter_cols = m_lstCollections.begin();
+	std::vector<Collection*>::iterator iter_cols = m_lstCollections.begin();
 	for (; iter_cols != m_lstCollections.end(); ++iter_cols)
 	{
 		if (aszCollectionName == (*iter_cols)->GetName())

@@ -1,6 +1,6 @@
 #include "Transaction.h"
 
-Transaction::Transaction(ItemCollection* aoCol)
+Transaction::Transaction(Collection* aoCol)
 {
 	m_Col = aoCol;
 	IsRecordable = true;

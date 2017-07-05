@@ -8,13 +8,13 @@
 #include "StringHelper.h"
 #include "Transaction.h"
 
-class ItemCollection
+class Collection
 {
 public:
-	ItemCollection(std::string aszName,
+	Collection(std::string aszName,
 				   CollectionSource* aoSource,
 				   std::string aszParentCollectionName = "");
-	~ItemCollection();
+	~Collection();
 
 	std::string GetName();
 
@@ -28,6 +28,7 @@ public:
 	void ChangeItem(std::string aszName, std::string aszIdentifyingHash, std::vector<Tag> alstChanges, bool abCloseTransaction = true);
 
 	void LoadCollection(std::string aszFileName);
+	void LoadChanges(std::vector<std::string> aszLines);
 
 	std::vector<std::string> GetCollectionList();
 
@@ -55,7 +56,6 @@ private:
 	void loadPreprocessingLines(std::vector<std::string> alstLine);
 	void loadPreprocessingLine(std::string aszLine);
 
-	void loadLines(std::vector<std::string> aszLines);
 	void loadInterfaceLine(std::string aszLine);
 
 	void loadAdditionLine(std::string aszLine);

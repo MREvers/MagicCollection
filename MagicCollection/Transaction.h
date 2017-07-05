@@ -7,7 +7,7 @@
 
 #include "Action.h"
 
-class ItemCollection;
+class Collection;
 
 /* Class Transaction
 * Wraps a list of actions. Provides interface for executing associated
@@ -16,7 +16,7 @@ class ItemCollection;
 class Transaction
 {
 public:
-	Transaction(ItemCollection* aoCol);
+	Transaction(Collection* aoCol);
 	~Transaction();
 
 	void AddAction(Action& aoAct);
@@ -27,6 +27,6 @@ public:
 	bool IsOpen = true;
 	bool IsRecordable = true;
 private:
-	ItemCollection* m_Col;
+	Collection* m_Col;
 	std::vector<Action> Actions;
 };

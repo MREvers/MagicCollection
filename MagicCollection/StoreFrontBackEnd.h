@@ -17,12 +17,15 @@ public:
 
    std::string LoadCollection(std::string aszCollectionFile);
    std::vector<std::string> GetLoadedCollections();
-   std::vector<std::string>
-	   GetCollectionList(std::string aszCollection);
+
+   std::vector<std::string> GetCollectionList(std::string aszCollection);
+   std::string GetCardPrototype(std::string aszCardName);
 
    std::vector<std::string> GetAllCardsStartingWith(std::string aszSearch);
 
    std::string GetImagesPath();
+
+   void SubmitBulkChanges(std::string aszCollection, std::vector<std::string> alstChanges);
    
    void ImportCollection();
 

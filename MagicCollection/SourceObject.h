@@ -4,7 +4,6 @@
 #include <map>
 #include <vector>
 
-#include "CollectionObject.h"
 #include "StringHelper.h"
 #include "Config.h"
 

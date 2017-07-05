@@ -27,6 +27,11 @@ namespace StoreFrontPro.Server
                 public EventArgs e;
             }
 
+            public string GetProtoType(string szCardName)
+            {
+                return SCI.GetCardPrototype(szCardName);
+            }
+
             // Passes the image to the callback.
             // There is notably a memory leak in wpf bitmap images. read here.
             //http://stackoverflow.com/questions/21877221/memory-not-getting-released-in-wpf-image
@@ -35,7 +40,7 @@ namespace StoreFrontPro.Server
             // we may not expect it to return to its previous usage.
             public void DownloadAndCacheImage(Action<BitmapImage> aCallback, CardModel aoCardModel)
             {
-                Thread downloadAndLoadImageThread = new Thread(()=> { inDownloadAndCacheImage(aCallback, aoCardModel); });
+                Thread downloadAndLoadImageThread = new Thread(() => { inDownloadAndCacheImage(aCallback, aoCardModel); });
                 downloadAndLoadImageThread.IsBackground = true;
                 downloadAndLoadImageThread.Start();
             }

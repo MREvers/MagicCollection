@@ -64,31 +64,10 @@ namespace StoreFrontPro.Server
 
             private CardModel inGenerateCopyModel(string aszIdentifier, string aszCollectionName)
             {
-                List<string> lstSplit = aszIdentifier.Split(':').ToList();
-                string szLongName = lstSplit[0];
-                string szMetaTags = "";
-                if (lstSplit.Count > 0)
-                {
-                    szMetaTags = lstSplit[1];
-                }
-
-                List<string> lstNameAttrs = szLongName.Split('{').ToList();
-                string szName = lstNameAttrs[0];
-                string szDetails = "";
-                if (lstNameAttrs.Count > 0)
-                {
-                    szDetails = lstNameAttrs[1];
-                }
-
                 // We also need the rest identified attrs
-                CardModel CopyM = new CardModel(
-                    szName,
-                    aszCollectionName,
-                    new List<Tuple<string, string>>(),
-                    new List<Tuple<string, string>>(),
-                    new List<Tuple<string, string>>());
+                CardModel newCopy = new CardModel(aszIdentifier, aszCollectionName);
 
-                return CopyM;
+                return newCopy;
             }
 
             public void SyncServerTask(Action aCallback)
