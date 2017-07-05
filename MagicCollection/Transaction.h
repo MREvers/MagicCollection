@@ -23,10 +23,16 @@ public:
 	void RemoveAction(int i);
 	void Finalize(bool abRecordable = true);
 	void Rollback();
+	
+	std::vector<std::string> GetDescriptions();
 
-	bool IsOpen = true;
-	bool IsRecordable = true;
+	bool IsOpen();
+	bool IsRecordable();
+
 private:
+	bool m_bIsOpen = true;
+	bool m_bIsRecordable = true;
+
 	Collection* m_Col;
 	std::vector<Action> Actions;
 };

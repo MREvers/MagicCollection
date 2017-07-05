@@ -14,6 +14,7 @@ public:
 	~ServerClientInterface();
 
 	System::String^ LoadCollection(System::String^ aszCollectionName);
+	void SaveCollection(System::String^ aszCollectionName);
 
     System::String^ GetImagesPath();
 	System::String^ GetCardPrototype(System::String^ ahszCardName);

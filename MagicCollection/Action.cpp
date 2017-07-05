@@ -16,6 +16,11 @@ void Action::SetIdentifier(std::string aszId)
 	Identifier = aszId;
 }
 
+std::string Action::GetIdentifier()
+{
+	return Identifier;
+}
+
 void Action::Execute()
 {
 	Do();

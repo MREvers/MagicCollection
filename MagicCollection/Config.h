@@ -54,6 +54,8 @@ public:
 
 	static Config* Instance();
 
+	static char* Config::MetaFileExtension;
+	static char* Config::HistoryFileExtension;
 	static char* Config::HashKey;
 	static char* Config::NotFoundString;
 	static char* Config::CollectionDefinitionKey;

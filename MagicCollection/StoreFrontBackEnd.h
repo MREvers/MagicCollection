@@ -15,6 +15,7 @@ public:
    CStoreFrontBackEnd();
    ~CStoreFrontBackEnd();
 
+   void SaveCollection(std::string aszCollectionName);
    std::string LoadCollection(std::string aszCollectionFile);
    std::vector<std::string> GetLoadedCollections();
 

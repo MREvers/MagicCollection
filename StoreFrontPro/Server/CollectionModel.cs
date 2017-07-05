@@ -46,7 +46,6 @@ namespace StoreFrontPro.Server
         public void SaveCollection()
         {
             ServerInterface.Collection.SaveCollection(CollectionName);
-            //ServerInterfaceModel.CollectionInterfaceModel.SaveCollection(CollectionName);
         }
 
         public void SubmitBulkEdits(List<string> alstEdits, Action aCallBack = null)

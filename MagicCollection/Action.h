@@ -17,6 +17,7 @@ public:
 	~Action();
 
 	void SetIdentifier(std::string aszId);
+	std::string GetIdentifier();
 
 	void Execute();
 	void Rollback();

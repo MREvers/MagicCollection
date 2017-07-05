@@ -4,6 +4,7 @@
 
 enum MetaTagType : unsigned short
 {
+	None = 0x0, // Used in filtering out meta info.
 	Public = 0x1, // 001
 	Ignored = 0x2, // 010
 	Visible = 0x3, // 011

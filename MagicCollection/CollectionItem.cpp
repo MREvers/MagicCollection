@@ -119,9 +119,9 @@ std::string CollectionItem::GetHash(std::string aszCollectionName,
 	return copyToHash.GetHash();
 }
 
-std::string CollectionItem::GetCardString(CopyItem* aItem)
+std::string CollectionItem::GetCardString(CopyItem* aItem, MetaTagType aTagType)
 {
-	return CollectionItem::ToCardLine(aItem->GetParent(), m_szName, aItem->GetIdentifyingAttributes(), aItem->GetMetaTags(Visible));
+	return CollectionItem::ToCardLine(aItem->GetParent(), m_szName, aItem->GetIdentifyingAttributes(), aItem->GetMetaTags(aTagType));
 }
 
 std::string CollectionItem::GetProtoTypeString()

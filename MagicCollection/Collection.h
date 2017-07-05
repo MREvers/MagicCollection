@@ -1,6 +1,7 @@
 #pragma once
 #include <vector>
 #include <string>
+#include <winapifamily.h>
 
 #include "CollectionIO.h"
 #include "CollectionSource.h"
@@ -22,15 +23,14 @@ public:
 		std::vector<Tag> alstAttrs = std::vector<Tag>(),
 		std::vector<Tag> alstMetaTags = std::vector<Tag>(),
 		bool abCloseTransaction = true);
-
 	void RemoveItem(std::string aszName, std::string aszIdentifyingHash, bool abCloseTransaction = true);
-
 	void ChangeItem(std::string aszName, std::string aszIdentifyingHash, std::vector<Tag> alstChanges, bool abCloseTransaction = true);
 
+	void SaveCollection();
 	void LoadCollection(std::string aszFileName);
 	void LoadChanges(std::vector<std::string> aszLines);
 
-	std::vector<std::string> GetCollectionList();
+	std::vector<std::string> GetCollectionList(MetaTagType atagType = Visible);
 
 	bool IsLoaded = false;
 
@@ -46,7 +46,9 @@ private:
 	std::string m_szParentName;
 	CollectionSource* m_ptrCollectionSource;
 
+	bool m_bRecordChanges;
 	std::vector<Transaction> m_lstTransactions;
+	std::vector<std::string> m_lstHistory;
 
 	std::vector<int> m_lstItemCacheIndexes;
 
@@ -69,5 +71,8 @@ private:
 	void loadRemoveLine(std::string aszLine);
 	void loadDeltaLine(std::string aszLine);
 
+	void saveHistory();
+	void saveMeta();
+	void saveCollection();
 };
 

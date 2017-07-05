@@ -15,6 +15,14 @@ CStoreFrontBackEnd::~CStoreFrontBackEnd()
 {
 }
 
+void CStoreFrontBackEnd::SaveCollection(std::string aszCollectionName)
+{
+	if (m_ColFactory->CollectionExists(aszCollectionName))
+	{
+		m_ColFactory->GetCollection(aszCollectionName)->SaveCollection();
+	}
+}
+
 std::string CStoreFrontBackEnd::LoadCollection(std::string aszCollectionFile)
 {
 	return m_ColFactory->LoadCollectionFromFile(aszCollectionFile);

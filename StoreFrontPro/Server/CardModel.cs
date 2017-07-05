@@ -14,25 +14,6 @@ namespace StoreFrontPro.Server
     {
         public static List<string> TEMP_LST_IMPORTANT_IDENTS = new List<string>() { "set" };
 
-        public string CardName { get; set; }
-        public string CardNameLong {
-            get
-            {
-                string szIDList = "{ ";
-                foreach (Tuple<string, string> MTag in CommonAttributes.Concat(IdentifyingAttributes))
-                {
-                    szIDList += MTag.Item1 + "=\"" + MTag.Item2 + "\" ";
-                }
-                szIDList += "}";
-                return CardName +" "+ szIDList;
-            }
-        }
-        public string TargetCollection;
-
-        public List<Tuple<string, string>> MetaTags;
-        public List<Tuple<string, string>> CommonAttributes; // Attrs that can change between copy such as 'Set'
-        public List<Tuple<string, string>> IdentifyingAttributes; // Attrs that define a copy into a card class.
-
         private object m_oLock = new object();
         private bool _bCardImageIsLoading = false;
         private bool m_bCardImageIsLoading
@@ -41,13 +22,21 @@ namespace StoreFrontPro.Server
             set { lock (m_oLock) { _bCardImageIsLoading = value; } }
         }
 
+        public string TargetCollection;
+        public string CardName;
+        public string CardNameLong;
+        public List<Tuple<string, string>> MetaTags;
+        public List<Tuple<string, string>> CommonAttributes; // Attrs that can change between copy such as 'Set'
+        public List<Tuple<string, string>> IdentifyingAttributes; // Attrs that define a copy into a card class.
+
         public CardModel(string aszIdentifier, string aszParent)
         {
             TargetCollection = aszParent;
             parseIdentifier(aszIdentifier);
         }
 
-        public void SubmitFeatureChangesToServer(List<Tuple<string, string>> alstNewMeta,
+        public void SubmitFeatureChangesToServer(
+            List<Tuple<string, string>> alstNewMeta,
             List<Tuple<string, string>> alstNewAttrs)
         {
 
@@ -94,7 +83,7 @@ namespace StoreFrontPro.Server
         public string GetMetaTag(string aszKey)
         {
             string szRetVal = "";
-            foreach (Tuple<string, string> KeyVal in MetaTags)
+            foreach (var KeyVal in MetaTags)
             {
                 if (KeyVal.Item1 == aszKey)
                 {
@@ -108,7 +97,7 @@ namespace StoreFrontPro.Server
         public string GetAttr(string aszKey)
         {
             string szRetVal = "";
-            foreach(var tup in IdentifyingAttributes)
+            foreach(var tup in IdentifyingAttributes.Concat(CommonAttributes))
             {
                 if (tup.Item1 == aszKey)
                 {
@@ -116,19 +105,6 @@ namespace StoreFrontPro.Server
                     break;
                 }
             }
-
-            if (szRetVal == "")
-            {
-                foreach (var tup in CommonAttributes)
-                {
-                    if (tup.Item1 == aszKey)
-                    {
-                        szRetVal = tup.Item2;
-                        break;
-                    }
-                }
-            }
-
             return szRetVal;
         }
 
@@ -146,6 +122,7 @@ namespace StoreFrontPro.Server
         {
             List<string> lstIdentifierAndTags = aszIdentifier.Split(':').ToList();
             string szIdentifier = lstIdentifierAndTags[0].Trim();
+            CardNameLong = szIdentifier;
             string szMeta = "";
             if (lstIdentifierAndTags.Count > 1)
             {

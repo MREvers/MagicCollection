@@ -8,6 +8,8 @@ const char * const CollectionObject::LstNonUniqueTraits[] = { "set", "multiverse
 */
 
 Config* Config::ms_pConfig = nullptr;
+char* Config::MetaFileExtension = "meta";
+char* Config::HistoryFileExtension = "history";
 char* Config::HashKey = "__hash";
 char* Config::NotFoundString = "NF";
 char* Config::CollectionDefinitionKey = ":";
@@ -60,7 +62,7 @@ std::string Config::GetImagesFolder()
 
 std::string Config::GetCollectionsDirectory()
 {
-	return GetCollectionsFolderName();
+	return ".\\" + GetCollectionsFolderName();
 }
 
 std::string Config::GetCollectionsFolderName()

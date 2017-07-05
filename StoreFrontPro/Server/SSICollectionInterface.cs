@@ -15,7 +15,7 @@ namespace StoreFrontPro.Server
             {
                 singleton.enqueueService(() =>
                 {
-                    //SCI.SaveCollection(aszCollectionName);
+                    SCI.SaveCollection(aszCollectionName);
                 });
             }
 

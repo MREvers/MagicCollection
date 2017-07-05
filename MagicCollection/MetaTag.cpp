@@ -30,5 +30,5 @@ std::string MetaTag::GetVal(MetaTagType atagType)
 
 bool MetaTag::CanView(MetaTagType atagType)
 {
-	return (m_Type | atagType) != 0;
+	return (m_Type & atagType) != 0;
 }

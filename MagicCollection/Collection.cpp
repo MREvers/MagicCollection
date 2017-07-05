@@ -7,6 +7,7 @@ Collection::Collection(std::string aszName, CollectionSource* aoSource, std::str
 	m_szName = aszName;
 	m_ptrCollectionSource = aoSource;
 	m_szParentName = aszParentCollectionName;
+	m_bRecordChanges = true;
 }
 
 
@@ -49,7 +50,7 @@ void Collection::AddItem(std::string aszName,
 
 		if (abCloseTransaction)
 		{
-			transaction->Finalize();
+			finalizeTransaction();
 		}
 
 	}
@@ -82,7 +83,7 @@ void Collection::RemoveItem(std::string aszName, std::string aszIdentifyingHash,
 
 	if (abCloseTransaction)
 	{
-		transaction->Finalize();
+		finalizeTransaction();
 	}
 }
 
@@ -129,13 +130,23 @@ void Collection::ChangeItem(std::string aszName, std::string aszIdentifyingHash,
 
 	if (abCloseTransaction)
 	{
-		transaction->Finalize();
+		finalizeTransaction();
 	}
+}
+
+void  Collection::SaveCollection()
+{
+	saveHistory();
+	
+	saveMeta();
+
+	saveCollection();
 }
 
 void Collection::LoadCollection(std::string aszFileName)
 {
 	CollectionIO loader;
+	m_bRecordChanges = false;
 
 	std::vector<std::string> lstLines = loader.LoadLines(aszFileName);
 
@@ -145,8 +156,10 @@ void Collection::LoadCollection(std::string aszFileName)
 	loadPreprocessingLines(lstPreprocessLines);
 
 	LoadChanges(lstCardLines);
+	// Also need to load metatags...
 
-	IsLoaded = (m_szName != Config::NotFoundString);	
+	m_bRecordChanges = true;
+	IsLoaded = (m_szName != Config::NotFoundString);
 }
 
 void Collection::LoadChanges(std::vector<std::string> lstLines)
@@ -158,7 +171,7 @@ void Collection::LoadChanges(std::vector<std::string> lstLines)
 	}
 }
 
-std::vector<std::string> Collection::GetCollectionList()
+std::vector<std::string> Collection::GetCollectionList(MetaTagType atagType)
 {
 	std::vector<std::string> lstRetVal;
 	std::vector<int> lstCol = getCollection();
@@ -171,7 +184,7 @@ std::vector<std::string> Collection::GetCollectionList()
 		std::vector<CopyItem*>::iterator iter_Copy = lstCopies.begin();
 		for (; iter_Copy != lstCopies.end(); ++iter_Copy)
 		{
-			std::string szRep = item->GetCardString(*iter_Copy);
+			std::string szRep = item->GetCardString(*iter_Copy, atagType);
 			lstRetVal.push_back(szRep);
 		}
 	}
@@ -236,7 +249,7 @@ void Collection::registerItem(int aiCacheIndex)
 Transaction* Collection::getOpenTransaction()
 {
 	if (m_lstTransactions.size() == 0 ||
-		!m_lstTransactions.at(m_lstTransactions.size() - 1).IsOpen)
+		!m_lstTransactions.at(m_lstTransactions.size() - 1).IsOpen())
 	{
 		m_lstTransactions.push_back(Transaction(this));
 	}
@@ -247,9 +260,9 @@ Transaction* Collection::getOpenTransaction()
 void Collection::finalizeTransaction()
 {
 	Transaction* transaction = getOpenTransaction();
-	if (transaction->IsOpen)
+	if (transaction->IsOpen())
 	{
-		transaction->Finalize();
+		transaction->Finalize(m_bRecordChanges);
 	}
 }
 
@@ -303,7 +316,7 @@ void Collection::loadInterfaceLine(std::string aszLine)
 	std::string szTrimmedLine = StringHelper::Str_Trim(aszLine, ' ');
 
 	std::string szLoadDirective = szTrimmedLine.substr(0, 1);
-	
+
 	if (szLoadDirective == "-") // REMOVE
 	{
 		szTrimmedLine = szTrimmedLine.substr(1);
@@ -321,7 +334,7 @@ void Collection::loadInterfaceLine(std::string aszLine)
 	}
 	else // ADD
 	{
-		if (szLoadDirective == "+") 
+		if (szLoadDirective == "+")
 		{
 			szTrimmedLine = szTrimmedLine.substr(1);
 		}
@@ -346,7 +359,7 @@ void Collection::loadRemoveLine(std::string aszLine)
 
 	std::string szHash;
 	int iHash = ListHelper::Instance()->List_Find(std::string(Config::HashKey), sudoItem.MetaTags, Config::Instance()->GetTagHelper());
-	if (iHash != -1) 
+	if (iHash != -1)
 	{
 		szHash = sudoItem.MetaTags[iHash].second;
 		RemoveItem(sudoItem.Name, szHash);
@@ -356,4 +369,93 @@ void Collection::loadRemoveLine(std::string aszLine)
 void Collection::loadDeltaLine(std::string aszLine)
 {
 
+}
+
+void Collection::saveHistory()
+{
+	std::vector<std::string> lstHistoryLines;
+	for (size_t i = 0; i < m_lstTransactions.size(); i++)
+	{
+		std::vector<std::string> lstTransLines = m_lstTransactions[i].GetDescriptions();
+		for (size_t t = 0; t < lstTransLines.size(); t++)
+		{
+			lstHistoryLines.push_back(lstTransLines[t]);
+		}
+	}
+
+	if (lstHistoryLines.size() > 0)
+	{
+		std::string szTimeString = "";
+		time_t now = time(0);
+		struct tm timeinfo;
+		localtime_s(&timeinfo, &now);
+		char str[26];
+		asctime_s(str, sizeof str, &timeinfo);
+		str[strlen(str) - 1] = 0;
+
+		std::ofstream oHistFile;
+		oHistFile.open(Config::Instance()->GetCollectionsDirectory() + "\\" +
+			Config::Instance()->GetHistoryFolderName() + "\\" +
+			m_szName + "." + +Config::HistoryFileExtension + ".txt", std::ios_base::app);
+
+		oHistFile << "[" << str << "] " << std::endl;
+
+		std::vector<std::string>::iterator iter_histLines = lstHistoryLines.begin();
+		for (; iter_histLines != lstHistoryLines.end(); ++iter_histLines)
+		{
+			oHistFile << *iter_histLines << std::endl;
+		}
+
+		oHistFile.close();
+	}
+}
+
+void Collection::saveMeta()
+{
+	std::vector<std::string> lstMetaLines = GetCollectionList(Visible);
+
+	if (lstMetaLines.size() > 0)
+	{
+		std::ofstream oMetaFile;
+		oMetaFile.open(Config::Instance()->GetCollectionsDirectory() + "\\" +
+			Config::Instance()->GetMetaFolderName() + "\\" +
+			m_szName + "." + +Config::MetaFileExtension + ".txt");
+
+		std::vector<std::string>::iterator iter_MetaLine = lstMetaLines.begin();
+		for (; iter_MetaLine != lstMetaLines.end(); ++iter_MetaLine)
+		{
+			if (iter_MetaLine->find_first_of(':') != std::string::npos)
+			{
+				oMetaFile << *iter_MetaLine << std::endl;
+			}
+		}
+
+		oMetaFile.close();
+	}
+}
+
+void Collection::saveCollection()
+{
+	std::vector<std::string> lstLines = GetCollectionList(None);
+
+	if (lstLines.size() > 0)
+	{
+		std::ofstream oColFile;
+		oColFile.open(Config::Instance()->GetCollectionsDirectory() + "\\"+
+			m_szName + ".txt");
+
+		oColFile << Config::CollectionDefinitionKey << " Name=\"" << m_szName<< "\"" << std::endl;
+		if (m_szParentName != "")
+		{
+			oColFile << Config::CollectionDefinitionKey << " Parent=\"" << m_szParentName << "\"" << std::endl;
+		}
+
+		std::vector<std::string>::iterator iter_Line = lstLines.begin();
+		for (; iter_Line != lstLines.end(); ++iter_Line)
+		{
+			oColFile << *iter_Line << std::endl;
+		}
+
+		oColFile.close();
+	}
 }
