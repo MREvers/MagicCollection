@@ -12,7 +12,7 @@ CollectionItem::PseudoIdentifier::PseudoIdentifier(unsigned int aiCount, std::st
 	MetaString = aszMeta;
 
 	CollectionItem::ParseTagString(aszDetails, Identifiers);
-	CollectionItem::ParseTagString(aszMeta, Identifiers);
+	CollectionItem::ParseTagString(aszMeta, MetaTags);
 }
 
 CollectionItem::PseudoIdentifier::~PseudoIdentifier()
@@ -52,6 +52,21 @@ CopyItem CollectionItem::GenerateCopy(std::string aszCollectionName,
 	CopyItem newCopy(&m_lstIdentifyingTraits, aszCollectionName, alstAttrs, alstMetaTags);
 
 	return newCopy;
+}
+
+void CollectionItem::RemoveCopyItem(std::string aszHash)
+{
+	std::vector<CopyItem>::iterator iter_Copies = m_lstCopies.begin();
+
+	for (; iter_Copies != m_lstCopies.end(); ++iter_Copies)
+	{
+		if (iter_Copies->GetMetaTag(Config::HashKey, Hidden) == aszHash)
+		{
+			m_lstCopies.erase(iter_Copies);
+			break;
+		}
+	}
+
 }
 
 CopyItem* CollectionItem::FindCopyItem(std::string aszHash)
@@ -188,7 +203,12 @@ bool CollectionItem::ParseCardLine(std::string aszLine, PseudoIdentifier& rPIden
 	szDetails = "";
 	if (i < iter_size && hasDets)
 	{
-		while (i < iter_size)
+		while (i < iter_size && aszLine.at(i) != '}')
+		{
+			szDetails += aszLine.at(i);
+			i++;
+		}
+		if (i < iter_size)
 		{
 			szDetails += aszLine.at(i);
 			i++;
@@ -207,6 +227,7 @@ bool CollectionItem::ParseCardLine(std::string aszLine, PseudoIdentifier& rPIden
 	szMeta = "";
 	if (i < iter_size && hasMeta)
 	{
+		i++;
 		while (i < iter_size)
 		{
 			szMeta += aszLine.at(i);

@@ -45,6 +45,8 @@ public:
 		std::vector<Tag> alstAttrs = std::vector<Tag>(),
 		std::vector<Tag> alstMetaTags = std::vector<Tag>());
 
+	void RemoveCopyItem(std::string aszHash);
+
 	CopyItem* FindCopyItem(std::string aszHash);
 
 	std::vector<CopyItem*> GetCopiesForCollection(std::string aszCollection, CollectionItemType aItemType);

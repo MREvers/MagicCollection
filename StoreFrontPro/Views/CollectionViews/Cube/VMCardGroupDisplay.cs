@@ -32,6 +32,12 @@ namespace StoreFrontPro.Views.CollectionViews.Cube
 
         public void SyncWithModel()
         {
+            Action actWrapper = () => { SyncWithModel(); };
+            if (!Application.Current.Dispatcher.CheckAccess())
+            {
+                Application.Current.Dispatcher.BeginInvoke(actWrapper);
+                return;
+            }
             inSyncWithModel();
         }
 
@@ -40,18 +46,25 @@ namespace StoreFrontPro.Views.CollectionViews.Cube
             // Get all of the grouping keys
             List<string> lstGroupingKeys = Model.Select(x => getCategory(x.GetAttr("manaCost"))).Distinct().ToList();
 
+            List<VCardGroupList> lstRemoveGroups = new List<VCardGroupList>();
+            foreach(var group in CategoryGroups)
+            {
+                ((VMCardGroupList)group.DataContext).SyncWithModel();
+                if (((VMCardGroupList)group.DataContext).CategoryList.Count == 0)
+                {
+                    lstRemoveGroups.Add(group);
+                }
+            }
+
+            foreach(var rmGroup in lstRemoveGroups)
+            {
+                CategoryGroups.Remove(rmGroup);
+            }
+
             foreach (string category in lstGroupingKeys)
             {
                 VCardGroupList oExistingDisplay = CategoryGroups.Where(x => ((VMCardGroupList)(x.DataContext)).GroupName == category).FirstOrDefault();
-                if (oExistingDisplay != null)
-                {
-                    ((VMCardGroupList)oExistingDisplay.DataContext).SyncWithModel();
-                    if (((VMCardGroupList)oExistingDisplay.DataContext).CategoryList.Count == 0)
-                    {
-                        CategoryGroups.Remove(oExistingDisplay);
-                    }
-                }
-                else
+                if (oExistingDisplay == null)
                 {
                     MCardGroupList oCardGroupList = new MCardGroupList("manaCost", category, m_lstPriorityGroupingKeys, Model);
                     if (oCardGroupList.GroupedList.Count > 0)

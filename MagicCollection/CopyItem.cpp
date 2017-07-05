@@ -48,7 +48,7 @@ std::string CopyItem::GetHash()
 
 	if (iMetaHash == -1)
 	{
-		std::string szHashString = "";
+		std::string szHashString = m_szParentCollection;
 		std::vector<Tag>::iterator iter_Tags = m_lstIdentifyingTags.begin();
 		for (; iter_Tags != m_lstIdentifyingTags.end(); ++iter_Tags)
 		{

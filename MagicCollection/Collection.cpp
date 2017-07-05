@@ -58,7 +58,7 @@ void Collection::AddItem(std::string aszName,
 void Collection::RemoveItem(std::string aszName, std::string aszIdentifyingHash, bool abCloseTransaction)
 {
 	int iValidItem = m_ptrCollectionSource->LoadCard(aszName);
-	if (iValidItem != -1) { return; }
+	if (iValidItem == -1) { return; }
 
 	CollectionItem* item = m_ptrCollectionSource->GetCardPrototype(iValidItem);
 	CopyItem* copy = item->FindCopyItem(aszIdentifyingHash);
@@ -200,7 +200,23 @@ void Collection::addItem(std::string aszName, std::vector<Tag> alstAttrs, std::v
 
 void Collection::removeItem(std::string aszName, std::string aszIdentifyingHash)
 {
+	int iCache = m_ptrCollectionSource->LoadCard(aszName);
 
+	CollectionItem* item = m_ptrCollectionSource->GetCardPrototype(iCache);
+	item->RemoveCopyItem(aszIdentifyingHash);
+
+	if (item->GetCopiesForCollection(m_szName, All).size() == 0)
+	{
+		std::vector<int> lstNewCacheIndexes;
+		for (size_t i = 0; i < m_lstItemCacheIndexes.size(); i++)
+		{
+			if (m_lstItemCacheIndexes[i] != iCache)
+			{
+				lstNewCacheIndexes.push_back(m_lstItemCacheIndexes[i]);
+			}
+		}
+		m_lstItemCacheIndexes = lstNewCacheIndexes;
+	}
 }
 
 void Collection::changeItem(std::string aszName, std::string aszIdentifyingHash, std::vector<Tag> alstChanges)
