@@ -317,32 +317,24 @@ void Collection::loadInterfaceLine(std::string aszLine)
 
 void Collection::loadAdditionLine(std::string aszLine)
 {
-	// Sylvan Card Name[{ set = "val" color = "val2" }][: { metatag1 = "val" metatag2 = "val2" }]
-	std::string szIdentifierString;
-	std::string szMetaTagString;
-
-	std::vector<std::string> lstSplitLine = StringHelper::Str_Split(aszLine, ":");
-
-	szIdentifierString = lstSplitLine[0];
-	if (lstSplitLine.size() > 1)
-	{
-		szMetaTagString = lstSplitLine[1];
-	}
-
 	CollectionItem::PseudoIdentifier sudoItem;
-	CollectionItem::ParseCardLine(szIdentifierString, sudoItem);
+	CollectionItem::ParseCardLine(aszLine, sudoItem);
 
-	std::vector<Tag> lstMetaTags;
-	CollectionItem::ParseTagString(szMetaTagString, lstMetaTags);
-
-	std::vector<Tag> lstIdentifiers = sudoItem.Identifiers;
-
-	AddItem(sudoItem.Name, lstIdentifiers, lstMetaTags);
+	AddItem(sudoItem.Name, sudoItem.Identifiers, sudoItem.MetaTags);
 }
 
 void Collection::loadRemoveLine(std::string aszLine)
 {
+	CollectionItem::PseudoIdentifier sudoItem;
+	CollectionItem::ParseCardLine(aszLine, sudoItem);
 
+	std::string szHash;
+	int iHash = ListHelper::Instance()->List_Find(std::string(Config::HashKey), sudoItem.MetaTags, Config::Instance()->GetTagHelper());
+	if (iHash != -1) 
+	{
+		szHash = sudoItem.MetaTags[iHash].second;
+		RemoveItem(sudoItem.Name, szHash);
+	}
 }
 
 void Collection::loadDeltaLine(std::string aszLine)

@@ -15,7 +15,18 @@ namespace StoreFrontPro.Server
         public static List<string> TEMP_LST_IMPORTANT_IDENTS = new List<string>() { "set" };
 
         public string CardName { get; set; }
-        public string CardNameLong;
+        public string CardNameLong {
+            get
+            {
+                string szIDList = "{ ";
+                foreach (Tuple<string, string> MTag in CommonAttributes.Concat(IdentifyingAttributes))
+                {
+                    szIDList += MTag.Item1 + "=\"" + MTag.Item2 + "\" ";
+                }
+                szIDList += "}";
+                return CardName +" "+ szIDList;
+            }
+        }
         public string TargetCollection;
 
         public List<Tuple<string, string>> MetaTags;

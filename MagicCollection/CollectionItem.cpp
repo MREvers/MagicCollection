@@ -4,13 +4,15 @@ CollectionItem::PseudoIdentifier::PseudoIdentifier()
 {
 }
 
-CollectionItem::PseudoIdentifier::PseudoIdentifier(unsigned int aiCount, std::string aszName, std::string aszDetails)
+CollectionItem::PseudoIdentifier::PseudoIdentifier(unsigned int aiCount, std::string aszName, std::string aszDetails, std::string aszMeta)
 {
 	Count = aiCount;
 	Name = aszName;
 	DetailString = aszDetails;
+	MetaString = aszMeta;
 
 	CollectionItem::ParseTagString(aszDetails, Identifiers);
+	CollectionItem::ParseTagString(aszMeta, Identifiers);
 }
 
 CollectionItem::PseudoIdentifier::~PseudoIdentifier()
@@ -115,6 +117,7 @@ std::string CollectionItem::GetProtoTypeString()
 bool CollectionItem::ParseCardLine(std::string aszLine, PseudoIdentifier& rPIdentifier)
 {
 	unsigned int iCount;
+	std::string szMeta;
 	std::string szDetails;
 	std::string szName;
 
@@ -169,24 +172,22 @@ bool CollectionItem::ParseCardLine(std::string aszLine, PseudoIdentifier& rPIden
 	szName.erase(0, szName.find_first_not_of(' '));
 	szName.erase(szName.find_last_not_of(' ') + 1);
 
-	while (i < iter_size && (aszLine.at(i) == ' ' || aszLine.at(i) != '{'))
+	while (i < iter_size && aszLine.at(i) == ' ')
 	{
 		i++;
 	}
 
 	bool hasDets = false;
+	bool hasMeta = false;
 	if (i < iter_size)
 	{
-		if (aszLine.at(i) == '{')
-		{
-			hasDets = true;
-		}
+		hasDets = aszLine.at(i) == '{';
+		hasMeta = aszLine.at(i) == ':';
 	}
 
 	szDetails = "";
 	if (i < iter_size && hasDets)
 	{
-
 		while (i < iter_size)
 		{
 			szDetails += aszLine.at(i);
@@ -194,8 +195,27 @@ bool CollectionItem::ParseCardLine(std::string aszLine, PseudoIdentifier& rPIden
 		}
 	}
 
+	if (!hasMeta && hasDets) 
+	{
+		while (i < iter_size && aszLine.at(i) != ':')
+		{
+			i++;
+		}
+		hasMeta = (i < iter_size) && (aszLine.at(i) == ':');
+	}
+
+	szMeta = "";
+	if (i < iter_size && hasMeta)
+	{
+		while (i < iter_size)
+		{
+			szMeta += aszLine.at(i);
+			i++;
+		}
+	}
+
 	// Output the details
-	rPIdentifier = PseudoIdentifier(iCount, szName, szDetails);
+	rPIdentifier = PseudoIdentifier(iCount, szName, szDetails, szMeta);
 	return true;
 }
 

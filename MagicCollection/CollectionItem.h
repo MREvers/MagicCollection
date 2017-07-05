@@ -21,13 +21,15 @@ public:
 	{
 	public:
 		PseudoIdentifier();
-		PseudoIdentifier(unsigned int aiCount, std::string aszName, std::string aszDetails);
+		PseudoIdentifier(unsigned int aiCount, std::string aszName, std::string aszDetails, std::string aszMeta);
 		~PseudoIdentifier();
 
 		unsigned int Count;
 		std::string Name;
 		std::string DetailString;
+		std::string MetaString;
 		std::vector<Tag> Identifiers;
+		std::vector<Tag> MetaTags;
 	};
 
 	CollectionItem(std::string aszItemName, std::vector<Tag> alstCommon, std::vector<TraitItem> alstRestrictions);

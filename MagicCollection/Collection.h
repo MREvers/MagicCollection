@@ -35,6 +35,13 @@ public:
 	bool IsLoaded = false;
 
 private:
+	enum ChangeType: int
+	{
+		Addition = 0x0,
+		Removal = 0x1,
+		Change = 0x2
+	};
+
 	std::string m_szName;
 	std::string m_szParentName;
 	CollectionSource* m_ptrCollectionSource;
