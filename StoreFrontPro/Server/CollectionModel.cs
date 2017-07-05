@@ -5,19 +5,20 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
+using StoreFrontPro.Tools;
 
 namespace StoreFrontPro.Server
 {
     public class CollectionModel
     {
         public string CollectionName;
-        public List<CardModel> CollectionItems;
+        public ObservableCollection<CardModel> CollectionItems;
         public List<CardModel> LstLastQuery;
 
         public CollectionModel(string aszName, List<string> aLstCards)
         {
             CollectionName = aszName;
-            CollectionItems = new List<CardModel>();
+            CollectionItems = new ObservableCollection<CardModel>();
             LstLastQuery = new List<CardModel>();
             BuildCopyModelList(aLstCards);
 

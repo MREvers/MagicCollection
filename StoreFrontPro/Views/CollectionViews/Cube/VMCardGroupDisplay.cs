@@ -9,7 +9,7 @@ using System.Windows;
 
 namespace StoreFrontPro.Views.CollectionViews.Cube
 {
-    class VMCardGroupDisplay : ViewModel<List<CardModel>>
+    class VMCardGroupDisplay : ViewModel<ObservableCollection<CardModel>>
     {
 
         public ObservableCollection<VCardGroupList> CategoryGroups { get; set; } = new ObservableCollection<VCardGroupList>() { };
@@ -24,9 +24,10 @@ namespace StoreFrontPro.Views.CollectionViews.Cube
             "G"
         };
 
-        public VMCardGroupDisplay(List<CardModel> Model) : base(Model)
+        public VMCardGroupDisplay(ObservableCollection<CardModel> Model) : base(Model)
         {
             SyncWithModel();
+            Model.CollectionChanged += (o, e) => { SyncWithModel(); };
         }
 
         public void SyncWithModel()
@@ -91,10 +92,13 @@ namespace StoreFrontPro.Views.CollectionViews.Cube
 
             foreach(VCardGroupList VList in lstTemp)
             {
-                int i = 0;
+                string szGroup = ((VMCardGroupList)VList.DataContext).GroupName;
+
+                int i = szGroup.Length > 0 ? 0 : CategoryGroups.Count();
                 for (; i < CategoryGroups.Count(); i++)
                 {
-                    if (((VMCardGroupList)VList.DataContext).GroupName.Length <= ((VMCardGroupList)CategoryGroups[i].DataContext).GroupName.Length)
+                    string inListGroup = ((VMCardGroupList)CategoryGroups[i].DataContext).GroupName;
+                    if (szGroup.Length <= inListGroup.Length )
                     {
                         break;
                     }
@@ -108,8 +112,6 @@ namespace StoreFrontPro.Views.CollectionViews.Cube
                 {
                     CategoryGroups.Insert(i, VList);
                 }
-
-                
             }
         }
     }

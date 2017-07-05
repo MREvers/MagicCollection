@@ -1,19 +1,21 @@
 ﻿using StoreFrontPro.Server;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using StoreFrontPro.Tools;
 
 namespace StoreFrontPro.Views.CollectionViews.Cube
 {
     class MCardGroupList
     {
-        private List<CardModel> _ungroupedList;
-        public List<CardModel> GroupedList {
+        private ObservableCollection<CardModel> _ungroupedList;
+        public ObservableCollection<CardModel> GroupedList {
             get
             {
-                return getFilteredList();
+                return getFilteredList(_ungroupedList);
             }
         }
 
@@ -22,7 +24,7 @@ namespace StoreFrontPro.Views.CollectionViews.Cube
         private string m_szFilteringAttribute;
         private List<string> m_szAttributeSet;
 
-        public MCardGroupList(string FilteredAttribute, string ExpectedAttribute, List<string> AttributeSet, List<CardModel> BaseList)
+        public MCardGroupList(string FilteredAttribute, string ExpectedAttribute, List<string> AttributeSet, ObservableCollection<CardModel> BaseList)
         {
 
             _ungroupedList = BaseList;
@@ -38,15 +40,15 @@ namespace StoreFrontPro.Views.CollectionViews.Cube
         }
 
         // Can eventually use a strategy pattern to decide how to filter. TODO
-        private List<CardModel> getFilteredList()
+        private ObservableCollection<CardModel> getFilteredList(ObservableCollection<CardModel> alstList)
         {
-            return filterListOnIdentityAndCMC(_ungroupedList);
+            return filterListOnIdentityAndCMC(alstList);
         }
 
 
-        public List<CardModel> filterListOnIdentityAndCMC(List<CardModel> alstNew)
+        public ObservableCollection<CardModel> filterListOnIdentityAndCMC(ObservableCollection<CardModel> alstNew)
         {
-            List<CardModel> lstRetVal = new List<CardModel>();
+            ObservableCollection<CardModel> lstRetVal = new ObservableCollection<CardModel>();
 
             foreach (CardModel oCardModel in alstNew)
             {

@@ -73,6 +73,7 @@
     <Compile Include="Support\MultiDisplay\MultiDisplay.xaml.cs">
       <DependentUpon>MultiDisplay.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Tools\Extensions.cs" />
     <Compile Include="Views\CollectionsOverview\VCollectionsOverview.xaml.cs">
       <DependentUpon>VCollectionsOverview.xaml</DependentUpon>
     </Compile>
@@ -178,9 +179,7 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Tools\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <ProjectReference Include="..\ServerInterface\ServerInterface.vcxproj">
       <Project>{b3e17e4d-3395-42fb-bf66-0af21c59db36}</Project>
