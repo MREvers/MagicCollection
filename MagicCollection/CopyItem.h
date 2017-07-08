@@ -25,7 +25,7 @@ public:
 	std::string GetParent();
 	std::vector<std::string> GetResidentIn();
 
-	void AddMetaTag(std::string aszKey, std::string aszVal, MetaTagType atagType);
+	void SetMetaTag(std::string aszKey, std::string aszVal, MetaTagType atagType);
 	std::string GetMetaTag(std::string aszKey, MetaTagType atagType);
 	std::vector<Tag> GetMetaTags(MetaTagType atagType);
 
@@ -33,7 +33,8 @@ public:
 	std::string GetIdentifyingAttribute(std::string aszKey);
 	std::vector<Tag> GetIdentifyingAttributes();
 
-	std::function<std::string(MetaTag)> GetMetaTagViewer(MetaTagType atagType);
+	std::function<std::string(MetaTag)> GetMetaTagValueViewer(MetaTagType atagType);
+	std::function<std::string(MetaTag)> GetMetaTagKeyViewer();
 
 private:
 	std::string m_szParentCollection;

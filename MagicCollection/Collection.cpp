@@ -171,9 +171,11 @@ void Collection::LoadChanges(std::vector<std::string> lstLines)
 	}
 }
 
-std::vector<std::string> Collection::GetCollectionList(MetaTagType atagType)
+std::vector<std::string> Collection::GetCollectionList(MetaTagType atagType, bool aiCollapsed)
 {
+	std::function<std::string(std::pair<std::string, int>)> fnExtractor = [](std::pair<std::string, int> pVal)->std::string { return pVal.first; };
 	std::vector<std::string> lstRetVal;
+	std::vector<std::pair<std::string,int>> lstSeenHashes;
 	std::vector<int> lstCol = getCollection();
 	std::vector<int>::iterator iter_Items = lstCol.begin();
 	for (; iter_Items != lstCol.end(); ++iter_Items)
@@ -184,9 +186,32 @@ std::vector<std::string> Collection::GetCollectionList(MetaTagType atagType)
 		std::vector<CopyItem*>::iterator iter_Copy = lstCopies.begin();
 		for (; iter_Copy != lstCopies.end(); ++iter_Copy)
 		{
-			std::string szRep = item->GetCardString(*iter_Copy, atagType);
-			lstRetVal.push_back(szRep);
+			std::string szHash = (*iter_Copy)->GetHash();
+			int iCounted = ListHelper::Instance()->List_Find(szHash, lstSeenHashes, fnExtractor);
+			if (!aiCollapsed || (iCounted == -1))
+			{
+				std::string szRep = item->GetCardString(*iter_Copy, atagType);
+				lstRetVal.push_back(szRep);
+				lstSeenHashes.push_back(std::make_pair(szHash, 1));
+			}
+			else if (iCounted != -1)
+			{
+				lstSeenHashes[iCounted].second++;
+			}
 		}
+	}
+
+	if (aiCollapsed)
+	{
+		std::vector<std::string> lstNewRetVal;
+		for (size_t i = 0; i < lstRetVal.size(); i++)
+		{
+			int iCounted = lstSeenHashes[i].second;
+			lstNewRetVal.push_back("x" + std::to_string(iCounted) + " " + lstRetVal[i]);
+		}
+
+		lstRetVal.clear();
+		lstRetVal = lstNewRetVal;
 	}
 
 	return lstRetVal;

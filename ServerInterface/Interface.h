@@ -23,7 +23,7 @@ public:
 
 	System::Collections::Generic::List<System::String^>^ GetAllCardsStartingWith(System::String^ ahszText);
 
-	System::Collections::Generic::List<System::String^>^ GetCollectionListWithMeta(System::String^ ahszCollectionName);
+	System::Collections::Generic::List<System::String^>^ GetCollectionList(System::String^ ahszCollectionName, System::Boolean ahbCollapsed);
 
 	void SubmitBulkChanges(System::String^ ahszCollectionName, System::Collections::Generic::List<System::String^>^ ahlstBulkChanges);
 

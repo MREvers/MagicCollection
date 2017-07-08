@@ -31,7 +31,7 @@ CopyItem::CopyItem(std::vector<TraitItem>* alstTraits,
 
 	for (iter_Attrs = alstMetaTags.begin(); iter_Attrs != alstMetaTags.end(); ++iter_Attrs)
 	{
-		AddMetaTag(iter_Attrs->first, iter_Attrs->second, Public);
+		SetMetaTag(iter_Attrs->first, iter_Attrs->second, Public);
 	}
 
 	GetHash();
@@ -40,7 +40,7 @@ CopyItem::CopyItem(std::vector<TraitItem>* alstTraits,
 std::string CopyItem::GetHash()
 {
 	std::function<std::string(MetaTag)> fnExtractor
-		= GetMetaTagViewer(Hidden);
+		= GetMetaTagKeyViewer();
 	int iMetaHash = ListHelper::Instance()->List_Find(
 		std::string(Config::HashKey),
 		m_lstMetaTags,
@@ -57,13 +57,14 @@ std::string CopyItem::GetHash()
 			szHashString += iter_Tags->second;
 		}
 
-		std::vector<MetaTag>::iterator iter_MetaTags = m_lstMetaTags.begin();
-		for (; iter_MetaTags != m_lstMetaTags.end(); ++iter_MetaTags)
+		std::vector<Tag> lstMetaList = this->GetMetaTags(Visible);
+		std::vector<Tag>::iterator iter_MetaTags = lstMetaList.begin();
+		for (; iter_MetaTags != lstMetaList.end(); ++iter_MetaTags)
 		{
-			szHashString += iter_MetaTags->GetKey() + iter_MetaTags->GetVal();
+			szHashString += iter_MetaTags->first + iter_MetaTags->second;
 		}
 		std::string szHash = Config::Instance()->GetHash(szHashString);
-		AddMetaTag(Config::HashKey, szHash, Hidden);
+		SetMetaTag(Config::HashKey, szHash, Hidden);
 
 		return szHash;
 	}
@@ -83,12 +84,22 @@ std::vector<std::string> CopyItem::GetResidentIn()
 	return m_lstResidentIn;
 }
 
-void CopyItem::AddMetaTag(std::string aszKey, std::string aszVal, MetaTagType atagType)
+void CopyItem::SetMetaTag(std::string aszKey, std::string aszVal, MetaTagType atagType)
 {
-	MetaTag newMeta(aszKey, aszVal, atagType);
-	std::function<int(MetaTag, MetaTag)> fnComparer =
-		[](MetaTag atag1, MetaTag atag2)-> int { return atag1.GetKey().compare(atag2.GetKey()); };
-	ListHelper::Instance()->List_Insert(newMeta, m_lstMetaTags, fnComparer);
+	std::function<std::string(MetaTag)> fnExtractor =
+		[](MetaTag atag1)-> std::string { return atag1.GetKey(); };
+	int iFound = ListHelper::Instance()->List_Find(aszKey, m_lstMetaTags, fnExtractor);
+	if (iFound == -1)
+	{
+		MetaTag newMeta(aszKey, aszVal, atagType);
+		std::function<int(MetaTag, MetaTag)> fnComparer =
+			[](MetaTag atag1, MetaTag atag2)-> int { return atag1.GetKey().compare(atag2.GetKey()); };
+		ListHelper::Instance()->List_Insert(newMeta, m_lstMetaTags, fnComparer);
+	}
+	else if (m_lstMetaTags[iFound].CanView(atagType))
+	{
+		m_lstMetaTags[iFound].SetVal(aszVal);
+	}
 }
 
 std::string CopyItem::GetMetaTag(std::string aszKey, MetaTagType atagType)
@@ -163,7 +174,12 @@ std::vector<Tag> CopyItem::GetIdentifyingAttributes()
 	return lstRetVal;
 }
 
-std::function<std::string(MetaTag)> CopyItem::GetMetaTagViewer(MetaTagType atagType)
+std::function<std::string(MetaTag)> CopyItem::GetMetaTagValueViewer(MetaTagType atagType)
 {
 	return [atagType](MetaTag atag)->std::string { return atag.GetVal(atagType); };
+}
+
+std::function<std::string(MetaTag)> CopyItem::GetMetaTagKeyViewer()
+{
+	return [](MetaTag atag)->std::string { return atag.GetKey(); };
 }

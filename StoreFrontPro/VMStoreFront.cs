@@ -3,6 +3,7 @@ using StoreFrontPro.Support.MultiDisplay;
 using StoreFrontPro.Views;
 using StoreFrontPro.Views.CollectionsOverview;
 using StoreFrontPro.Views.CollectionViews.Cube;
+using StoreFrontPro.Views.CollectionViews.Deckbox;
 using StoreFrontPro.Views.Interfaces.CollectionChanger;
 using System;
 using System.Collections.Generic;
@@ -70,12 +71,22 @@ namespace StoreFrontPro
 
         private void showCollectionCubeView(CollectionModel CollectionModel)
         {
+            
             VMCollectionCube collectionCubeVM = new VMCollectionCube(CollectionModel);
             OperationWindow.SetNewDisplay(
                             Name: "Overview",
                             NewDisplay: new VCollectionCube(),
                             DataContext: collectionCubeVM,
                             Persist: false);
+            
+            /*
+            VMCollectionDeckBox collectionFancyVM = new VMCollectionDeckBox(CollectionModel);
+            OperationWindow.SetNewDisplay(
+                            Name: "Fancy",
+                            NewDisplay: new VCollectionDeckBox(),
+                            DataContext: collectionFancyVM,
+                            Persist: false);
+                            */
         }
 
         private void viewDisplayEventHandler(object Source, DisplayEventArgs e)

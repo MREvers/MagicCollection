@@ -3,20 +3,16 @@ using StoreFrontPro.Support.MultiDisplay;
 using StoreFrontPro.Views.Interfaces.CollectionChanger;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls.Primitives;
 
-namespace StoreFrontPro.Views.CollectionViews.Cube
+namespace StoreFrontPro.Views.CollectionViews.Deckbox
 {
-    class VMCollectionCube : ViewModel<CollectionModel>, IViewComponent
+    class VMCollectionDeckBox: ViewModel<CollectionModel>, IViewComponent
     {
         private MultiDisplay _OperationWindow = new MultiDisplay();
-
-        public event DisplayEventHandler DisplayEvent;
 
         public MultiDisplay OperationWindow
         {
@@ -24,16 +20,17 @@ namespace StoreFrontPro.Views.CollectionViews.Cube
             set { _OperationWindow = value; OnPropertyChanged(); }
         }
 
-        public VMCollectionCube(CollectionModel Model) : base(Model)
+        public event DisplayEventHandler DisplayEvent;
+
+        public VMCollectionDeckBox(CollectionModel Model) : base(Model)
         {
-            Model.IsCollapsedCollection = false;
+            Model.IsCollapsedCollection = true;
             Model.Sync();
 
-            VMCardGroupDisplay collectionCubeVM = new VMCardGroupDisplay(Model.CollectionItems);
             OperationWindow.SetNewDisplay(
-                Name: "CollectionView",
-                NewDisplay: new VCardGroupDisplay(),
-                DataContext: collectionCubeVM,
+                Name: "List",
+                NewDisplay: new VFancyCollectionList(),
+                DataContext: new VMFancyCollectionList(Model, true),
                 Persist: false);
         }
 
@@ -49,6 +46,7 @@ namespace StoreFrontPro.Views.CollectionViews.Cube
 
             return lstRetVal;
         }
+
 
         private void displayEventHandler(object source, DisplayEventArgs e)
         {
@@ -68,9 +66,9 @@ namespace StoreFrontPro.Views.CollectionViews.Cube
             {
                 if (e.Property == "AcceptCommand")
                 {
-                    if (OperationWindow.Display.DataContext is VMCardGroupDisplay)
+                    if (OperationWindow.Display.DataContext is VMFancyCollectionList)
                     {
-                        (OperationWindow.Display.DataContext as VMCardGroupDisplay).SyncWithModel();                    
+                        (OperationWindow.Display.DataContext as VMFancyCollectionList).SyncWithModel();
                     }
                     OperationWindow.CloseOverlay();
                 }

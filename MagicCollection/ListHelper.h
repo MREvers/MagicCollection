@@ -41,7 +41,8 @@ public:
 		int index = 0;
 		for (; iter_list != alstFindList.end(); iter_list++)
 		{
-			if (aiFind == afuncExtractor(*iter_list))
+			T tRetval = afuncExtractor(*iter_list);
+			if (aiFind == tRetval)
 			{
 				return index;
 			}

@@ -35,20 +35,6 @@ System::String^ ServerClientInterface::GetCardPrototype(System::String^ ahszCard
 	return gcnew System::String(m_StoreFrontBackEnd->GetCardPrototype(szCardName).c_str());
 }
 
-// [ { card name - long, [ <tags> ] }, ... }
-System::Collections::Generic::List<System::String^>^
-ServerClientInterface::GetCollectionListWithMeta(System::String^ ahszCollectionName)
-{
-	std::string szCollectionName = msclr::interop::marshal_as<std::string>(ahszCollectionName);
-
-	std::vector<std::string> lstCollection = m_StoreFrontBackEnd->GetCollectionList(szCollectionName);
-
-	System::Collections::Generic::List<System::String^>^ hlstCollection;
-	hlstCollection = stringVectorToList(lstCollection);
-
-	return hlstCollection;
-}
-
 System::Collections::Generic::List<System::String^>^ 
 ServerClientInterface::GetLoadedCollections()
 {
@@ -76,6 +62,22 @@ System::Collections::Generic::List<System::String^>^ ServerClientInterface::GetA
 		hlstCardList->Add(hszCard);
 	}
 	return hlstCardList;
+}
+
+// [ { card name - long, [ <tags> ] }, ... }
+System::Collections::Generic::List<System::String^>^
+ServerClientInterface::GetCollectionList(System::String^ ahszCollectionName, System::Boolean ahbCollapsed)
+{
+	std::string szCollectionName = msclr::interop::marshal_as<std::string>(ahszCollectionName);
+	int iVisibility = 0xF;
+	bool bCollapsed = ahbCollapsed;
+
+	std::vector<std::string> lstCollection = m_StoreFrontBackEnd->GetCollectionList(szCollectionName, iVisibility, bCollapsed);
+
+	System::Collections::Generic::List<System::String^>^ hlstCollection;
+	hlstCollection = stringVectorToList(lstCollection);
+
+	return hlstCollection;
 }
 
 void ServerClientInterface::SubmitBulkChanges(System::String^ ahszCollectionName, System::Collections::Generic::List<System::String^>^ ahlstBulkChanges)

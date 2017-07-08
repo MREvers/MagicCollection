@@ -47,22 +47,12 @@ namespace StoreFrontPro.Server
 
             }
 
-            /// <summary>
-            /// Calls the server for the most up to date list of copies.
-            /// </summary>
-            /// <param name="aszCollectionName"></param>
-            public void Sync(string aszCollectionName, Action aCallback = null)
+            public void GetCollectionList(string aszCollectionName, bool abCollapsed, Action<List<string>> aCallback, bool UICallback = false)
             {
-                CollectionModel CMCurrent;
-                if ((CMCurrent = Server.GetCollectionModel(aszCollectionName)) != null)
+                singleton.enqueueService(() =>
                 {
-                    // List of [ { CardNameLong, [Tags, ...] }, ... ]
-                    List<string> lstCards = SCI.GetCollectionListWithMeta(aszCollectionName);
-                    if (CMCurrent != null)
-                    {
-                        CMCurrent.BuildCopyModelList(lstCards, aCallback);
-                    }
-                }
+                    aCallback(SCI.GetCollectionList(aszCollectionName, abCollapsed));
+                }, UICallback);
             }
         }
 

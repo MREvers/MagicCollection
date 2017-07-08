@@ -19,7 +19,7 @@ public:
    std::string LoadCollection(std::string aszCollectionFile);
    std::vector<std::string> GetLoadedCollections();
 
-   std::vector<std::string> GetCollectionList(std::string aszCollection);
+   std::vector<std::string> GetCollectionList(std::string aszCollection, int aiVisibility, bool bCollapsed);
    std::string GetCardPrototype(std::string aszCardName);
 
    std::vector<std::string> GetAllCardsStartingWith(std::string aszSearch);

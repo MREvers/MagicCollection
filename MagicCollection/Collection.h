@@ -30,7 +30,7 @@ public:
 	void LoadCollection(std::string aszFileName);
 	void LoadChanges(std::vector<std::string> aszLines);
 
-	std::vector<std::string> GetCollectionList(MetaTagType atagType = Visible);
+	std::vector<std::string> GetCollectionList(MetaTagType atagType = Visible, bool aiCollapsed = false);
 
 	bool IsLoaded = false;
 

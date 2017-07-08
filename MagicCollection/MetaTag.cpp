@@ -28,6 +28,11 @@ std::string MetaTag::GetVal(MetaTagType atagType)
 	}
 }
 
+void MetaTag::SetVal(std::string aszVal)
+{
+	m_Tag.second = aszVal;
+}
+
 bool MetaTag::CanView(MetaTagType atagType)
 {
 	return (m_Type & atagType) != 0;

@@ -36,9 +36,7 @@ namespace StoreFrontPro.Server
                 string szColName = SCI.LoadCollection(aszCollectionFileName);
                 if (szColName != "")
                 {
-                    // List of [ { CardNameLong, [Tags, ...] }, ... ]
-                    List<string> lstCards = SCI.GetCollectionListWithMeta(szColName);
-                    CollectionModel newCM = new CollectionModel(szColName, lstCards);
+                    CollectionModel newCM = new CollectionModel(szColName);
                     CollectionModel currentCM = m_lstCollectionModels.FirstOrDefault(x => x.CollectionName == szColName);
                     if (currentCM == null)
                     {

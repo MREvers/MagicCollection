@@ -22,6 +22,7 @@ namespace StoreFrontPro.Server
             set { lock (m_oLock) { _bCardImageIsLoading = value; } }
         }
 
+        public int Count = 1; // Used if the list in a collection is "Collapsed"
         public string TargetCollection;
         public string CardName;
         public string CardNameLong;
@@ -121,7 +122,21 @@ namespace StoreFrontPro.Server
         private void parseIdentifier(string aszIdentifier)
         {
             List<string> lstIdentifierAndTags = aszIdentifier.Split(':').ToList();
-            string szIdentifier = lstIdentifierAndTags[0].Trim();
+
+            string szIdentifier;
+            if (aszIdentifier.Trim().Substring(0,1) == "x")
+            {
+                string szCount = lstIdentifierAndTags[0].Substring(1, 1);
+                int.TryParse(szCount, out this.Count);
+
+                szIdentifier = lstIdentifierAndTags[0].Trim().Substring(2).Trim();
+            }
+            else
+            {
+                this.Count = 1;
+                szIdentifier = lstIdentifierAndTags[0].Trim();
+            }
+           
             CardNameLong = szIdentifier;
             string szMeta = "";
             if (lstIdentifierAndTags.Count > 1)

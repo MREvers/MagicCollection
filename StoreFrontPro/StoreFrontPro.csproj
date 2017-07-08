@@ -91,6 +91,18 @@
     <Compile Include="Views\CollectionViews\Cube\VMCardGroupDisplay.cs" />
     <Compile Include="Views\CollectionViews\Cube\VMCardGroupList.cs" />
     <Compile Include="Views\CollectionViews\Cube\VMCollectionCube.cs" />
+    <Compile Include="Views\CollectionViews\Deckbox\VCollectionDeckBox.xaml.cs">
+      <DependentUpon>VCollectionDeckBox.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\CollectionViews\Deckbox\VFancyCollectionItem.xaml.cs">
+      <DependentUpon>VFancyCollectionItem.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\CollectionViews\Deckbox\VFancyCollectionList.xaml.cs">
+      <DependentUpon>VFancyCollectionList.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\CollectionViews\Deckbox\VMCollectionDeckBox.cs" />
+    <Compile Include="Views\CollectionViews\Deckbox\VMFancyCollectionItem.cs" />
+    <Compile Include="Views\CollectionViews\Deckbox\VMFancyCollectionList.cs" />
     <Compile Include="Views\Components\CardImageDisplayer\VCardImageDisplayer.xaml.cs">
       <DependentUpon>VCardImageDisplayer.xaml</DependentUpon>
     </Compile>
@@ -159,6 +171,18 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\CollectionViews\Cube\VCollectionCube.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\CollectionViews\Deckbox\VCollectionDeckBox.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\CollectionViews\Deckbox\VFancyCollectionItem.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\CollectionViews\Deckbox\VFancyCollectionList.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

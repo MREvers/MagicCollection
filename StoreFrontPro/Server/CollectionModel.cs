@@ -11,31 +11,27 @@ namespace StoreFrontPro.Server
 {
     public class CollectionModel
     {
+        public bool IsCollapsedCollection = true;
         public string CollectionName;
         public ObservableCollection<CardModel> CollectionItems;
-        public List<CardModel> LstLastQuery;
+        public List<CardModel> LstLastQuery; // NOT CURRENTLY USED
 
-        public CollectionModel(string aszName, List<string> aLstCards)
+        public CollectionModel(string aszName)
         {
             CollectionName = aszName;
             CollectionItems = new ObservableCollection<CardModel>();
             LstLastQuery = new List<CardModel>();
-            BuildCopyModelList(aLstCards);
 
+            Sync();
         }
 
-        public void BuildCopyModelList(List<string> aLstCards, Action aCallback = null)
+        public void Sync(Action aCallback = null)
         {
-            CollectionItems.Clear();
-            foreach (var LongNameTagsPair in aLstCards)
-            {
-                ServerInterface.Server.GenerateCopyModel(
-                    Identifier: LongNameTagsPair,
-                    CollectionName: CollectionName,
-                    Callback: (aoCardModel) => { CollectionItems.Add(aoCardModel);  },
-                    UICallback: true);
-            }
-            ServerInterface.Server.SyncServerTask(aCallback);
+            ServerInterface.Collection.GetCollectionList(
+                CollectionName,
+                IsCollapsedCollection,
+                (alstCol)=> { setCollectionModels(alstCol, aCallback); },
+                true);
         }
 
         public void SetBaselineHistory()
@@ -97,10 +93,25 @@ namespace StoreFrontPro.Server
             return LstLastQuery.Select(x => x.CardNameLong).ToList();
         }
 
-        public void Sync(Action aCallback = null)
+        private void setCollectionModels(List<string> aLstCards)
         {
-            ServerInterface.Collection.Sync(this.CollectionName, aCallback);
+            CollectionItems.Clear();
+            foreach (var LongNameTagsPair in aLstCards)
+            {
+                ServerInterface.Server.GenerateCopyModel(
+                    Identifier: LongNameTagsPair,
+                    CollectionName: CollectionName,
+                    Callback: (aoCardModel) => { CollectionItems.Add(aoCardModel); },
+                    UICallback: true);
+            }
         }
+
+        private void setCollectionModels(List<string> aLstCards, Action aCallback)
+        {
+            setCollectionModels(aLstCards);
+            ServerInterface.Server.SyncServerTask(aCallback);
+        }
+
 
     }
 }

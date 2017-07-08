@@ -20,6 +20,7 @@ public:
 
 	std::string GetKey();
 	std::string GetVal(MetaTagType atagType = Any);
+	void SetVal(std::string aszVal);
 
 	bool CanView(MetaTagType atagType);
 
