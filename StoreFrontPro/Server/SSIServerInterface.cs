@@ -68,9 +68,9 @@ namespace StoreFrontPro.Server
                 return newCopy;
             }
 
-            public void SyncServerTask(Action aCallback)
+            public void SyncServerTask(Action aCallback, bool UICallback = false)
             {
-                singleton.enqueueService(() => { aCallback?.Invoke(); });
+                singleton.enqueueService(() => { aCallback?.Invoke(); }, UICallback);
             }
 
             /// <summary>

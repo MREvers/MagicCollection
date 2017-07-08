@@ -11,10 +11,18 @@ namespace StoreFrontPro.Server
 {
     public class CollectionModel
     {
-        public bool IsCollapsedCollection = true;
+        private bool _IsCollapsedCollection = false;
+        public bool IsCollapsedCollection
+        {
+            get { return _IsCollapsedCollection; }
+            set { m_bHardRebuild = (_IsCollapsedCollection != value); _IsCollapsedCollection = value;  }
+        }
+
         public string CollectionName;
         public ObservableCollection<CardModel> CollectionItems;
         public List<CardModel> LstLastQuery; // NOT CURRENTLY USED
+
+        private bool m_bHardRebuild = false;
 
         public CollectionModel(string aszName)
         {
@@ -30,7 +38,7 @@ namespace StoreFrontPro.Server
             ServerInterface.Collection.GetCollectionList(
                 CollectionName,
                 IsCollapsedCollection,
-                (alstCol)=> { setCollectionModels(alstCol, aCallback); },
+                (alstCol) => { setCollectionModels(alstCol, aCallback); },
                 true);
         }
 
@@ -95,15 +103,48 @@ namespace StoreFrontPro.Server
 
         private void setCollectionModels(List<string> aLstCards)
         {
-            CollectionItems.Clear();
-            foreach (var LongNameTagsPair in aLstCards)
+            // Calculate differences.
+            List<string> lstNewHashes = aLstCards.Select(x=>fastExtractHash(x)).ToList();
+            if (!m_bHardRebuild)
+            {
+                List<CardModel> lstRemoves = new List<CardModel>();
+                foreach (CardModel cm in CollectionItems)
+                {
+                    string szTargetHash = cm.GetMetaTag("__hash");
+                    int iFound = lstNewHashes.IndexOf(szTargetHash);
+                    if (iFound != -1)
+                    {
+                        // These CMs stay in the list
+                        lstNewHashes.RemoveAt(iFound);
+                        aLstCards.RemoveAt(iFound);
+                    }
+                    else
+                    {
+                        // These CMs are removed
+                        lstRemoves.Add(cm);
+                    }
+                }
+
+                foreach (CardModel removeCard in lstRemoves)
+                {
+                    ServerInterface.Server.SyncServerTask(() => { CollectionItems.Remove(removeCard); });
+                }
+            }
+            else
+            {
+                CollectionItems.Clear();
+            }
+
+            for(int i = 0; i < lstNewHashes.Count; i++)
             {
                 ServerInterface.Server.GenerateCopyModel(
-                    Identifier: LongNameTagsPair,
-                    CollectionName: CollectionName,
-                    Callback: (aoCardModel) => { CollectionItems.Add(aoCardModel); },
-                    UICallback: true);
+                                    Identifier: aLstCards[i],
+                                    CollectionName: CollectionName,
+                                    Callback: (aoCardModel) => { CollectionItems.Add(aoCardModel); },
+                                    UICallback: true);
             }
+
+            m_bHardRebuild = false;
         }
 
         private void setCollectionModels(List<string> aLstCards, Action aCallback)
@@ -112,6 +153,20 @@ namespace StoreFrontPro.Server
             ServerInterface.Server.SyncServerTask(aCallback);
         }
 
+        private string fastExtractHash(string aszIdentifier)
+        {
+            int iHashStart = aszIdentifier.IndexOf("__hash");
+            if (!(iHashStart >= 0 && iHashStart < aszIdentifier.Length)) { return ""; }
+            string remainingString = aszIdentifier.Substring(iHashStart);
 
+            int iOpeningQuote = remainingString.IndexOf('\"');
+            if (!(iOpeningQuote >= 0 && iOpeningQuote < aszIdentifier.Length)) { return ""; }
+
+            int iClosingQuote = remainingString.IndexOf("\"", iOpeningQuote + 1);
+            if (!(iClosingQuote >= 0 && iClosingQuote < aszIdentifier.Length)) { return ""; }
+
+            return remainingString.Substring(iOpeningQuote + 1, iClosingQuote - iOpeningQuote - 1).Trim();
+
+        }
     }
 }
