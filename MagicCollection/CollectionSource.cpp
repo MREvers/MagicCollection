@@ -315,6 +315,18 @@ std::vector<std::string> CollectionSource::GetAllCardsStartingWith(std::string a
 
 int CollectionSource::findInBuffer(std::string aszCardName, bool abCaseSensitive)
 {
+	std::string szName;
+	int iLength = m_lstCardBuffer.size();
+	for (size_t i = 0; i < iLength; i++)
+	{
+		szName = convertToSearchString(m_lstCardBuffer.at(i).GetName(m_AllCharBuff));
+		if (szName == aszCardName)
+		{
+			return i;
+		}
+	}
+
+	/*
 	std::string szCardNameFixed = convertToSearchString(aszCardName);
 	if (!abCaseSensitive)
 	{
@@ -347,12 +359,12 @@ int CollectionSource::findInBuffer(std::string aszCardName, bool abCaseSensitive
 
 		if (szName == szCardNameFixed)
 			return middle;
-		else if (szCardNameFixed.compare(szName) < 0)
+		else if (std::strcmp(szName.c_str(), szCardNameFixed.c_str()) > 0)
 			iRight = middle - 1;
 		else
 			iLeft = middle + 1;
 	}
-
+	*/
 	return -1;
 }
 

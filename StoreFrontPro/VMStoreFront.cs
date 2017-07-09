@@ -19,6 +19,7 @@ namespace StoreFrontPro
     {
         public RelayCommand CloseCommand { get; set; }
         public RelayCommand CollectionsOverviewCommand { get; set; }
+        public RelayCommand DownloadSetsCommand { get; set; }
 
         public ObservableCollection<MenuItem> ViewOptions { get; set; } = new ObservableCollection<MenuItem>();
 
@@ -35,6 +36,7 @@ namespace StoreFrontPro
             OperationWindow.DisplayEvent += viewDisplayEventHandler;
             CloseCommand = new RelayCommand(eCloseCommand);
             CollectionsOverviewCommand = new RelayCommand((o) => { showCollectionsOverview(); });
+            DownloadSetsCommand = new RelayCommand(eDownloadSetsCommand);
 
             showCollectionsOverview();
         }
@@ -123,6 +125,11 @@ namespace StoreFrontPro
         private void eCloseCommand(object aoCanExecute)
         {
             Model.CloseApplication();
+        }
+
+        private void eDownloadSetsCommand(object aoCanExecute)
+        {
+            ServerInterface.Server.ImportJSONCollection();
         }
     }
 }
