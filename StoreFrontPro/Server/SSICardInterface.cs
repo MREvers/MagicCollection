@@ -79,7 +79,16 @@ namespace StoreFrontPro.Server
                         }
 
                         // Download synchronously.
-                        client.DownloadFile(new Uri(szURL, UriKind.RelativeOrAbsolute), szFilePath);
+                        try
+                        {
+                            client.DownloadFile(new Uri(szURL, UriKind.RelativeOrAbsolute), szFilePath);
+                        }
+                        catch
+                        {
+                            // Connection issues, various things can fail here
+                            if (File.Exists(szFilePath)) { File.Delete(szFilePath); }
+                        }
+                        
                     }
                 }
 

@@ -62,6 +62,9 @@ private:
    int findInBuffer(std::string aszName, bool abCaseSensitive);
    int findInCache(std::string aszName, bool abCaseSensitive);
 
+   std::string convertToSearchString(std::string& aszSearch);
+   bool isSearchCharacter(char c);
+
    void finalizeBuffer();
 
    // This buffer stores ALL characters for every card.

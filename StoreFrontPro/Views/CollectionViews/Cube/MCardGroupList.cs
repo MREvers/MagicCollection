@@ -48,7 +48,7 @@ namespace StoreFrontPro.Views.CollectionViews.Cube
 
         public ObservableCollection<CardModel> filterListOnIdentityAndCMC(ObservableCollection<CardModel> alstNew)
         {
-            ObservableCollection<CardModel> lstRetVal = new ObservableCollection<CardModel>();
+            List<CardModel> lstRetVal = new List<CardModel>();
 
             foreach (CardModel oCardModel in alstNew)
             {
@@ -66,42 +66,24 @@ namespace StoreFrontPro.Views.CollectionViews.Cube
                 }
             }
 
-            return lstRetVal;
+            ObservableCollection<CardModel> lstRealRetVal = new ObservableCollection<CardModel>();
+            foreach (CardModel cm in lstRetVal.OrderBy(x => CMC(x)).ThenBy(x => x.GetIdealIdentifier())) { lstRealRetVal.Add(cm); }
+
+            return lstRealRetVal;
         }
 
-        private int CompareCMC(CardModel x, CardModel y)
+        private int CMC(CardModel x)
         {
-            int xCmc;
-            int yCmc;
-            string xszCmc = x.GetAttr("cmc");
-            string yszCmc = y.GetAttr("cmc");
+            int iCMC;
+            string szMC = x.GetAttr("manaCost");
+            int iSpecStart = Math.Max(szMC.IndexOf('}'), 0);
+            if (!int.TryParse(szMC.Substring(1, iSpecStart-1), out iCMC))
+            {
+                iCMC = 0;
+            }
 
-            bool xNum = int.TryParse(xszCmc, out xCmc);
-            bool yNum = int.TryParse(yszCmc, out yCmc);
-
-            if (xNum && yNum)
-            {
-                if (xCmc == yCmc)
-                {
-                    return 0;
-                }
-                else
-                {
-                    return (xCmc > yCmc) ? 1 : -1;
-                }
-            }
-            else if (xNum && !yNum)
-            {
-                return 1;
-            }
-            else if (!xNum && yNum)
-            {
-                return -1;
-            }
-            else
-            {
-                return 0;
-            }
+            int iNumSpecs = szMC.Count((c) => c == '{')-1;
+            return iCMC + iNumSpecs;
         }
     }
 }

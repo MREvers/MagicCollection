@@ -315,8 +315,8 @@ std::vector<std::string> CollectionSource::GetAllCardsStartingWith(std::string a
 
 int CollectionSource::findInBuffer(std::string aszCardName, bool abCaseSensitive)
 {
-	std::string szCardNameFixed = aszCardName;
-	if (abCaseSensitive)
+	std::string szCardNameFixed = convertToSearchString(aszCardName);
+	if (!abCaseSensitive)
 	{
 		std::transform(szCardNameFixed.begin(), szCardNameFixed.end(), szCardNameFixed.begin(), ::tolower);
 	}
@@ -339,7 +339,12 @@ int CollectionSource::findInBuffer(std::string aszCardName, bool abCaseSensitive
 			return -1;
 		}
 
-		szName = m_lstCardBuffer.at(middle).GetName(m_AllCharBuff);
+		szName = convertToSearchString(m_lstCardBuffer.at(middle).GetName(m_AllCharBuff));
+		if (!abCaseSensitive)
+		{
+			std::transform(szName.begin(), szName.end(), szName.begin(), ::tolower);
+		}
+
 		if (szName == szCardNameFixed)
 			return middle;
 		else if (szCardNameFixed.compare(szName) < 0)
@@ -364,6 +369,24 @@ int CollectionSource::findInCache(std::string aszName, bool abCaseSensitive)
 		index++;
 	}
 	return -1;
+}
+
+std::string CollectionSource::convertToSearchString(std::string& aszSearch)
+{
+	std::string szRetval = "";
+	for (size_t i = 0; i < aszSearch.size(); i++)
+	{
+		if (isSearchCharacter(aszSearch[i]))
+		{
+			szRetval += aszSearch[i];
+		}
+	}
+	return szRetval;
+}
+
+bool CollectionSource::isSearchCharacter(char c)
+{
+	return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') || c == ' ' || c == ',';
 }
 
 void CollectionSource::finalizeBuffer()
