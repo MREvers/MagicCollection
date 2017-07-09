@@ -23,7 +23,6 @@ void JSONImporter::ImportJSON(std::string aszFileName)
 		return;
 	}
 
-	ListHelper* listHelper = ListHelper::Instance();
 	Config* config = Config::Instance();
 
 	nlohmann::json j;
@@ -154,7 +153,7 @@ void JSONImporter::ImportJSON(std::string aszFileName)
 				for (; iter_NonUniqueKeys != config->GetIdentifyingAttributes().end(); ++iter_NonUniqueKeys)
 				{
 					int iKeyIndex = -1;
-					if ((iKeyIndex = listHelper->List_Find(*iter_NonUniqueKeys, lstCardNameNodeKeys)) != -1)
+					if ((iKeyIndex = ListHelper::List_Find(*iter_NonUniqueKeys, lstCardNameNodeKeys)) != -1)
 					{
 						std::string szValue;
 
@@ -303,13 +302,13 @@ void JSONImporter::ImportJSON(std::string aszFileName)
 			{
 				// If we found one, but not the other paired key, then we need to add a space.
 				std::string szTargetKey = "";
-				if (listHelper->List_Find(iter_PairedTags->first, lstFoundPairedTags) != -1 &&
-					listHelper->List_Find(iter_PairedTags->second, lstFoundPairedTags) == -1)
+				if (ListHelper::List_Find(iter_PairedTags->first, lstFoundPairedTags) != -1 &&
+					ListHelper::List_Find(iter_PairedTags->second, lstFoundPairedTags) == -1)
 				{
 					szTargetKey = iter_PairedTags->second;
 				}
-				else if (listHelper->List_Find(iter_PairedTags->first, lstFoundPairedTags) == -1 &&
-					     listHelper->List_Find(iter_PairedTags->second, lstFoundPairedTags) != -1)
+				else if (ListHelper::List_Find(iter_PairedTags->first, lstFoundPairedTags) == -1 &&
+					     ListHelper::List_Find(iter_PairedTags->second, lstFoundPairedTags) != -1)
 				{
 					szTargetKey = iter_PairedTags->first;
 				}
@@ -321,7 +320,7 @@ void JSONImporter::ImportJSON(std::string aszFileName)
 
 					// Get the list of all keys so far for this card
 					std::vector<std::string> lstCardNameNodeKeys(oCA->Keys, oCA->Keys + 35);
-					int iKeyIndex = listHelper->List_Find(szTargetKey, lstCardNameNodeKeys);
+					int iKeyIndex = ListHelper::List_Find(szTargetKey, lstCardNameNodeKeys);
 
 					// Perhaps this tag has not been encountered yet for this card.
 					// So we need to add this field (in the case of == -1)

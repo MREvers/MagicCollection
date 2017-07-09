@@ -12,13 +12,13 @@ public:
 	~ListHelper();
 
  
-	std::vector<std::pair<std::string, std::string>>
+	static std::vector<std::pair<std::string, std::string>>
 		ConvertMapToList(std::map<std::string, std::string>  aMap);
 
-	bool CompareKeyValPairList(std::vector<std::pair<std::string, std::string>> alstFirst,
+	static bool CompareKeyValPairList(std::vector<std::pair<std::string, std::string>> alstFirst,
 		std::vector<std::pair<std::string, std::string>> alstSecond);
 
-	template<typename T>
+	template<typename T> static
 	int List_Find(T aFind, std::vector<T>& alstFindList)
 	{
 		std::vector<T>::iterator iter_list = alstFindList.begin();
@@ -34,7 +34,7 @@ public:
 		return -1;
 	}
 
-	template<class T, class R>
+	template<class T, class R> static
 	int List_Find(T& aiFind, std::vector<R>& alstFindList, std::function<T(R)> afuncExtractor)
 	{
 		std::vector<R>::iterator iter_list = alstFindList.begin();
@@ -51,7 +51,7 @@ public:
 		return -1;
 	}
 
-	template<class T>
+	template<class T> static
 		void List_Insert(T& aInsert, std::vector<T>& alstInsertList, std::function<int(T, T)> afuncComparer)
 	{
 		std::vector<T>::iterator iter = alstInsertList.begin();
@@ -64,9 +64,5 @@ public:
 		alstInsertList.insert(iter, aInsert);
 	}
 
-	static ListHelper* Instance();
-	
-private:
-	static ListHelper* ListHelper::ms_Instance;
 };
 

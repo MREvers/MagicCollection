@@ -95,13 +95,13 @@ std::vector<CopyItem*> CollectionItem::GetCopiesForCollection(std::string aszCol
 		{
 			lstRetVal.push_back(iter_Copies._Ptr);
 		}
-		else if ((aItemType | Borrowed) > 0 && ListHelper::Instance()->List_Find(aszCollection, iter_Copies->GetResidentIn()) != -1)
+		else if ((aItemType | Borrowed) > 0 && ListHelper::List_Find(aszCollection, iter_Copies->GetResidentIn()) != -1)
 		{
 			lstRetVal.push_back(iter_Copies._Ptr);
 		}
 		else if ((aItemType | Virtual) > 0 &&
 			iter_Copies->GetParent() == "" &&
-			ListHelper::Instance()->List_Find(aszCollection, iter_Copies->GetResidentIn()) != -1)
+			ListHelper::List_Find(aszCollection, iter_Copies->GetResidentIn()) != -1)
 		{
 			lstRetVal.push_back(iter_Copies._Ptr);
 		}

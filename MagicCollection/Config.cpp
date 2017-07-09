@@ -137,25 +137,25 @@ std::function<std::string(Tag)> Config::GetTagHelper(TagHelperType aiMode)
 
 bool Config::IsIdentifyingAttributes(std::string aszAttrs)
 {
-	return ListHelper::Instance()->List_Find(aszAttrs, m_lstIdentifyingAttributes) != -1;
+	return ListHelper::List_Find(aszAttrs, m_lstIdentifyingAttributes) != -1;
 }
 
 bool Config::IsPairedKey(std::string aszKey)
 {
-	return ListHelper::Instance()->List_Find(aszKey, m_lstPairedKeys, m_fnKeyExtractor) != -1 || 
-		   ListHelper::Instance()->List_Find(aszKey, m_lstPairedKeys, m_fnValueExtractor) != -1;
+	return ListHelper::List_Find(aszKey, m_lstPairedKeys, m_fnKeyExtractor) != -1 || 
+		   ListHelper::List_Find(aszKey, m_lstPairedKeys, m_fnValueExtractor) != -1;
 }
 
 bool Config::IsValidKey(std::string aszKey)
 {
 	// A valid key is either a static attr or identifying attr
-	return ListHelper::Instance()->List_Find(aszKey, m_lstStaticAttributes) != -1 ||
-		   ListHelper::Instance()->List_Find(aszKey, m_lstIdentifyingAttributes) != -1;
+	return ListHelper::List_Find(aszKey, m_lstStaticAttributes) != -1 ||
+		   ListHelper::List_Find(aszKey, m_lstIdentifyingAttributes) != -1;
 }
 
 bool Config::IsStaticAttribute(std::string aszAttr)
 {
-	return ListHelper::Instance()->List_Find(aszAttr, m_lstStaticAttributes) != -1;
+	return ListHelper::List_Find(aszAttr, m_lstStaticAttributes) != -1;
 }
 
 Config* Config::Instance()

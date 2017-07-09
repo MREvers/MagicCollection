@@ -41,7 +41,7 @@ std::string CopyItem::GetHash()
 {
 	std::function<std::string(MetaTag)> fnExtractor
 		= GetMetaTagKeyViewer();
-	int iMetaHash = ListHelper::Instance()->List_Find(
+	int iMetaHash = ListHelper::List_Find(
 		std::string(Config::HashKey),
 		m_lstMetaTags,
 		fnExtractor);
@@ -88,13 +88,13 @@ void CopyItem::SetMetaTag(std::string aszKey, std::string aszVal, MetaTagType at
 {
 	std::function<std::string(MetaTag)> fnExtractor =
 		[](MetaTag atag1)-> std::string { return atag1.GetKey(); };
-	int iFound = ListHelper::Instance()->List_Find(aszKey, m_lstMetaTags, fnExtractor);
+	int iFound = ListHelper::List_Find(aszKey, m_lstMetaTags, fnExtractor);
 	if (iFound == -1)
 	{
 		MetaTag newMeta(aszKey, aszVal, atagType);
 		std::function<int(MetaTag, MetaTag)> fnComparer =
 			[](MetaTag atag1, MetaTag atag2)-> int { return atag1.GetKey().compare(atag2.GetKey()); };
-		ListHelper::Instance()->List_Insert(newMeta, m_lstMetaTags, fnComparer);
+		ListHelper::List_Insert(newMeta, m_lstMetaTags, fnComparer);
 	}
 	else if (m_lstMetaTags[iFound].CanView(atagType))
 	{
@@ -106,7 +106,7 @@ std::string CopyItem::GetMetaTag(std::string aszKey, MetaTagType atagType)
 {
 	std::function<std::string(MetaTag)> fnExtractor =
 		[](MetaTag atag)-> std::string { return atag.GetKey(); };
-	int iFound = ListHelper::Instance()->List_Find(aszKey, m_lstMetaTags, fnExtractor);
+	int iFound = ListHelper::List_Find(aszKey, m_lstMetaTags, fnExtractor);
 	if (iFound != -1)
 	{
 		return m_lstMetaTags[iFound].GetVal(atagType);
@@ -135,7 +135,7 @@ std::vector<Tag> CopyItem::GetMetaTags(MetaTagType atagType)
 bool CopyItem::SetIdentifyingAttribute(std::string aszKey, std::string aszValue)
 {
 	std::function<std::string(TraitItem)> fnExtractor = [](TraitItem aTI)->std::string { return aTI.GetKeyName(); };
-	int iIsAttr = ListHelper::Instance()->List_Find(aszKey, *m_plstRestrictedTraits, fnExtractor);
+	int iIsAttr = ListHelper::List_Find(aszKey, *m_plstRestrictedTraits, fnExtractor);
 	if (iIsAttr != -1)
 	{
 		TraitItem foundTrait = m_plstRestrictedTraits->at(iIsAttr);
@@ -151,7 +151,7 @@ bool CopyItem::SetIdentifyingAttribute(std::string aszKey, std::string aszValue)
 
 std::string CopyItem::GetIdentifyingAttribute(std::string aszKey)
 {
-	int iFound = ListHelper::Instance()->List_Find(aszKey, m_lstIdentifyingTags, Config::Instance()->GetTagHelper(Key));
+	int iFound = ListHelper::List_Find(aszKey, m_lstIdentifyingTags, Config::Instance()->GetTagHelper(Key));
 	if (iFound != -1)
 	{
 		return m_lstIdentifyingTags.at(iFound).second;

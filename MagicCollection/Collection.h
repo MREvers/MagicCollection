@@ -1,7 +1,6 @@
 #pragma once
 #include <vector>
 #include <string>
-#include <winapifamily.h>
 
 #include "CollectionIO.h"
 #include "CollectionSource.h"

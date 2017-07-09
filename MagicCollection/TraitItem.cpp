@@ -47,5 +47,5 @@ std::string TraitItem::GetDefaultValue()
 
 bool TraitItem::IsAllowedValue(std::string aszTestVal)
 {
-	return ListHelper::Instance()->List_Find(aszTestVal, m_lstPossibleValues) != -1;
+	return ListHelper::List_Find(aszTestVal, m_lstPossibleValues) != -1;
 }

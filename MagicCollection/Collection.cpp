@@ -187,7 +187,7 @@ std::vector<std::string> Collection::GetCollectionList(MetaTagType atagType, boo
 		for (; iter_Copy != lstCopies.end(); ++iter_Copy)
 		{
 			std::string szHash = (*iter_Copy)->GetHash();
-			int iCounted = ListHelper::Instance()->List_Find(szHash, lstSeenHashes, fnExtractor);
+			int iCounted = ListHelper::List_Find(szHash, lstSeenHashes, fnExtractor);
 			if (!aiCollapsed || (iCounted == -1))
 			{
 				std::string szRep = item->GetCardString(*iter_Copy, atagType);
@@ -264,7 +264,7 @@ void Collection::changeItem(std::string aszName, std::string aszIdentifyingHash,
 
 void Collection::registerItem(int aiCacheIndex)
 {
-	int iFound = ListHelper::Instance()->List_Find(aiCacheIndex, m_lstItemCacheIndexes);
+	int iFound = ListHelper::List_Find(aiCacheIndex, m_lstItemCacheIndexes);
 	if (iFound == -1)
 	{
 		m_lstItemCacheIndexes.push_back(iFound);
@@ -377,13 +377,14 @@ void Collection::loadAdditionLine(std::string aszLine)
 	AddItem(sudoItem.Name, sudoItem.Identifiers, sudoItem.MetaTags);
 }
 
+// This needs "Card Name : { __hash="hashval" }" All other values are irrelevant.
 void Collection::loadRemoveLine(std::string aszLine)
 {
 	CollectionItem::PseudoIdentifier sudoItem;
 	CollectionItem::ParseCardLine(aszLine, sudoItem);
 
 	std::string szHash;
-	int iHash = ListHelper::Instance()->List_Find(std::string(Config::HashKey), sudoItem.MetaTags, Config::Instance()->GetTagHelper());
+	int iHash = ListHelper::List_Find(std::string(Config::HashKey), sudoItem.MetaTags, Config::Instance()->GetTagHelper());
 	if (iHash != -1)
 	{
 		szHash = sudoItem.MetaTags[iHash].second;
@@ -391,9 +392,23 @@ void Collection::loadRemoveLine(std::string aszLine)
 	}
 }
 
+// Sylvan Card Name [{ set="val" color="val2" } ][: { metatag1="val" metatag2="val2" }] ->
+//   Another Card Name [{ set="val" color="val2" } ][: { metatag1="val" metatag2="val2" }]
 void Collection::loadDeltaLine(std::string aszLine)
 {
+	std::vector<std::string> lstOldNew = StringHelper::Str_Split(aszLine, "->");
 
+	CollectionItem::PseudoIdentifier sudoOldItem;
+	CollectionItem::ParseCardLine(lstOldNew[0], sudoOldItem);
+
+	CollectionItem::PseudoIdentifier sudoNewItem;
+	CollectionItem::ParseCardLine(lstOldNew[1], sudoNewItem);
+
+	std::string szHash;
+	int iHash = ListHelper::List_Find(std::string(Config::HashKey), sudoOldItem.MetaTags, Config::Instance()->GetTagHelper());
+	if (iHash != -1)
+	{
+	}
 }
 
 void Collection::saveHistory()
@@ -418,9 +433,11 @@ void Collection::saveHistory()
 		asctime_s(str, sizeof str, &timeinfo);
 		str[strlen(str) - 1] = 0;
 
+		Config* config = Config::Instance();
+
 		std::ofstream oHistFile;
-		oHistFile.open(Config::Instance()->GetCollectionsDirectory() + "\\" +
-			Config::Instance()->GetHistoryFolderName() + "\\" +
+		oHistFile.open(config->GetCollectionsDirectory() + "\\" +
+			config->GetHistoryFolderName() + "\\" +
 			m_szName + "." + +Config::HistoryFileExtension + ".txt", std::ios_base::app);
 
 		oHistFile << "[" << str << "] " << std::endl;
@@ -441,9 +458,11 @@ void Collection::saveMeta()
 
 	if (lstMetaLines.size() > 0)
 	{
+		Config* config = Config::Instance();
+
 		std::ofstream oMetaFile;
-		oMetaFile.open(Config::Instance()->GetCollectionsDirectory() + "\\" +
-			Config::Instance()->GetMetaFolderName() + "\\" +
+		oMetaFile.open(config->GetCollectionsDirectory() + "\\" +
+			config->GetMetaFolderName() + "\\" +
 			m_szName + "." + +Config::MetaFileExtension + ".txt");
 
 		std::vector<std::string>::iterator iter_MetaLine = lstMetaLines.begin();

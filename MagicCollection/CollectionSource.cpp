@@ -319,7 +319,7 @@ int CollectionSource::findInBuffer(std::string aszCardName, bool abCaseSensitive
 	int iLength = m_lstCardBuffer.size();
 	for (size_t i = 0; i < iLength; i++)
 	{
-		szName = convertToSearchString(m_lstCardBuffer.at(i).GetName(m_AllCharBuff));
+		szName = m_lstCardBuffer.at(i).GetName(m_AllCharBuff);
 		if (szName == aszCardName)
 		{
 			return i;
