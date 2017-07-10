@@ -28,6 +28,11 @@ std::string CStoreFrontBackEnd::LoadCollection(std::string aszCollectionFile)
 	return m_ColFactory->LoadCollectionFromFile(aszCollectionFile);
 }
 
+std::string CStoreFrontBackEnd::CreateNewCollection(std::string aszCollectionName)
+{
+	return m_ColFactory->CreateNewCollection(aszCollectionName);
+}
+
 std::vector<std::string> CStoreFrontBackEnd::GetLoadedCollections()
 {
 	return m_ColFactory->GetLoadedCollections();

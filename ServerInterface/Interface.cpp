@@ -17,6 +17,12 @@ System::String^ ServerClientInterface::LoadCollection(System::String^ ahszCollec
 	return gcnew System::String(szCollectionName.c_str());
 }
 
+System::String^ ServerClientInterface::CreateNewCollection(System::String^ aszCollectionName)
+{
+	std::string szCollectionFileName = msclr::interop::marshal_as<std::string>(aszCollectionName);
+	return gcnew System::String(m_StoreFrontBackEnd->CreateNewCollection(szCollectionFileName).c_str());
+}
+
 void ServerClientInterface::SaveCollection(System::String^ aszCollectionName)
 {
 	std::string szCollectionName = msclr::interop::marshal_as<std::string>(aszCollectionName);

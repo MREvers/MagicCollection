@@ -27,19 +27,12 @@ namespace StoreFrontPro.Views.CollectionsOverview
 
         public string SelectedCollection
         {
-            get
-            {
-                return _SelectedCollection;
-            }
-
-            set
-            {
-                _SelectedCollection = value; // Selection Changed Event Here.\
-                eCollectionPreviewUpdate(value);
-            }
+            get { return _SelectedCollection; }
+            set { _SelectedCollection = value; eCollectionPreviewUpdate(value); }
         }
 
         public RelayCommand ViewCollectionCommand { get; set; }
+        public RelayCommand AddCollectionCommand { get; set; }
 
         public ObservableCollection<string> AvailableCollections { get; set; } = new ObservableCollection<string>();
         public ObservableCollection<string> CollectionPreview { get; set; } = new ObservableCollection<string>();
@@ -99,7 +92,6 @@ namespace StoreFrontPro.Views.CollectionsOverview
                 eventArgs.Add(Key: "Collection", Value: Model.Where(x => x.CollectionName == SelectedCollection).First());
                 DisplayEvent(this, eventArgs);
             }
-
         }
         #endregion
     }

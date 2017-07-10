@@ -14,7 +14,8 @@ public:
    bool CollectionExists(std::string aszCollectionName);
    Collection* GetCollection(std::string aszCollectionName);
 
-   std::string LoadCollectionFromFile( std::string aszColFile);
+   std::string LoadCollectionFromFile(std::string aszColFile);
+   std::string CreateNewCollection(std::string aszColName);
 
    std::vector<std::string> GetLoadedCollections();
 

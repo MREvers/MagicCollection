@@ -32,6 +32,17 @@ std::string CollectionFactory::LoadCollectionFromFile(std::string aszFileName)
 	return szRetVal;
 }
 
+std::string CollectionFactory::CreateNewCollection(std::string aszColName)
+{
+	if (!CollectionExists(aszColName))
+	{
+		Collection* oCol = new Collection(aszColName, m_ColSource);
+		m_lstCollections.push_back(oCol);
+	}
+
+	return aszColName;
+}
+
 std::vector<std::string> CollectionFactory::GetLoadedCollections()
 {
 	std::vector<std::string> lstRetval;

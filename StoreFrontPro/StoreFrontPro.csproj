@@ -204,7 +204,9 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="Views\Components\RequestTextOverlay\" />
+  </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ServerInterface\ServerInterface.vcxproj">
       <Project>{b3e17e4d-3395-42fb-bf66-0af21c59db36}</Project>

@@ -29,7 +29,7 @@
         <Button Grid.Row="2" HorizontalAlignment="Stretch">
             <TextBlock>Load Collection</TextBlock>
         </Button>
-        <Button Grid.Row="3"  HorizontalAlignment="Stretch">
+        <Button Grid.Row="3"  HorizontalAlignment="Stretch" Command="{Binding AddCollectionCommand}">
             <TextBlock>Add Collection</TextBlock>
         </Button>
         <Button Grid.Row="4"  HorizontalAlignment="Stretch" Command="{Binding ViewCollectionCommand}">

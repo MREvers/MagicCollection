@@ -80,9 +80,16 @@ namespace StoreFrontPro
 
         private void viewDisplayEventHandler(object Source, DisplayEventArgs e)
         {
-            if (e.Source == "VCollectionsOverview" && e.Property == "ViewCollection" && e.Event == "Clicked")
+            if (e.Source == "VCollectionsOverview")
             {
-                showCollectionCubeView((CollectionModel)e.Get("Collection"));
+                if (e.Property == "ViewCollection")
+                {
+                    showCollectionCubeView((CollectionModel)e.Get("Collection"));
+                }
+                else if (e.Property == "AddCollection")
+                {
+                    eAddNewCollectionClick(e.Get("CollectionName"));
+                }
             }
             else if (e.Source == "MultiDisplay")
             {
@@ -118,6 +125,11 @@ namespace StoreFrontPro
             List<StoreFrontMenuItem> lstViewOptions = OperationWindow.GetMenuItems();
             ViewOptions.Clear();
             lstViewOptions.ForEach(x => ViewOptions.Add(new MenuItem() { Header = x.MenuName, Command = x.Operation }));
+        }
+
+        public void eAddNewCollectionClick(string aszCollectionName)
+        {
+
         }
 
         private void eCloseCommand(object aoCanExecute)
