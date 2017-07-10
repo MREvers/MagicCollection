@@ -13,6 +13,7 @@
         <Key>toughness</Key>
         <Key>loyalty</Key>
         <Key>text</Key>
+        <Key>types</Key>
       </ValidKeys>
       <IdentifyingKeys>
         <Key>set</Key>
@@ -64,6 +65,10 @@
         <Pair>
           <Key>colorIdentity</Key>
           <Key>cid</Key>
+        </Pair>
+        <Pair>
+          <Key>types</Key>
+          <Key>typ</Key>
         </Pair>
       </CodeKeys>
     </ImportDefinitions>

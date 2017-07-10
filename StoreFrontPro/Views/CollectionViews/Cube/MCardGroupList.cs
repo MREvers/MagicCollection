@@ -74,15 +74,20 @@ namespace StoreFrontPro.Views.CollectionViews.Cube
 
         private int CMC(CardModel x)
         {
-            int iCMC;
+            int iCMC=0;
+            int iNumSpecs = 0;
             string szMC = x.GetAttr("manaCost");
-            int iSpecStart = Math.Max(szMC.IndexOf('}'), 0);
-            if (!int.TryParse(szMC.Substring(1, iSpecStart-1), out iCMC))
+            if (!string.IsNullOrEmpty(szMC))
             {
-                iCMC = 0;
+                int iSpecStart = Math.Max(szMC.IndexOf('}'), 0);
+                if (!int.TryParse(szMC.Substring(1, iSpecStart - 1), out iCMC))
+                {
+                    iCMC = 0;
+                }
+
+                iNumSpecs = szMC.Count((c) => c == '{') - 1;
             }
 
-            int iNumSpecs = szMC.Count((c) => c == '{')-1;
             return iCMC + iNumSpecs;
         }
     }

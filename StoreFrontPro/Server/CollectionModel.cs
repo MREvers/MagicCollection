@@ -6,6 +6,7 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using StoreFrontPro.Tools;
+using System.Reflection;
 
 namespace StoreFrontPro.Server
 {
@@ -20,10 +21,11 @@ namespace StoreFrontPro.Server
 
         public string CollectionName;
         public ObservableCollection<CardModel> CollectionItems;
+        public ObservableCollection<CardModel> CollectionItemstwo;
         public List<CardModel> LstLastQuery; // NOT CURRENTLY USED
 
         private bool m_bHardRebuild = false;
-
+        
         public CollectionModel(string aszName)
         {
             CollectionName = aszName;
@@ -104,15 +106,20 @@ namespace StoreFrontPro.Server
         private void setCollectionModels(List<string> aLstCards)
         {
             // Calculate differences.
-            List<string> lstNewHashes = aLstCards.Select(x=>fastExtractHash(x)).ToList();
+            List<string> lstHashesAndCounts = aLstCards.Select(x=>fastExtractHash(x,true)).ToList();
+            List<string> lstNewHashes = lstHashesAndCounts.Select(x => x.Split(',')[1]).ToList();
+            List<string> lstNewCounts = lstHashesAndCounts.Select(x => x.Split(',')[0]).ToList();
+            CollectionItems.DisableEvents("CollectionChanged");
+            List<CardModel> lstRemoves = new List<CardModel>();
             if (!m_bHardRebuild)
             {
-                List<CardModel> lstRemoves = new List<CardModel>();
                 foreach (CardModel cm in CollectionItems)
                 {
+                    // Since count is not picked up in the hash, it must be checked for.
                     string szTargetHash = cm.GetMetaTag("__hash");
                     int iFound = lstNewHashes.IndexOf(szTargetHash);
-                    if (iFound != -1)
+                    int iCount;
+                    if (iFound != -1 && int.TryParse(lstNewCounts[iFound], out iCount) && iCount == cm.Count)
                     {
                         // These CMs stay in the list
                         lstNewHashes.RemoveAt(iFound);
@@ -135,7 +142,8 @@ namespace StoreFrontPro.Server
                 CollectionItems.Clear();
             }
 
-            for(int i = 0; i < lstNewHashes.Count; i++)
+            List<CardModel> lstAdds = new List<CardModel>();
+            for (int i = 0; i < lstNewHashes.Count; i++)
             {
                 ServerInterface.Server.GenerateCopyModel(
                                     Identifier: aLstCards[i],
@@ -153,8 +161,26 @@ namespace StoreFrontPro.Server
             ServerInterface.Server.SyncServerTask(aCallback);
         }
 
-        private string fastExtractHash(string aszIdentifier)
+        /// <summary>
+        /// WithCount is included be a count change will not be detected by the hash.
+        /// If withcount is true, there is guaranteed to be a comma in the return.
+        /// </summary>
+        /// <param name="aszIdentifier"></param>
+        /// <param name="WithCount"></param>
+        /// <returns></returns>
+        private string fastExtractHash(string aszIdentifier, bool WithCount = false)
         {
+            string szWithCount = "";
+            if (WithCount)
+            {
+                szWithCount = aszIdentifier.Substring(0, 2);
+                if (szWithCount[0] == 'x')
+                {
+                    szWithCount = szWithCount[1] + "";
+                }
+                szWithCount = ",";
+            }
+
             int iHashStart = aszIdentifier.IndexOf("__hash");
             if (!(iHashStart >= 0 && iHashStart < aszIdentifier.Length)) { return ""; }
             string remainingString = aszIdentifier.Substring(iHashStart);
@@ -165,7 +191,7 @@ namespace StoreFrontPro.Server
             int iClosingQuote = remainingString.IndexOf("\"", iOpeningQuote + 1);
             if (!(iClosingQuote >= 0 && iClosingQuote < aszIdentifier.Length)) { return ""; }
 
-            return remainingString.Substring(iOpeningQuote + 1, iClosingQuote - iOpeningQuote - 1).Trim();
+            return szWithCount + remainingString.Substring(iOpeningQuote + 1, iClosingQuote - iOpeningQuote - 1).Trim();
 
         }
     }

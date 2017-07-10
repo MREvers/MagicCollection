@@ -55,20 +55,6 @@ namespace StoreFrontPro
                 NewDisplay: new VCollectionsOverview(),
                 DataContext: collectionsOverviewVM,
                 Persist: false);
-            
-            /*
-            ServerInterface.Server.GenerateCollectionModel("Collections\\Primary.txt");
-            ServerInterface.Server.GetCollectionModel("Primary",
-                (o) =>
-                {
-                    VMCollectionEditor collectionsOverviewVM = new VMCollectionEditor(o);
-                    OperationWindow.SetNewDisplay(
-                        Name: "Overview",
-                        NewDisplay: new VCollectionEditor(),
-                        DataContext: collectionsOverviewVM,
-                        Persist: false);
-                }, true);
-            */
         }
 
         private void showCollectionCubeView(CollectionModel CollectionModel)
@@ -80,15 +66,16 @@ namespace StoreFrontPro
                             NewDisplay: new VCollectionCube(),
                             DataContext: collectionCubeVM,
                             Persist: false);
-            
-            /*
+        }
+
+        private void showCollectionDeckBox(CollectionModel CollectionModel)
+        {
             VMCollectionDeckBox collectionFancyVM = new VMCollectionDeckBox(CollectionModel);
             OperationWindow.SetNewDisplay(
                             Name: "Fancy",
                             NewDisplay: new VCollectionDeckBox(),
                             DataContext: collectionFancyVM,
                             Persist: false);
-                            */
         }
 
         private void viewDisplayEventHandler(object Source, DisplayEventArgs e)
@@ -100,6 +87,17 @@ namespace StoreFrontPro
             else if (e.Source == "MultiDisplay")
             {
                 eDisplayNewViewOptions();
+            }
+            // The expectation is that the source's model is a Collection
+            else if (e.Property == "SwitchToDeckbox")
+            {
+                CollectionModel cm = (Source as ViewModel<CollectionModel>).Model;
+                showCollectionDeckBox(cm);
+            }
+            else if (e.Property == "SwitchToCube")
+            {
+                CollectionModel cm = (Source as ViewModel<CollectionModel>).Model;
+                showCollectionCubeView(cm);
             }
         }
 

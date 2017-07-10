@@ -70,6 +70,8 @@ private:
 
 	std::vector<CopyItem> m_lstCopies;
 
+	// We are guaranteed that identifying traits are not themselves lists.
+	// If a list is not an identifying trait. It is kept as "thing1::thing2"
 	std::vector<Tag> m_lstCommonTraits;
 	std::vector<TraitItem> m_lstIdentifyingTraits;
 };

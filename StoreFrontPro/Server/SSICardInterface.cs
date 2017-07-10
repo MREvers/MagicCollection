@@ -16,6 +16,8 @@ namespace StoreFrontPro.Server
         {
             public string SZ_IMAGE_CACHE_PATH = "";
 
+            private Dictionary<string, string> m_lstMemoizedCommonCardAttrs = new Dictionary<string, string>();
+
             private class ImageDownloadedEventArgs : EventArgs
             {
                 public ImageDownloadedEventArgs(CardModel aDataModel, EventArgs ae)
@@ -29,15 +31,13 @@ namespace StoreFrontPro.Server
 
             public string GetProtoType(string szCardName)
             {
-                return SCI.GetCardPrototype(szCardName);
+                if (!m_lstMemoizedCommonCardAttrs.ContainsKey(szCardName))
+                {
+                    m_lstMemoizedCommonCardAttrs.Add(szCardName, SCI.GetCardPrototype(szCardName));
+                }
+                return m_lstMemoizedCommonCardAttrs[szCardName];
             }
 
-            // Passes the image to the callback.
-            // There is notably a memory leak in wpf bitmap images. read here.
-            //http://stackoverflow.com/questions/21877221/memory-not-getting-released-in-wpf-image
-            // I used the ANTS profiler and it looks like I am not leaking memory. It just seems that
-            // the process will hold onto memory after its no longer needed. So when viewing lots of images
-            // we may not expect it to return to its previous usage.
             public void DownloadAndCacheImage(Action<BitmapImage> aCallback, CardModel aoCardModel)
             {
                 Thread downloadAndLoadImageThread = new Thread(() => { inDownloadAndCacheImage(aCallback, aoCardModel); });

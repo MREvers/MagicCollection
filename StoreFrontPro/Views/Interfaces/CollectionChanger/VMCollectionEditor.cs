@@ -106,7 +106,7 @@ namespace StoreFrontPro.Views.Interfaces.CollectionChanger
         private void eAcceptCommand(object canExecute)
         {
             DisplayEventArgs eventArgs = new DisplayEventArgs(Source: "VMCollectionEditor", Property: "AcceptCommand", Event: "Resolved");
-            Model.SubmitBulkEdits(m_lstRealChanges);
+            Model.SubmitBulkEdits(m_lstRealChanges, ()=> { DisplayEvent(this, eventArgs); });
             DisplayEvent(this, eventArgs);
         }
 

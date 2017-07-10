@@ -24,8 +24,11 @@ namespace StoreFrontPro.Views.CollectionViews.Deckbox
 
         public VMCollectionDeckBox(CollectionModel Model) : base(Model)
         {
-            Model.IsCollapsedCollection = true;
-            Model.Sync();
+            if (!Model.IsCollapsedCollection)
+            {
+                Model.IsCollapsedCollection = true;
+                Model.Sync();
+            }
 
             OperationWindow.SetNewDisplay(
                 Name: "List",
@@ -40,9 +43,11 @@ namespace StoreFrontPro.Views.CollectionViews.Deckbox
 
             StoreFrontMenuItem openCollectionEditor = new StoreFrontMenuItem("Edit Collection", eDisplayCollectionEditorCommand);
             StoreFrontMenuItem saveCollection = new StoreFrontMenuItem("Save Collection", eSaveCollection);
+            StoreFrontMenuItem switchToCube = new StoreFrontMenuItem("View as Cube", eSwitchToCubeView);
 
             lstRetVal.Add(openCollectionEditor);
             lstRetVal.Add(saveCollection);
+            lstRetVal.Add(switchToCube);
 
             return lstRetVal;
         }
@@ -66,10 +71,6 @@ namespace StoreFrontPro.Views.CollectionViews.Deckbox
             {
                 if (e.Property == "AcceptCommand")
                 {
-                    if (OperationWindow.Display.DataContext is VMFancyCollectionList)
-                    {
-                        (OperationWindow.Display.DataContext as VMFancyCollectionList).SyncWithModel();
-                    }
                     OperationWindow.CloseOverlay();
                 }
                 else if (e.Property == "CancelCommand")
@@ -89,6 +90,12 @@ namespace StoreFrontPro.Views.CollectionViews.Deckbox
         private void eSaveCollection(object canExecute)
         {
             Model.SaveCollection();
+        }
+
+        private void eSwitchToCubeView(object canExecute)
+        {
+            DisplayEventArgs eventArts = new DisplayEventArgs(Source: "VMCollectionDeckBox", Property: "SwitchToCube", Event: "Clicked");
+            DisplayEvent(this, eventArts);
         }
     }
 }

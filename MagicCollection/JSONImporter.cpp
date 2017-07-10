@@ -116,10 +116,23 @@ void JSONImporter::ImportJSON(std::string aszFileName)
 
 					if (config->IsValidKey(szKey))
 					{
+						std::string szValue;
 						std::stringstream ss;
-						ss << iter_card.value();
-						std::string szValue = ss.str();
-
+						if (iter_card->is_array())
+						{
+							bool first = true;
+							nlohmann::json json_array = iter_card.value(); //iter_card.value();
+							for (nlohmann::json::iterator iter_array = json_array.begin(); iter_array != json_array.end(); ++iter_array)
+							{
+								if (!first) { ss << "::"; first = true; }
+								ss << iter_array.value();
+							}
+						}
+						else
+						{
+							ss << iter_card.value();
+						}
+						szValue = ss.str();
 						oCA->Keys[iNumKeyValPair] = StringHelper::Str_Clean(szKey);
 						oCA->Vals[iNumKeyValPair] = StringHelper::Str_Clean(szValue);
 

@@ -26,8 +26,11 @@ namespace StoreFrontPro.Views.CollectionViews.Cube
 
         public VMCollectionCube(CollectionModel Model) : base(Model)
         {
-            Model.IsCollapsedCollection = false;
-            Model.Sync();
+            if (Model.IsCollapsedCollection)
+            {
+                Model.IsCollapsedCollection = false;
+                Model.Sync();
+            }
 
             VMCardGroupDisplay collectionCubeVM = new VMCardGroupDisplay(Model.CollectionItems);
             OperationWindow.SetNewDisplay(
@@ -43,9 +46,11 @@ namespace StoreFrontPro.Views.CollectionViews.Cube
 
             StoreFrontMenuItem openCollectionEditor = new StoreFrontMenuItem("Edit Collection", eDisplayCollectionEditorCommand);
             StoreFrontMenuItem saveCollection = new StoreFrontMenuItem("Save Collection", eSaveCollection);
+            StoreFrontMenuItem switchToDeckBox = new StoreFrontMenuItem("View as Deckbox", eSwitchToDeckboxView);
 
             lstRetVal.Add(openCollectionEditor);
             lstRetVal.Add(saveCollection);
+            lstRetVal.Add(switchToDeckBox);
 
             return lstRetVal;
         }
@@ -68,10 +73,6 @@ namespace StoreFrontPro.Views.CollectionViews.Cube
             {
                 if (e.Property == "AcceptCommand")
                 {
-                    if (OperationWindow.Display.DataContext is VMCardGroupDisplay)
-                    {
-                        (OperationWindow.Display.DataContext as VMCardGroupDisplay).SyncWithModel();                    
-                    }
                     OperationWindow.CloseOverlay();
                 }
                 else if (e.Property == "CancelCommand")
@@ -91,6 +92,12 @@ namespace StoreFrontPro.Views.CollectionViews.Cube
         private void eSaveCollection(object canExecute)
         {
             Model.SaveCollection();
+        }
+
+        private void eSwitchToDeckboxView(object canExecute)
+        {
+            DisplayEventArgs eventArts = new DisplayEventArgs(Source: "VMCollectionCube", Property: "SwitchToDeckbox", Event: "Clicked");
+            DisplayEvent(this, eventArts);
         }
     }
 }

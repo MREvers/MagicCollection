@@ -37,6 +37,7 @@ Config::~Config()
 
 std::string Config::GetSourceFile()
 {
+	std::cout << ".\\Config\\" + m_szSourceFolder + "\\" + m_szSourceFile << std::endl;
 	return ".\\Config\\" + m_szSourceFolder + "\\" + m_szSourceFile;
 }
 

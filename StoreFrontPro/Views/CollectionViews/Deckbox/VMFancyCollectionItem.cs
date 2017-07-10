@@ -23,20 +23,29 @@ namespace StoreFrontPro.Views.CollectionViews.Deckbox
 
         public ObservableCollection<UIElement> DisplayedProperties { get; set; } = new ObservableCollection<UIElement>();
 
-        public VMFancyCollectionItem(CardModel Model) : base(Model)
+        public VMFancyCollectionItem(CardModel Model, int Columns = 3) : base(Model)
         {
+            this.Columns = Columns;
             SyncWithModel();
         }
 
         public void SyncWithModel()
         {
             DisplayedProperties.Clear();
-            DisplayedProperties.Add(new TextBox() { Text = "x"+Model.Count, IsReadOnly = true });
-            DisplayedProperties.Add(new TextBox() { Text= Model.CardName, IsReadOnly=true });
-            foreach(string szKey in LST_TEMP_IMPORTANT_ATTRS)
+            if (Columns != 1)
             {
-                DisplayedProperties.Add(new TextBox() { Text = Model.GetAttr(szKey), IsReadOnly = true });
+                DisplayedProperties.Add(new TextBox() { Text = "x" + Model.Count, IsReadOnly = true });
+                DisplayedProperties.Add(new TextBox() { Text = Model.CardName, IsReadOnly = true });
+                foreach (string szKey in LST_TEMP_IMPORTANT_ATTRS)
+                {
+                    DisplayedProperties.Add(new TextBox() { Text = Model.GetAttr(szKey), IsReadOnly = true });
+                }
             }
+            else
+            {
+                DisplayedProperties.Add(new TextBox() { Text = Model.CardName, IsReadOnly = true });
+            }
+            
         }
 
  
