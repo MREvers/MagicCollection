@@ -7,10 +7,11 @@ using System.Text;
 using System.Threading.Tasks;
 using StoreFrontPro.Tools;
 using System.Reflection;
+using System.Collections.Specialized;
 
 namespace StoreFrontPro.Server
 {
-    public class CollectionModel
+    public partial class CollectionModel
     {
         private bool _IsCollapsedCollection = false;
         public bool IsCollapsedCollection
@@ -21,7 +22,6 @@ namespace StoreFrontPro.Server
 
         public string CollectionName;
         public ObservableCollection<CardModel> CollectionItems;
-        public ObservableCollection<CardModel> CollectionItemstwo;
         public List<CardModel> LstLastQuery; // NOT CURRENTLY USED
 
         private bool m_bHardRebuild = false;
@@ -109,7 +109,8 @@ namespace StoreFrontPro.Server
             List<string> lstHashesAndCounts = aLstCards.Select(x=>fastExtractHash(x,true)).ToList();
             List<string> lstNewHashes = lstHashesAndCounts.Select(x => x.Split(',')[1]).ToList();
             List<string> lstNewCounts = lstHashesAndCounts.Select(x => x.Split(',')[0]).ToList();
-            CollectionItems.DisableEvents("CollectionChanged");
+            DisableEvents(CollectionItems);
+
             List<CardModel> lstRemoves = new List<CardModel>();
             if (!m_bHardRebuild)
             {
@@ -150,8 +151,11 @@ namespace StoreFrontPro.Server
                                     CollectionName: CollectionName,
                                     Callback: (aoCardModel) => { CollectionItems.Add(aoCardModel); },
                                     UICallback: true);
+                if (i == lstNewHashes.Count - 2)
+                {
+                    ServerInterface.Server.SyncServerTask(() => { EnableEvents(CollectionItems); });
+                }
             }
-
             m_bHardRebuild = false;
         }
 

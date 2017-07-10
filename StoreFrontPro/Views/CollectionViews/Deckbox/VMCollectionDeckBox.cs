@@ -33,7 +33,7 @@ namespace StoreFrontPro.Views.CollectionViews.Deckbox
             OperationWindow.SetNewDisplay(
                 Name: "List",
                 NewDisplay: new VFancyCollectionList(),
-                DataContext: new VMFancyCollectionList(Model, true),
+                DataContext: new VMFancyCollectionList(Model.CollectionItems, true),
                 Persist: false);
         }
 

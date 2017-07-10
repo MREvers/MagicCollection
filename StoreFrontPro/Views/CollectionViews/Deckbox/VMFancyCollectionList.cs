@@ -11,7 +11,7 @@ using System.Windows;
 
 namespace StoreFrontPro.Views.CollectionViews.Deckbox
 {
-    class VMFancyCollectionList : ViewModel<CollectionModel>
+    class VMFancyCollectionList : ViewModel<ObservableCollection<CardModel>>
     {
         public ObservableCollection<VFancyCollectionItem> Cards { get; set; } = new ObservableCollection<VFancyCollectionItem>();
 
@@ -24,11 +24,11 @@ namespace StoreFrontPro.Views.CollectionViews.Deckbox
             }
         }
 
-        public VMFancyCollectionList(CollectionModel Model, bool CollapsedView = false) : base(Model)
+        public VMFancyCollectionList(ObservableCollection<CardModel> Model, bool CollapsedView = false) : base(Model)
         {
             _CollapsedView = CollapsedView;
             SyncWithModel();
-            Model.CollectionItems.CollectionChanged += eSyncWithModel;
+            CollectionModel.RegisterCollectionListener(Model,eSyncWithModel);
         }
 
         private void eSyncWithModel(object source, NotifyCollectionChangedEventArgs e)
@@ -46,13 +46,13 @@ namespace StoreFrontPro.Views.CollectionViews.Deckbox
             }
             
             Cards.Clear();
-            List<CardModel> lstCMs = Model.CollectionItems.ToList();
+            List<CardModel> lstCMs = Model.ToList();
             Dictionary<string, List<CardModel>> mapCardTypeGroup = new Dictionary<string, List<CardModel>>();
 
             VFancyCollectionItem fancyCollectionItemV;
             VMFancyCollectionItem fancyCollectionItemVM;
 
-            foreach (CardModel cm in Model.CollectionItems)
+            foreach (CardModel cm in Model)
             {
                 string szTypeGroup = cm.GetAttr("types");
                 szTypeGroup = szTypeGroup.Contains("Creature") ? "Creature" : szTypeGroup;

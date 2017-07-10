@@ -58,6 +58,7 @@
     </ApplicationDefinition>
     <Compile Include="Server\CardModel.cs" />
     <Compile Include="Server\CollectionModel.cs" />
+    <Compile Include="Server\CollectionModelStatic.cs" />
     <Compile Include="Server\SSICardInterface.cs" />
     <Compile Include="Server\SSICollectionInterface.cs" />
     <Compile Include="Server\SSIServer.cs" />

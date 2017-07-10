@@ -1,4 +1,5 @@
 ﻿using StoreFrontPro.Server;
+using StoreFrontPro.Tools;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -27,7 +28,7 @@ namespace StoreFrontPro.Views.CollectionViews.Cube
         public VMCardGroupDisplay(ObservableCollection<CardModel> Model) : base(Model)
         {
             SyncWithModel();
-            Model.CollectionChanged += (o, e) => { SyncWithModel(); };
+            CollectionModel.RegisterCollectionListener(Model, (o, e) => { SyncWithModel(); });
         }
 
         public void SyncWithModel()
