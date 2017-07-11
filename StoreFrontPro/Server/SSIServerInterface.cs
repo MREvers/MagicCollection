@@ -138,6 +138,7 @@ namespace StoreFrontPro.Server
             public void CreateCollection(string aszName)
             {
                 SCI.CreateNewCollection(aszName);
+                inGenerateCollectionModel(aszName);
             }
 
             /// <summary>

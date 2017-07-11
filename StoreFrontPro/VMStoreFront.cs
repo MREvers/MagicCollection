@@ -8,6 +8,7 @@ using StoreFrontPro.Views.Interfaces.CollectionChanger;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -59,7 +60,7 @@ namespace StoreFrontPro
 
         private void showCollectionCubeView(CollectionModel CollectionModel)
         {
-            
+
             VMCollectionCube collectionCubeVM = new VMCollectionCube(CollectionModel);
             OperationWindow.SetNewDisplay(
                             Name: "Overview",
@@ -130,15 +131,25 @@ namespace StoreFrontPro
         public void eAddNewCollectionClick(string aszCollectionName)
         {
             ServerInterface.Server.CreateCollection(aszCollectionName);
-            ServerInterface.Server.GenerateCollectionModel(aszCollectionName);
             Model.SyncCollections();
         }
 
         public void eLoadCollectionFromFile(string aszCollectionName)
         {
-            ServerInterface.Server.CreateCollection(aszCollectionName);
-            ServerInterface.Server.GenerateCollectionModel(aszCollectionName);
-            Model.SyncCollections();
+            Microsoft.Win32.OpenFileDialog openFile = new Microsoft.Win32.OpenFileDialog();
+
+            openFile.DefaultExt = ".txt";
+            openFile.Filter = "Text Files (*.txt)|*.txt";
+
+            Nullable<bool> result = openFile.ShowDialog();
+            if (result == true)
+            {
+                string szSelectedFile = openFile.FileName;
+                Uri filePath = new Uri(szSelectedFile);
+                Uri currentPath = new Uri(Directory.GetCurrentDirectory());
+                Uri relPath = filePath.MakeRelativeUri(currentPath);
+                string szPath = 
+            }
         }
 
         private void eCloseCommand(object aoCanExecute)
