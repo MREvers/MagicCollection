@@ -14,7 +14,7 @@ using StoreFrontPro.Views.Components.RequestTextOverlay;
 
 namespace StoreFrontPro.Views.CollectionsOverview
 {
-    class VMCollectionsOverview : ViewModel<List<CollectionModel>>, IViewComponent
+    class VMCollectionsOverview : ViewModel<ObservableCollection<CollectionModel>>, IViewComponent
     {
         #region Binding
         private MultiDisplay _OperationWindow = new MultiDisplay();
@@ -48,7 +48,7 @@ namespace StoreFrontPro.Views.CollectionsOverview
         /// The "Model" of this class is a list of collections.
         /// </summary>
         /// <param name="Model"></param>
-        public VMCollectionsOverview(List<CollectionModel> Model) : base(Model)
+        public VMCollectionsOverview(ObservableCollection<CollectionModel> Model) : base(Model)
         {
             ViewCollectionCommand = new RelayCommand(eCollectionViewCommand);
             AddCollectionCommand = new RelayCommand(eAddCollectionCommand);
@@ -58,6 +58,7 @@ namespace StoreFrontPro.Views.CollectionsOverview
                 NewDisplay: new VCCollectionsMenuList(),
                 DataContext: this,
                 Persist: false);
+            OperationWindow.DisplayEvent += eDisplayEventHandler;
             SyncWithModel();
         }
 
@@ -78,7 +79,7 @@ namespace StoreFrontPro.Views.CollectionsOverview
         {
             if (e.Source == "VMRequestText")
             {
-                if (e.Property == "AcceptCommand")
+                if (e.Property == "AcceptButton")
                 {
                     DisplayEventArgs eventArgs = new DisplayEventArgs("VCollectionsOverview", "AddCollection", "Clicked");
                     eventArgs.Add("NewCollectionName", (string)e.Get("Text"));
