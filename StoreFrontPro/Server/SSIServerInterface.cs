@@ -17,40 +17,49 @@ namespace StoreFrontPro.Server
         {
             private List<CollectionModel> m_lstCollectionModels = new List<CollectionModel>();
 
+            public void LoadCollection(string aszCollectionFileName)
+            {
+                singleton.enqueueService(() =>
+                {
+                    inLoadCollection(aszCollectionFileName);
+                });
+            }
+
+            private void inLoadCollection(string aszCollectionFileName)
+            {
+                string szColName = SCI.LoadCollection(aszCollectionFileName);
+                if (szColName != "NF")
+                {
+                    inGenerateCollectionModel(szColName);
+                }
+            }
+
             /// <summary>
             /// Creates a new collection model from data from the server, if that collection model
             ///  doesn't already exist. If it exists, it updates the model.
             /// </summary>
             /// <param name="aszCollectionFileName"></param>
             /// <returns></returns>
-            public void GenerateCollectionModel(string aszCollectionFileName)
+            public void GenerateCollectionModel(string aszCollectionName)
             {
                 singleton.enqueueService(() =>
                 {
-                    inGenerateCollectionModel(aszCollectionFileName);
+                    inGenerateCollectionModel(aszCollectionName);
                 });
             }
 
-            private void inGenerateCollectionModel(string aszCollectionFileName)
+            private void inGenerateCollectionModel(string aszCollectionName)
             {
-                string szColName = SCI.LoadCollection(aszCollectionFileName);
-                if (szColName != "")
+                List<string> lstLoadedCollections = SCI.GetLoadedCollections();
+                if (lstLoadedCollections.Contains(aszCollectionName))
                 {
-                    CollectionModel newCM = new CollectionModel(szColName);
-                    CollectionModel currentCM = m_lstCollectionModels.FirstOrDefault(x => x.CollectionName == szColName);
-                    if (currentCM == null)
-                    {
-                        m_lstCollectionModels.Add(newCM);
-                    }
-                    else
-                    {
-                        currentCM.CollectionItems = newCM.CollectionItems;
-                    }
+                    CollectionModel newCM = new CollectionModel(aszCollectionName);
+                    m_lstCollectionModels.Add(newCM);
                 }
             }
 
             public void GenerateCopyModel(string Identifier,
-                string CollectionName, 
+                string CollectionName,
                 Action<CardModel> Callback,
                 bool UICallback = false)
             {
@@ -99,7 +108,7 @@ namespace StoreFrontPro.Server
                     Callback(GetCollectionModels());
                 }, UICallback);
             }
-            
+
             public List<CollectionModel> GetCollectionModels()
             {
                 return m_lstCollectionModels;
@@ -128,8 +137,7 @@ namespace StoreFrontPro.Server
 
             public void CreateCollection(string aszName)
             {
-                //SCI.CreateCollection(aszName);
-                //GenerateCollectionModel(aszName + ".txt");
+                SCI.CreateNewCollection(aszName);
             }
 
             /// <summary>

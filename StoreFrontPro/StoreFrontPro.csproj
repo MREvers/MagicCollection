@@ -108,6 +108,10 @@
       <DependentUpon>VCardImageDisplayer.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Components\CardImageDisplayer\VMCardImageDisplayer.cs" />
+    <Compile Include="Views\Components\RequestTextOverlay\VMRequestText.cs" />
+    <Compile Include="Views\Components\RequestTextOverlay\VRequestText.xaml.cs">
+      <DependentUpon>VRequestText.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\Components\SuggestionsSearchBox\MSuggestionsSearchBox.cs" />
     <Compile Include="Views\Components\SuggestionsSearchBox\VMSuggestionsSearchBox.cs" />
     <Compile Include="Views\Components\SuggestionsSearchBox\VSuggestionsSearchBox.xaml.cs">
@@ -191,6 +195,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Views\Components\RequestTextOverlay\VRequestText.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\Components\SuggestionsSearchBox\VSuggestionsSearchBox.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -204,9 +212,7 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Views\Components\RequestTextOverlay\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <ProjectReference Include="..\ServerInterface\ServerInterface.vcxproj">
       <Project>{b3e17e4d-3395-42fb-bf66-0af21c59db36}</Project>

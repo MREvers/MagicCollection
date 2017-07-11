@@ -72,6 +72,10 @@ namespace StoreFrontPro.Support.MultiDisplay
         public void ShowOverlay(UserControl Overlay)
         {
             CloseOverlay();
+            if (Overlay?.DataContext is IViewComponent)
+            {
+                (Overlay.DataContext as IViewComponent).DisplayEvent += displayFireEvent;
+            }
             m_oOverlay = Overlay;
             displaySendToBack();
             fireUpdateMenuItems();
@@ -164,6 +168,10 @@ namespace StoreFrontPro.Support.MultiDisplay
         {
             Display.IsEnabled = true;
             MultiDisplayPanel.Children.Remove(m_oOverlay);
+            if (m_oOverlay?.DataContext is IViewComponent)
+            {
+                (m_oOverlay.DataContext as IViewComponent).DisplayEvent -= displayFireEvent;
+            }
             m_oOverlay = null;
 
             fireUpdateMenuItems();

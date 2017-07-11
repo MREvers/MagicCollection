@@ -13,6 +13,7 @@ class Collection
 public:
 	Collection(std::string aszName,
 				   CollectionSource* aoSource,
+				   std::string aszFileCollection,
 				   std::string aszParentCollectionName = "");
 	~Collection();
 
@@ -34,15 +35,9 @@ public:
 	bool IsLoaded = false;
 
 private:
-	enum ChangeType: int
-	{
-		Addition = 0x0,
-		Removal = 0x1,
-		Change = 0x2
-	};
-
 	std::string m_szName;
 	std::string m_szParentName;
+	std::string m_szFileName;
 	CollectionSource* m_ptrCollectionSource;
 
 	bool m_bRecordChanges;

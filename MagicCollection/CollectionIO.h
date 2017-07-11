@@ -15,5 +15,8 @@ public:
 
 	std::vector<std::string> LoadLines(std::string aszFileName);
 	std::vector<std::string> GetPreprocessLines(std::vector<std::string> alstAllLines, std::vector<std::string>& rlstPreprocessingLines);
+
+	bool CollectionFileExists(std::string aszFileName);
+	std::string GetCollectionFile(std::string aszCollectionName);
 };
 

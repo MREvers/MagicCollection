@@ -16,7 +16,7 @@ CollectionFactory::~CollectionFactory()
 std::string CollectionFactory::LoadCollectionFromFile(std::string aszFileName)
 {
 	std::string szRetVal = Config::NotFoundString;
-	Collection* oCol = new Collection(Config::NotFoundString, m_ColSource);
+	Collection* oCol = new Collection(Config::NotFoundString, m_ColSource, aszFileName);
 	oCol->LoadCollection(aszFileName);
 	std::string szFoundName = oCol->GetName();
 	if (oCol->IsLoaded && !CollectionExists(szFoundName))
@@ -36,7 +36,7 @@ std::string CollectionFactory::CreateNewCollection(std::string aszColName)
 {
 	if (!CollectionExists(aszColName))
 	{
-		Collection* oCol = new Collection(aszColName, m_ColSource);
+		Collection* oCol = new Collection(aszColName, m_ColSource, aszColName);
 		m_lstCollections.push_back(oCol);
 	}
 

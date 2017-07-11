@@ -10,6 +10,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using StoreFrontPro.Tools;
+using StoreFrontPro.Views.Components.RequestTextOverlay;
 
 namespace StoreFrontPro.Views.CollectionsOverview
 {
@@ -50,6 +51,7 @@ namespace StoreFrontPro.Views.CollectionsOverview
         public VMCollectionsOverview(List<CollectionModel> Model) : base(Model)
         {
             ViewCollectionCommand = new RelayCommand(eCollectionViewCommand);
+            AddCollectionCommand = new RelayCommand(eAddCollectionCommand);
 
             OperationWindow.SetNewDisplay(
                 Name: "Overview",
@@ -72,6 +74,20 @@ namespace StoreFrontPro.Views.CollectionsOverview
         #endregion Public Methods
 
         #region Event Handlers
+        private void eDisplayEventHandler(object source, DisplayEventArgs e)
+        {
+            if (e.Source == "VMRequestText")
+            {
+                if (e.Property == "AcceptCommand")
+                {
+                    DisplayEventArgs eventArgs = new DisplayEventArgs("VCollectionsOverview", "AddCollection", "Clicked");
+                    eventArgs.Add("NewCollectionName", (string)e.Get("Text"));
+                    DisplayEvent(this, eventArgs);
+                }
+                OperationWindow.CloseOverlay();
+            }
+        }
+
         private void eCollectionPreviewUpdate(string aszCollectionName)
         {
             if (!string.IsNullOrEmpty(aszCollectionName))
@@ -92,6 +108,14 @@ namespace StoreFrontPro.Views.CollectionsOverview
                 eventArgs.Add(Key: "Collection", Value: Model.Where(x => x.CollectionName == SelectedCollection).First());
                 DisplayEvent(this, eventArgs);
             }
+        }
+
+        private void eAddCollectionCommand(object aoCanExecute)
+        {
+            VMRequestText requestTextVM = new VMRequestText("");
+            VRequestText requestTextV = new VRequestText();
+            requestTextV.DataContext = requestTextVM;
+            OperationWindow.ShowOverlay(requestTextV);
         }
         #endregion
     }

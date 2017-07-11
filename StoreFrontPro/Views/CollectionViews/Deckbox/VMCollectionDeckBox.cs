@@ -35,6 +35,7 @@ namespace StoreFrontPro.Views.CollectionViews.Deckbox
                 NewDisplay: new VFancyCollectionList(),
                 DataContext: new VMFancyCollectionList(Model.CollectionItems, true),
                 Persist: false);
+
         }
 
         public List<StoreFrontMenuItem> GetMenuItems()

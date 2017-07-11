@@ -108,7 +108,7 @@ namespace StoreFrontPro.Server
             // Calculate differences.
             List<string> lstHashesAndCounts = aLstCards.Select(x=>fastExtractHash(x,true)).ToList();
             List<string> lstNewHashes = lstHashesAndCounts.Select(x => x.Split(',')[1]).ToList();
-            List<string> lstNewCounts = lstHashesAndCounts.Select(x => x.Split(',')[0]).ToList();
+            List<string> lstNewCounts = lstHashesAndCounts.Select(x => x.Split(',')[0] == "" ? (1).ToString() : x.Split(',')[0]).ToList();
             DisableEvents(CollectionItems);
 
             List<CardModel> lstRemoves = new List<CardModel>();
@@ -146,15 +146,15 @@ namespace StoreFrontPro.Server
             List<CardModel> lstAdds = new List<CardModel>();
             for (int i = 0; i < lstNewHashes.Count; i++)
             {
+                if (i == lstNewHashes.Count - 1)
+                {
+                    ServerInterface.Server.SyncServerTask(() => { EnableEvents(CollectionItems); });
+                }
                 ServerInterface.Server.GenerateCopyModel(
                                     Identifier: aLstCards[i],
                                     CollectionName: CollectionName,
                                     Callback: (aoCardModel) => { CollectionItems.Add(aoCardModel); },
                                     UICallback: true);
-                if (i == lstNewHashes.Count - 2)
-                {
-                    ServerInterface.Server.SyncServerTask(() => { EnableEvents(CollectionItems); });
-                }
             }
             m_bHardRebuild = false;
         }

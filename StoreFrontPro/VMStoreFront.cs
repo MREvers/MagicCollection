@@ -88,7 +88,7 @@ namespace StoreFrontPro
                 }
                 else if (e.Property == "AddCollection")
                 {
-                    eAddNewCollectionClick(e.Get("CollectionName"));
+                    eAddNewCollectionClick((string)e.Get("NewCollectionName"));
                 }
             }
             else if (e.Source == "MultiDisplay")
@@ -129,12 +129,22 @@ namespace StoreFrontPro
 
         public void eAddNewCollectionClick(string aszCollectionName)
         {
+            ServerInterface.Server.CreateCollection(aszCollectionName);
+            ServerInterface.Server.GenerateCollectionModel(aszCollectionName);
+            Model.SyncCollections();
+        }
 
+        public void eLoadCollectionFromFile(string aszCollectionName)
+        {
+            ServerInterface.Server.CreateCollection(aszCollectionName);
+            ServerInterface.Server.GenerateCollectionModel(aszCollectionName);
+            Model.SyncCollections();
         }
 
         private void eCloseCommand(object aoCanExecute)
         {
             Model.CloseApplication();
+
         }
 
         private void eDownloadSetsCommand(object aoCanExecute)

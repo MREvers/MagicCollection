@@ -1,6 +1,7 @@
 ﻿using StoreFrontPro.Server;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -17,7 +18,7 @@ namespace StoreFrontPro
     /// </summary>
     class StoreFront
     {
-        public List<CollectionModel> Collections { get; private set; }
+        public ObservableCollection<CollectionModel> Collections { get; private set; }
         public CollectionModel ActiveCollection { get; private set; }
 
         private Window m_ucMainWindow;
@@ -28,7 +29,7 @@ namespace StoreFrontPro
         public StoreFront(Window MainWindow)
         {
             m_ucMainWindow = MainWindow;
-            Collections = new List<CollectionModel>();
+            Collections = new ObservableCollection<CollectionModel>();
             ActiveCollection = null;
             StoreFrontVM = new VMStoreFront(Model: this);
             
@@ -40,15 +41,20 @@ namespace StoreFrontPro
             m_ucMainWindow.Close();
         }
 
+        public void SyncCollections()
+        {
+            ServerInterface.Server.GetCollectionModels(
+                Callback: (alstColMos) => { Collections.Clear(); alstColMos.ForEach((x) => { Collections.Add(x); }); StoreFrontVM.Notify(); },
+                UICallback: true);
+        }
+
         private void initializeStoreFront()
         {
             ServerInterface.Server.Start();
 
             loadStartupCollections();
 
-            ServerInterface.Server.GetCollectionModels(
-                Callback: (alstColMos) => { Collections.Clear(); alstColMos.ForEach((x)=> { Collections.Add(x); }); StoreFrontVM.Notify(); },
-                UICallback: true);
+            SyncCollections();
         }
 
         private void loadStartupCollections()
@@ -99,7 +105,7 @@ namespace StoreFrontPro
             {
                 foreach (string fileName in lstStartup)
                 {
-                    ServerInterface.Server.GenerateCollectionModel(".\\" + szCollection + "\\" + fileName + ".txt");
+                    ServerInterface.Server.LoadCollection(".\\" + szCollection + "\\" + fileName + ".txt");
                 }
             }
 

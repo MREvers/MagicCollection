@@ -2,9 +2,10 @@
 
 
 
-Collection::Collection(std::string aszName, CollectionSource* aoSource, std::string aszParentCollectionName)
+Collection::Collection(std::string aszName, CollectionSource* aoSource, std::string aszFileCollection, std::string aszParentCollectionName)
 {
 	m_szName = aszName;
+	m_szFileName = aszFileCollection;
 	m_ptrCollectionSource = aoSource;
 	m_szParentName = aszParentCollectionName;
 	m_bRecordChanges = true;
@@ -484,9 +485,9 @@ void Collection::saveCollection()
 
 	if (lstLines.size() > 0)
 	{
+		CollectionIO ioHelper;
 		std::ofstream oColFile;
-		oColFile.open(Config::Instance()->GetCollectionsDirectory() + "\\"+
-			m_szName + ".txt");
+		oColFile.open(ioHelper.GetCollectionFile(m_szFileName));
 
 		oColFile << Config::CollectionDefinitionKey << " Name=\"" << m_szName<< "\"" << std::endl;
 		if (m_szParentName != "")

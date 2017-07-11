@@ -44,3 +44,16 @@ std::vector<std::string> CollectionIO::GetPreprocessLines(std::vector<std::strin
 	rlstPreprocessingLines = lstPreprocessLines;
 	return lstRetVal;
 }
+
+bool CollectionIO::CollectionFileExists(std::string aszFileName)
+{
+	std::string szFullFileName = GetCollectionFile(aszFileName);
+	std::ifstream f(szFullFileName.c_str());
+	return f.good();
+}
+
+std::string CollectionIO::GetCollectionFile(std::string aszCollectionName)
+{
+	return Config::Instance()->GetCollectionsDirectory() + "\\" +
+		StringHelper::Str_Replace(aszCollectionName, ' ', '_') + ".txt";
+}

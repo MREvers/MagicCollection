@@ -22,6 +22,19 @@ std::string StringHelper::Str_Trim(const std::string& src, char removeChar)
    return src.substr(first, (last - first + 1));
 }
 
+std::string StringHelper::Str_Replace(const std::string& srz, char removeChar, char replaceChar)
+{
+	std::string szRetVal = "";
+	for (char c : srz)
+	{
+		if (c != ' ')
+		{
+			szRetVal += c;
+		}
+	}
+	return szRetVal;
+}
+
 std::string StringHelper::Str_Clean(const std::string& src)
 {
 	std::string szRetVal = "";
