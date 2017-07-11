@@ -11,7 +11,7 @@ CollectionIO::~CollectionIO()
 {
 }
 
-std::vector<std::string> CollectionIO::LoadLines(std::string aszFileName)
+std::vector<std::string> CollectionIO::GetFileLines(std::string aszFileName)
 {
 	// Load the collection
 	std::ifstream in(aszFileName);
@@ -23,6 +23,7 @@ std::vector<std::string> CollectionIO::LoadLines(std::string aszFileName)
 	return StringHelper::SplitIntoLines(contents);
 }
 
+// Returns non-preprocessing lines.
 std::vector<std::string> CollectionIO::GetPreprocessLines(std::vector<std::string> alstAllLines, std::vector<std::string>& rlstPreprocessingLines)
 {
 	std::vector<std::string> lstRetVal;
@@ -56,4 +57,16 @@ std::string CollectionIO::GetCollectionFile(std::string aszCollectionName)
 {
 	return Config::Instance()->GetCollectionsDirectory() + "\\" +
 		StringHelper::Str_Replace(aszCollectionName, ' ', '_') + ".txt";
+}
+
+std::string CollectionIO::GetMetaFile(std::string aszCollectionName)
+{
+	return Config::Instance()->GetCollectionsDirectory() + "\\" +
+		StringHelper::Str_Replace(aszCollectionName, ' ', '_') + "." + std::string(Config::MetaFileExtension) + ".txt";
+}
+
+std::string CollectionIO::GetHistoryFile(std::string aszCollectionName)
+{
+	return Config::Instance()->GetCollectionsDirectory() + "\\" +
+		StringHelper::Str_Replace(aszCollectionName, ' ', '_') + "." + std::string(Config::HistoryFileExtension) + ".txt";
 }

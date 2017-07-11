@@ -26,7 +26,7 @@
                 VerticalAlignment="Stretch"/>
 
 
-        <Button Grid.Row="2" HorizontalAlignment="Stretch">
+        <Button Grid.Row="2" HorizontalAlignment="Stretch" Command="{Binding LoadCollectionFileCommand}">
             <TextBlock>Load Collection</TextBlock>
         </Button>
         <Button Grid.Row="3"  HorizontalAlignment="Stretch" Command="{Binding AddCollectionCommand}">

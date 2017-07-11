@@ -34,6 +34,7 @@ namespace StoreFrontPro.Views.CollectionsOverview
 
         public RelayCommand ViewCollectionCommand { get; set; }
         public RelayCommand AddCollectionCommand { get; set; }
+        public RelayCommand LoadCollectionFileCommand { get; set; }
 
         public ObservableCollection<string> AvailableCollections { get; set; } = new ObservableCollection<string>();
         public ObservableCollection<string> CollectionPreview { get; set; } = new ObservableCollection<string>();
@@ -52,6 +53,7 @@ namespace StoreFrontPro.Views.CollectionsOverview
         {
             ViewCollectionCommand = new RelayCommand(eCollectionViewCommand);
             AddCollectionCommand = new RelayCommand(eAddCollectionCommand);
+            LoadCollectionFileCommand = new RelayCommand(eLoadCollectionFileCommand);
 
             OperationWindow.SetNewDisplay(
                 Name: "Overview",
@@ -81,7 +83,7 @@ namespace StoreFrontPro.Views.CollectionsOverview
             {
                 if (e.Property == "AcceptButton")
                 {
-                    DisplayEventArgs eventArgs = new DisplayEventArgs("VCollectionsOverview", "AddCollection", "Clicked");
+                    DisplayEventArgs eventArgs = new DisplayEventArgs("VMCollectionsOverview", "AddCollection", "Clicked");
                     eventArgs.Add("NewCollectionName", (string)e.Get("Text"));
                     DisplayEvent(this, eventArgs);
                 }
@@ -105,7 +107,7 @@ namespace StoreFrontPro.Views.CollectionsOverview
         {
             if (!string.IsNullOrEmpty(SelectedCollection))
             {
-                DisplayEventArgs eventArgs = new DisplayEventArgs("VCollectionsOverview", "ViewCollection", "Clicked");
+                DisplayEventArgs eventArgs = new DisplayEventArgs("VMCollectionsOverview", "ViewCollection", "Clicked");
                 eventArgs.Add(Key: "Collection", Value: Model.Where(x => x.CollectionName == SelectedCollection).First());
                 DisplayEvent(this, eventArgs);
             }
@@ -117,6 +119,12 @@ namespace StoreFrontPro.Views.CollectionsOverview
             VRequestText requestTextV = new VRequestText();
             requestTextV.DataContext = requestTextVM;
             OperationWindow.ShowOverlay(requestTextV);
+        }
+
+        private void eLoadCollectionFileCommand(object aoCanExecute)
+        {
+            DisplayEventArgs eventArgs = new DisplayEventArgs("VMCollectionsOverview", "LoadCollection", "Clicked");
+            DisplayEvent(this, eventArgs);
         }
         #endregion
     }

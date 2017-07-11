@@ -56,6 +56,8 @@ private:
 	Transaction* getOpenTransaction();
 	void finalizeTransaction();
 
+	void loadMetaTagFile();
+
 	void loadPreprocessingLines(std::vector<std::string> alstLine);
 	void loadPreprocessingLine(std::string aszLine);
 

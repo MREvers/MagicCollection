@@ -149,7 +149,7 @@ void Collection::LoadCollection(std::string aszFileName)
 	CollectionIO loader;
 	m_bRecordChanges = false;
 
-	std::vector<std::string> lstLines = loader.LoadLines(aszFileName);
+	std::vector<std::string> lstLines = loader.GetFileLines(aszFileName);
 
 	std::vector<std::string> lstPreprocessLines;
 	std::vector<std::string> lstCardLines = loader.GetPreprocessLines(lstLines, lstPreprocessLines);
@@ -157,7 +157,9 @@ void Collection::LoadCollection(std::string aszFileName)
 	loadPreprocessingLines(lstPreprocessLines);
 
 	LoadChanges(lstCardLines);
+
 	// Also need to load metatags...
+	loadMetaTagFile();
 
 	m_bRecordChanges = true;
 	IsLoaded = (m_szName != Config::NotFoundString);
@@ -292,6 +294,40 @@ void Collection::finalizeTransaction()
 	}
 }
 
+void Collection::loadMetaTagFile()
+{
+	// This should only be called during initial loading.
+	CollectionIO ioHelper;
+	std::vector<std::string> lstMetaLines = ioHelper.GetFileLines(Config::Instance()->GetMetaFolderName() + "\\" + ioHelper.GetMetaFile(m_szFileName));
+
+	for (size_t i = 0; i < lstMetaLines.size(); i++)
+	{
+		CollectionItem::PseudoIdentifier sudoItem;
+		CollectionItem::ParseCardLine(lstMetaLines[i], sudoItem);
+
+		std::vector<Tag> lstMetaTags = sudoItem.MetaTags;
+
+		// Clear the meta so the hash may be obtained.
+		sudoItem.MetaString = "";
+		sudoItem.MetaTags.clear();
+
+		int iRealCard = m_ptrCollectionSource->LoadCard(sudoItem.Name);
+		if (iRealCard != -1)
+		{
+			CollectionItem* item = m_ptrCollectionSource->GetCardPrototype(iRealCard);
+			std::string szPlainHash = item->GetHash(m_szName, sudoItem.Identifiers);
+
+			CopyItem* matchingCopy = item->FindCopyItem(szPlainHash);
+			if (matchingCopy != nullptr)
+			{
+				for (size_t t = 0; t < lstMetaTags.size(); t++)
+				{
+					matchingCopy->SetMetaTag(lstMetaTags[i].first, lstMetaTags[i].second, MetaTagType::Public);
+				}
+			}
+		}
+	}
+}
 
 void Collection::loadPreprocessingLines(std::vector<std::string>  alstLines)
 {
@@ -434,12 +470,9 @@ void Collection::saveHistory()
 		asctime_s(str, sizeof str, &timeinfo);
 		str[strlen(str) - 1] = 0;
 
-		Config* config = Config::Instance();
-
+		CollectionIO ioHelper;
 		std::ofstream oHistFile;
-		oHistFile.open(config->GetCollectionsDirectory() + "\\" +
-			config->GetHistoryFolderName() + "\\" +
-			m_szName + "." + +Config::HistoryFileExtension + ".txt", std::ios_base::app);
+		oHistFile.open(Config::Instance()->GetHistoryFolderName() + "\\" + ioHelper.GetHistoryFile(m_szFileName), std::ios_base::app);
 
 		oHistFile << "[" << str << "] " << std::endl;
 
@@ -459,12 +492,9 @@ void Collection::saveMeta()
 
 	if (lstMetaLines.size() > 0)
 	{
-		Config* config = Config::Instance();
-
+		CollectionIO ioHelper;
 		std::ofstream oMetaFile;
-		oMetaFile.open(config->GetCollectionsDirectory() + "\\" +
-			config->GetMetaFolderName() + "\\" +
-			m_szName + "." + +Config::MetaFileExtension + ".txt");
+		oMetaFile.open(Config::Instance()->GetMetaFolderName() + "\\"+ioHelper.GetMetaFile(m_szFileName));
 
 		std::vector<std::string>::iterator iter_MetaLine = lstMetaLines.begin();
 		for (; iter_MetaLine != lstMetaLines.end(); ++iter_MetaLine)

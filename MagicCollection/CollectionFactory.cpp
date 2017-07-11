@@ -16,7 +16,14 @@ CollectionFactory::~CollectionFactory()
 std::string CollectionFactory::LoadCollectionFromFile(std::string aszFileName)
 {
 	std::string szRetVal = Config::NotFoundString;
-	Collection* oCol = new Collection(Config::NotFoundString, m_ColSource, aszFileName);
+
+	// Get the file name.
+	std::vector<std::string> lstSplitFile = StringHelper::Str_Split(aszFileName, "\\");
+	std::string szFile = lstSplitFile[lstSplitFile.size() - 1];
+	std::vector<std::string> lstSplitExt = StringHelper::Str_Split(szFile, ".");
+	szFile = lstSplitExt[0];
+
+	Collection* oCol = new Collection(Config::NotFoundString, m_ColSource, szFile);
 	oCol->LoadCollection(aszFileName);
 	std::string szFoundName = oCol->GetName();
 	if (oCol->IsLoaded && !CollectionExists(szFoundName))

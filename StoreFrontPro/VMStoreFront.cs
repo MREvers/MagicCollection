@@ -81,7 +81,7 @@ namespace StoreFrontPro
 
         private void viewDisplayEventHandler(object Source, DisplayEventArgs e)
         {
-            if (e.Source == "VCollectionsOverview")
+            if (e.Source == "VMCollectionsOverview")
             {
                 if (e.Property == "ViewCollection")
                 {
@@ -90,6 +90,10 @@ namespace StoreFrontPro
                 else if (e.Property == "AddCollection")
                 {
                     eAddNewCollectionClick((string)e.Get("NewCollectionName"));
+                }
+                else if (e.Property == "LoadCollection")
+                {
+                    eLoadCollectionFromFile();
                 }
             }
             else if (e.Source == "MultiDisplay")
@@ -134,7 +138,7 @@ namespace StoreFrontPro
             Model.SyncCollections();
         }
 
-        public void eLoadCollectionFromFile(string aszCollectionName)
+        public void eLoadCollectionFromFile()
         {
             Microsoft.Win32.OpenFileDialog openFile = new Microsoft.Win32.OpenFileDialog();
 
@@ -145,10 +149,8 @@ namespace StoreFrontPro
             if (result == true)
             {
                 string szSelectedFile = openFile.FileName;
-                Uri filePath = new Uri(szSelectedFile);
-                Uri currentPath = new Uri(Directory.GetCurrentDirectory());
-                Uri relPath = filePath.MakeRelativeUri(currentPath);
-                string szPath = 
+                ServerInterface.Server.LoadCollection(szSelectedFile);
+                ServerInterface.Server.SyncServerTask(() => { Model.SyncCollections(); });
             }
         }
 
