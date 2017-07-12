@@ -53,7 +53,6 @@ void Collection::AddItem(std::string aszName,
 		{
 			finalizeTransaction();
 		}
-
 	}
 }
 

@@ -47,7 +47,7 @@ std::string CollectionFactory::CreateNewCollection(std::string aszColName)
 		m_lstCollections.push_back(oCol);
 	}
 
-	return aszColName;
+	return Config::NotFoundString;
 }
 
 std::vector<std::string> CollectionFactory::GetLoadedCollections()

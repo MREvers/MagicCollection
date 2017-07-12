@@ -16,7 +16,7 @@ using System.Windows.Controls;
 
 namespace StoreFrontPro
 {
-    class VMStoreFront : ViewModel<StoreFront>
+    class VMStoreFront : ViewModel<StoreFront>, IVCISupporter
     {
         public RelayCommand CloseCommand { get; set; }
         public RelayCommand CollectionsOverviewCommand { get; set; }
@@ -31,21 +31,49 @@ namespace StoreFrontPro
             set { _OperationWindow = value; OnPropertyChanged(); }
         }
 
+        public Dictionary<Type, IViewComponentInterface> SupportedInterface { get; set; } = new Dictionary<Type, IViewComponentInterface>();
+
         public VMStoreFront(StoreFront Model) : base(Model)
         {
+            
             OperationWindow = new MultiDisplay();
-            OperationWindow.DisplayEvent += viewDisplayEventHandler;
+            OperationWindow.DisplayEvent += DisplayEventHandler;
+            
+            VCICollectionDeckBox CDBIS = new VCICollectionDeckBox(
+                SwitchToCube: showCollectionCubeView);
+            VCICollectionCube CCIS = new VCICollectionCube(
+                SwitchToDeckBox: showCollectionDeckBox);
+            VCICollectionsOverview COIS = new VCICollectionsOverview(
+                ViewCollection: showCollectionCubeView,
+                AddCollection: eAddNewCollectionClick,
+                LoadCollection: eLoadCollectionFromFile);
+            VCIMultiDisplay MDIS = new VCIMultiDisplay(
+                Change: eDisplayNewViewOptions);
+            SupportedInterface.Add(CDBIS.GetInterfaceType(), CDBIS);
+            SupportedInterface.Add(CCIS.GetInterfaceType(), CCIS);
+            SupportedInterface.Add(COIS.GetInterfaceType(), COIS);
+            SupportedInterface.Add(MDIS.GetInterfaceType(), MDIS);
+            
             CloseCommand = new RelayCommand(eCloseCommand);
             CollectionsOverviewCommand = new RelayCommand((o) => { showCollectionsOverview(); });
             DownloadSetsCommand = new RelayCommand(eDownloadSetsCommand);
 
             showCollectionsOverview();
+            
         }
 
         public void Notify()
         {
             // do other updates here
             notifyMultiDisplay();
+        }
+
+        public void DisplayEventHandler(object source, DisplayEventArgs e)
+        {
+            if (SupportedInterface.ContainsKey(source.GetType()))
+            {
+                SupportedInterface?[source.GetType()]?.TryInvoke(e.Key, e.Args);
+            }
         }
 
         private void showCollectionsOverview()
@@ -79,40 +107,6 @@ namespace StoreFrontPro
                             Persist: false);
         }
 
-        private void viewDisplayEventHandler(object Source, DisplayEventArgs e)
-        {
-            if (e.Source == "VMCollectionsOverview")
-            {
-                if (e.Property == "ViewCollection")
-                {
-                    showCollectionCubeView((CollectionModel)e.Get("Collection"));
-                }
-                else if (e.Property == "AddCollection")
-                {
-                    eAddNewCollectionClick((string)e.Get("NewCollectionName"));
-                }
-                else if (e.Property == "LoadCollection")
-                {
-                    eLoadCollectionFromFile();
-                }
-            }
-            else if (e.Source == "MultiDisplay")
-            {
-                eDisplayNewViewOptions();
-            }
-            // The expectation is that the source's model is a Collection
-            else if (e.Property == "SwitchToDeckbox")
-            {
-                CollectionModel cm = (Source as ViewModel<CollectionModel>).Model;
-                showCollectionDeckBox(cm);
-            }
-            else if (e.Property == "SwitchToCube")
-            {
-                CollectionModel cm = (Source as ViewModel<CollectionModel>).Model;
-                showCollectionCubeView(cm);
-            }
-        }
-
         private void notifyMultiDisplay()
         {
             UserControl viewMode = OperationWindow.Display;
@@ -135,7 +129,7 @@ namespace StoreFrontPro
         public void eAddNewCollectionClick(string aszCollectionName)
         {
             ServerInterface.Server.CreateCollection(aszCollectionName);
-            Model.SyncCollections();
+            Model.SyncCollectionList();
         }
 
         public void eLoadCollectionFromFile()
@@ -150,7 +144,7 @@ namespace StoreFrontPro
             {
                 string szSelectedFile = openFile.FileName;
                 ServerInterface.Server.LoadCollection(szSelectedFile);
-                ServerInterface.Server.SyncServerTask(() => { Model.SyncCollections(); });
+                ServerInterface.Server.SyncServerTask(() => { Model.SyncAllCollections(); });
             }
         }
 

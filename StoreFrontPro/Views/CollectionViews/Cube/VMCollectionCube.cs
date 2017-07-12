@@ -12,7 +12,7 @@ using System.Windows.Controls.Primitives;
 
 namespace StoreFrontPro.Views.CollectionViews.Cube
 {
-    class VMCollectionCube : ViewModel<CollectionModel>, IViewComponent
+    class VMCollectionCube : ViewModel<CollectionModel>, IViewComponent, IVCISupporter
     {
         private MultiDisplay _OperationWindow = new MultiDisplay();
 
@@ -24,8 +24,15 @@ namespace StoreFrontPro.Views.CollectionViews.Cube
             set { _OperationWindow = value; OnPropertyChanged(); }
         }
 
+        public Dictionary<Type, IViewComponentInterface> SupportedInterface { get; set; } = new Dictionary<Type, IViewComponentInterface>();
+
         public VMCollectionCube(CollectionModel Model) : base(Model)
         {
+            VCICollectionEditor CEIS = new VCICollectionEditor(
+                Accept: eAcceptOrCancelColEditor,
+                Cancel: eAcceptOrCancelColEditor);
+            SupportedInterface.Add(CEIS.GetInterfaceType(), CEIS);
+
             if (Model.IsCollapsedCollection)
             {
                 Model.IsCollapsedCollection = false;
@@ -38,6 +45,7 @@ namespace StoreFrontPro.Views.CollectionViews.Cube
                 NewDisplay: new VCardGroupDisplay(),
                 DataContext: collectionCubeVM,
                 Persist: false);
+            OperationWindow.DisplayEvent += DisplayEventHandler;
         }
 
         public List<StoreFrontMenuItem> GetMenuItems()
@@ -55,7 +63,8 @@ namespace StoreFrontPro.Views.CollectionViews.Cube
             return lstRetVal;
         }
 
-        private void displayEventHandler(object source, DisplayEventArgs e)
+
+        public void DisplayEventHandler(object source, DisplayEventArgs e)
         {
             if (!Application.Current.Dispatcher.CheckAccess())
             {
@@ -69,16 +78,9 @@ namespace StoreFrontPro.Views.CollectionViews.Cube
 
         private void inDisplayEventHandler(object source, DisplayEventArgs e)
         {
-            if (e.Source == "VMCollectionEditor")
+            if (SupportedInterface.ContainsKey(source.GetType()))
             {
-                if (e.Property == "AcceptCommand")
-                {
-                    OperationWindow.CloseOverlay();
-                }
-                else if (e.Property == "CancelCommand")
-                {
-                    OperationWindow.CloseOverlay();
-                }
+                SupportedInterface?[source.GetType()]?.TryInvoke(e.Key, e.Args);
             }
         }
 
@@ -86,7 +88,6 @@ namespace StoreFrontPro.Views.CollectionViews.Cube
         {
             VMCollectionEditor collectionsOverviewVM = new VMCollectionEditor(Model);
             OperationWindow.ShowOverlay(new VCollectionEditor() { DataContext = collectionsOverviewVM });
-            collectionsOverviewVM.DisplayEvent += displayEventHandler;
         }
 
         private void eSaveCollection(object canExecute)
@@ -96,8 +97,13 @@ namespace StoreFrontPro.Views.CollectionViews.Cube
 
         private void eSwitchToDeckboxView(object canExecute)
         {
-            DisplayEventArgs eventArts = new DisplayEventArgs(Source: "VMCollectionCube", Property: "SwitchToDeckbox", Event: "Clicked");
-            DisplayEvent(this, eventArts);
+            DisplayEventArgs eventArgs = new DisplayEventArgs(VCICollectionCube.SwitchToDeckBox, Model);
+            DisplayEvent(this, eventArgs);
+        }
+
+        private void eAcceptOrCancelColEditor()
+        {
+            OperationWindow.CloseOverlay();
         }
     }
 }

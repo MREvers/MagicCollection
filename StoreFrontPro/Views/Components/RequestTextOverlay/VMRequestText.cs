@@ -30,20 +30,20 @@ namespace StoreFrontPro.Views.Components.RequestTextOverlay
 
         private void eAcceptCommand(object canExecute)
         {
-            DisplayEventArgs eventArgs = new DisplayEventArgs("VMRequestText", "AcceptButton", "Clicked");
-            eventArgs.Add("Text", this.DisplayText);
+            DisplayEventArgs eventArgs = new DisplayEventArgs(VCIRequestText.Accept, DisplayText);
             DisplayEvent(this, eventArgs);
         }
 
         private void eCancelCommand(object canExecute)
         {
-            DisplayEventArgs eventArgs = new DisplayEventArgs("VMRequestText", "CancelButton", "Clicked");
+            DisplayEventArgs eventArgs = new DisplayEventArgs(VCIRequestText.Cancel);
             DisplayEvent(this, eventArgs);
         }
 
         public List<StoreFrontMenuItem> GetMenuItems()
         {
-            throw new NotImplementedException();
+            return null;
+            //throw new NotImplementedException();
         }
     }
 }

@@ -112,10 +112,10 @@ namespace StoreFrontPro.Server
                     }
                     aCallback(bitmap);
                 }
-                catch { }
-                
-
-                
+                catch
+                {
+                    aCallback(null);
+                }
             }
         }
     }

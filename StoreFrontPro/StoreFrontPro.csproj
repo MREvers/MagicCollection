@@ -74,7 +74,9 @@
     <Compile Include="Support\MultiDisplay\MultiDisplay.xaml.cs">
       <DependentUpon>MultiDisplay.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Support\MultiDisplay\VCIMultiDisplay.cs" />
     <Compile Include="Tools\Extensions.cs" />
+    <Compile Include="Views\CollectionsOverview\VCICollectionsOverview.cs" />
     <Compile Include="Views\CollectionsOverview\VCollectionsOverview.xaml.cs">
       <DependentUpon>VCollectionsOverview.xaml</DependentUpon>
     </Compile>
@@ -86,12 +88,14 @@
     <Compile Include="Views\CollectionViews\Cube\VCardGroupList.xaml.cs">
       <DependentUpon>VCardGroupList.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\CollectionViews\Cube\VCICollectionCube.cs" />
     <Compile Include="Views\CollectionViews\Cube\VCollectionCube.xaml.cs">
       <DependentUpon>VCollectionCube.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\CollectionViews\Cube\VMCardGroupDisplay.cs" />
     <Compile Include="Views\CollectionViews\Cube\VMCardGroupList.cs" />
     <Compile Include="Views\CollectionViews\Cube\VMCollectionCube.cs" />
+    <Compile Include="Views\CollectionViews\Deckbox\VCICollectionDeckBox.cs" />
     <Compile Include="Views\CollectionViews\Deckbox\VCollectionDeckBox.xaml.cs">
       <DependentUpon>VCollectionDeckBox.xaml</DependentUpon>
     </Compile>
@@ -108,11 +112,13 @@
       <DependentUpon>VCardImageDisplayer.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Components\CardImageDisplayer\VMCardImageDisplayer.cs" />
+    <Compile Include="Views\Components\RequestTextOverlay\VCIRequestText.cs" />
     <Compile Include="Views\Components\RequestTextOverlay\VMRequestText.cs" />
     <Compile Include="Views\Components\RequestTextOverlay\VRequestText.xaml.cs">
       <DependentUpon>VRequestText.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Components\SuggestionsSearchBox\MSuggestionsSearchBox.cs" />
+    <Compile Include="Views\Components\SuggestionsSearchBox\VCISuggestionsSearchBox.cs" />
     <Compile Include="Views\Components\SuggestionsSearchBox\VMSuggestionsSearchBox.cs" />
     <Compile Include="Views\Components\SuggestionsSearchBox\VSuggestionsSearchBox.xaml.cs">
       <DependentUpon>VSuggestionsSearchBox.xaml</DependentUpon>
@@ -120,11 +126,14 @@
     <Compile Include="Views\Components\VCCollectionsMenuList.xaml.cs">
       <DependentUpon>VCCollectionsMenuList.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\Interfaces\CollectionChanger\VCICollectionEditor.cs" />
     <Compile Include="Views\Interfaces\CollectionChanger\VCollectionEditor.xaml.cs">
       <DependentUpon>VCollectionEditor.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Interfaces\CollectionChanger\VMCollectionEditor.cs" />
+    <Compile Include="Views\IVCISupporter.cs" />
     <Compile Include="Views\IViewComponent.cs" />
+    <Compile Include="Views\IViewComponentInterface.cs" />
     <Compile Include="Views\ViewModel.cs" />
     <Compile Include="VMStoreFront.cs" />
   </ItemGroup>

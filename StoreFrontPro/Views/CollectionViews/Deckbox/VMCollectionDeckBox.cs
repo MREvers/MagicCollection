@@ -10,7 +10,7 @@ using System.Windows;
 
 namespace StoreFrontPro.Views.CollectionViews.Deckbox
 {
-    class VMCollectionDeckBox: ViewModel<CollectionModel>, IViewComponent
+    class VMCollectionDeckBox: ViewModel<CollectionModel>, IViewComponent, IVCISupporter
     {
         private MultiDisplay _OperationWindow = new MultiDisplay();
 
@@ -20,10 +20,17 @@ namespace StoreFrontPro.Views.CollectionViews.Deckbox
             set { _OperationWindow = value; OnPropertyChanged(); }
         }
 
+        public Dictionary<Type, IViewComponentInterface> SupportedInterface { get; set; } = new Dictionary<Type, IViewComponentInterface>();
+
         public event DisplayEventHandler DisplayEvent;
 
         public VMCollectionDeckBox(CollectionModel Model) : base(Model)
         {
+            VCICollectionEditor CEIS = new VCICollectionEditor(
+                Accept: eAcceptOrCancelColEditor,
+                Cancel: eAcceptOrCancelColEditor);
+            SupportedInterface.Add(CEIS.GetInterfaceType(), CEIS);
+
             if (!Model.IsCollapsedCollection)
             {
                 Model.IsCollapsedCollection = true;
@@ -35,7 +42,20 @@ namespace StoreFrontPro.Views.CollectionViews.Deckbox
                 NewDisplay: new VFancyCollectionList(),
                 DataContext: new VMFancyCollectionList(Model.CollectionItems, true),
                 Persist: false);
+            OperationWindow.DisplayEvent += DisplayEventHandler;
 
+        }
+
+        public void DisplayEventHandler(object source, DisplayEventArgs e)
+        {
+            if (!Application.Current.Dispatcher.CheckAccess())
+            {
+                Action aAction = new Action(() => { inDisplayEventHandler(source, e); });
+                Application.Current.Dispatcher.BeginInvoke(aAction);
+                return;
+            }
+
+            inDisplayEventHandler(source, e);
         }
 
         public List<StoreFrontMenuItem> GetMenuItems()
@@ -53,31 +73,11 @@ namespace StoreFrontPro.Views.CollectionViews.Deckbox
             return lstRetVal;
         }
 
-
-        private void displayEventHandler(object source, DisplayEventArgs e)
-        {
-            if (!Application.Current.Dispatcher.CheckAccess())
-            {
-                Action aAction = new Action(() => { inDisplayEventHandler(source, e); });
-                Application.Current.Dispatcher.BeginInvoke(aAction);
-                return;
-            }
-
-            inDisplayEventHandler(source, e);
-        }
-
         private void inDisplayEventHandler(object source, DisplayEventArgs e)
         {
-            if (e.Source == "VMCollectionEditor")
+            if (SupportedInterface.ContainsKey(source.GetType()))
             {
-                if (e.Property == "AcceptCommand")
-                {
-                    OperationWindow.CloseOverlay();
-                }
-                else if (e.Property == "CancelCommand")
-                {
-                    OperationWindow.CloseOverlay();
-                }
+                SupportedInterface?[source.GetType()]?.TryInvoke(e.Key, e.Args);
             }
         }
 
@@ -85,7 +85,6 @@ namespace StoreFrontPro.Views.CollectionViews.Deckbox
         {
             VMCollectionEditor collectionsOverviewVM = new VMCollectionEditor(Model);
             OperationWindow.ShowOverlay(new VCollectionEditor() { DataContext = collectionsOverviewVM });
-            collectionsOverviewVM.DisplayEvent += displayEventHandler;
         }
 
         private void eSaveCollection(object canExecute)
@@ -95,8 +94,14 @@ namespace StoreFrontPro.Views.CollectionViews.Deckbox
 
         private void eSwitchToCubeView(object canExecute)
         {
-            DisplayEventArgs eventArts = new DisplayEventArgs(Source: "VMCollectionDeckBox", Property: "SwitchToCube", Event: "Clicked");
+            DisplayEventArgs eventArts = new DisplayEventArgs(VCICollectionDeckBox.SwitchToCube, Model);
             DisplayEvent(this, eventArts);
         }
+
+        private void eAcceptOrCancelColEditor()
+        {
+            OperationWindow.CloseOverlay();
+        }
+
     }
 }

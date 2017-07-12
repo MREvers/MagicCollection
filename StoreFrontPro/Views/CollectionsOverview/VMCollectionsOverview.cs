@@ -14,7 +14,7 @@ using StoreFrontPro.Views.Components.RequestTextOverlay;
 
 namespace StoreFrontPro.Views.CollectionsOverview
 {
-    class VMCollectionsOverview : ViewModel<ObservableCollection<CollectionModel>>, IViewComponent
+    class VMCollectionsOverview : ViewModel<ObservableCollection<CollectionModel>>, IViewComponent, IVCISupporter
     {
         #region Binding
         private MultiDisplay _OperationWindow = new MultiDisplay();
@@ -38,6 +38,8 @@ namespace StoreFrontPro.Views.CollectionsOverview
 
         public ObservableCollection<string> AvailableCollections { get; set; } = new ObservableCollection<string>();
         public ObservableCollection<string> CollectionPreview { get; set; } = new ObservableCollection<string>();
+
+        public Dictionary<Type, IViewComponentInterface> SupportedInterface { get; set; } = new Dictionary<Type, IViewComponentInterface>();
         #endregion Binding
 
         #region Events
@@ -54,13 +56,19 @@ namespace StoreFrontPro.Views.CollectionsOverview
             ViewCollectionCommand = new RelayCommand(eCollectionViewCommand);
             AddCollectionCommand = new RelayCommand(eAddCollectionCommand);
             LoadCollectionFileCommand = new RelayCommand(eLoadCollectionFileCommand);
+            
+            VCIRequestText RTIS = new VCIRequestText(
+                Accept: eAddCollectionResolved,
+                Cancel: eAddCollectionCanceled);
 
+            SupportedInterface.Add(RTIS.GetInterfaceType(), RTIS);
+
+            // Dont use this to set the data context because we dont want the MultiDisplay to hook to this display event.
             OperationWindow.SetNewDisplay(
                 Name: "Overview",
-                NewDisplay: new VCCollectionsMenuList(),
-                DataContext: this,
+                NewDisplay: new VCCollectionsMenuList() { DataContext = this},
                 Persist: false);
-            OperationWindow.DisplayEvent += eDisplayEventHandler;
+            OperationWindow.DisplayEvent += DisplayEventHandler;
             SyncWithModel();
         }
 
@@ -77,17 +85,11 @@ namespace StoreFrontPro.Views.CollectionsOverview
         #endregion Public Methods
 
         #region Event Handlers
-        private void eDisplayEventHandler(object source, DisplayEventArgs e)
+        public void DisplayEventHandler(object source, DisplayEventArgs e)
         {
-            if (e.Source == "VMRequestText")
+            if (SupportedInterface.ContainsKey(source.GetType()))
             {
-                if (e.Property == "AcceptButton")
-                {
-                    DisplayEventArgs eventArgs = new DisplayEventArgs("VMCollectionsOverview", "AddCollection", "Clicked");
-                    eventArgs.Add("NewCollectionName", (string)e.Get("Text"));
-                    DisplayEvent(this, eventArgs);
-                }
-                OperationWindow.CloseOverlay();
+                SupportedInterface?[source.GetType()]?.TryInvoke(e.Key, e.Args);
             }
         }
 
@@ -107,8 +109,8 @@ namespace StoreFrontPro.Views.CollectionsOverview
         {
             if (!string.IsNullOrEmpty(SelectedCollection))
             {
-                DisplayEventArgs eventArgs = new DisplayEventArgs("VMCollectionsOverview", "ViewCollection", "Clicked");
-                eventArgs.Add(Key: "Collection", Value: Model.Where(x => x.CollectionName == SelectedCollection).First());
+                DisplayEventArgs eventArgs = new DisplayEventArgs(
+                    VCICollectionsOverview.ViewCollection, Model.Where(x => x.CollectionName == SelectedCollection).First());
                 DisplayEvent(this, eventArgs);
             }
         }
@@ -121,11 +123,24 @@ namespace StoreFrontPro.Views.CollectionsOverview
             OperationWindow.ShowOverlay(requestTextV);
         }
 
+        private void eAddCollectionCanceled()
+        {
+            OperationWindow.CloseOverlay();
+        }
+
+        private void eAddCollectionResolved(string aszNewCol)
+        {
+            DisplayEventArgs eventArgs = new DisplayEventArgs(VCICollectionsOverview.AddCollection, aszNewCol);
+            DisplayEvent(this, eventArgs);
+            OperationWindow.CloseOverlay();
+        }
+
         private void eLoadCollectionFileCommand(object aoCanExecute)
         {
-            DisplayEventArgs eventArgs = new DisplayEventArgs("VMCollectionsOverview", "LoadCollection", "Clicked");
+            DisplayEventArgs eventArgs = new DisplayEventArgs(VCICollectionsOverview.LoadCollection);
             DisplayEvent(this, eventArgs);
         }
+
         #endregion
     }
 }

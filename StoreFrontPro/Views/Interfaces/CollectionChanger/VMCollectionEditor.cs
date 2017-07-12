@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace StoreFrontPro.Views.Interfaces.CollectionChanger
 {
-    class VMCollectionEditor : ViewModel<CollectionModel>, IViewComponent
+    class VMCollectionEditor : ViewModel<CollectionModel>, IViewComponent, IVCISupporter
     {
         public ObservableCollection<string> TextChangesList { get; set; } = new ObservableCollection<string>();
 
@@ -22,6 +22,8 @@ namespace StoreFrontPro.Views.Interfaces.CollectionChanger
         public RelayCommand CancelCommand { get; set; }
 
         private List<string> m_lstRealChanges { get; set; }
+
+        public Dictionary<Type, IViewComponentInterface> SupportedInterface { get; set; } = new Dictionary<Type, IViewComponentInterface>();
 
         public event DisplayEventHandler DisplayEvent;
 
@@ -48,7 +50,7 @@ namespace StoreFrontPro.Views.Interfaces.CollectionChanger
 
         private void eRemoveCardEventHandler(object Source, DisplayEventArgs Event)
         {
-            // Only one event comes from the SSBox so we dont have to worry about checking.
+            // Only one event comes from the SSBox so we dont have to worry about checking whether this is the right function
             VMSuggestionsSearchBox removeBoxVM = (RemoveCardSearchBox.DataContext as VMSuggestionsSearchBox);
             if (removeBoxVM.ComboBoxList.Count > 0 &&
                 removeBoxVM.ComboBoxList.Contains(removeBoxVM.TextBoxValue))
@@ -105,20 +107,25 @@ namespace StoreFrontPro.Views.Interfaces.CollectionChanger
 
         private void eAcceptCommand(object canExecute)
         {
-            DisplayEventArgs eventArgs = new DisplayEventArgs(Source: "VMCollectionEditor", Property: "AcceptCommand", Event: "Resolved");
+            DisplayEventArgs eventArgs = new DisplayEventArgs(VCICollectionEditor.Accept);
             Model.SubmitBulkEdits(m_lstRealChanges, ()=> { DisplayEvent(this, eventArgs); });
             DisplayEvent(this, eventArgs);
         }
 
         private void eCancelCommand(object canExecute)
         {
-            DisplayEventArgs eventArgs = new DisplayEventArgs(Source: "VMCollectionEditor", Property: "CancelCommand", Event: "Clicked");
+            DisplayEventArgs eventArgs = new DisplayEventArgs(VCICollectionEditor.Cancel);
             DisplayEvent(this, eventArgs);
         }
 
         public List<StoreFrontMenuItem> GetMenuItems()
         {
             return new List<StoreFrontMenuItem>();
+        }
+
+        public void DisplayEventHandler(object source, DisplayEventArgs e)
+        {
+            // throw new NotImplementedException();
         }
     }
 }

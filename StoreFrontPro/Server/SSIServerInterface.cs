@@ -137,8 +137,10 @@ namespace StoreFrontPro.Server
 
             public void CreateCollection(string aszName)
             {
-                SCI.CreateNewCollection(aszName);
-                inGenerateCollectionModel(aszName);
+                if (SCI.CreateNewCollection(aszName) != "NF")
+                {
+                    inGenerateCollectionModel(aszName);
+                }
             }
 
             /// <summary>

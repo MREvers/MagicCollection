@@ -67,7 +67,7 @@ namespace StoreFrontPro.Views.Components.SuggestionsSearchBox
 
         public void eOKCommand(object canExecute)
         {
-            DisplayEventArgs eventArgs = new DisplayEventArgs("VMSuggestionsSearchBox", "OKCommand", "Execute");
+            DisplayEventArgs eventArgs = new DisplayEventArgs(VCISuggestionsSearchBox.OK);
             DisplayEvent(this, eventArgs);
         }
 

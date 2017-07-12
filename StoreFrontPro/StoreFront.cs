@@ -19,7 +19,6 @@ namespace StoreFrontPro
     class StoreFront
     {
         public ObservableCollection<CollectionModel> Collections { get; private set; }
-        public CollectionModel ActiveCollection { get; private set; }
 
         private Window m_ucMainWindow;
 
@@ -30,7 +29,6 @@ namespace StoreFrontPro
         {
             m_ucMainWindow = MainWindow;
             Collections = new ObservableCollection<CollectionModel>();
-            ActiveCollection = null;
             StoreFrontVM = new VMStoreFront(Model: this);
             
             initializeStoreFront();
@@ -41,11 +39,19 @@ namespace StoreFrontPro
             m_ucMainWindow.Close();
         }
 
-        public void SyncCollections()
+        // Creates collections if needed. Does not sync already existing collections.
+        public void SyncCollectionList()
         {
             ServerInterface.Server.GetCollectionModels(
-                Callback: (alstColMos) => { Collections.Clear(); alstColMos.ForEach((x) => { x.Sync(); Collections.Add(x); }); StoreFrontVM.Notify(); },
+                Callback: (alstColMos) => { Collections.Clear(); alstColMos.ForEach((x) => { Collections.Add(x); }); StoreFrontVM.Notify(); },
                 UICallback: true);
+        }
+
+        public void SyncAllCollections()
+        {
+            ServerInterface.Server.GetCollectionModels(
+               Callback: (alstColMos) => { Collections.Clear(); alstColMos.ForEach((x) => { x.Sync(); }); },
+               UICallback: true);
         }
 
         private void initializeStoreFront()
@@ -54,7 +60,7 @@ namespace StoreFrontPro
 
             loadStartupCollections();
 
-            SyncCollections();
+            SyncCollectionList();
         }
 
         private void loadStartupCollections()

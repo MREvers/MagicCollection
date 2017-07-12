@@ -9,27 +9,13 @@ namespace StoreFrontPro.Views
     #region Data Types
     public class DisplayEventArgs
     {
-        public string Source;
-        public string Property;
-        public string Event;
+        public string Key;
+        public object[] Args;
 
-        private Dictionary<string, object> m_lstParms = new Dictionary<string, object>();
-
-        public DisplayEventArgs(string Source, string Property, string Event)
+        public DisplayEventArgs(string Key, params object[] args)
         {
-            this.Source = Source;
-            this.Property = Property;
-            this.Event = Event;
-        }
-
-        public void Add(string Key, object Value)
-        {
-            m_lstParms.Add(Key, Value);
-        }
-
-        public object Get(string aszKey)
-        {
-            return m_lstParms.ContainsKey(aszKey) ? m_lstParms[aszKey] : null;
+            this.Key = Key;
+            this.Args = args;
         }
     }
 

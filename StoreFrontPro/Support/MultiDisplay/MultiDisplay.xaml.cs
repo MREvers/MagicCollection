@@ -179,7 +179,7 @@ namespace StoreFrontPro.Support.MultiDisplay
 
         private void fireUpdateMenuItems()
         {
-            DisplayEventArgs eventArgs = new DisplayEventArgs("MultiDisplay", "Change", "Event");
+            DisplayEventArgs eventArgs = new DisplayEventArgs(VCIMultiDisplay.Change);
             displayFireEvent(this, eventArgs);
         }
 
