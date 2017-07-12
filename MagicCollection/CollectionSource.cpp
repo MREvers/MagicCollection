@@ -179,13 +179,13 @@ bool CollectionSource::IsSyncNeeded(std::string aszCollectionName)
 }
 
 std::vector<int>
-CollectionSource::GetCollectionCache(std::string aszCollectionName, bool abOnlyCopiesWithParent)
+CollectionSource::GetCollectionCache(std::string aszCollectionName, CollectionItemType aColItemType)
 {
 	std::vector<int> lstRetVal;
 
 	for (size_t i = 0; i < m_lstoCardCache.size(); i++)
 	{
-		if (m_lstoCardCache[i].GetCopiesForCollection(aszCollectionName, All).size() > 0)
+		if (m_lstoCardCache[i].GetCopiesForCollection(aszCollectionName, aColItemType).size() > 0)
 		{
 			lstRetVal.push_back(i);
 		}
@@ -195,20 +195,18 @@ CollectionSource::GetCollectionCache(std::string aszCollectionName, bool abOnlyC
 }
 
 std::vector<CopyItem*>
-	CollectionSource::GetCollection(std::string aszCollectionName, bool abOnlyCopiesWithParent)
+CollectionSource::GetCollection(std::string aszCollectionName, CollectionItemType aColItemType)
 {
 	std::vector<CopyItem*> lstRetVal;
 
 	for (size_t i = 0; i < m_lstoCardCache.size(); i++)
 	{
-		std::vector<CopyItem*> lstCopies = m_lstoCardCache[i].GetCopiesForCollection(aszCollectionName, All);
-		if (lstCopies.size() > 0)
+		std::vector<CopyItem*> lstCopies = m_lstoCardCache[i].GetCopiesForCollection(aszCollectionName, aColItemType);
+
+		std::vector<CopyItem*>::iterator iter_Copy = lstCopies.begin();
+		for (; iter_Copy != lstCopies.end(); ++iter_Copy)
 		{
-			std::vector<CopyItem*>::iterator iter_Copy = lstCopies.begin();
-			for (; iter_Copy != lstCopies.end(); ++iter_Copy)
-			{
-				lstRetVal.push_back(*iter_Copy);
-			}
+			lstRetVal.push_back(*iter_Copy);
 		}
 	}
 
@@ -230,7 +228,7 @@ std::vector<std::string> CollectionSource::GetAllCardsStartingWith(std::string a
 	if (bActiveCache)
 	{
 		int iEnd = m_lstSearchCache.size();
-		for (int i = iEnd-1; i >= 0; i--)
+		for (int i = iEnd - 1; i >= 0; i--)
 		{
 			std::pair<std::string, std::vector<SourceObject>>
 				pairICache = m_lstSearchCache[i];

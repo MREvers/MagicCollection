@@ -41,13 +41,16 @@ public:
 		std::vector<Tag> alstAttrs = std::vector<Tag>(),
 		std::vector<Tag> alstMetaTags = std::vector<Tag>());
 
-	CopyItem GenerateCopy(std::string aszCollectionName,
+	CopyItem* GenerateCopy(std::string aszCollectionName,
 		std::vector<Tag> alstAttrs = std::vector<Tag>(),
 		std::vector<Tag> alstMetaTags = std::vector<Tag>());
 
 	void RemoveCopyItem(std::string aszHash);
 
-	CopyItem* FindCopyItem(std::string aszHash);
+	// Finds First
+	CopyItem* FindCopyItem(std::string aszHash, std::string aszResidentIn = "");
+	std::vector<CopyItem*> FindAllCopyItems(std::string aszHash, std::string aszResidentIn = "");
+	void Erase(CopyItem* ociRemove);
 
 	std::vector<CopyItem*> GetCopiesForCollection(std::string aszCollection, CollectionItemType aItemType);
 
@@ -55,7 +58,7 @@ public:
 		std::vector<Tag> alstAttrs = std::vector<Tag>(),
 		std::vector<Tag> alstMetaTags = std::vector<Tag>());
 
-	std::string GetCardString(CopyItem* aItem, MetaTagType aTagType = Visible);
+	std::string GetCardString(CopyItem* aItem, MetaTagType aTagType = Visible, std::string aszCompareParent=Config::NotFoundString);
 	std::string GetProtoTypeString();
 
 	static bool ParseCardLine(std::string aszLine, PseudoIdentifier& rPIdentifier);
@@ -63,12 +66,13 @@ public:
 	static std::string ToCardLine(std::string aszParentCollection, 
 		std::string aszName,
 		std::vector<Tag> alstAttrs = std::vector<Tag>(),
-		std::vector<Tag> alstMetaTags = std::vector<Tag>());
+		std::vector<Tag> alstMetaTags = std::vector<Tag>(), 
+		std::string aszCompareParent = Config::NotFoundString);
 
 private:
 	std::string m_szName;
 
-	std::vector<CopyItem> m_lstCopies;
+	std::vector<CopyItem*> m_lstCopies;
 
 	// We are guaranteed that identifying traits are not themselves lists.
 	// If a list is not an identifying trait. It is kept as "thing1::thing2"

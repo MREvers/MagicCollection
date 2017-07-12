@@ -99,18 +99,23 @@ namespace StoreFrontPro.Server
             {
                 if (!File.Exists(aszFileName)) { return; }
 
-                BitmapImage bitmap = new BitmapImage();
-
-                using (FileStream stream = File.OpenRead(aszFileName))
+                try
                 {
-                    bitmap.BeginInit();
-                    bitmap.StreamSource = stream;
-                    bitmap.CacheOption = BitmapCacheOption.OnLoad;
-                    bitmap.EndInit();
-                    bitmap.Freeze();
+                    BitmapImage bitmap = new BitmapImage();
+                    using (FileStream stream = File.OpenRead(aszFileName))
+                    {
+                        bitmap.BeginInit();
+                        bitmap.StreamSource = stream;
+                        bitmap.CacheOption = BitmapCacheOption.OnLoad;
+                        bitmap.EndInit();
+                        bitmap.Freeze();
+                    }
+                    aCallback(bitmap);
                 }
+                catch { }
+                
 
-                aCallback(bitmap);
+                
             }
         }
     }

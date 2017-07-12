@@ -61,12 +61,12 @@ std::string CollectionIO::GetCollectionFile(std::string aszCollectionName)
 
 std::string CollectionIO::GetMetaFile(std::string aszCollectionName)
 {
-	return Config::Instance()->GetCollectionsDirectory() + "\\" +
+	return Config::Instance()->GetCollectionsDirectory() + "\\" + Config::Instance()->GetMetaFolderName() + "\\" +
 		StringHelper::Str_Replace(aszCollectionName, ' ', '_') + "." + std::string(Config::MetaFileExtension) + ".txt";
 }
 
 std::string CollectionIO::GetHistoryFile(std::string aszCollectionName)
 {
-	return Config::Instance()->GetCollectionsDirectory() + "\\" +
+	return Config::Instance()->GetCollectionsDirectory() + "\\" + Config::Instance()->GetHistoryFolderName() + "\\" +
 		StringHelper::Str_Replace(aszCollectionName, ' ', '_') + "." + std::string(Config::HistoryFileExtension) + ".txt";
 }

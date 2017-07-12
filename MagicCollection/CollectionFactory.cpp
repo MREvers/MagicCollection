@@ -24,7 +24,7 @@ std::string CollectionFactory::LoadCollectionFromFile(std::string aszFileName)
 	szFile = lstSplitExt[0];
 
 	Collection* oCol = new Collection(Config::NotFoundString, m_ColSource, szFile);
-	oCol->LoadCollection(aszFileName);
+	oCol->LoadCollection(aszFileName, this);
 	std::string szFoundName = oCol->GetName();
 	if (oCol->IsLoaded && !CollectionExists(szFoundName))
 	{

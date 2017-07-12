@@ -7,6 +7,9 @@
 #include "CollectionItem.h"
 #include "StringHelper.h"
 #include "Transaction.h"
+#include "CollectionFactory.h"
+
+class CollectionFactory;
 
 class Collection
 {
@@ -27,7 +30,7 @@ public:
 	void ChangeItem(std::string aszName, std::string aszIdentifyingHash, std::vector<Tag> alstChanges, bool abCloseTransaction = true);
 
 	void SaveCollection();
-	void LoadCollection(std::string aszFileName);
+	void LoadCollection(std::string aszFileName, CollectionFactory* aoFactory);
 	void LoadChanges(std::vector<std::string> aszLines);
 
 	std::vector<std::string> GetCollectionList(MetaTagType atagType = Visible, bool aiCollapsed = false);

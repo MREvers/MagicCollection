@@ -29,6 +29,7 @@ CollectionItem::CollectionItem(std::string aszName, std::vector<Tag> alstCommon,
 
 CollectionItem::~CollectionItem()
 {
+	m_lstCopies.clear();
 }
 
 std::string CollectionItem::GetName()
@@ -40,27 +41,27 @@ CopyItem* CollectionItem::AddCopyItem(std::string aszCollectionName,
 	std::vector<Tag> alstAttrs,
 	std::vector<Tag> alstMetaTags)
 {
-	CopyItem newCopy = GenerateCopy(aszCollectionName, alstAttrs, alstMetaTags);
+	CopyItem* newCopy = GenerateCopy(aszCollectionName, alstAttrs, alstMetaTags);
 	m_lstCopies.push_back(newCopy);
-	return &m_lstCopies.at(m_lstCopies.size() - 1);
+	return newCopy;
 }
 
-CopyItem CollectionItem::GenerateCopy(std::string aszCollectionName,
+CopyItem* CollectionItem::GenerateCopy(std::string aszCollectionName,
 	std::vector<Tag> alstAttrs,
 	std::vector<Tag> alstMetaTags)
 {
-	CopyItem newCopy(&m_lstIdentifyingTraits, aszCollectionName, alstAttrs, alstMetaTags);
+	CopyItem* newCopy = new CopyItem(&m_lstIdentifyingTraits, aszCollectionName, alstAttrs, alstMetaTags);
 
 	return newCopy;
 }
 
 void CollectionItem::RemoveCopyItem(std::string aszHash)
 {
-	std::vector<CopyItem>::iterator iter_Copies = m_lstCopies.begin();
+	std::vector<CopyItem*>::iterator iter_Copies = m_lstCopies.begin();
 
 	for (; iter_Copies != m_lstCopies.end(); ++iter_Copies)
 	{
-		if (iter_Copies->GetMetaTag(Config::HashKey, Hidden) == aszHash)
+		if ((*iter_Copies)->GetMetaTag(Config::HashKey, Hidden) == aszHash)
 		{
 			m_lstCopies.erase(iter_Copies);
 			break;
@@ -69,41 +70,68 @@ void CollectionItem::RemoveCopyItem(std::string aszHash)
 
 }
 
-CopyItem* CollectionItem::FindCopyItem(std::string aszHash)
+CopyItem* CollectionItem::FindCopyItem(std::string aszHash, std::string aszResidentIn)
 {
-	std::vector<CopyItem>::iterator iter_Copies = m_lstCopies.begin();
+	std::vector<CopyItem*>::iterator iter_Copies = m_lstCopies.begin();
 
 	for (; iter_Copies != m_lstCopies.end(); ++iter_Copies)
 	{
-		if (iter_Copies->GetMetaTag(Config::HashKey, Hidden) == aszHash)
+		if ((*iter_Copies)->GetMetaTag(Config::HashKey, Hidden) == aszHash &&
+			(aszResidentIn == "" || (*iter_Copies)->IsResidentIn(aszResidentIn)))
 		{
-			return (iter_Copies._Ptr);
+			return *iter_Copies;
 		}
 	}
 
 	return nullptr;
 }
 
-std::vector<CopyItem*> CollectionItem::GetCopiesForCollection(std::string aszCollection, CollectionItemType aItemType)
+std::vector<CopyItem*> CollectionItem::FindAllCopyItems(std::string aszHash, std::string aszResidentIn)
 {
-	std::vector<CopyItem*> lstRetVal;
-	std::vector<CopyItem>::iterator iter_Copies = m_lstCopies.begin();
+	std::vector<CopyItem*> lstRetval;
+	std::vector<CopyItem*>::iterator iter_Copies = m_lstCopies.begin();
 
 	for (; iter_Copies != m_lstCopies.end(); ++iter_Copies)
 	{
-		if ((aItemType | Local) > 0 && iter_Copies->GetParent() == aszCollection)
+		if ((*iter_Copies)->GetMetaTag(Config::HashKey, Hidden) == aszHash &&
+			(aszResidentIn == "" || (*iter_Copies)->IsResidentIn(aszResidentIn)))
 		{
-			lstRetVal.push_back(iter_Copies._Ptr);
+			lstRetval.push_back(*iter_Copies);
 		}
-		else if ((aItemType | Borrowed) > 0 && ListHelper::List_Find(aszCollection, iter_Copies->GetResidentIn()) != -1)
+	}
+
+	return lstRetval;
+}
+
+void CollectionItem::Erase(CopyItem* ociRemove)
+{
+	std::vector<CopyItem*>::iterator iter_copy = m_lstCopies.begin();
+	int iFound = ListHelper::List_Find(ociRemove, m_lstCopies);
+	m_lstCopies.erase(m_lstCopies.begin() + iFound);
+}
+
+std::vector<CopyItem*> CollectionItem::GetCopiesForCollection(std::string aszCollection, CollectionItemType aItemType)
+{
+	std::vector<CopyItem*> lstRetVal;
+	std::vector<CopyItem*>::iterator iter_Copies = m_lstCopies.begin();
+
+	for (; iter_Copies != m_lstCopies.end(); ++iter_Copies)
+	{
+		if ((aItemType & Local) > 0 && (*iter_Copies)->GetParent() == aszCollection)
 		{
-			lstRetVal.push_back(iter_Copies._Ptr);
+			lstRetVal.push_back(*iter_Copies);
 		}
-		else if ((aItemType | Virtual) > 0 &&
-			iter_Copies->GetParent() == "" &&
-			ListHelper::List_Find(aszCollection, iter_Copies->GetResidentIn()) != -1)
+		else if ((aItemType & Borrowed) > 0            &&
+			(*iter_Copies)->GetParent() != aszCollection  &&
+			(*iter_Copies)->IsResidentIn(aszCollection))
 		{
-			lstRetVal.push_back(iter_Copies._Ptr);
+			lstRetVal.push_back(*iter_Copies);
+		}
+		else if ((aItemType & Virtual) > 0 &&
+			(*iter_Copies)->GetParent() == "" &&
+			(*iter_Copies)->IsResidentIn(aszCollection))
+		{
+			lstRetVal.push_back(*iter_Copies);
 		}
 	}
 
@@ -119,7 +147,7 @@ std::string CollectionItem::GetHash(std::string aszCollectionName,
 	return copyToHash.GetHash();
 }
 
-std::string CollectionItem::GetCardString(CopyItem* aItem, MetaTagType aTagType)
+std::string CollectionItem::GetCardString(CopyItem* aItem, MetaTagType aTagType, std::string aszCompareParent)
 {
 	return CollectionItem::ToCardLine(aItem->GetParent(), m_szName, aItem->GetIdentifyingAttributes(), aItem->GetMetaTags(aTagType));
 }
@@ -264,14 +292,18 @@ bool CollectionItem::ParseTagString(std::string aszDetails, std::vector<Tag>& rl
 std::string CollectionItem::ToCardLine(std::string aszParentCollection,
 	std::string aszName,
 	std::vector<Tag> alstAttrs,
-	std::vector<Tag> alstMetaTags)
+	std::vector<Tag> alstMetaTags,
+	std::string aszCompareParent)
 {
 	std::string szLine = aszName;
 	szLine += " { ";
 
-	szLine += "Parent=\"";
-	szLine += aszParentCollection;
-	szLine += "\" ";
+	if (aszParentCollection != aszCompareParent)
+	{
+		szLine += "Parent=\"";
+		szLine += aszParentCollection;
+		szLine += "\" ";
+	}
 
 	std::vector<Tag>::iterator iter_keyValPairs;
 	if (alstAttrs.size() > 0)

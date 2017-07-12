@@ -42,8 +42,8 @@ public:
    void NotifyNeedToSync(std::string aszCollectionName);
    bool IsSyncNeeded(std::string aszCollectionName);
 
-   std::vector<int> GetCollectionCache(std::string aszCollectionName, bool abOnlyCopiesWithParent = true);
-   std::vector<CopyItem*> GetCollection(std::string aszCollectionName, bool abOnlyCopiesWithParent = true);
+   std::vector<int> GetCollectionCache(std::string aszCollectionName, CollectionItemType aColItemType = CollectionItemType::All);
+   std::vector<CopyItem*> GetCollection(std::string aszCollectionName, CollectionItemType aColItemType = CollectionItemType::All);
 
    std::vector<std::string> GetAllCardsStartingWith(std::string aszText);
 

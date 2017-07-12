@@ -144,8 +144,15 @@ void  Collection::SaveCollection()
 	saveCollection();
 }
 
-void Collection::LoadCollection(std::string aszFileName)
+void Collection::LoadCollection(std::string aszFileName, CollectionFactory* aoFactory)
 {
+	// Used to filter out already used existing copies
+	std::function<std::string(CopyItem*)> fnExtractor = [&](CopyItem* item)->std::string
+	{
+		if (!item->IsResidentIn(m_szName)) { return item->GetHash(); }
+		else { return ""; }
+	};
+
 	CollectionIO loader;
 	m_bRecordChanges = false;
 
@@ -161,10 +168,96 @@ void Collection::LoadCollection(std::string aszFileName)
 	// Also need to load metatags...
 	loadMetaTagFile();
 
+	// Now Verify Borrowed Cards (i.e. Parent != this) that were just loaded exist.
+	for (size_t i = 0; i < m_lstItemCacheIndexes.size(); i++)
+	{
+		CollectionItem* itemPrototype = m_ptrCollectionSource->GetCardPrototype(m_lstItemCacheIndexes[i]);
+		std::vector<CopyItem*> lstBorrowedItems = itemPrototype->GetCopiesForCollection(m_szName, CollectionItemType::Borrowed);
+		for (size_t t = 0; t < lstBorrowedItems.size(); t++)
+		{
+			std::string szItemParent = lstBorrowedItems[t]->GetParent();
+			std::string szItemHash = lstBorrowedItems[t]->GetHash();
+			if (aoFactory->CollectionExists(szItemParent)) // The aoFactory is used to check if the collection is loaded.
+			{
+				itemPrototype->Erase(lstBorrowedItems[t]);// This copy is erased either way. These were added as placeholders.
+
+				std::vector<CopyItem*> existingItems = itemPrototype->FindAllCopyItems(szItemHash, szItemParent); // This list will be checked for any unused copy that matches this description.
+				int iFoundAlreadyUsed = ListHelper::List_Find(szItemHash, existingItems, fnExtractor);
+				if (iFoundAlreadyUsed != -1)
+				{
+					existingItems[iFoundAlreadyUsed]->AddResident(m_szName);
+				}
+			}
+			else
+			{ // Check if any other collection referenced the unverified copy.
+				// Get a list of all other cards that supposedly belong to this collection
+				std::vector<CopyItem*> lstPotentiallyAlreadyUsedItems = itemPrototype->GetCopiesForCollection(szItemParent, CollectionItemType::Local);
+
+				int iFoundAlreadyUsed = ListHelper::List_Find(szItemHash, lstPotentiallyAlreadyUsedItems, fnExtractor);
+				if (iFoundAlreadyUsed != -1)
+				{
+					itemPrototype->Erase(lstBorrowedItems[t]);
+					lstPotentiallyAlreadyUsedItems[iFoundAlreadyUsed]->AddResident(m_szName);
+				}
+			}
+		}
+	}
+
+	std::vector<int> lstAllPossibleCacheItems = m_ptrCollectionSource->GetCollectionCache()
+	for (size_t i = 0; i < m_ptrCollectionSource->; i++)
+	{
+		CollectionItem* itemPrototype = m_ptrCollectionSource->GetCardPrototype(m_lstItemCacheIndexes[i]);
+		// This has to iterate over ALL cards because we don't know where dangling references are.
+		std::vector<CopyItem*> lstPossibleLocals = itemPrototype->GetCopiesForCollection(m_szName, CollectionItemType::Local);
+		for (size_t t = 0; t < lstPossibleLocals.size(); t++)
+		{
+			if (!lstPossibleLocals[t]->IsResidentIn(m_szName))
+			{
+				std::string szItemHash = lstPossibleLocals[t]->GetHash();
+				// Duplicate duplicates because there might be a copy of an existing item.
+				std::vector<CopyItem*> lstDuplicateDuplicates = itemPrototype->FindAllCopyItems(szItemHash, m_szName);
+
+				// If there is more than one, count the number that were just added, then try to find matching existing ones for each.
+				// Make sure that we account for the fact that other collections can borrow up to the amount in this col.
+				std::map<std::string, std::vector<CopyItem*>> mapColExistingItems;
+				std::vector<CopyItem*> lstNewlyAddedItems;
+				for (size_t q = 0; q < lstDuplicateDuplicates.size(); q++)
+				{
+					if (lstDuplicateDuplicates[q]->IsResidentIn(m_szName))
+					{
+						lstNewlyAddedItems.push_back(lstDuplicateDuplicates[q]);
+					}
+					else
+					{
+						std::string szTargetCol = lstDuplicateDuplicates[q]->GetParent();
+						mapColExistingItems[szTargetCol].push_back(lstDuplicateDuplicates[q]);
+					}
+				}
+
+				// Now go through each collection and account for each one.
+				std::map<std::string, std::vector<CopyItem*>>::iterator iter_existingCol = mapColExistingItems.begin();
+				for (; iter_existingCol != mapColExistingItems.end(); ++iter_existingCol)
+				{
+					std::vector<CopyItem*>::iterator iter_existingColItem = iter_existingCol->second.begin();
+					int q = 0;
+					for (; iter_existingColItem != iter_existingCol->second.end() && q < lstNewlyAddedItems.size(); ++iter_existingColItem, q++)
+					{
+						lstNewlyAddedItems[q]->AddResident(iter_existingCol->first);
+					}
+
+					for (; q >= lstNewlyAddedItems.size() && iter_existingColItem != iter_existingCol->second.end(); ++iter_existingColItem, q++)
+					{
+						itemPrototype->Erase(*iter_existingColItem);
+					}
+				}
+			}
+		}
+	}
 	m_bRecordChanges = true;
 	IsLoaded = (m_szName != Config::NotFoundString);
 }
 
+// Returns all the copies impacted by this function.
 void Collection::LoadChanges(std::vector<std::string> lstLines)
 {
 	std::vector<std::string>::iterator iter_Lines = lstLines.begin();
@@ -224,7 +317,7 @@ std::vector<int> Collection::getCollection()
 {
 	if (m_ptrCollectionSource->IsSyncNeeded(m_szName))
 	{
-		m_lstItemCacheIndexes = m_ptrCollectionSource->GetCollectionCache(m_szName, false);
+		m_lstItemCacheIndexes = m_ptrCollectionSource->GetCollectionCache(m_szName);
 	}
 	return m_lstItemCacheIndexes;
 }
@@ -270,7 +363,7 @@ void Collection::registerItem(int aiCacheIndex)
 	int iFound = ListHelper::List_Find(aiCacheIndex, m_lstItemCacheIndexes);
 	if (iFound == -1)
 	{
-		m_lstItemCacheIndexes.push_back(iFound);
+		m_lstItemCacheIndexes.push_back(aiCacheIndex);
 	}
 }
 
@@ -298,7 +391,8 @@ void Collection::loadMetaTagFile()
 {
 	// This should only be called during initial loading.
 	CollectionIO ioHelper;
-	std::vector<std::string> lstMetaLines = ioHelper.GetFileLines(Config::Instance()->GetMetaFolderName() + "\\" + ioHelper.GetMetaFile(m_szFileName));
+	std::string szFileName = ioHelper.GetMetaFile(m_szFileName);
+	std::vector<std::string> lstMetaLines = ioHelper.GetFileLines(szFileName);
 
 	for (size_t i = 0; i < lstMetaLines.size(); i++)
 	{
@@ -317,12 +411,13 @@ void Collection::loadMetaTagFile()
 			CollectionItem* item = m_ptrCollectionSource->GetCardPrototype(iRealCard);
 			std::string szPlainHash = item->GetHash(m_szName, sudoItem.Identifiers);
 
-			CopyItem* matchingCopy = item->FindCopyItem(szPlainHash);
+			// Gets the first matching item resident in this collection.
+			CopyItem* matchingCopy = item->FindCopyItem(szPlainHash, m_szName);
 			if (matchingCopy != nullptr)
 			{
 				for (size_t t = 0; t < lstMetaTags.size(); t++)
 				{
-					matchingCopy->SetMetaTag(lstMetaTags[i].first, lstMetaTags[i].second, MetaTagType::Public);
+					matchingCopy->SetMetaTag(lstMetaTags[t].first, lstMetaTags[t].second, MetaTagType::Public);
 				}
 			}
 		}
@@ -371,6 +466,7 @@ void Collection::loadPreprocessingLine(std::string aszLine)
 	}
 }
 
+// May return null depending on input
 void Collection::loadInterfaceLine(std::string aszLine)
 {
 	if (aszLine.size() <= 2) { return; }
@@ -411,7 +507,7 @@ void Collection::loadAdditionLine(std::string aszLine)
 	CollectionItem::PseudoIdentifier sudoItem;
 	CollectionItem::ParseCardLine(aszLine, sudoItem);
 
-	AddItem(sudoItem.Name, sudoItem.Identifiers, sudoItem.MetaTags);
+	addItem(sudoItem.Name, sudoItem.Identifiers, sudoItem.MetaTags);
 }
 
 // This needs "Card Name : { __hash="hashval" }" All other values are irrelevant.
@@ -425,7 +521,7 @@ void Collection::loadRemoveLine(std::string aszLine)
 	if (iHash != -1)
 	{
 		szHash = sudoItem.MetaTags[iHash].second;
-		RemoveItem(sudoItem.Name, szHash);
+		removeItem(sudoItem.Name, szHash);
 	}
 }
 
@@ -446,6 +542,7 @@ void Collection::loadDeltaLine(std::string aszLine)
 	if (iHash != -1)
 	{
 	}
+
 }
 
 void Collection::saveHistory()

@@ -3,6 +3,7 @@
 CopyItem::CopyItem(std::vector<TraitItem>* alstTraits, std::string aszParentCollection)
 {
 	m_szParentCollection = aszParentCollection;
+	m_lstResidentIn.push_back(aszParentCollection);
 	m_plstRestrictedTraits = alstTraits;
 
 	std::vector<TraitItem>::iterator iter_DefaultVals = m_plstRestrictedTraits->begin();
@@ -15,6 +16,7 @@ CopyItem::CopyItem(std::vector<TraitItem>* alstTraits, std::string aszParentColl
 
 CopyItem::~CopyItem()
 {
+	m_lstMetaTags.clear();
 }
 
 CopyItem::CopyItem(std::vector<TraitItem>* alstTraits,
@@ -79,9 +81,19 @@ std::string CopyItem::GetParent()
 	return m_szParentCollection;
 }
 
+void CopyItem::AddResident(std::string aszNewResi)
+{
+	m_lstResidentIn.push_back(aszNewResi);
+}
+
 std::vector<std::string> CopyItem::GetResidentIn()
 {
 	return m_lstResidentIn;
+}
+
+bool CopyItem::IsResidentIn(std::string aszResident)
+{
+	return ListHelper::List_Find(aszResident, m_lstResidentIn) != -1;
 }
 
 void CopyItem::SetMetaTag(std::string aszKey, std::string aszVal, MetaTagType atagType)
@@ -144,6 +156,11 @@ bool CopyItem::SetIdentifyingAttribute(std::string aszKey, std::string aszValue)
 			m_lstIdentifyingTags[iIsAttr].second = aszValue;
 			return true;
 		}
+	}
+	else if (aszKey == "Parent")
+	{
+		m_szParentCollection = aszValue;
+		return true;
 	}
 
 	return false;

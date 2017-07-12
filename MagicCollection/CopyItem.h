@@ -23,7 +23,9 @@ public:
 	std::string GetHash();
 
 	std::string GetParent();
+	void AddResident(std::string aszNewResi);
 	std::vector<std::string> GetResidentIn();
+	bool IsResidentIn(std::string aszResident);
 
 	void SetMetaTag(std::string aszKey, std::string aszVal, MetaTagType atagType);
 	std::string GetMetaTag(std::string aszKey, MetaTagType atagType);
