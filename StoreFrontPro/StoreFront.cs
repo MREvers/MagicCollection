@@ -44,7 +44,7 @@ namespace StoreFrontPro
         public void SyncCollections()
         {
             ServerInterface.Server.GetCollectionModels(
-                Callback: (alstColMos) => { Collections.Clear(); alstColMos.ForEach((x) => { Collections.Add(x); }); StoreFrontVM.Notify(); },
+                Callback: (alstColMos) => { Collections.Clear(); alstColMos.ForEach((x) => { x.Sync(); Collections.Add(x); }); StoreFrontVM.Notify(); },
                 UICallback: true);
         }
 

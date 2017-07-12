@@ -169,6 +169,9 @@ void Collection::LoadCollection(std::string aszFileName, CollectionFactory* aoFa
 	loadMetaTagFile();
 
 	// Now Verify Borrowed Cards (i.e. Parent != this) that were just loaded exist.
+	// Two things can happen in this case. 
+	// If the claimed collection exists, then try to find the referenced item and use that instead, if that fails, delete the item.
+	// If the claimed collection does not exist, then try to find an identical copy that may have been created by another collection and use that. If that fails, use the one created.
 	for (size_t i = 0; i < m_lstItemCacheIndexes.size(); i++)
 	{
 		CollectionItem* itemPrototype = m_ptrCollectionSource->GetCardPrototype(m_lstItemCacheIndexes[i]);
@@ -203,10 +206,13 @@ void Collection::LoadCollection(std::string aszFileName, CollectionFactory* aoFa
 		}
 	}
 
-	std::vector<int> lstAllPossibleCacheItems = m_ptrCollectionSource->GetCollectionCache()
-	for (size_t i = 0; i < m_ptrCollectionSource->; i++)
+	// Now this collection is COMPLETELY LOADED. Since other collections can reference this collection, without this collection being loaded,
+	// those other collections may have created copies of card in this collection already; if that is the case, use those copies. Additionally,
+	// check that all the copies referenced by the other collections still exist, if not, delete those copies.
+	std::vector<int> lstAllPossibleCacheItems = m_ptrCollectionSource->GetCollectionCache(m_szName);
+	for (size_t i = 0; i < lstAllPossibleCacheItems.size(); i++)
 	{
-		CollectionItem* itemPrototype = m_ptrCollectionSource->GetCardPrototype(m_lstItemCacheIndexes[i]);
+		CollectionItem* itemPrototype = m_ptrCollectionSource->GetCardPrototype(lstAllPossibleCacheItems[i]);
 		// This has to iterate over ALL cards because we don't know where dangling references are.
 		std::vector<CopyItem*> lstPossibleLocals = itemPrototype->GetCopiesForCollection(m_szName, CollectionItemType::Local);
 		for (size_t t = 0; t < lstPossibleLocals.size(); t++)
@@ -215,9 +221,10 @@ void Collection::LoadCollection(std::string aszFileName, CollectionFactory* aoFa
 			{
 				std::string szItemHash = lstPossibleLocals[t]->GetHash();
 				// Duplicate duplicates because there might be a copy of an existing item.
-				std::vector<CopyItem*> lstDuplicateDuplicates = itemPrototype->FindAllCopyItems(szItemHash, m_szName);
+				// The second param is empty because we want ALL items with a matching hash.
+				std::vector<CopyItem*> lstDuplicateDuplicates = itemPrototype->FindAllCopyItems(szItemHash, "");
 
-				// If there is more than one, count the number that were just added, then try to find matching existing ones for each.
+				// If there is more than one, count the number that were just added to this col, then try to find matching existing ones for each.
 				// Make sure that we account for the fact that other collections can borrow up to the amount in this col.
 				std::map<std::string, std::vector<CopyItem*>> mapColExistingItems;
 				std::vector<CopyItem*> lstNewlyAddedItems;
@@ -245,6 +252,7 @@ void Collection::LoadCollection(std::string aszFileName, CollectionFactory* aoFa
 						lstNewlyAddedItems[q]->AddResident(iter_existingCol->first);
 					}
 
+					// Delete the items unaccounted for.
 					for (; q >= lstNewlyAddedItems.size() && iter_existingColItem != iter_existingCol->second.end(); ++iter_existingColItem, q++)
 					{
 						itemPrototype->Erase(*iter_existingColItem);
@@ -253,6 +261,7 @@ void Collection::LoadCollection(std::string aszFileName, CollectionFactory* aoFa
 			}
 		}
 	}
+
 	m_bRecordChanges = true;
 	IsLoaded = (m_szName != Config::NotFoundString);
 }
@@ -286,7 +295,7 @@ std::vector<std::string> Collection::GetCollectionList(MetaTagType atagType, boo
 			int iCounted = ListHelper::List_Find(szHash, lstSeenHashes, fnExtractor);
 			if (!aiCollapsed || (iCounted == -1))
 			{
-				std::string szRep = item->GetCardString(*iter_Copy, atagType);
+				std::string szRep = item->GetCardString(*iter_Copy, atagType, m_szName);
 				lstRetVal.push_back(szRep);
 				lstSeenHashes.push_back(std::make_pair(szHash, 1));
 			}

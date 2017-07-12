@@ -149,7 +149,7 @@ std::string CollectionItem::GetHash(std::string aszCollectionName,
 
 std::string CollectionItem::GetCardString(CopyItem* aItem, MetaTagType aTagType, std::string aszCompareParent)
 {
-	return CollectionItem::ToCardLine(aItem->GetParent(), m_szName, aItem->GetIdentifyingAttributes(), aItem->GetMetaTags(aTagType));
+	return CollectionItem::ToCardLine(aItem->GetParent(), m_szName, aItem->GetIdentifyingAttributes(), aItem->GetMetaTags(aTagType), aszCompareParent);
 }
 
 std::string CollectionItem::GetProtoTypeString()
