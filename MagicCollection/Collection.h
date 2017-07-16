@@ -27,7 +27,7 @@ public:
 		std::vector<Tag> alstMetaTags = std::vector<Tag>(),
 		bool abCloseTransaction = true);
 	void RemoveItem(std::string aszName, std::string aszIdentifyingHash, bool abCloseTransaction = true);
-	void ChangeItem(std::string aszName, std::string aszIdentifyingHash, std::vector<Tag> alstChanges, bool abCloseTransaction = true);
+	void ChangeItem(std::string aszName, std::string aszIdentifyingHash, std::vector<Tag> alstIdChanges, std::vector<Tag> alstMetaChanges, bool abCloseTransaction = true);
 
 	void SaveCollection();
 	void LoadCollection(std::string aszFileName, CollectionFactory* aoFactory);
@@ -53,7 +53,7 @@ private:
 
 	void addItem(std::string aszName, std::vector<Tag> alstAttrs, std::vector<Tag> alstMetaTags);
 	void removeItem(std::string aszName, std::string aszIdentifyingHash);
-	void changeItem(std::string aszName, std::string aszIdentifyingHash, std::vector<Tag> alstChanges);
+	void changeItem(std::string aszName, std::string aszIdentifyingHash, std::vector<Tag> alstChanges, std::vector<Tag> alstMetaChanges);
 	void registerItem(int aiCacheIndex);
 
 	Transaction* getOpenTransaction();

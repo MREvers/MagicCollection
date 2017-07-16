@@ -87,7 +87,7 @@ void Collection::RemoveItem(std::string aszName, std::string aszIdentifyingHash,
 	}
 }
 
-void Collection::ChangeItem(std::string aszName, std::string aszIdentifyingHash, std::vector<Tag> alstChanges, bool abCloseTransaction)
+void Collection::ChangeItem(std::string aszName, std::string aszIdentifyingHash, std::vector<Tag> alstChanges, std::vector<Tag> alstMetaChanges, bool abCloseTransaction)
 {
 	int iValidItem = m_ptrCollectionSource->LoadCard(aszName);
 	if (iValidItem != -1) { return; }
@@ -97,7 +97,7 @@ void Collection::ChangeItem(std::string aszName, std::string aszIdentifyingHash,
 	if (copy == nullptr) { return; }
 
 	std::function<void()> fnDo;
-	fnDo = std::bind(&Collection::changeItem, this, aszName, aszIdentifyingHash, alstChanges);
+	fnDo = std::bind(&Collection::changeItem, this, aszName, aszIdentifyingHash, alstChanges, alstMetaChanges);
 
 	std::vector<Tag> lstUndoChanges;
 	std::vector<Tag>::iterator iter_Changes = alstChanges.begin();
@@ -107,23 +107,29 @@ void Collection::ChangeItem(std::string aszName, std::string aszIdentifyingHash,
 		if (szVal != Config::NotFoundString)
 		{
 			lstUndoChanges.push_back(std::make_pair(iter_Changes->first, szVal));
-			continue;
-		}
-
-		szVal = copy->GetMetaTag(iter_Changes->first, MetaTagType::Any);
-		if (szVal != Config::NotFoundString)
-		{
-			lstUndoChanges.push_back(std::make_pair(iter_Changes->first, szVal));
 		}
 	}
 
+	std::vector<Tag> lstUndoMetaChanges;
+	for (; iter_Changes != alstMetaChanges.end(); ++iter_Changes)
+	{
+		std::string szVal = copy->GetMetaTag(iter_Changes->first, MetaTagType::Any);
+		if (szVal != Config::NotFoundString)
+		{
+			lstUndoMetaChanges.push_back(std::make_pair(iter_Changes->first, szVal));
+		}
+	}
+
+	// This is the hash that the itme will have after the properties are changed. So we need this to undo this change.
+	std::string szPostHash = item->GetHash(aszName, lstUndoChanges, lstUndoMetaChanges);
 	std::function<void()> fnUndo;
-	fnUndo = std::bind(&Collection::changeItem, this, aszName, aszIdentifyingHash, lstUndoChanges);
+	fnUndo = std::bind(&Collection::changeItem, this, aszName, szPostHash, lstUndoChanges, lstUndoMetaChanges);
 
 	Action action(fnDo, fnUndo);
 
-	std::string szIdentifier = "% " + CollectionItem::ToCardLine(m_szName, aszName, alstChanges);
-	action.SetIdentifier(szIdentifier); //"Set Meta-Tag '" + aszKey + "' to '" + aszValue + "' on " + aszLongName;// + szCard;
+	std::string szIdentifier = "% " + CollectionItem::ToCardLine(m_szName, aszName, alstChanges, alstMetaChanges) + "->";
+	szIdentifier += CollectionItem::ToCardLine(m_szName, aszName, lstUndoChanges, lstUndoMetaChanges);
+	action.SetIdentifier(szIdentifier); 
 
 	Transaction* transaction = getOpenTransaction();
 	transaction->AddAction(action);
@@ -342,6 +348,7 @@ void Collection::addItem(std::string aszName, std::vector<Tag> alstAttrs, std::v
 
 void Collection::removeItem(std::string aszName, std::string aszIdentifyingHash)
 {
+	// The copy is already verified to exist at this point
 	int iCache = m_ptrCollectionSource->LoadCard(aszName);
 
 	CollectionItem* item = m_ptrCollectionSource->GetCardPrototype(iCache);
@@ -361,9 +368,28 @@ void Collection::removeItem(std::string aszName, std::string aszIdentifyingHash)
 	}
 }
 
-void Collection::changeItem(std::string aszName, std::string aszIdentifyingHash, std::vector<Tag> alstChanges)
+void Collection::changeItem(std::string aszName, std::string aszIdentifyingHash, std::vector<Tag> alstChanges, std::vector<Tag> alstMetaChanges)
 {
+	int iCache = m_ptrCollectionSource->LoadCard(aszName);
 
+	CollectionItem* item = m_ptrCollectionSource->GetCardPrototype(iCache);
+	CopyItem* cItem = item->FindCopyItem(aszIdentifyingHash);
+	if (cItem == nullptr) { return; }
+
+	for (size_t i = 0; i < alstChanges.size(); i++)
+	{
+		cItem->SetIdentifyingAttribute(alstChanges[i].first, alstChanges[i].second);
+	}
+
+	MetaTagType mtt = MetaTagType::Public;
+	for (size_t i = 0; i < alstMetaChanges.size(); i++)
+	{
+		if (alstMetaChanges[i].first.size() > 0 && alstMetaChanges[i].first[0] == '_')
+		{
+			mtt == MetaTagType::Ignored;
+		}
+		cItem->SetMetaTag(alstMetaChanges[i].first, alstMetaChanges[i].second, mtt);
+	}
 }
 
 void Collection::registerItem(int aiCacheIndex)
@@ -549,6 +575,28 @@ void Collection::loadDeltaLine(std::string aszLine)
 	int iHash = ListHelper::List_Find(std::string(Config::HashKey), sudoOldItem.MetaTags, Config::Instance()->GetTagHelper());
 	if (iHash != -1)
 	{
+		std::string szHash = sudoOldItem.MetaTags[iHash].second;
+		int iCache = m_ptrCollectionSource->LoadCard(sudoOldItem.Name);
+		if (iCache != -1)
+		{
+			CollectionItem* itemOld = m_ptrCollectionSource->GetCardPrototype(iCache);
+			CopyItem* cItem = itemOld->FindCopyItem(szHash);
+
+			if (sudoOldItem.Name == sudoNewItem.Name)
+			{
+				changeItem(sudoOldItem.Name, szHash, sudoNewItem.Identifiers, sudoNewItem.MetaTags);
+			}
+			else
+			{
+				int iCache = m_ptrCollectionSource->LoadCard(sudoNewItem.Name);
+				if (iCache != -1)
+				{
+					CollectionItem* itemNew = m_ptrCollectionSource->GetCardPrototype(iCache);
+					removeItem(sudoOldItem.Name, szHash);
+					addItem(sudoNewItem.Name, sudoNewItem.Identifiers, sudoNewItem.MetaTags);
+				}
+			}
+		}
 	}
 
 }
