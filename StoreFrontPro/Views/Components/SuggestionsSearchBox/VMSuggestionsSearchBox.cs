@@ -108,7 +108,7 @@ namespace StoreFrontPro.Views.Components.SuggestionsSearchBox
 
                 ComboBoxIsEditable = true;
             }
-            else { ComboBoxList.Clear(); }
+            else { ComboBoxList.Clear(); ComboBoxDropDown = false; }
 
             PropertyChanged += propertyChangedEventHandler;
         }

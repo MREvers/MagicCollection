@@ -162,14 +162,15 @@ namespace StoreFrontPro.Server
         private string fastExtractHash(string aszIdentifier, bool WithCount = false)
         {
             string szWithCount = "";
+            int iFirstSpace = aszIdentifier.IndexOf(' ');
             if (WithCount)
             {
-                szWithCount = aszIdentifier.Substring(0, 2);
+                szWithCount = aszIdentifier.Substring(0, iFirstSpace);
                 if (szWithCount[0] == 'x')
                 {
-                    szWithCount = szWithCount[1] + "";
+                    szWithCount = szWithCount.Substring(1, iFirstSpace-1);
                 }
-                szWithCount = ",";
+                szWithCount += ",";
             }
 
             int iHashStart = aszIdentifier.IndexOf("__hash");

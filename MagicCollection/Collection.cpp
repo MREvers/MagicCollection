@@ -43,7 +43,7 @@ void Collection::AddItem(std::string aszName,
 
 		Action action(fnDo, fnUndo);
 
-		std::string szIdentifier = "+ " + CollectionItem::ToCardLine(m_szName, aszName, alstAttrs, alstMetaTags);
+		std::string szIdentifier = "+ " + CollectionItem::ToCardLine(m_szName, aszName, alstAttrs, alstMetaTags, m_szName);
 		action.SetIdentifier(szIdentifier); //"Set Meta-Tag '" + aszKey + "' to '" + aszValue + "' on " + aszLongName;// + szCard;
 
 		Transaction* transaction = getOpenTransaction();
@@ -75,7 +75,7 @@ void Collection::RemoveItem(std::string aszName, std::string aszIdentifyingHash,
 
 	Action action(fnDo, fnUndo);
 
-	std::string szIdentifier = "- " + CollectionItem::ToCardLine(m_szName, aszName, lstAttrs, lstMetas);
+	std::string szIdentifier = "- " + CollectionItem::ToCardLine(m_szName, aszName, lstAttrs, lstMetas, m_szName);
 	action.SetIdentifier(szIdentifier); //"Set Meta-Tag '" + aszKey + "' to '" + aszValue + "' on " + aszLongName;// + szCard;
 
 	Transaction* transaction = getOpenTransaction();
@@ -116,8 +116,8 @@ void Collection::ChangeItem(std::string aszName, std::string aszIdentifyingHash,
 
 	Action action(fnDo, fnUndo);
 
-	std::string szIdentifier = "% " + CollectionItem::ToCardLine(m_szName, aszName, lstOldIds, lstOldMeta) + "->";
-	szIdentifier += CollectionItem::ToCardLine(m_szName, aszName, lstFutureIds, lstFutureMeta);
+	std::string szIdentifier = "% " + CollectionItem::ToCardLine(m_szName, aszName, lstOldIds, lstOldMeta, m_szName) + "->";
+	szIdentifier += CollectionItem::ToCardLine(m_szName, aszName, lstFutureIds, lstFutureMeta, m_szName);
 	action.SetIdentifier(szIdentifier);
 
 	Transaction* transaction = getOpenTransaction();
@@ -159,8 +159,8 @@ void Collection::ReplaceItem(std::string aszName, std::string aszIdentifyingHash
 
 	Action action(fnDo, fnUndo);
 
-	std::string szIdentifier = "% " + CollectionItem::ToCardLine(m_szName, aszName, lstOldIds, lstOldMeta) + "->";
-	szIdentifier += CollectionItem::ToCardLine(m_szName, aszNewName, alstIdChanges, alstMetaChanges);
+	std::string szIdentifier = "% " + CollectionItem::ToCardLine(m_szName, aszName, lstOldIds, lstOldMeta, m_szName) + "->";
+	szIdentifier += CollectionItem::ToCardLine(m_szName, aszNewName, alstIdChanges, alstMetaChanges, m_szName);
 	action.SetIdentifier(szIdentifier);
 
 	Transaction* transaction = getOpenTransaction();
@@ -689,7 +689,8 @@ void Collection::saveHistory()
 
 		CollectionIO ioHelper;
 		std::ofstream oHistFile;
-		oHistFile.open(Config::Instance()->GetHistoryFolderName() + "\\" + ioHelper.GetHistoryFile(m_szFileName), std::ios_base::app);
+		std::string szHistFile = ioHelper.GetHistoryFile(m_szFileName);
+		oHistFile.open(szHistFile, std::ios_base::app);
 
 		oHistFile << "[" << str << "] " << std::endl;
 
@@ -711,7 +712,7 @@ void Collection::saveMeta()
 	{
 		CollectionIO ioHelper;
 		std::ofstream oMetaFile;
-		oMetaFile.open(Config::Instance()->GetMetaFolderName() + "\\" + ioHelper.GetMetaFile(m_szFileName));
+		oMetaFile.open(ioHelper.GetMetaFile(m_szFileName));
 
 		std::vector<std::string>::iterator iter_MetaLine = lstMetaLines.begin();
 		for (; iter_MetaLine != lstMetaLines.end(); ++iter_MetaLine)

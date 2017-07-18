@@ -45,6 +45,7 @@ std::string CollectionFactory::CreateNewCollection(std::string aszColName)
 	{
 		Collection* oCol = new Collection(aszColName, m_ColSource, aszColName);
 		m_lstCollections.push_back(oCol);
+		return oCol->GetName();
 	}
 
 	return Config::NotFoundString;
