@@ -118,8 +118,13 @@ namespace StoreFrontPro.Server
                     }
                 }
 
-                foreach (CardModel removeCard in lstRemoves)
+                for (int i = 0; i < lstRemoves.Count; i++)
                 {
+                    if (i == lstRemoves.Count - 1 && lstNewHashes.Count == 0)
+                    {
+                        ServerInterface.Server.SyncServerTask(() => { EnableEvents(CollectionItems); });
+                    }
+                    CardModel removeCard = lstRemoves[i];
                     ServerInterface.Server.SyncServerTask(() => { CollectionItems.Remove(removeCard); });
                 }
             }
@@ -127,8 +132,7 @@ namespace StoreFrontPro.Server
             {
                 CollectionItems.Clear();
             }
-
-            List<CardModel> lstAdds = new List<CardModel>();
+            
             for (int i = 0; i < lstNewHashes.Count; i++)
             {
                 if (i == lstNewHashes.Count - 1)
@@ -141,6 +145,7 @@ namespace StoreFrontPro.Server
                                     Callback: (aoCardModel) => { CollectionItems.Add(aoCardModel); },
                                     UICallback: true);
             }
+            
             m_bHardRebuild = false;
 
             List<string> szTest = ServerInterface.Collection.GetCollectionAnalysis(this.CollectionName, "mana");
