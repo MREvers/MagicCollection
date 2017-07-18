@@ -34,6 +34,7 @@ namespace StoreFrontPro.Views.CollectionViews.Deckbox
         {
             DisplayedProperties.Clear();
             
+            // Clean this up
             if (Columns != 1)
             {
                 DisplayedProperties.Add(new TextBox() { Text = "x" + Model.Count, IsReadOnly = true });
