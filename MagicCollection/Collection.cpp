@@ -43,7 +43,10 @@ void Collection::AddItem(std::string aszName,
 
 		Action action(fnDo, fnUndo);
 
-		std::string szIdentifier = "+ " + CollectionItem::ToCardLine(m_szName, aszName, alstAttrs, alstMetaTags, m_szName);
+		// Use a generated copy to ensure that default values are set.
+		CopyItem* newCopy = item->GenerateCopy(m_szName, alstAttrs, alstMetaTags);
+		std::string szIdentifier = "+ " + CollectionItem::ToCardLine(m_szName, aszName, newCopy->GetIdentifyingAttributes(), newCopy->GetMetaTags(MetaTagType::Visible), m_szName);
+		delete newCopy;
 		action.SetIdentifier(szIdentifier); //"Set Meta-Tag '" + aszKey + "' to '" + aszValue + "' on " + aszLongName;// + szCard;
 
 		Transaction* transaction = getOpenTransaction();
