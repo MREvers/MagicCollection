@@ -55,6 +55,11 @@ namespace StoreFrontPro.Views.CollectionViews.Deckbox
                 MainGrid.Children.Add(tbItem);
                 Grid.SetColumn(tbItem, i);
             }
+
+            if (iColumns > 1)
+            {
+                MainGrid.ColumnDefinitions[0].Width = new GridLength(24);
+            }
         }
     }
 }

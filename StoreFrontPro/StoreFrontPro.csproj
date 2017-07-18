@@ -112,6 +112,10 @@
       <DependentUpon>VCardImageDisplayer.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Components\CardImageDisplayer\VMCardImageDisplayer.cs" />
+    <Compile Include="Views\Components\ManaViewer\VManaViewer.xaml.cs">
+      <DependentUpon>VManaViewer.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Components\ManaViewer\VMManaViewer.cs" />
     <Compile Include="Views\Components\RequestTextOverlay\VCIRequestText.cs" />
     <Compile Include="Views\Components\RequestTextOverlay\VMRequestText.cs" />
     <Compile Include="Views\Components\RequestTextOverlay\VRequestText.xaml.cs">
@@ -201,6 +205,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\Components\CardImageDisplayer\VCardImageDisplayer.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Components\ManaViewer\VManaViewer.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

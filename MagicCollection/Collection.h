@@ -28,6 +28,7 @@ public:
 		bool abCloseTransaction = true);
 	void RemoveItem(std::string aszName, std::string aszIdentifyingHash, bool abCloseTransaction = true);
 	void ChangeItem(std::string aszName, std::string aszIdentifyingHash, std::vector<Tag> alstIdChanges, std::vector<Tag> alstMetaChanges, bool abCloseTransaction = true);
+	void ReplaceItem(std::string aszName, std::string aszIdentifyingHash, std::string aszNewName, std::vector<Tag> alstIdChanges, std::vector<Tag> alstMetaChanges, bool abCloseTransaction = true);
 
 	void SaveCollection();
 	void LoadCollection(std::string aszFileName, CollectionFactory* aoFactory);
@@ -51,10 +52,14 @@ private:
 
 	std::vector<int> getCollection();
 
+	// These all locate by name and hash for a second time so we dont risk dangling pointers.
 	void addItem(std::string aszName, std::vector<Tag> alstAttrs, std::vector<Tag> alstMetaTags);
 	void removeItem(std::string aszName, std::string aszIdentifyingHash);
 	void changeItem(std::string aszName, std::string aszIdentifyingHash, std::vector<Tag> alstChanges, std::vector<Tag> alstMetaChanges);
+	void replaceItem(std::string aszName, std::string aszIdentifyingHash, std::string aszNewName, std::vector<Tag> alstIdChanges, std::vector<Tag> alstMetaChanges);
 	void registerItem(int aiCacheIndex);
+
+	void modifyItem(CopyItem* aptCopy, std::vector<Tag> alstChanges, std::vector<Tag> alstMetaChanges);
 
 	Transaction* getOpenTransaction();
 	void finalizeTransaction();

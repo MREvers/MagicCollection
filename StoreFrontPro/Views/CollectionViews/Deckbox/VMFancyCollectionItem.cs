@@ -1,4 +1,5 @@
 ﻿using StoreFrontPro.Server;
+using StoreFrontPro.Views.Components.ManaViewer;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -32,13 +33,24 @@ namespace StoreFrontPro.Views.CollectionViews.Deckbox
         public void SyncWithModel()
         {
             DisplayedProperties.Clear();
+            
             if (Columns != 1)
             {
                 DisplayedProperties.Add(new TextBox() { Text = "x" + Model.Count, IsReadOnly = true });
                 DisplayedProperties.Add(new TextBox() { Text = Model.CardName, IsReadOnly = true });
                 foreach (string szKey in LST_TEMP_IMPORTANT_ATTRS)
                 {
-                    DisplayedProperties.Add(new TextBox() { Text = Model.GetAttr(szKey), IsReadOnly = true });
+                    if (szKey == "manaCost")
+                    {
+                        VMManaViewer manaViewerVM = new VMManaViewer(Model.GetAttr(szKey));
+                        VManaViewer manaViewerV = new VManaViewer();
+                        manaViewerV.DataContext = manaViewerVM;
+                        DisplayedProperties.Add(manaViewerV);
+                    }
+                    else
+                    {
+                        DisplayedProperties.Add(new TextBox() { Text = Model.GetAttr(szKey), IsReadOnly = true });
+                    }
                 }
             }
             else

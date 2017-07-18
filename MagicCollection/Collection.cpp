@@ -99,37 +99,69 @@ void Collection::ChangeItem(std::string aszName, std::string aszIdentifyingHash,
 	std::function<void()> fnDo;
 	fnDo = std::bind(&Collection::changeItem, this, aszName, aszIdentifyingHash, alstChanges, alstMetaChanges);
 
-	std::vector<Tag> lstUndoChanges;
-	std::vector<Tag>::iterator iter_Changes = alstChanges.begin();
-	for (; iter_Changes != alstChanges.end(); ++iter_Changes)
-	{
-		std::string szVal = copy->GetIdentifyingAttribute(iter_Changes->first);
-		if (szVal != Config::NotFoundString)
-		{
-			lstUndoChanges.push_back(std::make_pair(iter_Changes->first, szVal));
-		}
-	}
+	// Simulate the change so we can determine the hash and the exact traits when change is complete.
+	CopyItem* falseCopy = new CopyItem(*copy);
+	modifyItem(falseCopy, alstChanges, alstMetaChanges);
+	std::vector<Tag> lstFutureIds = falseCopy->GetIdentifyingAttributes();
+	std::vector<Tag> lstFutureMeta = falseCopy->GetMetaTags(MetaTagType::Visible);
+	delete falseCopy;
 
-	std::vector<Tag> lstUndoMetaChanges;
-	for (; iter_Changes != alstMetaChanges.end(); ++iter_Changes)
-	{
-		std::string szVal = copy->GetMetaTag(iter_Changes->first, MetaTagType::Any);
-		if (szVal != Config::NotFoundString)
-		{
-			lstUndoMetaChanges.push_back(std::make_pair(iter_Changes->first, szVal));
-		}
-	}
+	std::vector<Tag> lstOldIds = copy->GetIdentifyingAttributes();
+	std::vector<Tag> lstOldMeta = copy->GetMetaTags(MetaTagType::Visible);
 
 	// This is the hash that the itme will have after the properties are changed. So we need this to undo this change.
-	std::string szPostHash = item->GetHash(aszName, lstUndoChanges, lstUndoMetaChanges);
+	std::string szPostHash = item->GetHash(m_szName, lstFutureIds, lstFutureMeta);
 	std::function<void()> fnUndo;
-	fnUndo = std::bind(&Collection::changeItem, this, aszName, szPostHash, lstUndoChanges, lstUndoMetaChanges);
+	fnUndo = std::bind(&Collection::changeItem, this, aszName, szPostHash, lstOldIds, lstOldMeta);
 
 	Action action(fnDo, fnUndo);
 
-	std::string szIdentifier = "% " + CollectionItem::ToCardLine(m_szName, aszName, alstChanges, alstMetaChanges) + "->";
-	szIdentifier += CollectionItem::ToCardLine(m_szName, aszName, lstUndoChanges, lstUndoMetaChanges);
-	action.SetIdentifier(szIdentifier); 
+	std::string szIdentifier = "% " + CollectionItem::ToCardLine(m_szName, aszName, lstOldIds, lstOldMeta) + "->";
+	szIdentifier += CollectionItem::ToCardLine(m_szName, aszName, lstFutureIds, lstFutureMeta);
+	action.SetIdentifier(szIdentifier);
+
+	Transaction* transaction = getOpenTransaction();
+	transaction->AddAction(action);
+
+	if (abCloseTransaction)
+	{
+		finalizeTransaction();
+	}
+}
+
+void Collection::ReplaceItem(std::string aszName, std::string aszIdentifyingHash, std::string aszNewName, std::vector<Tag> alstIdChanges, std::vector<Tag> alstMetaChanges, bool abCloseTransaction)
+{
+	int iValidItem = m_ptrCollectionSource->LoadCard(aszName);
+	int iValidNewItem = m_ptrCollectionSource->LoadCard(aszNewName);
+	if (iValidItem != -1 || iValidNewItem != -1) { return; }
+
+	CollectionItem* item = m_ptrCollectionSource->GetCardPrototype(iValidItem);
+	CollectionItem* newItem = m_ptrCollectionSource->GetCardPrototype(iValidNewItem);
+	CopyItem* copy = item->FindCopyItem(aszIdentifyingHash);
+	if (copy == nullptr) { return; }
+
+	std::function<void()> fnDo;
+	fnDo = std::bind(&Collection::replaceItem, this, aszName, aszIdentifyingHash, aszNewName, alstIdChanges, alstMetaChanges);
+
+	std::vector<Tag> lstOldIds = copy->GetIdentifyingAttributes();
+	std::vector<Tag> lstOldMeta = copy->GetMetaTags(MetaTagType::Visible);
+
+	// Generate a temp copy to see what the actual result is.
+	CopyItem* falseCopy = newItem->GenerateCopy(m_szName, alstIdChanges, alstMetaChanges);
+	std::vector<Tag> lstFutureIds = falseCopy->GetIdentifyingAttributes();
+	std::vector<Tag> lstFutureMeta = falseCopy->GetMetaTags(MetaTagType::Visible);
+	delete falseCopy;
+
+	// This is the hash that the itme will have after the properties are changed. So we need this to undo this change.
+	std::string szPostHash = newItem->GetHash(m_szName, alstIdChanges, alstMetaChanges);
+	std::function<void()> fnUndo;
+	fnUndo = std::bind(&Collection::replaceItem, this, aszNewName, szPostHash, aszName, lstOldIds, lstOldMeta);
+
+	Action action(fnDo, fnUndo);
+
+	std::string szIdentifier = "% " + CollectionItem::ToCardLine(m_szName, aszName, lstOldIds, lstOldMeta) + "->";
+	szIdentifier += CollectionItem::ToCardLine(m_szName, aszNewName, alstIdChanges, alstMetaChanges);
+	action.SetIdentifier(szIdentifier);
 
 	Transaction* transaction = getOpenTransaction();
 	transaction->AddAction(action);
@@ -143,7 +175,7 @@ void Collection::ChangeItem(std::string aszName, std::string aszIdentifyingHash,
 void  Collection::SaveCollection()
 {
 	saveHistory();
-	
+
 	saveMeta();
 
 	saveCollection();
@@ -285,7 +317,7 @@ std::vector<std::string> Collection::GetCollectionList(MetaTagType atagType, boo
 {
 	std::function<std::string(std::pair<std::string, int>)> fnExtractor = [](std::pair<std::string, int> pVal)->std::string { return pVal.first; };
 	std::vector<std::string> lstRetVal;
-	std::vector<std::pair<std::string,int>> lstSeenHashes;
+	std::vector<std::pair<std::string, int>> lstSeenHashes;
 	std::vector<int> lstCol = getCollection();
 	std::vector<int>::iterator iter_Items = lstCol.begin();
 	for (; iter_Items != lstCol.end(); ++iter_Items)
@@ -376,9 +408,38 @@ void Collection::changeItem(std::string aszName, std::string aszIdentifyingHash,
 	CopyItem* cItem = item->FindCopyItem(aszIdentifyingHash);
 	if (cItem == nullptr) { return; }
 
+	modifyItem(cItem, alstChanges, alstMetaChanges);
+}
+
+
+void Collection::replaceItem(std::string aszName, std::string aszIdentifyingHash, std::string aszNewName, std::vector<Tag> alstIdChanges, std::vector<Tag> alstMetaChanges)
+{
+	int iCache = m_ptrCollectionSource->LoadCard(aszName);
+	int iNewCache = m_ptrCollectionSource->LoadCard(aszNewName);
+
+	CollectionItem* item = m_ptrCollectionSource->GetCardPrototype(iCache);
+	CollectionItem* newItem = m_ptrCollectionSource->GetCardPrototype(iNewCache);
+	CopyItem* cItem = item->FindCopyItem(aszIdentifyingHash);
+	if (cItem == nullptr) { return; }
+
+	removeItem(item->GetName(), cItem->GetHash());
+	addItem(newItem->GetName(), alstIdChanges, alstMetaChanges);
+}
+
+void Collection::registerItem(int aiCacheIndex)
+{
+	int iFound = ListHelper::List_Find(aiCacheIndex, m_lstItemCacheIndexes);
+	if (iFound == -1)
+	{
+		m_lstItemCacheIndexes.push_back(aiCacheIndex);
+	}
+}
+
+void Collection::modifyItem(CopyItem* aptCopy, std::vector<Tag> alstChanges, std::vector<Tag> alstMetaChanges)
+{
 	for (size_t i = 0; i < alstChanges.size(); i++)
 	{
-		cItem->SetIdentifyingAttribute(alstChanges[i].first, alstChanges[i].second);
+		aptCopy->SetIdentifyingAttribute(alstChanges[i].first, alstChanges[i].second);
 	}
 
 	MetaTagType mtt = MetaTagType::Public;
@@ -388,16 +449,7 @@ void Collection::changeItem(std::string aszName, std::string aszIdentifyingHash,
 		{
 			mtt == MetaTagType::Ignored;
 		}
-		cItem->SetMetaTag(alstMetaChanges[i].first, alstMetaChanges[i].second, mtt);
-	}
-}
-
-void Collection::registerItem(int aiCacheIndex)
-{
-	int iFound = ListHelper::List_Find(aiCacheIndex, m_lstItemCacheIndexes);
-	if (iFound == -1)
-	{
-		m_lstItemCacheIndexes.push_back(aiCacheIndex);
+		aptCopy->SetMetaTag(alstMetaChanges[i].first, alstMetaChanges[i].second, mtt);
 	}
 }
 
@@ -466,8 +518,6 @@ void Collection::loadPreprocessingLines(std::vector<std::string>  alstLines)
 		loadPreprocessingLine(*iter_Lines);
 	}
 }
-
-
 
 void Collection::loadPreprocessingLine(std::string aszLine)
 {
@@ -541,7 +591,7 @@ void Collection::loadAdditionLine(std::string aszLine)
 	CollectionItem::PseudoIdentifier sudoItem;
 	CollectionItem::ParseCardLine(aszLine, sudoItem);
 
-	addItem(sudoItem.Name, sudoItem.Identifiers, sudoItem.MetaTags);
+	AddItem(sudoItem.Name, sudoItem.Identifiers, sudoItem.MetaTags);
 }
 
 // This needs "Card Name : { __hash="hashval" }" All other values are irrelevant.
@@ -555,7 +605,7 @@ void Collection::loadRemoveLine(std::string aszLine)
 	if (iHash != -1)
 	{
 		szHash = sudoItem.MetaTags[iHash].second;
-		removeItem(sudoItem.Name, szHash);
+		RemoveItem(sudoItem.Name, szHash);
 	}
 }
 
@@ -572,30 +622,23 @@ void Collection::loadDeltaLine(std::string aszLine)
 	CollectionItem::ParseCardLine(lstOldNew[1], sudoNewItem);
 
 	std::string szHash;
+	int iCache;
 	int iHash = ListHelper::List_Find(std::string(Config::HashKey), sudoOldItem.MetaTags, Config::Instance()->GetTagHelper());
-	if (iHash != -1)
+	if (iHash != -1 && (iCache = m_ptrCollectionSource->LoadCard(sudoOldItem.Name)) != -1)
 	{
 		std::string szHash = sudoOldItem.MetaTags[iHash].second;
-		int iCache = m_ptrCollectionSource->LoadCard(sudoOldItem.Name);
-		if (iCache != -1)
-		{
-			CollectionItem* itemOld = m_ptrCollectionSource->GetCardPrototype(iCache);
-			CopyItem* cItem = itemOld->FindCopyItem(szHash);
+		CollectionItem* itemOld = m_ptrCollectionSource->GetCardPrototype(iCache);
+		CopyItem* cItem = itemOld->FindCopyItem(szHash);
 
-			if (sudoOldItem.Name == sudoNewItem.Name)
-			{
-				changeItem(sudoOldItem.Name, szHash, sudoNewItem.Identifiers, sudoNewItem.MetaTags);
-			}
-			else
-			{
-				int iCache = m_ptrCollectionSource->LoadCard(sudoNewItem.Name);
-				if (iCache != -1)
-				{
-					CollectionItem* itemNew = m_ptrCollectionSource->GetCardPrototype(iCache);
-					removeItem(sudoOldItem.Name, szHash);
-					addItem(sudoNewItem.Name, sudoNewItem.Identifiers, sudoNewItem.MetaTags);
-				}
-			}
+		int iNewCache;
+		if (sudoOldItem.Name == sudoNewItem.Name)
+		{
+			ChangeItem(sudoOldItem.Name, szHash, sudoNewItem.Identifiers, sudoNewItem.MetaTags);
+		}
+		else if ((iNewCache = m_ptrCollectionSource->LoadCard(sudoNewItem.Name)) != -1)
+		{
+			CollectionItem* itemNew = m_ptrCollectionSource->GetCardPrototype(iNewCache);
+			ReplaceItem(sudoOldItem.Name, szHash, sudoNewItem.Name, sudoNewItem.Identifiers, sudoNewItem.MetaTags);
 		}
 	}
 
@@ -647,7 +690,7 @@ void Collection::saveMeta()
 	{
 		CollectionIO ioHelper;
 		std::ofstream oMetaFile;
-		oMetaFile.open(Config::Instance()->GetMetaFolderName() + "\\"+ioHelper.GetMetaFile(m_szFileName));
+		oMetaFile.open(Config::Instance()->GetMetaFolderName() + "\\" + ioHelper.GetMetaFile(m_szFileName));
 
 		std::vector<std::string>::iterator iter_MetaLine = lstMetaLines.begin();
 		for (; iter_MetaLine != lstMetaLines.end(); ++iter_MetaLine)
@@ -672,7 +715,7 @@ void Collection::saveCollection()
 		std::ofstream oColFile;
 		oColFile.open(ioHelper.GetCollectionFile(m_szFileName));
 
-		oColFile << Config::CollectionDefinitionKey << " Name=\"" << m_szName<< "\"" << std::endl;
+		oColFile << Config::CollectionDefinitionKey << " Name=\"" << m_szName << "\"" << std::endl;
 		if (m_szParentName != "")
 		{
 			oColFile << Config::CollectionDefinitionKey << " Parent=\"" << m_szParentName << "\"" << std::endl;

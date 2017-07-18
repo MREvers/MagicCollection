@@ -44,7 +44,7 @@ namespace StoreFrontPro
             VCICollectionCube CCIS = new VCICollectionCube(
                 SwitchToDeckBox: showCollectionDeckBox);
             VCICollectionsOverview COIS = new VCICollectionsOverview(
-                ViewCollection: showCollectionCubeView,
+                ViewCollection: showCollectionDeckBox,
                 AddCollection: eAddNewCollectionClick,
                 LoadCollection: eLoadCollectionFromFile);
             VCIMultiDisplay MDIS = new VCIMultiDisplay(
