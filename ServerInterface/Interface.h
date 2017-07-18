@@ -25,6 +25,7 @@ public:
 	System::Collections::Generic::List<System::String^>^ GetAllCardsStartingWith(System::String^ ahszText);
 
 	System::Collections::Generic::List<System::String^>^ GetCollectionList(System::String^ ahszCollectionName, System::Boolean ahbCollapsed);
+	System::Collections::Generic::List<System::String^>^ GetCollectionAnalysis(System::String^ ahszCollectionName, System::String^ ahszAnalysisCommand);
 
 	void SubmitBulkChanges(System::String^ ahszCollectionName, System::Collections::Generic::List<System::String^>^ ahlstBulkChanges);
 

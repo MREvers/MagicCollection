@@ -63,21 +63,6 @@ namespace StoreFrontPro.Server
                 false);
         }
 
-        public void AddItem(string aszCardNameLong, List<Tuple<string, string>> alstMeta)
-        {
-            //ServerInterfaceModel.CollectionInterfaceModel.AddItem(CollectionName, aszCardNameLong, alstMeta);
-        }
-
-        public void RemoveItem(string aszCardNameLong, List<Tuple<string, string>> alstMeta)
-        {
-            //ServerInterfaceModel.CollectionInterfaceModel.RemoveItem(CollectionName, aszCardNameLong, alstMeta);
-        }
-
-        public void Refresh()
-        {
-            //ServerInterfaceModel.CollectionInterfaceModel.Refresh(CollectionName);
-        }
-
         public List<string> GetAllCardsStartingWith(string aszString)
         {
             List<CardModel> LstStartingStrings = new List<CardModel>();
@@ -157,6 +142,8 @@ namespace StoreFrontPro.Server
                                     UICallback: true);
             }
             m_bHardRebuild = false;
+
+            List<string> szTest = ServerInterface.Collection.GetCollectionAnalysis(this.CollectionName, "mana");
         }
 
         private void setCollectionModels(List<string> aLstCards, Action aCallback)

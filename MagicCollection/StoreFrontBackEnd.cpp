@@ -41,10 +41,22 @@ std::vector<std::string> CStoreFrontBackEnd::GetLoadedCollections()
 std::vector<std::string>
 CStoreFrontBackEnd::GetCollectionList(std::string aszCollection, int aiVisibility, bool bCollapsed)
 {
-	std::vector<std::string> lstList;
 	if (m_ColFactory->CollectionExists(aszCollection))
 	{
 		return m_ColFactory->GetCollection(aszCollection)->GetCollectionList((MetaTagType)aiVisibility, bCollapsed);
+	}
+	else
+	{
+		std::vector<std::string> lstEmpty;
+		return lstEmpty;
+	}
+}
+
+std::vector<std::string> CStoreFrontBackEnd::GetCollectionAnalysis(std::string aszCollection, std::string aszAnalysisCmd)
+{
+	if (m_ColFactory->CollectionExists(aszCollection))
+	{
+		return m_ColFactory->GetCollection(aszCollection)->GetCollectionAnalysis("mana");
 	}
 	else
 	{

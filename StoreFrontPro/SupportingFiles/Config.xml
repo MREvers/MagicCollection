@@ -14,6 +14,7 @@
         <Key>loyalty</Key>
         <Key>text</Key>
         <Key>types</Key>
+        <Key>colorIdentity</Key>
       </ValidKeys>
       <IdentifyingKeys>
         <Key>set</Key>

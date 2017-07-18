@@ -42,7 +42,11 @@ private:
 	std::string m_szParentCollection;
 	std::vector<std::string> m_lstResidentIn;
 
+	// Metatags are visible by all collections. They 'may' be used to identify the card.
+	// In general, meta-tags are attached to some physical meaning related to the card such as
+	// aquisition date, price, etc...
 	std::vector<MetaTag> m_lstMetaTags;
+
 	std::vector<Tag> m_lstIdentifyingTags;
 
 	std::vector<TraitItem>* m_plstRestrictedTraits;

@@ -36,6 +36,8 @@ public:
 
 	std::vector<std::string> GetCollectionList(MetaTagType atagType = Visible, bool aiCollapsed = false);
 
+	std::vector<std::string> GetCollectionAnalysis(std::string aszAnalysisCmd);
+
 	bool IsLoaded = false;
 
 private:
@@ -46,7 +48,9 @@ private:
 
 	bool m_bRecordChanges;
 	std::vector<Transaction> m_lstTransactions;
-	std::vector<std::string> m_lstHistory;
+
+	// Contains information such as "Sideboard" or if the card is an "Icon" of the collection.
+	std::vector<std::pair<std::string, Tag>> m_lstTaggedItems;
 
 	std::vector<int> m_lstItemCacheIndexes;
 
@@ -78,5 +82,8 @@ private:
 	void saveHistory();
 	void saveMeta();
 	void saveCollection();
+
+	// Specific to MtG. This type of stuff can be abstracted out but I will leave it here for now.
+	std::string analyseMana();
 };
 

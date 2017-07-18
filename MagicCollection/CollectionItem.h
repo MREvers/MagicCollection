@@ -60,6 +60,7 @@ public:
 
 	std::string GetCardString(CopyItem* aItem, MetaTagType aTagType = Visible, std::string aszCompareParent=Config::NotFoundString);
 	std::string GetProtoTypeString();
+	std::vector<Tag> GetCommonTraits();
 
 	static bool ParseCardLine(std::string aszLine, PseudoIdentifier& rPIdentifier);
 	static bool ParseTagString(std::string aszDetails, std::vector<Tag>& rlstTags);

@@ -124,8 +124,9 @@ void JSONImporter::ImportJSON(std::string aszFileName)
 							nlohmann::json json_array = iter_card.value(); //iter_card.value();
 							for (nlohmann::json::iterator iter_array = json_array.begin(); iter_array != json_array.end(); ++iter_array)
 							{
-								if (!first) { ss << "::"; first = true; }
+								if (!first) { ss << "::"; }
 								ss << iter_array.value();
+								first = false;
 							}
 						}
 						else

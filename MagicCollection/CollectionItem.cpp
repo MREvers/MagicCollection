@@ -157,6 +157,11 @@ std::string CollectionItem::GetProtoTypeString()
 	return CollectionItem::ToCardLine("", "", m_lstCommonTraits);
 }
 
+std::vector<Tag> CollectionItem::GetCommonTraits()
+{
+	return m_lstCommonTraits;
+}
+
 bool CollectionItem::ParseCardLine(std::string aszLine, PseudoIdentifier& rPIdentifier)
 {
 	unsigned int iCount;

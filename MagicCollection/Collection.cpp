@@ -359,6 +359,24 @@ std::vector<std::string> Collection::GetCollectionList(MetaTagType atagType, boo
 	return lstRetVal;
 }
 
+std::vector<std::string> Collection::GetCollectionAnalysis(std::string aszAnalysisCmd)
+{
+	std::vector<std::string> lstCmds = StringHelper::Str_Split(aszAnalysisCmd, ";");
+	std::vector<std::string> lstResults;
+	for (size_t i = 0; i < lstCmds.size(); i++)
+	{
+		if (lstCmds[i] == "mana")
+		{
+			lstResults.push_back(analyseMana());
+		}
+		else if (lstCmds[i] == "cmc")
+		{
+
+		}
+	}
+	return lstResults;
+}
+
 std::vector<int> Collection::getCollection()
 {
 	if (m_ptrCollectionSource->IsSyncNeeded(m_szName))
@@ -398,6 +416,9 @@ void Collection::removeItem(std::string aszName, std::string aszIdentifyingHash)
 		}
 		m_lstItemCacheIndexes = lstNewCacheIndexes;
 	}
+
+	// Notify other collections they may need to sync since this may have been borrowed by other collections.
+	m_ptrCollectionSource->NotifyNeedToSync(m_szName);
 }
 
 void Collection::changeItem(std::string aszName, std::string aszIdentifyingHash, std::vector<Tag> alstChanges, std::vector<Tag> alstMetaChanges)
@@ -729,4 +750,97 @@ void Collection::saveCollection()
 
 		oColFile.close();
 	}
+}
+
+std::string Collection::analyseMana()
+{
+	std::vector<int> lstColItems = getCollection();
+	std::map<char, int> mapCounts;
+	mapCounts['W'] = 0;
+	mapCounts['U'] = 0;
+	mapCounts['B'] = 0;
+	mapCounts['R'] = 0;
+	mapCounts['G'] = 0;
+	int iTotal = 0;
+
+	std::map<char, int> mapLandCounts;
+	mapLandCounts['W'] = 0;
+	mapLandCounts['U'] = 0;
+	mapLandCounts['B'] = 0;
+	mapLandCounts['R'] = 0;
+	mapLandCounts['G'] = 0;
+	int iLandTotal = 0;
+
+	for each (int iItem in lstColItems)
+	{
+		bool bIsLand = false;
+		CollectionItem* item = m_ptrCollectionSource->GetCardPrototype(iItem);
+		std::vector<CopyItem*> lstCopies = item->GetCopiesForCollection(m_szName, CollectionItemType::All);
+		int iCopyCount = lstCopies.size();
+
+		std::vector<Tag> lstCommonTraits = item->GetCommonTraits();
+		int iType = ListHelper::List_Find(std::string("types"), lstCommonTraits, Config::Instance()->GetTagHelper());
+		if (iType != -1)
+		{
+
+			if (lstCommonTraits[iType].second != "Land")
+			{
+				int iFoundMC = ListHelper::List_Find(std::string("manaCost"), lstCommonTraits, Config::Instance()->GetTagHelper());
+				std::string szMC = "";
+				if (iFoundMC != -1)
+				{
+					szMC = lstCommonTraits[iFoundMC].second;
+				}
+
+				for each (char symbol in szMC)
+				{
+					if (symbol == 'W' || symbol == 'U' || symbol == 'B' || symbol == 'R' || symbol == 'G')
+					{
+						mapCounts[symbol] += iCopyCount;
+						iTotal += iCopyCount;
+					}
+				}
+			}
+			else
+			{
+				int iFoundMC = ListHelper::List_Find(std::string("colorIdentity"), lstCommonTraits, Config::Instance()->GetTagHelper());
+				std::string szId = "";
+				if (iFoundMC != -1)
+				{
+					szId = lstCommonTraits[iFoundMC].second;
+				}
+
+				for each (char symbol in szId)
+				{
+					if (symbol == 'W' || symbol == 'U' || symbol == 'B' || symbol == 'R' || symbol == 'G')
+					{
+						mapLandCounts[symbol] += iCopyCount;
+						iLandTotal += iCopyCount;
+					}
+				}
+			}
+
+		}
+	}
+
+	std::string szRetval = "{";
+	bool first = true;
+	for each (std::pair<char,int> var in mapCounts)
+	{
+		if (!first) { szRetval += ","; }
+		szRetval += std::to_string(var.second);
+		first = false;
+	}
+
+	szRetval += "} {";
+	first = true;
+	for each (std::pair<char, int> var in mapLandCounts)
+	{
+		if (!first) { szRetval += ","; }
+		szRetval += std::to_string(var.second);
+		first = false;
+	}
+	szRetval += "}";
+
+	return szRetval;
 }

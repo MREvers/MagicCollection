@@ -108,8 +108,8 @@ namespace StoreFrontPro.Views.Interfaces.CollectionChanger
         private void eAcceptCommand(object canExecute)
         {
             DisplayEventArgs eventArgs = new DisplayEventArgs(VCICollectionEditor.Accept);
-            Model.SubmitBulkEdits(m_lstRealChanges, ()=> { DisplayEvent(this, eventArgs); });
-            DisplayEvent(this, eventArgs);
+            Model.SubmitBulkEdits(m_lstRealChanges, ()=> { DisplayEvent?.Invoke(this, eventArgs); });
+            DisplayEvent?.Invoke(this, eventArgs);
         }
 
         private void eCancelCommand(object canExecute)

@@ -19,16 +19,6 @@ namespace StoreFrontPro.Server
                 });
             }
 
-            public void AddItem(string aszCollectionName, string aszCardNameLong, List<Tuple<string, string>> lstMeta)
-            {
-                //SCI.AddItem(aszCollectionName, aszCardNameLong, lstMeta);
-            }
-
-            public void RemoveItem(string aszCollectionName, string aszCardNameLong, List<Tuple<string, string>> lstMeta)
-            {
-                //SCI.RemoveItem(aszCollectionName, aszCardNameLong, lstMeta);
-            }
-
             public void SetBaselineHistory(string aszCollection)
             {
                 //SCI.SetBaselineHistory(aszCollection);
@@ -53,6 +43,11 @@ namespace StoreFrontPro.Server
                 {
                     aCallback(SCI.GetCollectionList(aszCollectionName, abCollapsed));
                 }, UICallback);
+            }
+
+            public List<string> GetCollectionAnalysis(string aszCollectionName, string aszCommand)
+            {
+                return SCI.GetCollectionAnalysis(aszCollectionName, aszCommand);
             }
         }
 
