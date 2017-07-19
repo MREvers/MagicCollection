@@ -64,8 +64,13 @@ namespace StoreFrontPro.Server
                     Directory.CreateDirectory(szDirectoryName);
                 }
 
-                if (!File.Exists(szFilePath))
+                if (!File.Exists(szFilePath) || (new System.IO.FileInfo(szFilePath).Length < 100)) // Less than 100 bytes
                 {
+                    if (File.Exists(szFilePath))
+                    {
+                        File.Delete(szFilePath);
+                    }
+
                     using (WebClient client = new WebClient())
                     {
                         string szURL;

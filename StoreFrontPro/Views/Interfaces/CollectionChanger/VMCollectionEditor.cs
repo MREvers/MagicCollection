@@ -85,11 +85,13 @@ namespace StoreFrontPro.Views.Interfaces.CollectionChanger
                         szCmdString += "% " + oRemoveCard.GetFullIdentifier();
                         szCmdString += " -> " + szAddBaseCard;
                         addBoxVM.TextBoxValue = "";
+                        szBaseCard = szAddBaseCard;
                     }
                     else
                     {
                         szDisplay += "- " + oRemoveCard.GetIdealIdentifier();
                         szCmdString += "- " + oRemoveCard.GetFullIdentifier();
+                        szBaseCard = "";
                     }
 
                     int iMaxOps = 0;
@@ -122,7 +124,7 @@ namespace StoreFrontPro.Views.Interfaces.CollectionChanger
         private void eAcceptCommand(object canExecute)
         {
             DisplayEventArgs eventArgs = new DisplayEventArgs(VCICollectionEditor.Accept);
-            Model.SubmitBulkEdits(getFunctionList(), ()=> { DisplayEvent?.Invoke(this, eventArgs); });
+            Model.SubmitBulkEdits(getFunctionList(), () => { DisplayEvent?.Invoke(this, eventArgs); });
             DisplayEvent?.Invoke(this, eventArgs);
         }
 
@@ -147,17 +149,9 @@ namespace StoreFrontPro.Views.Interfaces.CollectionChanger
 
         private List<string> getFunctionList()
         {
-            foreach(MCollectionEditorItem item in m_lstItems)
+            foreach (MCollectionEditorItem item in m_lstItems)
             {
-                List<string> lstSplit = item.FunctionText.Split(new string[] { "->" }, StringSplitOptions.RemoveEmptyEntries).ToList();
-                if (lstSplit.Count > 1)
-                {
-                    item.FunctionText = lstSplit[0] + " { set=\"" + item.SelectedSet + "\" } " + lstSplit[1];
-                }
-                else
-                {
-                    item.FunctionText = item.FunctionText + " { set=\"" + item.SelectedSet + "\" } ";
-                }
+                item.FunctionText = item.FunctionText + " { set=\"" + item.SelectedSet + "\" } ";
             }
 
             List<string> lstOutput = m_lstItems
