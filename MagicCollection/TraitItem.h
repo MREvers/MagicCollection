@@ -14,6 +14,7 @@ public:
 	
 	std::string GetKeyName();
 	std::string GetDefaultValue();
+	std::vector<std::string> GetAllowedValues();
 
 	bool IsAllowedValue(std::string aszTestVal);
 

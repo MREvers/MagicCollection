@@ -20,7 +20,7 @@
             <ContentPresenter Grid.Column="0" Content="{Binding AddCardSearchBox}"/>
             <ContentPresenter Grid.Column="1" Content="{Binding RemoveCardSearchBox}"/>
         </Grid>
-        <ListView Grid.Row="1" Margin="10,0" ItemsSource="{Binding Path=TextChangesList}"/>
+        <ListView HorizontalContentAlignment="Stretch" Grid.Row="1" Margin="10,0" ItemsSource="{Binding Path=TextChangesList}"/>
         <Grid Grid.Row="2">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition/>

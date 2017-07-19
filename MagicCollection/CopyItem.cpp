@@ -154,6 +154,8 @@ bool CopyItem::SetIdentifyingAttribute(std::string aszKey, std::string aszValue)
 		if (foundTrait.IsAllowedValue(aszValue))
 		{
 			m_lstIdentifyingTags[iIsAttr].second = aszValue;
+			int iValueIndex = ListHelper::List_Find(aszValue, foundTrait.GetAllowedValues());
+			setPairedAttributes(aszKey, iValueIndex);
 			return true;
 		}
 	}
@@ -199,4 +201,32 @@ std::function<std::string(MetaTag)> CopyItem::GetMetaTagValueViewer(MetaTagType 
 std::function<std::string(MetaTag)> CopyItem::GetMetaTagKeyViewer()
 {
 	return [](MetaTag atag)->std::string { return atag.GetKey(); };
+}
+
+void CopyItem::setPairedAttributes(std::string aszKey, int iVal)
+{
+	std::function<std::string(TraitItem)> fnExtractor = [](TraitItem aTI)->std::string { return aTI.GetKeyName(); };
+	std::vector<std::string> lstPartners;
+	std::vector<Tag> lstPairs = Config::Instance()->GetPairedKeysList();
+	for each (Tag var in lstPairs)
+	{
+		if (var.first == aszKey && ListHelper::List_Find(var.second, lstPartners) == -1)
+		{
+			lstPartners.push_back(var.second);
+		}
+		else if (var.second == aszKey && ListHelper::List_Find(var.first, lstPartners) == -1)
+		{
+			lstPartners.push_back(var.first);
+		}
+	}
+
+	for each (std::string szKey in lstPartners)
+	{
+		int iIsAttr = ListHelper::List_Find(szKey, *m_plstRestrictedTraits, fnExtractor);
+		if (iIsAttr != -1)
+		{
+			TraitItem foundTrait = m_plstRestrictedTraits->at(iIsAttr);
+			m_lstIdentifyingTags[iIsAttr].second = foundTrait.GetAllowedValues().at(iVal);
+		}
+	}
 }

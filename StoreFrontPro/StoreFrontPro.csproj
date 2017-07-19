@@ -116,6 +116,11 @@
       <DependentUpon>VManaViewer.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Components\ManaViewer\VMManaViewer.cs" />
+    <Compile Include="Views\Components\PlusMinusControl\MPlusMinusControl.cs" />
+    <Compile Include="Views\Components\PlusMinusControl\VMPlusMinusControl.cs" />
+    <Compile Include="Views\Components\PlusMinusControl\VPlusMinusControl.xaml.cs">
+      <DependentUpon>VPlusMinusControl.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\Components\RequestTextOverlay\VCIRequestText.cs" />
     <Compile Include="Views\Components\RequestTextOverlay\VMRequestText.cs" />
     <Compile Include="Views\Components\RequestTextOverlay\VRequestText.xaml.cs">
@@ -130,11 +135,16 @@
     <Compile Include="Views\Components\VCCollectionsMenuList.xaml.cs">
       <DependentUpon>VCCollectionsMenuList.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\Interfaces\CollectionChanger\MCollectionEditorItem.cs" />
     <Compile Include="Views\Interfaces\CollectionChanger\VCICollectionEditor.cs" />
     <Compile Include="Views\Interfaces\CollectionChanger\VCollectionEditor.xaml.cs">
       <DependentUpon>VCollectionEditor.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\Interfaces\CollectionChanger\VCollectionEditorItem.xaml.cs">
+      <DependentUpon>VCollectionEditorItem.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\Interfaces\CollectionChanger\VMCollectionEditor.cs" />
+    <Compile Include="Views\Interfaces\CollectionChanger\VMCollectionEditorItem.cs" />
     <Compile Include="Views\IVCISupporter.cs" />
     <Compile Include="Views\IViewComponent.cs" />
     <Compile Include="Views\IViewComponentInterface.cs" />
@@ -212,6 +222,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Views\Components\PlusMinusControl\VPlusMinusControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\Components\RequestTextOverlay\VRequestText.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -225,6 +239,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\Interfaces\CollectionChanger\VCollectionEditor.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Interfaces\CollectionChanger\VCollectionEditorItem.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

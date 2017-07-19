@@ -47,8 +47,11 @@ private:
 	// aquisition date, price, etc...
 	std::vector<MetaTag> m_lstMetaTags;
 
+	// Note that these will correspond 1-1 to each traititem in m_plstRest...
 	std::vector<Tag> m_lstIdentifyingTags;
 
 	std::vector<TraitItem>* m_plstRestrictedTraits;
+
+	void setPairedAttributes(std::string aszKey, int iVal);
 };
 

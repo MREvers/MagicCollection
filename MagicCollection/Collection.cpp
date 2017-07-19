@@ -93,7 +93,7 @@ void Collection::RemoveItem(std::string aszName, std::string aszIdentifyingHash,
 void Collection::ChangeItem(std::string aszName, std::string aszIdentifyingHash, std::vector<Tag> alstChanges, std::vector<Tag> alstMetaChanges, bool abCloseTransaction)
 {
 	int iValidItem = m_ptrCollectionSource->LoadCard(aszName);
-	if (iValidItem != -1) { return; }
+	if (iValidItem == -1) { return; }
 
 	CollectionItem* item = m_ptrCollectionSource->GetCardPrototype(iValidItem);
 	CopyItem* copy = item->FindCopyItem(aszIdentifyingHash);
@@ -136,7 +136,7 @@ void Collection::ReplaceItem(std::string aszName, std::string aszIdentifyingHash
 {
 	int iValidItem = m_ptrCollectionSource->LoadCard(aszName);
 	int iValidNewItem = m_ptrCollectionSource->LoadCard(aszNewName);
-	if (iValidItem != -1 || iValidNewItem != -1) { return; }
+	if (iValidItem == -1 || iValidNewItem == -1) { return; }
 
 	CollectionItem* item = m_ptrCollectionSource->GetCardPrototype(iValidItem);
 	CollectionItem* newItem = m_ptrCollectionSource->GetCardPrototype(iValidNewItem);
@@ -615,7 +615,10 @@ void Collection::loadAdditionLine(std::string aszLine)
 	CollectionItem::PseudoIdentifier sudoItem;
 	CollectionItem::ParseCardLine(aszLine, sudoItem);
 
-	AddItem(sudoItem.Name, sudoItem.Identifiers, sudoItem.MetaTags);
+	for (size_t i = 0; i < sudoItem.Count; i++)
+	{
+		AddItem(sudoItem.Name, sudoItem.Identifiers, sudoItem.MetaTags);
+	}
 }
 
 // This needs "Card Name : { __hash="hashval" }" All other values are irrelevant.
@@ -624,12 +627,16 @@ void Collection::loadRemoveLine(std::string aszLine)
 	CollectionItem::PseudoIdentifier sudoItem;
 	CollectionItem::ParseCardLine(aszLine, sudoItem);
 
-	std::string szHash;
-	int iHash = ListHelper::List_Find(std::string(Config::HashKey), sudoItem.MetaTags, Config::Instance()->GetTagHelper());
-	if (iHash != -1)
+	for (size_t i = 0; i < sudoItem.Count; i++)
 	{
-		szHash = sudoItem.MetaTags[iHash].second;
-		RemoveItem(sudoItem.Name, szHash);
+		std::string szHash;
+		int iHash = ListHelper::List_Find(std::string(Config::HashKey), sudoItem.MetaTags, Config::Instance()->GetTagHelper());
+		if (iHash != -1)
+		{
+			szHash = sudoItem.MetaTags[iHash].second;
+			RemoveItem(sudoItem.Name, szHash);
+		}
+		else { break; }
 	}
 }
 
@@ -654,16 +661,20 @@ void Collection::loadDeltaLine(std::string aszLine)
 		CollectionItem* itemOld = m_ptrCollectionSource->GetCardPrototype(iCache);
 		CopyItem* cItem = itemOld->FindCopyItem(szHash);
 
-		int iNewCache;
-		if (sudoOldItem.Name == sudoNewItem.Name)
+		for (size_t i = 0; i < sudoOldItem.Count; i++)
 		{
-			ChangeItem(sudoOldItem.Name, szHash, sudoNewItem.Identifiers, sudoNewItem.MetaTags);
+			int iNewCache;
+			if (sudoOldItem.Name == sudoNewItem.Name)
+			{
+				ChangeItem(sudoOldItem.Name, szHash, sudoNewItem.Identifiers, sudoNewItem.MetaTags);
+			}
+			else if ((iNewCache = m_ptrCollectionSource->LoadCard(sudoNewItem.Name)) != -1)
+			{
+				CollectionItem* itemNew = m_ptrCollectionSource->GetCardPrototype(iNewCache);
+				ReplaceItem(sudoOldItem.Name, szHash, sudoNewItem.Name, sudoNewItem.Identifiers, sudoNewItem.MetaTags);
+			}
 		}
-		else if ((iNewCache = m_ptrCollectionSource->LoadCard(sudoNewItem.Name)) != -1)
-		{
-			CollectionItem* itemNew = m_ptrCollectionSource->GetCardPrototype(iNewCache);
-			ReplaceItem(sudoOldItem.Name, szHash, sudoNewItem.Name, sudoNewItem.Identifiers, sudoNewItem.MetaTags);
-		}
+
 	}
 
 }

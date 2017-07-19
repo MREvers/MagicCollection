@@ -45,6 +45,11 @@ std::string TraitItem::GetDefaultValue()
 	return m_lstPossibleValues[0];
 }
 
+std::vector<std::string> TraitItem::GetAllowedValues()
+{
+	return m_lstPossibleValues;
+}
+
 bool TraitItem::IsAllowedValue(std::string aszTestVal)
 {
 	return ListHelper::List_Find(aszTestVal, m_lstPossibleValues) != -1;

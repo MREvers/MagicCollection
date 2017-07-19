@@ -13,6 +13,54 @@ namespace StoreFrontPro.Server
     public class CardModel
     {
         public static List<string> TEMP_LST_IMPORTANT_IDENTS = new List<string>() { "set" };
+        private static Dictionary<string, List<Tuple<string, string>>> MEMO_COMMON_ATTRS = new Dictionary<string, List<Tuple<string, string>>>();
+        private static Dictionary<string, List<Tuple<string, List<string>>>> MEMO_ID_OPTIONS = new Dictionary<string, List<Tuple<string, List<string>>>>();
+        public static List<Tuple<string, string>> GetCommonAttrs(string CardName)
+        {
+            if (!MEMO_COMMON_ATTRS.ContainsKey(CardName))
+            {
+                List<Tuple<string, string>> CommonAttributes = parseTagList(ServerInterface.Card.GetProtoType(CardName));
+                MEMO_COMMON_ATTRS[CardName] = CommonAttributes;
+
+                List<Tuple<string, string>> lstNonComms = new List<Tuple<string, string>>();
+                foreach (Tuple<string, string> comAttr in CommonAttributes)
+                {
+                    if (comAttr.Item2.Contains("*"))
+                    {
+                        string szVal = comAttr.Item2.Substring(1);
+                        List<string> lstSplitOps = szVal.Split(new string[] { "::" }, StringSplitOptions.RemoveEmptyEntries).ToList();
+                        lstNonComms.Add(comAttr);
+                        Tuple<string, List<string>> tupOption = new Tuple<string, List<string>>(
+                                comAttr.Item1,
+                                lstSplitOps);
+                        if (MEMO_ID_OPTIONS.ContainsKey(CardName))
+                        {
+                            MEMO_ID_OPTIONS[CardName].Add(tupOption);
+                        }
+                        else
+                        {
+                            MEMO_ID_OPTIONS[CardName] = new List<Tuple<string, List<string>>>() { tupOption };
+                        }
+                    }
+                }
+
+                foreach (var item in lstNonComms)
+                {
+                    CommonAttributes.Remove(item);
+                }
+            }
+
+            return MEMO_COMMON_ATTRS.ContainsKey(CardName) ? MEMO_COMMON_ATTRS[CardName] : new List<Tuple<string, string>>();
+        }
+        public static List<Tuple<string, List<string>>> GetIdentifierOptions(string CardName)
+        {
+            if (!MEMO_ID_OPTIONS.ContainsKey(CardName))
+            {
+                GetCommonAttrs(CardName);
+            }
+
+            return MEMO_ID_OPTIONS.ContainsKey(CardName) ? MEMO_ID_OPTIONS[CardName] : new List<Tuple<string, List<string>>>();
+        }
 
         private object m_oLock = new object();
         private bool _bCardImageIsLoading = false;
@@ -27,8 +75,9 @@ namespace StoreFrontPro.Server
         public string CardName;
         public string CardNameLong;
         public List<Tuple<string, string>> MetaTags;
-        public List<Tuple<string, string>> CommonAttributes; // Attrs that can change between copy such as 'Set'
         public List<Tuple<string, string>> IdentifyingAttributes; // Attrs that define a copy into a card class.
+        public List<Tuple<string, string>> CommonAttributes; // Attrs that can change between copy such as 'Set'
+        public List<Tuple<string, List<string>>> IdentifyingOptions = new List<Tuple<string, List<string>>>();
 
         public CardModel(string aszIdentifier, string aszParent)
         {
@@ -164,10 +213,12 @@ namespace StoreFrontPro.Server
                 IdentifyingAttributes = new List<Tuple<string, string>>();
             }
 
-            CommonAttributes = parseTagList(ServerInterface.Card.GetProtoType(CardName));
+            // Now parse the common attributes and the restrictions.
+            CommonAttributes = GetCommonAttrs(szName);
+            IdentifyingOptions = GetIdentifierOptions(szName);
         }
 
-        private List<Tuple<string,string>> parseTagList(string szTags)
+        private static List<Tuple<string,string>> parseTagList(string szTags)
         {
             string szRetval = szTags.Trim(' ', '{', '}', ' ');
             List<string> lstTuples = szRetval.Split(' ').ToList();

@@ -154,7 +154,23 @@ std::string CollectionItem::GetCardString(CopyItem* aItem, MetaTagType aTagType,
 
 std::string CollectionItem::GetProtoTypeString()
 {
-	return CollectionItem::ToCardLine("", "", m_lstCommonTraits);
+	// Include multi traits in this list
+	std::vector<Tag> lstAllCommonTraits(m_lstCommonTraits);
+	for each (TraitItem trait in m_lstIdentifyingTraits)
+	{
+		std::string szTraitVal = "";
+		bool first = true;
+		for each (std::string possibleTrait in trait.GetAllowedValues())
+		{
+			if (!first) { szTraitVal += "::"; }
+			else { szTraitVal += "*"; } // This * will indicate it is an identifier.
+			szTraitVal += possibleTrait;
+			first = false;
+		}
+		lstAllCommonTraits.push_back(std::make_pair(trait.GetKeyName(), szTraitVal));
+	}
+	
+	return CollectionItem::ToCardLine("", "", lstAllCommonTraits);
 }
 
 std::vector<Tag> CollectionItem::GetCommonTraits()
@@ -168,8 +184,11 @@ bool CollectionItem::ParseCardLine(std::string aszLine, PseudoIdentifier& rPIden
 	std::string szMeta;
 	std::string szDetails;
 	std::string szName;
+	aszLine = StringHelper::Str_Trim(aszLine, ' ');
 
 	unsigned int i = 0;
+	if (aszLine.size() > 0 && aszLine[0] == 'x') { i++; }
+
 	std::string szNum = "";
 	while (i < aszLine.size() && aszLine.at(i) < '9' && aszLine.at(i) > '0')
 	{
@@ -303,7 +322,7 @@ std::string CollectionItem::ToCardLine(std::string aszParentCollection,
 	std::string szLine = aszName;
 	szLine += " { ";
 
-	if (aszParentCollection != aszCompareParent)
+	if (aszParentCollection != aszCompareParent && aszCompareParent != Config::NotFoundString)
 	{
 		szLine += "Parent=\"";
 		szLine += aszParentCollection;

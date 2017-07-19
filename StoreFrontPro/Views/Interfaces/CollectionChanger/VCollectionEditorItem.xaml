@@ -1,0 +1,20 @@
+﻿<UserControl x:Class="StoreFrontPro.Views.Interfaces.CollectionChanger.VCollectionEditorItem"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:StoreFrontPro.Views.Interfaces.CollectionChanger"
+             xmlns:pm="clr-namespace:StoreFrontPro.Views.Components.PlusMinusControl"
+             mc:Ignorable="d" 
+             d:DesignHeight="24" d:DesignWidth="300">
+    <Grid HorizontalAlignment="Stretch">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition/>
+            <ColumnDefinition Width="70"/>
+            <ColumnDefinition Width="100"/>
+        </Grid.ColumnDefinitions>
+        <TextBox Background="{Binding DisplayColor}" Grid.Column="0"  HorizontalAlignment="Stretch" IsReadOnly="True" Text="{Binding DisplayText, Mode=OneWay}"/>
+        <ComboBox Grid.Column="1"  ItemsSource="{Binding PossibleValues}" Text="{Binding Path=Set}"/>
+        <ContentPresenter HorizontalAlignment="Right" Grid.Column="2" Content="{Binding PlusMinusControl}"/>
+    </Grid>
+</UserControl>

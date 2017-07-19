@@ -1,4 +1,5 @@
 ﻿using StoreFrontPro.Server;
+using StoreFrontPro.Tools;
 using StoreFrontPro.Views.Components.SuggestionsSearchBox;
 using System;
 using System.Collections.Generic;
@@ -13,7 +14,7 @@ namespace StoreFrontPro.Views.Interfaces.CollectionChanger
 {
     class VMCollectionEditor : ViewModel<CollectionModel>, IViewComponent, IVCISupporter
     {
-        public ObservableCollection<string> TextChangesList { get; set; } = new ObservableCollection<string>();
+        public ObservableCollection<VCollectionEditorItem> TextChangesList { get; set; } = new ObservableCollection<VCollectionEditorItem>();
 
         public VSuggestionsSearchBox AddCardSearchBox { get; set; }
         public VSuggestionsSearchBox RemoveCardSearchBox { get; set; }
@@ -21,7 +22,7 @@ namespace StoreFrontPro.Views.Interfaces.CollectionChanger
         public RelayCommand AcceptCommand { get; set; }
         public RelayCommand CancelCommand { get; set; }
 
-        private List<string> m_lstRealChanges { get; set; }
+        private List<MCollectionEditorItem> m_lstItems { get; set; }
 
         public Dictionary<Type, IViewComponentInterface> SupportedInterface { get; set; } = new Dictionary<Type, IViewComponentInterface>();
 
@@ -31,7 +32,7 @@ namespace StoreFrontPro.Views.Interfaces.CollectionChanger
         {
             AcceptCommand = new RelayCommand(eAcceptCommand);
             CancelCommand = new RelayCommand(eCancelCommand);
-            m_lstRealChanges = new List<string>();
+            m_lstItems = new List<MCollectionEditorItem>();
 
             MSuggestionsSearchBox ssBoxMA = new MSuggestionsSearchBox(
                 ActionName: "Add Card",
@@ -46,6 +47,16 @@ namespace StoreFrontPro.Views.Interfaces.CollectionChanger
             VMSuggestionsSearchBox ssBoxVMR = new VMSuggestionsSearchBox(ssBoxMR);
             RemoveCardSearchBox = new VSuggestionsSearchBox() { DataContext = ssBoxVMR };
             ssBoxVMR.DisplayEvent += eRemoveCardEventHandler;
+        }
+
+        public List<StoreFrontMenuItem> GetMenuItems()
+        {
+            return new List<StoreFrontMenuItem>();
+        }
+
+        public void DisplayEventHandler(object source, DisplayEventArgs e)
+        {
+            // throw new NotImplementedException();
         }
 
         private void eRemoveCardEventHandler(object Source, DisplayEventArgs Event)
@@ -63,7 +74,6 @@ namespace StoreFrontPro.Views.Interfaces.CollectionChanger
                 if (oRemoveCard != null)
                 {
                     VMSuggestionsSearchBox addBoxVM = (AddCardSearchBox.DataContext as VMSuggestionsSearchBox);
-
                     if (addBoxVM.ComboBoxList.Count > 0 &&
                         addBoxVM.ComboBoxList.Contains(addBoxVM.TextBoxValue))
                     {
@@ -82,8 +92,13 @@ namespace StoreFrontPro.Views.Interfaces.CollectionChanger
                         szCmdString += "- " + oRemoveCard.GetFullIdentifier();
                     }
 
-                    TextChangesList.Add(szDisplay);
-                    m_lstRealChanges.Add(szCmdString);
+                    int iMaxOps = 0;
+                    Model.CollectionItems.ForEach(x => { if (oRemoveCard.GetMetaTag("__hash") == x.GetMetaTag("__hash")) { iMaxOps += x.Count; } });
+                    if (iMaxOps > 0)
+                    {
+                        addEditorItem(szDisplay, szCmdString, getIdentifierOptions(szBaseCard), iMaxOps);
+                    }
+
                     removeBoxVM.TextBoxValue = "";
                 }
             }
@@ -99,8 +114,7 @@ namespace StoreFrontPro.Views.Interfaces.CollectionChanger
                 string szBaseCard = addBoxVM.TextBoxValue;
                 string szCmdString = "";
                 szCmdString += "+ " + szBaseCard;
-                m_lstRealChanges.Add(szCmdString);
-                TextChangesList.Add(szCmdString);
+                addEditorItem(szCmdString, szCmdString, getIdentifierOptions(szBaseCard));
                 addBoxVM.TextBoxValue = "";
             }
         }
@@ -108,7 +122,7 @@ namespace StoreFrontPro.Views.Interfaces.CollectionChanger
         private void eAcceptCommand(object canExecute)
         {
             DisplayEventArgs eventArgs = new DisplayEventArgs(VCICollectionEditor.Accept);
-            Model.SubmitBulkEdits(m_lstRealChanges, ()=> { DisplayEvent?.Invoke(this, eventArgs); });
+            Model.SubmitBulkEdits(getFunctionList(), ()=> { DisplayEvent?.Invoke(this, eventArgs); });
             DisplayEvent?.Invoke(this, eventArgs);
         }
 
@@ -118,14 +132,44 @@ namespace StoreFrontPro.Views.Interfaces.CollectionChanger
             DisplayEvent(this, eventArgs);
         }
 
-        public List<StoreFrontMenuItem> GetMenuItems()
+        private void addEditorItem(string aszDisplay, string aszFunction, List<string> alstPossibleSetValues, int aiMaxOps = 99)
         {
-            return new List<StoreFrontMenuItem>();
+            MCollectionEditorItem ceiM = new MCollectionEditorItem(aszDisplay, aszFunction, alstPossibleSetValues, aiMaxOps);
+            VMCollectionEditorItem ceiVM = new VMCollectionEditorItem(ceiM);
+            m_lstItems.Add(ceiM);
+            TextChangesList.Add(new VCollectionEditorItem() { DataContext = ceiVM });
         }
 
-        public void DisplayEventHandler(object source, DisplayEventArgs e)
+        private string getSelectedSet(string szBaseCard)
         {
-            // throw new NotImplementedException();
+            return szBaseCard + "{ set=\"";
+        }
+
+        private List<string> getFunctionList()
+        {
+            foreach(MCollectionEditorItem item in m_lstItems)
+            {
+                List<string> lstSplit = item.FunctionText.Split(new string[] { "->" }, StringSplitOptions.RemoveEmptyEntries).ToList();
+                if (lstSplit.Count > 1)
+                {
+                    item.FunctionText = lstSplit[0] + " { set=\"" + item.SelectedSet + "\" } " + lstSplit[1];
+                }
+                else
+                {
+                    item.FunctionText = item.FunctionText + " { set=\"" + item.SelectedSet + "\" } ";
+                }
+            }
+
+            List<string> lstOutput = m_lstItems
+                .Select(x =>
+                    x.FunctionText.Substring(0, 1) + " x" + x.Amount + x.FunctionText.Substring(1))
+                .ToList();
+            return lstOutput;
+        }
+
+        private List<string> getIdentifierOptions(string szCard)
+        {
+            return CardModel.GetIdentifierOptions(szCard).Where(x => x.Item1 == "set").FirstOrDefault().Item2;
         }
     }
 }
