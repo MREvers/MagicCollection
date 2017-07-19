@@ -25,7 +25,7 @@ namespace StoreFrontPro.Views.Interfaces.CollectionChanger
         public MCollectionEditorItem(string DisplayText, string FunctionText, List<string> PossibleSetValues, int MaxOps = 99)
         {
             SetOptions = PossibleSetValues ?? new List<string>() { "" };
-            SelectedSet = PossibleSetValues[0];
+            SelectedSet = SetOptions[0];
             BoxedAmount = new MPlusMinusControl(1, MaxOps);
             this.DisplayText = DisplayText;
             this.FunctionText = FunctionText;

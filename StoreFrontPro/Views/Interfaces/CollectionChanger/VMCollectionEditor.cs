@@ -43,7 +43,7 @@ namespace StoreFrontPro.Views.Interfaces.CollectionChanger
 
             MSuggestionsSearchBox ssBoxMR = new MSuggestionsSearchBox(
                 ActionName: "Remove/Replace Card",
-                Collection: Model.CollectionItems.Select(x => x.CardName));
+                Collection: Model.CollectionItems.Select(x => getStandardShortId(x)));
             VMSuggestionsSearchBox ssBoxVMR = new VMSuggestionsSearchBox(ssBoxMR);
             RemoveCardSearchBox = new VSuggestionsSearchBox() { DataContext = ssBoxVMR };
             ssBoxVMR.DisplayEvent += eRemoveCardEventHandler;
@@ -70,7 +70,7 @@ namespace StoreFrontPro.Views.Interfaces.CollectionChanger
                 string szCmdString = "";
                 string szDisplay = "";
 
-                CardModel oRemoveCard = Model.CollectionItems.Where(x => x.CardName == szBaseCard).FirstOrDefault();
+                CardModel oRemoveCard = Model.CollectionItems.Where(x => getStandardShortId(x) == szBaseCard).FirstOrDefault();
                 if (oRemoveCard != null)
                 {
                     VMSuggestionsSearchBox addBoxVM = (AddCardSearchBox.DataContext as VMSuggestionsSearchBox);
@@ -163,7 +163,12 @@ namespace StoreFrontPro.Views.Interfaces.CollectionChanger
 
         private List<string> getIdentifierOptions(string szCard)
         {
-            return CardModel.GetIdentifierOptions(szCard).Where(x => x.Item1 == "set").FirstOrDefault().Item2;
+            return CardModel.GetIdentifierOptions(szCard).Where(x => x.Item1 == "set").FirstOrDefault()?.Item2;
+        }
+
+        private string getStandardShortId(CardModel aCM)
+        {
+            return aCM.GetIdealIdentifier();
         }
     }
 }

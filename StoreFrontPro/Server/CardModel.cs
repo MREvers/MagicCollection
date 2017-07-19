@@ -20,7 +20,10 @@ namespace StoreFrontPro.Server
             if (!MEMO_COMMON_ATTRS.ContainsKey(CardName))
             {
                 List<Tuple<string, string>> CommonAttributes = parseTagList(ServerInterface.Card.GetProtoType(CardName));
-                MEMO_COMMON_ATTRS[CardName] = CommonAttributes;
+                if (CommonAttributes.Count > 0)
+                {
+                    MEMO_COMMON_ATTRS[CardName] = CommonAttributes;
+                }
 
                 List<Tuple<string, string>> lstNonComms = new List<Tuple<string, string>>();
                 foreach (Tuple<string, string> comAttr in CommonAttributes)
