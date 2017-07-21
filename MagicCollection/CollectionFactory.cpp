@@ -39,11 +39,11 @@ std::string CollectionFactory::LoadCollectionFromFile(std::string aszFileName)
 	return szRetVal;
 }
 
-std::string CollectionFactory::CreateNewCollection(std::string aszColName)
+std::string CollectionFactory::CreateNewCollection(std::string aszColName, std::string aszParent)
 {
 	if (!CollectionExists(aszColName))
 	{
-		Collection* oCol = new Collection(aszColName, m_ColSource, aszColName);
+		Collection* oCol = new Collection(aszColName, m_ColSource, aszColName, aszParent);
 		m_lstCollections.push_back(oCol);
 		return oCol->GetName();
 	}

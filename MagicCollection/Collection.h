@@ -30,6 +30,10 @@ public:
 	void ChangeItem(std::string aszName, std::string aszIdentifyingHash, std::vector<Tag> alstIdChanges, std::vector<Tag> alstMetaChanges, bool abCloseTransaction = true);
 	void ReplaceItem(std::string aszName, std::string aszIdentifyingHash, std::string aszNewName, std::vector<Tag> alstIdChanges, std::vector<Tag> alstMetaChanges, bool abCloseTransaction = true);
 
+	std::vector<std::pair<std::string, Tag>> GetTags();
+	void TagItem(std::string aszHash, Tag atag);
+	void UntagItem(std::string aszHash, std::string aszTagKey);
+
 	void SaveCollection();
 	void LoadCollection(std::string aszFileName, CollectionFactory* aoFactory);
 	void LoadChanges(std::vector<std::string> aszLines);
@@ -50,6 +54,7 @@ private:
 	std::vector<Transaction> m_lstTransactions;
 
 	// Contains information such as "Sideboard" or if the card is an "Icon" of the collection.
+	// Hash, Tag
 	std::vector<std::pair<std::string, Tag>> m_lstTaggedItems;
 
 	std::vector<int> m_lstItemCacheIndexes;
@@ -82,8 +87,5 @@ private:
 	void saveHistory();
 	void saveMeta();
 	void saveCollection();
-
-	// Specific to MtG. This type of stuff can be abstracted out but I will leave it here for now.
-	std::string analyseMana();
 };
 

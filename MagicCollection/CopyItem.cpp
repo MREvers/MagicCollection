@@ -83,7 +83,10 @@ std::string CopyItem::GetParent()
 
 void CopyItem::AddResident(std::string aszNewResi)
 {
-	m_lstResidentIn.push_back(aszNewResi);
+	if (ListHelper::List_Find(aszNewResi, m_lstResidentIn) == -1)
+	{
+		m_lstResidentIn.push_back(aszNewResi);
+	}
 }
 
 std::vector<std::string> CopyItem::GetResidentIn()

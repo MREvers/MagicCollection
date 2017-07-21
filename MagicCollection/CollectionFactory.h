@@ -15,7 +15,7 @@ public:
    Collection* GetCollection(std::string aszCollectionName);
 
    std::string LoadCollectionFromFile(std::string aszColFile);
-   std::string CreateNewCollection(std::string aszColName);
+   std::string CreateNewCollection(std::string aszColName, std::string aszParent = "");
 
    std::vector<std::string> GetLoadedCollections();
 
