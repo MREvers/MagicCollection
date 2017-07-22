@@ -43,6 +43,8 @@ std::string CollectionFactory::CreateNewCollection(std::string aszColName, std::
 {
 	if (!CollectionExists(aszColName))
 	{
+		// The parent is required to be loaded to have it as a parent
+		if (aszParent != "" && !CollectionExists(aszParent)) { aszParent = ""; }
 		Collection* oCol = new Collection(aszColName, m_ColSource, aszColName, aszParent);
 		m_lstCollections.push_back(oCol);
 		return oCol->GetName();

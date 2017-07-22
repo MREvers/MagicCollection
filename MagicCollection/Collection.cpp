@@ -16,9 +16,19 @@ Collection::~Collection()
 {
 }
 
+void Collection::SetName(std::string aszNewName)
+{
+	m_szName = aszNewName;
+}
+
 std::string Collection::GetName()
 {
 	return m_szName;
+}
+
+std::string Collection::GetParent()
+{
+	return m_szParentName;
 }
 
 void Collection::AddItem(std::string aszName,

@@ -20,7 +20,11 @@ public:
 				   std::string aszParentCollectionName = "");
 	~Collection();
 
+	void SetName(std::string aszNewName);
 	std::string GetName();
+
+	// Once the parent is set, it can't change. This would lead to weird relations with no obvious solution.
+	std::string GetParent();
 
 	void AddItem(std::string aszName,
 		std::vector<Tag> alstAttrs = std::vector<Tag>(),
