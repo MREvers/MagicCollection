@@ -34,6 +34,8 @@ public:
 	void ChangeItem(std::string aszName, std::string aszIdentifyingHash, std::vector<Tag> alstIdChanges, std::vector<Tag> alstMetaChanges, bool abCloseTransaction = true);
 	void ReplaceItem(std::string aszName, std::string aszIdentifyingHash, std::string aszNewName, std::vector<Tag> alstIdChanges, std::vector<Tag> alstMetaChanges, bool abCloseTransaction = true);
 
+	std::vector<std::string> GetMetaData();
+
 	std::vector<std::pair<std::string, Tag>> GetTags();
 	void TagItem(std::string aszHash, Tag atag);
 	void UntagItem(std::string aszHash, std::string aszTagKey);

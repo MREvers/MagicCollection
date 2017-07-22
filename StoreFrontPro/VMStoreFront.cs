@@ -40,7 +40,8 @@ namespace StoreFrontPro
             OperationWindow.DisplayEvent += DisplayEventHandler;
             
             VCICollectionDeckBox CDBIS = new VCICollectionDeckBox(
-                SwitchToCube: showCollectionCubeView);
+                SwitchToCube: showCollectionCubeView,
+                ChildCreated: eSyncCollections);
             VCICollectionCube CCIS = new VCICollectionCube(
                 SwitchToDeckBox: showCollectionDeckBox);
             VCICollectionsOverview COIS = new VCICollectionsOverview(
@@ -146,6 +147,11 @@ namespace StoreFrontPro
                 ServerInterface.Server.LoadCollection(szSelectedFile);
                 ServerInterface.Server.SyncServerTask(() => { Model.SyncAllCollections(); Model.SyncCollectionList(); });
             }
+        }
+
+        private void eSyncCollections()
+        {
+            ServerInterface.Server.SyncServerTask(() => { Model.SyncAllCollections(); Model.SyncCollectionList(); });
         }
 
         private void eCloseCommand(object aoCanExecute)

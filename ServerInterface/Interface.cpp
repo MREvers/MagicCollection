@@ -17,10 +17,11 @@ System::String^ ServerClientInterface::LoadCollection(System::String^ ahszCollec
 	return gcnew System::String(szCollectionName.c_str());
 }
 
-System::String^ ServerClientInterface::CreateNewCollection(System::String^ aszCollectionName)
+System::String^ ServerClientInterface::CreateNewCollection(System::String^ aszCollectionName, System::String^ ahszParent)
 {
 	std::string szCollectionFileName = msclr::interop::marshal_as<std::string>(aszCollectionName);
-	return gcnew System::String(m_StoreFrontBackEnd->CreateNewCollection(szCollectionFileName).c_str());
+	std::string szParentName = msclr::interop::marshal_as<std::string>(ahszParent);
+	return gcnew System::String(m_StoreFrontBackEnd->CreateNewCollection(szCollectionFileName, szParentName).c_str());
 }
 
 void ServerClientInterface::SaveCollection(System::String^ aszCollectionName)
@@ -68,6 +69,14 @@ System::Collections::Generic::List<System::String^>^ ServerClientInterface::GetA
 		hlstCardList->Add(hszCard);
 	}
 	return hlstCardList;
+}
+
+System::Collections::Generic::List<System::String^>^
+ServerClientInterface::GetCollectionMetaData(System::String^ ahszCollectionName)
+{
+	std::string szCollectionName = msclr::interop::marshal_as<std::string>(ahszCollectionName);
+	std::vector<std::string> lstMeta = m_StoreFrontBackEnd->GetCollectionMetaData(szCollectionName);
+	return stringVectorToList(lstMeta);
 }
 
 // [ { card name - long, [ <tags> ] }, ... }

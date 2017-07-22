@@ -1,5 +1,6 @@
 ﻿using StoreFrontPro.Server;
 using StoreFrontPro.Support.MultiDisplay;
+using StoreFrontPro.Views.Components.RequestTextOverlay;
 using StoreFrontPro.Views.Interfaces.CollectionChanger;
 using System;
 using System.Collections.Generic;
@@ -29,6 +30,10 @@ namespace StoreFrontPro.Views.CollectionViews.Deckbox
             VCICollectionEditor CEIS = new VCICollectionEditor(
                 Accept: eAcceptOrCancelColEditor,
                 Cancel: eAcceptOrCancelColEditor);
+            VCIRequestText RTIS = new VCIRequestText(
+                Accept: eSubCollectionAccept,
+                Cancel: eSubCollectionCancelled);
+            SupportedInterface.Add(RTIS.GetInterfaceType(), RTIS);
             SupportedInterface.Add(CEIS.GetInterfaceType(), CEIS);
 
             if (!Model.IsCollapsedCollection)
@@ -64,10 +69,12 @@ namespace StoreFrontPro.Views.CollectionViews.Deckbox
 
             StoreFrontMenuItem openCollectionEditor = new StoreFrontMenuItem("Edit Collection", eDisplayCollectionEditorCommand);
             StoreFrontMenuItem saveCollection = new StoreFrontMenuItem("Save Collection", eSaveCollection);
+            StoreFrontMenuItem createChild = new StoreFrontMenuItem("Create Child Collection", eDisplayCreateChildCollection);
             StoreFrontMenuItem switchToCube = new StoreFrontMenuItem("View as Cube", eSwitchToCubeView);
 
             lstRetVal.Add(openCollectionEditor);
             lstRetVal.Add(saveCollection);
+            lstRetVal.Add(createChild);
             lstRetVal.Add(switchToCube);
 
             return lstRetVal;
@@ -87,6 +94,12 @@ namespace StoreFrontPro.Views.CollectionViews.Deckbox
             OperationWindow.ShowOverlay(new VCollectionEditor() { DataContext = collectionsOverviewVM });
         }
 
+        private void eDisplayCreateChildCollection(object canExecute)
+        {
+            VMRequestText collectionsOverviewVM = new VMRequestText("");
+            OperationWindow.ShowOverlay(new VRequestText() { DataContext = collectionsOverviewVM });
+        }
+
         private void eSaveCollection(object canExecute)
         {
             Model.SaveCollection();
@@ -99,6 +112,18 @@ namespace StoreFrontPro.Views.CollectionViews.Deckbox
         }
 
         private void eAcceptOrCancelColEditor()
+        {
+            OperationWindow.CloseOverlay();
+        }
+
+        private void eSubCollectionAccept(string aszCollectionName)
+        {
+            Model.CreateChildCollection(aszCollectionName);
+            OperationWindow.CloseOverlay();
+            DisplayEvent(this, new DisplayEventArgs(VCICollectionDeckBox.ChildCreated));
+        }
+
+        private void eSubCollectionCancelled()
         {
             OperationWindow.CloseOverlay();
         }

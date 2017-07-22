@@ -17,15 +17,16 @@ namespace StoreFrontPro.Server
         public bool IsCollapsedCollection
         {
             get { return _IsCollapsedCollection; }
-            set { m_bHardRebuild = (_IsCollapsedCollection != value); _IsCollapsedCollection = value;  }
+            set { m_bHardRebuild = (_IsCollapsedCollection != value); _IsCollapsedCollection = value; }
         }
 
         public string CollectionName;
+        public string ParentCollection = "";
         public ObservableCollection<CardModel> CollectionItems;
         public List<CardModel> LstLastQuery; // NOT CURRENTLY USED
 
         private bool m_bHardRebuild = false;
-        
+
         public CollectionModel(string aszName)
         {
             CollectionName = aszName;
@@ -35,13 +36,24 @@ namespace StoreFrontPro.Server
             Sync();
         }
 
+        public void CreateChildCollection(string aszNewName)
+        {
+            ServerInterface.Server.CreateCollection(aszNewName, CollectionName);
+        }
+
         public void Sync(Action aCallback = null)
         {
+            ServerInterface.Collection.GetCollectionMetaData(
+                CollectionName,
+                analyzeMetaData,
+                true);
+
             ServerInterface.Collection.GetCollectionList(
                 CollectionName,
                 IsCollapsedCollection,
                 (alstCol) => { setCollectionModels(alstCol, aCallback); },
                 true);
+
         }
 
         public void SetBaselineHistory()
@@ -91,7 +103,7 @@ namespace StoreFrontPro.Server
         private void setCollectionModels(List<string> aLstCards)
         {
             // Calculate differences.
-            List<string> lstHashesAndCounts = aLstCards.Select(x=>fastExtractHash(x,true)).ToList();
+            List<string> lstHashesAndCounts = aLstCards.Select(x => fastExtractHash(x, true)).ToList();
             List<string> lstNewHashes = lstHashesAndCounts.Select(x => x.Split(',')[1]).ToList();
             List<string> lstNewCounts = lstHashesAndCounts.Select(x => x.Split(',')[0] == "" ? (1).ToString() : x.Split(',')[0]).ToList();
             DisableEvents(CollectionItems);
@@ -132,7 +144,7 @@ namespace StoreFrontPro.Server
             {
                 CollectionItems.Clear();
             }
-            
+
             for (int i = 0; i < lstNewHashes.Count; i++)
             {
                 if (i == lstNewHashes.Count - 1)
@@ -145,7 +157,7 @@ namespace StoreFrontPro.Server
                                     Callback: (aoCardModel) => { CollectionItems.Add(aoCardModel); },
                                     UICallback: true);
             }
-            
+
             m_bHardRebuild = false;
 
             List<string> szTest = ServerInterface.Collection.GetCollectionAnalysis(this.CollectionName, "mana");
@@ -155,6 +167,30 @@ namespace StoreFrontPro.Server
         {
             setCollectionModels(aLstCards);
             ServerInterface.Server.SyncServerTask(aCallback);
+        }
+
+        private void analyzeMetaData(List<string> alstMeta)
+        {
+            foreach (string szLine in alstMeta)
+            {
+                if (szLine.Contains(":"))
+                {
+
+                }
+                else
+                {
+                    List<string> lstSplitLine = szLine.Split('=').ToList();
+                    if (lstSplitLine.Count > 1)
+                    {
+                        string szKey = lstSplitLine[0];
+                        string szVal = lstSplitLine[1];
+                        if (szKey == "Parent")
+                        {
+                            ParentCollection = szVal.Trim('"');
+                        }
+                    }
+                }
+            }
         }
 
         /// <summary>
@@ -173,7 +209,7 @@ namespace StoreFrontPro.Server
                 szWithCount = aszIdentifier.Substring(0, iFirstSpace);
                 if (szWithCount[0] == 'x')
                 {
-                    szWithCount = szWithCount.Substring(1, iFirstSpace-1);
+                    szWithCount = szWithCount.Substring(1, iFirstSpace - 1);
                 }
                 szWithCount += ",";
             }

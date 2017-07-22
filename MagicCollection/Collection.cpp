@@ -185,6 +185,24 @@ void Collection::ReplaceItem(std::string aszName, std::string aszIdentifyingHash
 	}
 }
 
+std::vector<std::string> Collection::GetMetaData()
+{
+	std::vector<std::string> lstRetval;
+	lstRetval.push_back("Name=\"" + m_szName + "\"");
+
+	if (m_szParentName != "")
+	{
+		lstRetval.push_back("Parent=\"" + m_szParentName + "\"");
+	}
+
+	for each(auto metaData in m_lstTaggedItems)
+	{
+		lstRetval.push_back(metaData.first + ": {" + metaData.second.first + "=\"" + metaData.second.second + "\" }");
+	}
+
+	return lstRetval;
+}
+
 std::vector<std::pair<std::string, Tag>> Collection::GetTags()
 {
 	return m_lstTaggedItems;
@@ -430,7 +448,7 @@ void Collection::addItem(std::string aszName, std::vector<Tag> alstAttrs, std::v
 	std::string szItemParent = m_szName;
 	if (m_szParentName != "") { szItemParent = m_szParentName; }
 
-	item->AddCopyItem(szItemParent, alstAttrs, alstMetaTags)->AddResident(szItemParent);
+	item->AddCopyItem(szItemParent, alstAttrs, alstMetaTags)->AddResident(m_szName);
 
 	registerItem(iCache);
 

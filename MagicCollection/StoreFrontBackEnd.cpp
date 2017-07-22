@@ -28,14 +28,27 @@ std::string CStoreFrontBackEnd::LoadCollection(std::string aszCollectionFile)
 	return m_ColFactory->LoadCollectionFromFile(aszCollectionFile);
 }
 
-std::string CStoreFrontBackEnd::CreateNewCollection(std::string aszCollectionName)
+std::string CStoreFrontBackEnd::CreateNewCollection(std::string aszCollectionName, std::string aszParent)
 {
-	return m_ColFactory->CreateNewCollection(aszCollectionName);
+	return m_ColFactory->CreateNewCollection(aszCollectionName, aszParent);
 }
 
 std::vector<std::string> CStoreFrontBackEnd::GetLoadedCollections()
 {
 	return m_ColFactory->GetLoadedCollections();
+}
+
+std::vector<std::string> CStoreFrontBackEnd::GetCollectionMetaData(std::string aszCollection)
+{
+	if (m_ColFactory->CollectionExists(aszCollection))
+	{
+		return m_ColFactory->GetCollection(aszCollection)->GetMetaData();
+	}
+	else
+	{
+		std::vector<std::string> noRetval;
+		return noRetval;
+	}
 }
 
 std::vector<std::string>

@@ -26,7 +26,10 @@ std::string CollectionFactory::LoadCollectionFromFile(std::string aszFileName)
 	Collection* oCol = new Collection(Config::NotFoundString, m_ColSource, szFile);
 	oCol->LoadCollection(aszFileName, this);
 	std::string szFoundName = oCol->GetName();
-	if (oCol->IsLoaded && !CollectionExists(szFoundName))
+
+	// The parent collection must be loaded
+	if (oCol->IsLoaded && !CollectionExists(szFoundName) &&
+		(oCol->GetParent() == "" || CollectionExists(oCol->GetParent())))
 	{
 		m_lstCollections.push_back(oCol);
 		szRetVal = szFoundName;

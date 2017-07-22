@@ -37,6 +37,13 @@ namespace StoreFrontPro.Server
 
             }
 
+            public void GetCollectionMetaData(string aszCollectionName, Action<List<string>> aCallback, bool UICallback)
+            {
+                singleton.enqueueService(()=> {
+                    aCallback(SCI.GetCollectionMetaData(aszCollectionName));
+                }, UICallback);
+            }
+
             public void GetCollectionList(string aszCollectionName, bool abCollapsed, Action<List<string>> aCallback, bool UICallback = false)
             {
                 singleton.enqueueService(() =>

@@ -60,7 +60,6 @@ namespace StoreFrontPro.Views.CollectionsOverview
             VCIRequestText RTIS = new VCIRequestText(
                 Accept: eAddCollectionResolved,
                 Cancel: eAddCollectionCanceled);
-
             SupportedInterface.Add(RTIS.GetInterfaceType(), RTIS);
 
             // Dont use this to set the data context because we dont want the MultiDisplay to hook to this display event.

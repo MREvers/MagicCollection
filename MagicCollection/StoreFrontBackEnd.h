@@ -17,9 +17,10 @@ public:
 
    void SaveCollection(std::string aszCollectionName);
    std::string LoadCollection(std::string aszCollectionFile);
-   std::string CreateNewCollection(std::string aszCollectionName);
+   std::string CreateNewCollection(std::string aszCollectionName, std::string aszParent);
    std::vector<std::string> GetLoadedCollections();
 
+   std::vector<std::string> GetCollectionMetaData(std::string aszCollection);
    std::vector<std::string> GetCollectionList(std::string aszCollection, int aiVisibility, bool bCollapsed);
    std::vector<std::string> GetCollectionAnalysis(std::string aszCollection, std::string aszAnalysisCmd);
    std::string GetCardPrototype(std::string aszCardName);
