@@ -1,5 +1,6 @@
 #pragma once
 #include <vector>
+#include <memory>
 #include <string>
 
 #include "CollectionIO.h"
@@ -17,7 +18,7 @@ public:
 	Collection(std::string aszName,
 				   CollectionSource* aoSource,
 				   std::string aszFileCollection,
-				   std::string aszParentCollectionName = "");
+				   std::shared_ptr<Collection> aptrCollection = std::shared_ptr<Collection>(nullptr));
 	~Collection();
 
 	void SetName(std::string aszNewName);
@@ -52,8 +53,10 @@ public:
 
 private:
 	std::string m_szName;
-	std::string m_szParentName;
 	std::string m_szFileName;
+	// The parent name can be loaded from a file or captured in the constructor with a parent.
+	std::string m_szParentName;
+	std::shared_ptr<Collection> m_ptrParentCollection;
 	CollectionSource* m_ptrCollectionSource;
 
 	bool m_bRecordChanges;

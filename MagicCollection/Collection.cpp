@@ -2,12 +2,18 @@
 
 
 
-Collection::Collection(std::string aszName, CollectionSource* aoSource, std::string aszFileCollection, std::string aszParentCollectionName)
+Collection::Collection(std::string aszName, CollectionSource* aoSource, std::string aszFileCollection, std::shared_ptr<Collection> aptrCollection)
 {
 	m_szName = aszName;
 	m_szFileName = aszFileCollection;
 	m_ptrCollectionSource = aoSource;
-	m_szParentName = aszParentCollectionName;
+	m_ptrParentCollection = aptrCollection;
+
+	if (!m_ptrParentCollection)
+	{
+		m_szParentName = m_ptrParentCollection->GetName();
+	}
+
 	m_bRecordChanges = true;
 }
 
@@ -28,7 +34,14 @@ std::string Collection::GetName()
 
 std::string Collection::GetParent()
 {
-	return m_szParentName;
+	if (!m_ptrParentCollection)
+	{
+		return "";
+	}
+	else
+	{
+		return m_ptrParentCollection->GetName();
+	}
 }
 
 void Collection::AddItem(std::string aszName,
@@ -190,9 +203,9 @@ std::vector<std::string> Collection::GetMetaData()
 	std::vector<std::string> lstRetval;
 	lstRetval.push_back("Name=\"" + m_szName + "\"");
 
-	if (m_szParentName != "")
+	if (GetParent() != "")
 	{
-		lstRetval.push_back("Parent=\"" + m_szParentName + "\"");
+		lstRetval.push_back("Parent=\"" + GetParent() + "\"");
 	}
 
 	for each(auto metaData in m_lstTaggedItems)
@@ -446,7 +459,7 @@ void Collection::addItem(std::string aszName, std::vector<Tag> alstAttrs, std::v
 	CollectionItem* item = m_ptrCollectionSource->GetCardPrototype(iCache);
 
 	std::string szItemParent = m_szName;
-	if (m_szParentName != "") { szItemParent = m_szParentName; }
+	if (GetParent() != "") { szItemParent = GetParent(); }
 
 	item->AddCopyItem(szItemParent, alstAttrs, alstMetaTags)->AddResident(m_szName);
 
@@ -812,9 +825,9 @@ void Collection::saveCollection()
 		oColFile.open(ioHelper.GetCollectionFile(m_szFileName));
 
 		oColFile << Config::CollectionDefinitionKey << " Name=\"" << m_szName << "\"" << std::endl;
-		if (m_szParentName != "")
+		if (GetParent() != "")
 		{
-			oColFile << Config::CollectionDefinitionKey << " Parent=\"" << m_szParentName << "\"" << std::endl;
+			oColFile << Config::CollectionDefinitionKey << " Parent=\"" << GetParent() << "\"" << std::endl;
 		}
 
 		std::vector<std::string>::iterator iter_Line = lstLines.begin();
