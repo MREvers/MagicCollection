@@ -23,6 +23,7 @@ public:
 	std::string GetHash();
 
 	std::string GetParent();
+	void SetParent(std::string aszParentName);
 	void AddResident(std::string aszNewResi);
 	void RemoveResident(std::string aszRemoveResi);
 	std::vector<std::string> GetResidentIn();
@@ -40,6 +41,7 @@ public:
 	std::function<std::string(MetaTag)> GetMetaTagKeyViewer();
 
 private:
+	bool m_bNeedHash;
 	std::string m_szParentCollection;
 	std::vector<std::string> m_lstResidentIn;
 

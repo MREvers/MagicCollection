@@ -33,7 +33,7 @@ public:
 		std::vector<Tag> alstAttrs = std::vector<Tag>(),
 		std::vector<Tag> alstMetaTags = std::vector<Tag>(),
 		bool abCloseTransaction = true);
-	void AddItem(std::string aszName, std::string aszHash, bool abCloseTransaction = true);
+	void AddItem(std::string aszName, std::string aszHash, std::string aszResidentIn = "", bool abCloseTransaction = true);
 	void RemoveItem(std::string aszName, std::string aszIdentifyingHash, bool abCloseTransaction = true);
 	void ChangeItem(std::string aszName, std::string aszIdentifyingHash, std::vector<Tag> alstIdChanges, std::vector<Tag> alstMetaChanges, bool abCloseTransaction = true);
 	void ReplaceItem(std::string aszName, std::string aszIdentifyingHash, std::string aszNewName, std::vector<Tag> alstIdChanges, std::vector<Tag> alstMetaChanges, bool abCloseTransaction = true);
@@ -75,8 +75,8 @@ private:
 
 	// These all locate by name and hash for a second time so we dont risk dangling pointers.
 	void addItem(std::string aszName, std::vector<Tag> alstAttrs, std::vector<Tag> alstMetaTags);
-	void addExistingItem(std::string aszName, std::string aszHash); // this is for an Item from another collection
-	void removeItem(std::string aszName, std::string aszIdentifyingHash);
+	void addExistingItem(std::string aszName, std::string aszHash, std::string aszResidentIn); // this is for an Item from another collection
+	void removeItem(std::string aszName, std::string aszIdentifyingHash,std::string aszResidentIn);
 	void changeItem(std::string aszName, std::string aszIdentifyingHash, std::vector<Tag> alstChanges, std::vector<Tag> alstMetaChanges);
 	void replaceItem(std::string aszName, std::string aszIdentifyingHash, std::string aszNewName, std::vector<Tag> alstIdChanges, std::vector<Tag> alstMetaChanges);
 	void registerItem(int aiCacheIndex);

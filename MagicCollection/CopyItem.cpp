@@ -11,6 +11,8 @@ CopyItem::CopyItem(std::vector<TraitItem>* alstTraits, std::string aszParentColl
 	{
 		m_lstIdentifyingTags.push_back(std::make_pair(iter_DefaultVals->GetKeyName(), iter_DefaultVals->GetDefaultValue()));
 	}
+
+	m_bNeedHash = true;
 }
 
 
@@ -48,7 +50,7 @@ std::string CopyItem::GetHash()
 		m_lstMetaTags,
 		fnExtractor);
 
-	if (iMetaHash == -1)
+	if (iMetaHash == -1 || m_bNeedHash)
 	{
 		std::string szHashString = m_szParentCollection;
 		std::vector<Tag>::iterator iter_Tags = m_lstIdentifyingTags.begin();
@@ -68,6 +70,7 @@ std::string CopyItem::GetHash()
 		std::string szHash = Config::Instance()->GetHash(szHashString);
 		SetMetaTag(Config::HashKey, szHash, Hidden);
 
+		m_bNeedHash = false;
 		return szHash;
 	}
 	else
@@ -79,6 +82,12 @@ std::string CopyItem::GetHash()
 std::string CopyItem::GetParent()
 {
 	return m_szParentCollection;
+}
+
+void CopyItem::SetParent(std::string aszParentName)
+{
+	m_szParentCollection = aszParentName;
+	m_bNeedHash = true;
 }
 
 void CopyItem::AddResident(std::string aszNewResi)
@@ -124,6 +133,7 @@ void CopyItem::SetMetaTag(std::string aszKey, std::string aszVal, MetaTagType at
 	{
 		m_lstMetaTags[iFound].SetVal(aszVal);
 	}
+	m_bNeedHash = true;
 }
 
 std::string CopyItem::GetMetaTag(std::string aszKey, MetaTagType atagType)
@@ -168,12 +178,14 @@ bool CopyItem::SetIdentifyingAttribute(std::string aszKey, std::string aszValue)
 			m_lstIdentifyingTags[iIsAttr].second = aszValue;
 			int iValueIndex = ListHelper::List_Find(aszValue, foundTrait.GetAllowedValues());
 			setPairedAttributes(aszKey, iValueIndex);
+			m_bNeedHash = true;
 			return true;
 		}
 	}
 	else if (aszKey == "Parent")
 	{
 		m_szParentCollection = aszValue;
+		m_bNeedHash = true;
 		return true;
 	}
 

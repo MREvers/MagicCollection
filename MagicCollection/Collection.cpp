@@ -10,7 +10,7 @@ Collection::Collection(std::string aszName, CollectionSource* aoSource, std::str
 	m_ptrCollectionSource = aoSource;
 	m_ptrParentCollection = aptrCollection;
 
-	if (!m_ptrParentCollection)
+	if (m_ptrParentCollection)
 	{
 		m_szParentName = m_ptrParentCollection->GetName();
 	}
@@ -68,7 +68,7 @@ void Collection::AddItem(std::string aszName,
 	fnDo = std::bind(&Collection::addItem, this, aszName, alstAttrs, alstMetaTags);
 
 	std::function<void()> fnUndo;
-	fnUndo = std::bind(&Collection::removeItem, this, aszName, szHash);
+	fnUndo = std::bind(&Collection::removeItem, this, aszName, szHash, m_szName);
 
 	Action action(fnDo, fnUndo);
 
@@ -87,7 +87,7 @@ void Collection::AddItem(std::string aszName,
 	}
 }
 
-void Collection::AddItem(std::string aszName, std::string aszHash, bool abCloseTransaction)
+void Collection::AddItem(std::string aszName, std::string aszHash, std::string aszResidentIn, bool abCloseTransaction)
 {
 	// Verify the card name entered is valid
 	int iValidItem = m_ptrCollectionSource->LoadCard(aszName);
@@ -100,10 +100,10 @@ void Collection::AddItem(std::string aszName, std::string aszHash, bool abCloseT
 	if (cItem == nullptr) { return; }
 
 	std::function<void()> fnDo;
-	fnDo = std::bind(&Collection::addExistingItem, this, aszName, aszHash);
+	fnDo = std::bind(&Collection::addExistingItem, this, aszName, aszHash, aszResidentIn);
 
 	std::function<void()> fnUndo;
-	fnUndo = std::bind(&Collection::removeItem, this, aszName, aszHash);
+	fnUndo = std::bind(&Collection::removeItem, this, aszName, aszHash, aszResidentIn);
 
 	Action action(fnDo, fnUndo);
 
@@ -130,7 +130,7 @@ void Collection::RemoveItem(std::string aszName, std::string aszIdentifyingHash,
 	if (copy == nullptr) { return; }
 
 	std::function<void()> fnDo;
-	fnDo = std::bind(&Collection::removeItem, this, aszName, aszIdentifyingHash);
+	fnDo = std::bind(&Collection::removeItem, this, aszName, aszIdentifyingHash, m_szName);
 
 	std::vector<Tag> lstAttrs = copy->GetIdentifyingAttributes();
 	std::vector<Tag> lstMetas = copy->GetMetaTags(Visible);
@@ -304,6 +304,7 @@ void Collection::LoadCollection(std::string aszFileName, CollectionFactory* aoFa
 	std::vector<std::string> lstPreprocessLines;
 	std::vector<std::string> lstCardLines = loader.GetPreprocessLines(lstLines, lstPreprocessLines);
 
+	// This must be done first.
 	loadPreprocessingLines(lstPreprocessLines);
 
 	LoadChanges(lstCardLines);
@@ -322,59 +323,75 @@ void Collection::LoadCollection(std::string aszFileName, CollectionFactory* aoFa
 	for each (int cacheItem in lstAllPossibleCacheItems)
 	{
 		CollectionItem* itemPrototype = m_ptrCollectionSource->GetCardPrototype(cacheItem);
-		std::vector<CopyItem*> lstLocalItems = itemPrototype->GetCopiesForCollection(m_szName, CollectionItemType::Local);
-		std::map<std::string, std::vector<CopyItem*>> mapColExistingItems;
-		std::vector<CopyItem*> lstJustLoadedItems;
-		for each (CopyItem* copy in lstLocalItems)
+		if (GetParent() == "")
 		{
-			if (copy->IsResidentIn(m_szName))
+			std::vector<CopyItem*> lstLocalItems = itemPrototype->GetCopiesForCollection(m_szName, CollectionItemType::Local);
+			std::map<std::string, std::vector<CopyItem*>> mapColExistingItems;
+			std::vector<CopyItem*> lstJustLoadedItems;
+			for each (CopyItem* copy in lstLocalItems)
 			{
-				if (copy->GetResidentIn().size() > 1)
+				if (copy->IsResidentIn(m_szName))
 				{
-					// It has more than just this collection in it.
-					for each (std::string collection in copy->GetResidentIn())
+					std::vector<std::string> lstResidentIn = copy->GetResidentIn();
+					if (lstResidentIn.size() > 1 && ListHelper::List_Find(GetParent(), lstResidentIn) == -1)
 					{
-						mapColExistingItems[collection].push_back(copy);
+						// It has more than just this collection in it.
+						// This loop will capture the name of this collection too. (Because a child collection created it)
+						for each (std::string collection in lstResidentIn)
+						{
+							mapColExistingItems[collection].push_back(copy);
+						}
+					}
+					else
+					{
+						lstJustLoadedItems.push_back(copy);
 					}
 				}
-				else
+			}
+
+			// Now try to pair up "just loaded" with "already". If a match is found, use the existing one.
+			// Now go through each collection and account for each one.
+			std::map<std::string, std::vector<CopyItem*>>::iterator iter_existingCol = mapColExistingItems.begin();
+			for (; iter_existingCol != mapColExistingItems.end(); ++iter_existingCol)
+			{
+				std::string szOtherCollection = iter_existingCol->first;
+
+				std::function<std::string(CopyItem*)> fnNotAlreadyUsedExtractor = [&, szOtherCollection](CopyItem* item)->std::string
 				{
-					lstJustLoadedItems.push_back(copy);
+					if (!item->IsResidentIn(szOtherCollection)) { return item->GetHash(); }
+					else { return ""; }
+				};
+
+				std::vector<CopyItem*>::iterator iter_existingColItem = iter_existingCol->second.begin();
+				int q = 0;
+				for (; iter_existingColItem != iter_existingCol->second.end() && q < lstJustLoadedItems.size(); ++iter_existingColItem, q++)
+				{
+					std::string szHash = (*iter_existingColItem)->GetHash();
+					// If there is a card just loaded with the same hash, then that is the card we want to keep.
+					// If not, then that is an additional copy added while this col wasn't loaded.
+					int iFoundJustAdded = ListHelper::List_Find(szHash, lstJustLoadedItems, fnNotAlreadyUsedExtractor);
+					if (iFoundJustAdded != -1)
+					{
+						lstJustLoadedItems[iFoundJustAdded]->AddResident(szOtherCollection);
+
+						// If we remove the resident here, the that item will be deleted later in this function.
+						(*iter_existingColItem)->RemoveResident(szOtherCollection);
+						(*iter_existingColItem)->RemoveResident(m_szName);
+					}
 				}
 			}
 		}
-
-		// Now try to pair up "just loaded" with "already". If a match is found, use the existing one.
-		// Now go through each collection and account for each one.
-		std::map<std::string, std::vector<CopyItem*>>::iterator iter_existingCol = mapColExistingItems.begin();
-		for (; iter_existingCol != mapColExistingItems.end(); ++iter_existingCol)
+		else
 		{
-			std::string szOtherCollection = iter_existingCol->first;
-
-			std::function<std::string(CopyItem*)> fnNotAlreadyUsedExtractor = [&, szOtherCollection](CopyItem* item)->std::string
+			std::vector<CopyItem*> lstLocalItems = itemPrototype->GetCopiesForCollection(m_szName, CollectionItemType::Local);
+			for each (CopyItem* copy in lstLocalItems)
 			{
-				if (!item->IsResidentIn(szOtherCollection)) { return item->GetHash(); }
-				else { return ""; }
-			};
-
-			std::vector<CopyItem*>::iterator iter_existingColItem = iter_existingCol->second.begin();
-			int q = 0;
-			for (; iter_existingColItem != iter_existingCol->second.end() && q < lstJustLoadedItems.size(); ++iter_existingColItem, q++)
-			{
-				std::string szHash = (*iter_existingColItem)->GetHash();
-				// If there is a card just loaded with the same hash, then that is the card we want to keep.
-				// If not, then that is an additional copy added while this col wasn't loaded.
-				int iFoundJustAdded = ListHelper::List_Find(szHash, lstJustLoadedItems, fnNotAlreadyUsedExtractor);
-				if (iFoundJustAdded != -1)
-				{
-					lstJustLoadedItems[iFoundJustAdded]->AddResident(szOtherCollection);
-
-					// If we remove the resident here, the that item will be deleted later in this function.
-					(*iter_existingColItem)->RemoveResident(m_szName);
-				}
+				copy->SetParent(GetParent());
 			}
 		}
+		
 	}
+
 	// Now Verify Borrowed Cards (i.e. Parent != this) that were just loaded exist.
 	// Two things can happen in this case. 
 	// If the claimed collection exists, then try to find the referenced item and use that instead, if that fails, delete the item.
@@ -416,7 +433,7 @@ void Collection::LoadCollection(std::string aszFileName, CollectionFactory* aoFa
 	// Now this collection is COMPLETELY LOADED. Since other collections can reference this collection, without this collection being loaded,
 	// those other collections may have created copies of card in this collection already; if that is the case, use those copies. Additionally,
 	// check that all the copies referenced by the other collections still exist, if not, delete those copies.
-	std::vector<int> lstAllPossibleCacheItems = m_ptrCollectionSource->GetCollectionCache(m_szName);
+	lstAllPossibleCacheItems = m_ptrCollectionSource->GetCollectionCache(m_szName);
 	for (size_t i = 0; i < lstAllPossibleCacheItems.size(); i++)
 	{
 		CollectionItem* itemPrototype = m_ptrCollectionSource->GetCardPrototype(lstAllPossibleCacheItems[i]);
@@ -461,6 +478,7 @@ void Collection::LoadCollection(std::string aszFileName, CollectionFactory* aoFa
 					for (; iter_existingColItem != iter_existingCol->second.end() && q < lstNewlyAddedItems.size(); ++iter_existingColItem, q++)
 					{
 						lstNewlyAddedItems[q]->AddResident(iter_existingCol->first);
+						itemPrototype->Erase(*iter_existingColItem);
 					}
 
 					// Delete the items unaccounted for.
@@ -569,11 +587,51 @@ void Collection::addItem(std::string aszName, std::vector<Tag> alstAttrs, std::v
 	std::string szItemParent = m_szName;
 	if (GetParent() != "") { szItemParent = GetParent(); }
 
-	item->AddCopyItem(szItemParent, alstAttrs, alstMetaTags)->AddResident(m_szName);
+	// If this is a super collection, it will just add the item.
+	// If this is a child collection, it will add this to its resident and set the parent to this' parent.
+	CopyItem* cItem = item->AddCopyItem(szItemParent, alstAttrs, alstMetaTags);
+	cItem->AddResident(m_szName);
+	std::string szHash = cItem->GetHash();
 
-	if (!m_ptrParentCollection)
+	if (m_ptrParentCollection)
 	{
-		m_ptrParentCollection->AddItem(aszName, alstAttrs, alstMetaTags);
+		cItem->RemoveResident(szItemParent);
+		// If this is a child collection, there will be a copy with parent = this.parent but parent not in resi
+		m_ptrParentCollection->addExistingItem(aszName, szHash, m_szName);
+	}
+
+	registerItem(iCache);
+
+	// Notify other collections they may need to sync since this may have been borrowed by other collections.
+	// There should never be other copies with that hash not in resident. They are removed at load time.
+	m_ptrCollectionSource->NotifyNeedToSync(m_szName);
+}
+
+void Collection::addExistingItem(std::string aszName, std::string aszHash, std::string aszResidentIn)
+{
+	// Used to filter out copies that are already in this collection.
+	std::function<std::string(CopyItem*)> fnExtractor = [&](CopyItem* item)->std::string
+	{
+		if (!item->IsResidentIn(m_szName)) { return item->GetHash(); }
+		else { return ""; }
+	};
+
+	int iCache = m_ptrCollectionSource->LoadCard(aszName);
+	CollectionItem* item = m_ptrCollectionSource->GetCardPrototype(iCache);
+	std::vector<CopyItem*> lstPosCopies = item->FindAllCopyItems(aszHash, aszResidentIn);
+
+	// Look for a copy not already used in this collection
+	int iFoundMatch = ListHelper::List_Find(aszHash, lstPosCopies, fnExtractor);
+	if (iFoundMatch == -1) { return; }
+
+	CopyItem* cItem = lstPosCopies[iFoundMatch];
+	cItem->AddResident(GetName());
+
+	if (m_ptrParentCollection && cItem->GetParent()==m_szName)
+	{
+		cItem->SetParent(GetParent());
+
+		m_ptrParentCollection->addExistingItem(aszName, cItem->GetHash(), m_szName);
 	}
 
 	registerItem(iCache);
@@ -582,13 +640,19 @@ void Collection::addItem(std::string aszName, std::vector<Tag> alstAttrs, std::v
 	m_ptrCollectionSource->NotifyNeedToSync(m_szName);
 }
 
-void Collection::removeItem(std::string aszName, std::string aszIdentifyingHash)
+void Collection::removeItem(std::string aszName, std::string aszIdentifyingHash, std::string aszResidentIn)
 {
 	// The copy is already verified to exist at this point
 	int iCache = m_ptrCollectionSource->LoadCard(aszName);
 
 	CollectionItem* item = m_ptrCollectionSource->GetCardPrototype(iCache);
-	item->RemoveCopyItem(m_szName, aszIdentifyingHash);
+	std::string szHostToRemoveFrom = m_szName;
+	if (aszResidentIn != "")
+	{
+		szHostToRemoveFrom = aszResidentIn;
+	}
+
+	item->RemoveCopyItem(aszResidentIn, aszIdentifyingHash);
 
 	// Remove any items from the cache that are no longer in this collection.
 	if (item->GetCopiesForCollection(m_szName, All).size() == 0)
@@ -633,7 +697,7 @@ void Collection::replaceItem(std::string aszName, std::string aszIdentifyingHash
 	CopyItem* cItem = item->FindCopyItem(aszIdentifyingHash);
 	if (cItem == nullptr) { return; }
 
-	removeItem(item->GetName(), cItem->GetHash());
+	removeItem(item->GetName(), cItem->GetHash(), m_szName);
 	addItem(newItem->GetName(), alstIdChanges, alstMetaChanges);
 }
 

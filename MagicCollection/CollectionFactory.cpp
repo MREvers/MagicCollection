@@ -32,6 +32,11 @@ std::string CollectionFactory::LoadCollectionFromFile(std::string aszFileName)
 		m_lstCollections.push_back(std::shared_ptr<Collection>(oCol));
 		szRetVal = szFoundName;
 
+		if (CollectionExists(oCol->GetParent()))
+		{
+			oCol->RegisterParent(std::shared_ptr<Collection>(GetCollection(oCol->GetParent())));
+		}
+
 		// Check if this collection is a parent of another. If so, then those cols need this collection.
 		for each (std::shared_ptr<Collection> col in m_lstCollections)
 		{
@@ -53,9 +58,17 @@ std::string CollectionFactory::CreateNewCollection(std::string aszColName, std::
 {
 	if (!CollectionExists(aszColName))
 	{
+		Collection* oCol;
 		// The parent is required to be loaded to have it as a parent
-		if (aszParent != "" && !CollectionExists(aszParent)) { aszParent = ""; }
-		Collection* oCol = new Collection(aszColName, m_ColSource, aszColName, aszParent);
+		if (CollectionExists(aszParent))
+		{
+			oCol = new Collection(aszColName, m_ColSource, aszColName, std::shared_ptr<Collection>(GetCollection(aszParent)));
+		}
+		else
+		{
+			oCol = new Collection(aszColName, m_ColSource, aszColName);
+		}
+
 		m_lstCollections.push_back(std::shared_ptr<Collection>(oCol));
 		return oCol->GetName();
 	}

@@ -65,11 +65,18 @@ void CollectionItem::RemoveCopyItem(std::string aszCollectionName, std::string a
 		{
 			if ((*iter_Copies)->GetParent() == aszCollectionName)
 			{
-				m_lstCopies.erase(iter_Copies);
+				if ((*iter_Copies)->GetResidentIn().size() > 1)
+				{
+					m_lstCopies.erase(iter_Copies);
+				}
+				else
+				{
+					(*iter_Copies)->SetParent("");
+				}
 			}
 			else
 			{
-				(*iter_Copies)->
+				(*iter_Copies)->RemoveResident(aszCollectionName);
 			}
 			
 			break;
