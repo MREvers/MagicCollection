@@ -307,89 +307,93 @@ void Collection::LoadCollection(std::string aszFileName, CollectionFactory* aoFa
 	// This must be done first.
 	loadPreprocessingLines(lstPreprocessLines);
 
+	// Before we load the changes. We need to store off any copies that reference this collection.
+	std::vector<CopyItem*> lstResidentInsOnly; 
+	std::vector<CopyItem*> lstAddedByChildren;
+	std::vector<int> lstAllCards = m_ptrCollectionSource->GetCollectionCache(m_szName);
+	for each (int cacheItem in lstAllCards)
+	{
+		CollectionItem* itemPrototype = m_ptrCollectionSource->GetCardPrototype(cacheItem);
+		// This has to iterate over ALL cards because we don't know where dangling references are.
+		// Get all copies that claim to be in this collection.
+		std::vector<CopyItem*> lstCopies = itemPrototype->GetCopiesForCollection(m_szName, CollectionItemType::All);
+		for each (CopyItem* copy in lstCopies)
+		{
+			if (copy->GetParent() == m_szName && copy->IsResidentIn(m_szName))
+			{
+				lstAddedByChildren.push_back(copy);
+			}
+			else if (copy->IsResidentIn(m_szName))
+			{
+				lstResidentInsOnly.push_back(copy);
+			}
+		}
+	}
+
+	if (GetParent() != "")
+	{
+		for each (CopyItem* copy in lstAddedByChildren)
+		{
+			copy->SetParent(GetParent());
+		}
+	}
+
 	LoadChanges(lstCardLines);
 
 	// Also need to load metatags...
 	loadMetaTagFile();
 
-	// Now we need to find cards that were created by children of this collection.
-	// The only way that a copy could have this collection in its residence is...
-	// 1. It was just loaded in LoadChanges
-	// 2. It was loaded by a child collection.
-	// However, we need to distinguish from copies that were loaded by this function and by other collections
-	// Copies loaded in LoadedChanges will ONLY have this collection in its resident. If it was loaded by a 
-	// child collection, those copies will have that child collection ALSO in its resident.
-	std::vector<int> lstAllPossibleCacheItems = m_ptrCollectionSource->GetCollectionCache(m_szName, CollectionItemType::Local);
-	for each (int cacheItem in lstAllPossibleCacheItems)
+	std::vector<CopyItem*> lstNewlyAdded;
+	lstAllCards = m_ptrCollectionSource->GetCollectionCache(m_szName);
+	for each (int cacheItem in lstAllCards)
 	{
 		CollectionItem* itemPrototype = m_ptrCollectionSource->GetCardPrototype(cacheItem);
-		if (GetParent() == "")
+		std::vector<CopyItem*> lstCopies = itemPrototype->GetCopiesForCollection(m_szName, CollectionItemType::All);
+		for each (CopyItem* copy in lstCopies)
 		{
-			std::vector<CopyItem*> lstLocalItems = itemPrototype->GetCopiesForCollection(m_szName, CollectionItemType::Local);
-			std::map<std::string, std::vector<CopyItem*>> mapColExistingItems;
-			std::vector<CopyItem*> lstJustLoadedItems;
-			for each (CopyItem* copy in lstLocalItems)
+			if (ListHelper::List_Find(copy, lstAddedByChildren) == -1 &&
+				ListHelper::List_Find(copy, lstResidentInsOnly) == -1)
 			{
-				if (copy->IsResidentIn(m_szName))
-				{
-					std::vector<std::string> lstResidentIn = copy->GetResidentIn();
-					if (lstResidentIn.size() > 1 && ListHelper::List_Find(GetParent(), lstResidentIn) == -1)
-					{
-						// It has more than just this collection in it.
-						// This loop will capture the name of this collection too. (Because a child collection created it)
-						for each (std::string collection in lstResidentIn)
-						{
-							mapColExistingItems[collection].push_back(copy);
-						}
-					}
-					else
-					{
-						lstJustLoadedItems.push_back(copy);
-					}
-				}
+				lstNewlyAdded.push_back(copy);
 			}
+		}
+	}
 
-			// Now try to pair up "just loaded" with "already". If a match is found, use the existing one.
-			// Now go through each collection and account for each one.
-			std::map<std::string, std::vector<CopyItem*>>::iterator iter_existingCol = mapColExistingItems.begin();
-			for (; iter_existingCol != mapColExistingItems.end(); ++iter_existingCol)
+	for each (int cacheItem in lstAllCards)
+	{
+		CollectionItem* itemPrototype = m_ptrCollectionSource->GetCardPrototype(cacheItem);
+		std::vector<CopyItem*> lstCopies = itemPrototype->GetCopiesForCollection(m_szName, CollectionItemType::All);
+		for each (CopyItem* copy in lstCopies)
+		{
+			if (ListHelper::List_Find(copy, lstNewlyAdded) != -1)
 			{
-				std::string szOtherCollection = iter_existingCol->first;
-
-				std::function<std::string(CopyItem*)> fnNotAlreadyUsedExtractor = [&, szOtherCollection](CopyItem* item)->std::string
+				// This is a newly added item.
+				std::string szHash = copy->GetHash();
+				// Find a matching item that matches this hash but is not a new item.
+				std::function<std::string(CopyItem*)> fnExtractor = [&, lstNewlyAdded](CopyItem* item)->std::string
 				{
-					if (!item->IsResidentIn(szOtherCollection)) { return item->GetHash(); }
+					std::vector<CopyItem*> lstNew(lstNewlyAdded);
+					if (ListHelper::List_Find(item, lstNew) == -1)
+					{ return item->GetHash(); }
 					else { return ""; }
 				};
 
-				std::vector<CopyItem*>::iterator iter_existingColItem = iter_existingCol->second.begin();
-				int q = 0;
-				for (; iter_existingColItem != iter_existingCol->second.end() && q < lstJustLoadedItems.size(); ++iter_existingColItem, q++)
+				int iFoundMatch = ListHelper::List_Find(szHash, lstCopies, fnExtractor);
+				if (iFoundMatch != -1)
 				{
-					std::string szHash = (*iter_existingColItem)->GetHash();
-					// If there is a card just loaded with the same hash, then that is the card we want to keep.
-					// If not, then that is an additional copy added while this col wasn't loaded.
-					int iFoundJustAdded = ListHelper::List_Find(szHash, lstJustLoadedItems, fnNotAlreadyUsedExtractor);
-					if (iFoundJustAdded != -1)
+					CopyItem* matchCopy = lstCopies[iFoundMatch];
+					for each (std::string szResi in matchCopy->GetResidentIn())
 					{
-						lstJustLoadedItems[iFoundJustAdded]->AddResident(szOtherCollection);
-
-						// If we remove the resident here, the that item will be deleted later in this function.
-						(*iter_existingColItem)->RemoveResident(szOtherCollection);
-						(*iter_existingColItem)->RemoveResident(m_szName);
+						copy->AddResident(szResi);
 					}
+					itemPrototype->Erase(matchCopy);
 				}
 			}
-		}
-		else
-		{
-			std::vector<CopyItem*> lstLocalItems = itemPrototype->GetCopiesForCollection(m_szName, CollectionItemType::Local);
-			for each (CopyItem* copy in lstLocalItems)
+			else
 			{
-				copy->SetParent(GetParent());
+				registerItem(cacheItem);
 			}
 		}
-		
 	}
 
 	// Now Verify Borrowed Cards (i.e. Parent != this) that were just loaded exist.
@@ -433,7 +437,7 @@ void Collection::LoadCollection(std::string aszFileName, CollectionFactory* aoFa
 	// Now this collection is COMPLETELY LOADED. Since other collections can reference this collection, without this collection being loaded,
 	// those other collections may have created copies of card in this collection already; if that is the case, use those copies. Additionally,
 	// check that all the copies referenced by the other collections still exist, if not, delete those copies.
-	lstAllPossibleCacheItems = m_ptrCollectionSource->GetCollectionCache(m_szName);
+	std::vector<int> lstAllPossibleCacheItems = m_ptrCollectionSource->GetCollectionCache(m_szName);
 	for (size_t i = 0; i < lstAllPossibleCacheItems.size(); i++)
 	{
 		CollectionItem* itemPrototype = m_ptrCollectionSource->GetCardPrototype(lstAllPossibleCacheItems[i]);
@@ -627,7 +631,7 @@ void Collection::addExistingItem(std::string aszName, std::string aszHash, std::
 	CopyItem* cItem = lstPosCopies[iFoundMatch];
 	cItem->AddResident(GetName());
 
-	if (m_ptrParentCollection && cItem->GetParent()==m_szName)
+	if (m_ptrParentCollection && cItem->GetParent() == m_szName)
 	{
 		cItem->SetParent(GetParent());
 
