@@ -89,6 +89,15 @@ void CopyItem::AddResident(std::string aszNewResi)
 	}
 }
 
+void CopyItem::RemoveResident(std::string aszRemoveResi)
+{
+	int iFound;
+	if ((iFound = ListHelper::List_Find(aszRemoveResi, m_lstResidentIn)) != -1)
+	{
+		m_lstResidentIn.erase(m_lstResidentIn.begin() + iFound);
+	}
+}
+
 std::vector<std::string> CopyItem::GetResidentIn()
 {
 	return m_lstResidentIn;

@@ -55,7 +55,7 @@ CopyItem* CollectionItem::GenerateCopy(std::string aszCollectionName,
 	return newCopy;
 }
 
-void CollectionItem::RemoveCopyItem(std::string aszHash)
+void CollectionItem::RemoveCopyItem(std::string aszCollectionName, std::string aszHash)
 {
 	std::vector<CopyItem*>::iterator iter_Copies = m_lstCopies.begin();
 
@@ -63,7 +63,15 @@ void CollectionItem::RemoveCopyItem(std::string aszHash)
 	{
 		if ((*iter_Copies)->GetMetaTag(Config::HashKey, Hidden) == aszHash)
 		{
-			m_lstCopies.erase(iter_Copies);
+			if ((*iter_Copies)->GetParent() == aszCollectionName)
+			{
+				m_lstCopies.erase(iter_Copies);
+			}
+			else
+			{
+				(*iter_Copies)->
+			}
+			
 			break;
 		}
 	}

@@ -26,11 +26,14 @@ public:
 
 	// Once the parent is set, it can't change. This would lead to weird relations with no obvious solution.
 	std::string GetParent();
+	// This is used if this parent is loaded later.
+	void RegisterParent(std::shared_ptr<Collection> aptrCollection);
 
 	void AddItem(std::string aszName,
 		std::vector<Tag> alstAttrs = std::vector<Tag>(),
 		std::vector<Tag> alstMetaTags = std::vector<Tag>(),
 		bool abCloseTransaction = true);
+	void AddItem(std::string aszName, std::string aszHash, bool abCloseTransaction = true);
 	void RemoveItem(std::string aszName, std::string aszIdentifyingHash, bool abCloseTransaction = true);
 	void ChangeItem(std::string aszName, std::string aszIdentifyingHash, std::vector<Tag> alstIdChanges, std::vector<Tag> alstMetaChanges, bool abCloseTransaction = true);
 	void ReplaceItem(std::string aszName, std::string aszIdentifyingHash, std::string aszNewName, std::vector<Tag> alstIdChanges, std::vector<Tag> alstMetaChanges, bool abCloseTransaction = true);
@@ -72,6 +75,7 @@ private:
 
 	// These all locate by name and hash for a second time so we dont risk dangling pointers.
 	void addItem(std::string aszName, std::vector<Tag> alstAttrs, std::vector<Tag> alstMetaTags);
+	void addExistingItem(std::string aszName, std::string aszHash); // this is for an Item from another collection
 	void removeItem(std::string aszName, std::string aszIdentifyingHash);
 	void changeItem(std::string aszName, std::string aszIdentifyingHash, std::vector<Tag> alstChanges, std::vector<Tag> alstMetaChanges);
 	void replaceItem(std::string aszName, std::string aszIdentifyingHash, std::string aszNewName, std::vector<Tag> alstIdChanges, std::vector<Tag> alstMetaChanges);
@@ -96,5 +100,7 @@ private:
 	void saveHistory();
 	void saveMeta();
 	void saveCollection();
+
+	bool isEditingAllowed();
 };
 

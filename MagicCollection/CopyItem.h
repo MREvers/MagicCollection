@@ -24,6 +24,7 @@ public:
 
 	std::string GetParent();
 	void AddResident(std::string aszNewResi);
+	void RemoveResident(std::string aszRemoveResi);
 	std::vector<std::string> GetResidentIn();
 	bool IsResidentIn(std::string aszResident);
 

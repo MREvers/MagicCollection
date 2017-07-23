@@ -27,12 +27,19 @@ std::string CollectionFactory::LoadCollectionFromFile(std::string aszFileName)
 	oCol->LoadCollection(aszFileName, this);
 	std::string szFoundName = oCol->GetName();
 
-	// The parent collection must be loaded
-	if (oCol->IsLoaded && !CollectionExists(szFoundName) &&
-		(oCol->GetParent() == "" || CollectionExists(oCol->GetParent())))
+	if (oCol->IsLoaded && !CollectionExists(szFoundName))
 	{
-		m_lstCollections.push_back(oCol);
+		m_lstCollections.push_back(std::shared_ptr<Collection>(oCol));
 		szRetVal = szFoundName;
+
+		// Check if this collection is a parent of another. If so, then those cols need this collection.
+		for each (std::shared_ptr<Collection> col in m_lstCollections)
+		{
+			if (col->GetParent() == szFoundName)
+			{
+				col->RegisterParent(std::shared_ptr<Collection>(oCol));
+			}
+		}
 	}
 	else
 	{
@@ -49,7 +56,7 @@ std::string CollectionFactory::CreateNewCollection(std::string aszColName, std::
 		// The parent is required to be loaded to have it as a parent
 		if (aszParent != "" && !CollectionExists(aszParent)) { aszParent = ""; }
 		Collection* oCol = new Collection(aszColName, m_ColSource, aszColName, aszParent);
-		m_lstCollections.push_back(oCol);
+		m_lstCollections.push_back(std::shared_ptr<Collection>(oCol));
 		return oCol->GetName();
 	}
 
@@ -69,7 +76,7 @@ std::vector<std::string> CollectionFactory::GetLoadedCollections()
 
 bool CollectionFactory::CollectionExists(std::string aszCollectionName)
 {
-	std::vector<Collection*>::iterator iter_cols = m_lstCollections.begin();
+	std::vector<std::shared_ptr<Collection>>::iterator iter_cols = m_lstCollections.begin();
 	for (; iter_cols != m_lstCollections.end(); ++iter_cols)
 	{
 		if (aszCollectionName == (*iter_cols)->GetName())
@@ -82,12 +89,12 @@ bool CollectionFactory::CollectionExists(std::string aszCollectionName)
 
 Collection* CollectionFactory::GetCollection(std::string aszCollectionName)
 {
-	std::vector<Collection*>::iterator iter_cols = m_lstCollections.begin();
+	std::vector<std::shared_ptr<Collection>>::iterator iter_cols = m_lstCollections.begin();
 	for (; iter_cols != m_lstCollections.end(); ++iter_cols)
 	{
 		if (aszCollectionName == (*iter_cols)->GetName())
 		{
-			return *iter_cols;
+			return iter_cols->get();
 		}
 	}
 	return nullptr;

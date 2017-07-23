@@ -1,6 +1,7 @@
 #pragma once
 #include <vector>
 #include <string>
+#include <memory>
 
 #include "Collection.h"
 #include "StringHelper.h"
@@ -20,7 +21,7 @@ public:
    std::vector<std::string> GetLoadedCollections();
 
 private:
-   std::vector<Collection*> m_lstCollections;
+   std::vector<std::shared_ptr<Collection>> m_lstCollections;
    CollectionSource* m_ColSource;
 };
 
