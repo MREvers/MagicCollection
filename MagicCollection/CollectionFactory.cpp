@@ -25,26 +25,12 @@ std::string CollectionFactory::LoadCollectionFromFile(std::string aszFileName)
 
 	Collection* oCol = new Collection(Config::NotFoundString, m_ColSource, szFile);
 	oCol->LoadCollection(aszFileName, this);
-	std::string szFoundName = oCol->GetName();
+	std::string szFoundID = oCol->GetIdentifier();
 
-	if (oCol->IsLoaded && !CollectionExists(szFoundName))
+	if (oCol->IsLoaded && !CollectionExists(szFoundID))
 	{
 		m_lstCollections.push_back(std::shared_ptr<Collection>(oCol));
-		szRetVal = szFoundName;
-
-		if (CollectionExists(oCol->GetParent()))
-		{
-			oCol->RegisterParent(std::shared_ptr<Collection>(GetCollection(oCol->GetParent())));
-		}
-
-		// Check if this collection is a parent of another. If so, then those cols need this collection.
-		for each (std::shared_ptr<Collection> col in m_lstCollections)
-		{
-			if (col->GetParent() == szFoundName)
-			{
-				col->RegisterParent(std::shared_ptr<Collection>(oCol));
-			}
-		}
+		szRetVal = oCol->GetIdentifier();
 	}
 	else
 	{
@@ -54,26 +40,21 @@ std::string CollectionFactory::LoadCollectionFromFile(std::string aszFileName)
 	return szRetVal;
 }
 
-std::string CollectionFactory::CreateNewCollection(std::string aszColName, std::string aszParent)
+std::string CollectionFactory::CreateNewCollection(std::string aszColName, std::string aszParentID)
 {
-	if (!CollectionExists(aszColName))
+	Collection* oCol;
+	// The parent is required to be loaded to have it as a parent
+	if (CollectionExists(aszParentID))
 	{
-		Collection* oCol;
-		// The parent is required to be loaded to have it as a parent
-		if (CollectionExists(aszParent))
-		{
-			oCol = new Collection(aszColName, m_ColSource, aszColName, std::shared_ptr<Collection>(GetCollection(aszParent)));
-		}
-		else
-		{
-			oCol = new Collection(aszColName, m_ColSource, aszColName);
-		}
-
-		m_lstCollections.push_back(std::shared_ptr<Collection>(oCol));
-		return oCol->GetName();
+		oCol = new Collection(aszColName, m_ColSource, aszColName, getNextChildName(aszParentID));
+	}
+	else
+	{
+		oCol = new Collection(aszColName, m_ColSource, aszColName);
 	}
 
-	return Config::NotFoundString;
+	m_lstCollections.push_back(std::shared_ptr<Collection>(oCol));
+	return oCol->GetName();
 }
 
 std::vector<std::string> CollectionFactory::GetLoadedCollections()
@@ -82,7 +63,7 @@ std::vector<std::string> CollectionFactory::GetLoadedCollections()
 	auto iter_Colo = m_lstCollections.begin();
 	for (; iter_Colo != m_lstCollections.end(); ++iter_Colo)
 	{
-		lstRetval.push_back((*iter_Colo)->GetName());
+		lstRetval.push_back((*iter_Colo)->GetIdentifier());
 	}
 	return lstRetval;
 }
@@ -92,7 +73,7 @@ bool CollectionFactory::CollectionExists(std::string aszCollectionName)
 	std::vector<std::shared_ptr<Collection>>::iterator iter_cols = m_lstCollections.begin();
 	for (; iter_cols != m_lstCollections.end(); ++iter_cols)
 	{
-		if (aszCollectionName == (*iter_cols)->GetName())
+		if (aszCollectionName == (*iter_cols)->GetIdentifier())
 		{
 			return true;
 		}
@@ -105,10 +86,39 @@ Collection* CollectionFactory::GetCollection(std::string aszCollectionName)
 	std::vector<std::shared_ptr<Collection>>::iterator iter_cols = m_lstCollections.begin();
 	for (; iter_cols != m_lstCollections.end(); ++iter_cols)
 	{
-		if (aszCollectionName == (*iter_cols)->GetName())
+		if (aszCollectionName == (*iter_cols)->GetIdentifier())
 		{
 			return iter_cols->get();
 		}
 	}
 	return nullptr;
+}
+
+std::string CollectionFactory::getNextChildName(std::string aszParentID)
+{
+	int iID;
+	std::vector<std::string> lstUIandPF = StringHelper::Str_Split(aszParentID, std::string("-"));
+	if (lstUIandPF.size() == 1)
+	{
+		// The first child gets 2; the first prime.
+		iID = 2;
+	}
+	else
+	{
+		iID = std::stoi(lstUIandPF[1]);
+	}
+
+	int iNextPrime = 1;
+	// Find the largest prime number divisor
+	for each (int iPrime in Config::primes)
+	{
+		if (iID % iPrime != 0)
+		{
+			iNextPrime = iPrime;
+			break;
+		}
+	}
+	int iChild = GetCollection(aszParentID)->ChildCount();
+	std::string szRetval = lstUIandPF[0] + "-" + std::to_string(iID*(iNextPrime^iChild));
+	return szRetval;
 }

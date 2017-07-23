@@ -152,40 +152,40 @@ CollectionItem* CollectionSource::GetCardPrototype(int aiCacheIndex)
 	}
 }
 
-void CollectionSource::NotifyNeedToSync(std::string aszCollectionName)
+void CollectionSource::NotifyNeedToSync(std::string aszCollectionID)
 {
-	m_mapSync[aszCollectionName] = false;
+	m_mapSync[aszCollectionID] = false;
 
 	std::map<std::string, bool>::iterator iter_SyncCols = m_mapSync.begin();
 	for (; iter_SyncCols != m_mapSync.end(); ++iter_SyncCols)
 	{
-		if (iter_SyncCols->first != aszCollectionName)
+		if (iter_SyncCols->first != aszCollectionID)
 		{
 			iter_SyncCols->second = true;
 		}
 	}
 }
 
-bool CollectionSource::IsSyncNeeded(std::string aszCollectionName)
+bool CollectionSource::IsSyncNeeded(std::string aszCollectionID)
 {
-	if (m_mapSync.find(aszCollectionName) != m_mapSync.end())
+	if (m_mapSync.find(aszCollectionID) != m_mapSync.end())
 	{
-		return m_mapSync[aszCollectionName];
+		return m_mapSync[aszCollectionID];
 	}
 	else
 	{
-		return (m_mapSync[aszCollectionName] = true);
+		return (m_mapSync[aszCollectionID] = true);
 	}
 }
 
 std::vector<int>
-CollectionSource::GetCollectionCache(std::string aszCollectionName, CollectionItemType aColItemType)
+CollectionSource::GetCollectionCache(std::string aszCollectionID, CollectionItemType aColItemType)
 {
 	std::vector<int> lstRetVal;
 
 	for (size_t i = 0; i < m_lstoCardCache.size(); i++)
 	{
-		if (m_lstoCardCache[i].GetCopiesForCollection(aszCollectionName, aColItemType).size() > 0)
+		if (m_lstoCardCache[i].GetCopiesForCollection(aszCollectionID, aColItemType).size() > 0)
 		{
 			lstRetVal.push_back(i);
 		}
@@ -195,13 +195,13 @@ CollectionSource::GetCollectionCache(std::string aszCollectionName, CollectionIt
 }
 
 std::vector<CopyItem*>
-CollectionSource::GetCollection(std::string aszCollectionName, CollectionItemType aColItemType)
+CollectionSource::GetCollection(std::string aszCollectionID, CollectionItemType aColItemType)
 {
 	std::vector<CopyItem*> lstRetVal;
 
 	for (size_t i = 0; i < m_lstoCardCache.size(); i++)
 	{
-		std::vector<CopyItem*> lstCopies = m_lstoCardCache[i].GetCopiesForCollection(aszCollectionName, aColItemType);
+		std::vector<CopyItem*> lstCopies = m_lstoCardCache[i].GetCopiesForCollection(aszCollectionID, aColItemType);
 
 		std::vector<CopyItem*>::iterator iter_Copy = lstCopies.begin();
 		for (; iter_Copy != lstCopies.end(); ++iter_Copy)

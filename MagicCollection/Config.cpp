@@ -13,6 +13,7 @@ char* Config::HistoryFileExtension = "history";
 char* Config::HashKey = "__hash";
 char* Config::NotFoundString = "NF";
 char* Config::CollectionDefinitionKey = ":";
+const std::vector<int> Config::primes({ 2, 3, 5, 7, 11, 13 });
 
 Config::Config()
 {
@@ -136,6 +137,26 @@ std::function<std::string(Tag)> Config::GetTagHelper(TagHelperType aiMode)
 	}
 }
 
+std::pair<std::string, int> Config::GetIDInfo(std::string aszColID)
+{
+	int iID;
+	std::string szID;
+
+	std::vector<std::string> lstUIandPF = StringHelper::Str_Split(aszColID, std::string("-"));
+	if (lstUIandPF.size() == 1)
+	{
+		// The first child gets 2; the first prime.
+		iID = 1;
+	}
+	else
+	{
+		iID = std::stoi(lstUIandPF[1]);
+	}
+	szID = lstUIandPF[0];
+
+	return std::make_pair(szID, iID);
+}
+
 bool Config::IsIdentifyingAttributes(std::string aszAttrs)
 {
 	return ListHelper::List_Find(aszAttrs, m_lstIdentifyingAttributes) != -1;
@@ -143,15 +164,15 @@ bool Config::IsIdentifyingAttributes(std::string aszAttrs)
 
 bool Config::IsPairedKey(std::string aszKey)
 {
-	return ListHelper::List_Find(aszKey, m_lstPairedKeys, m_fnKeyExtractor) != -1 || 
-		   ListHelper::List_Find(aszKey, m_lstPairedKeys, m_fnValueExtractor) != -1;
+	return ListHelper::List_Find(aszKey, m_lstPairedKeys, m_fnKeyExtractor) != -1 ||
+		ListHelper::List_Find(aszKey, m_lstPairedKeys, m_fnValueExtractor) != -1;
 }
 
 bool Config::IsValidKey(std::string aszKey)
 {
 	// A valid key is either a static attr or identifying attr
 	return ListHelper::List_Find(aszKey, m_lstStaticAttributes) != -1 ||
-		   ListHelper::List_Find(aszKey, m_lstIdentifyingAttributes) != -1;
+		ListHelper::List_Find(aszKey, m_lstIdentifyingAttributes) != -1;
 }
 
 bool Config::IsStaticAttribute(std::string aszAttr)

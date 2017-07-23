@@ -5,6 +5,7 @@
 
 #include "MetaTag.h"
 #include "Config.h"
+#include "StringHelper.h"
 #include "TraitItem.h"
 
 template void ListHelper::List_Insert<MetaTag>(MetaTag&, std::vector<MetaTag>&, std::function<int(MetaTag, MetaTag)>);
@@ -23,7 +24,8 @@ public:
 	std::string GetHash();
 
 	std::string GetParent();
-	void SetParent(std::string aszParentName);
+	bool IsParent(std::string aszParent);
+
 	void AddResident(std::string aszNewResi);
 	void RemoveResident(std::string aszRemoveResi);
 	std::vector<std::string> GetResidentIn();
@@ -42,8 +44,12 @@ public:
 
 private:
 	bool m_bNeedHash;
-	std::string m_szParentCollection;
+	int m_iID;
+	std::string m_szOwnerID;
+	std::string m_szParentCollection; // This is a string number UI-fnfn1fn2....
 	std::vector<std::string> m_lstResidentIn;
+
+	void setParent(std::string aszNewParent);
 
 	// Metatags are visible by all collections. They 'may' be used to identify the card.
 	// In general, meta-tags are attached to some physical meaning related to the card such as

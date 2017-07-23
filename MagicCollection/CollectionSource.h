@@ -39,11 +39,11 @@ public:
 
    // This needs to be called whenever a child collection adds a card.
    // It will let other collections know that they need to check their lists.
-   void NotifyNeedToSync(std::string aszCollectionName);
-   bool IsSyncNeeded(std::string aszCollectionName);
+   void NotifyNeedToSync(std::string aszCollectionID);
+   bool IsSyncNeeded(std::string aszCollectionID);
 
-   std::vector<int> GetCollectionCache(std::string aszCollectionName, CollectionItemType aColItemType = CollectionItemType::All);
-   std::vector<CopyItem*> GetCollection(std::string aszCollectionName, CollectionItemType aColItemType = CollectionItemType::All);
+   std::vector<int> GetCollectionCache(std::string aszCollectionID, CollectionItemType aColItemType = CollectionItemType::All);
+   std::vector<CopyItem*> GetCollection(std::string aszCollectionID, CollectionItemType aColItemType = CollectionItemType::All);
 
    std::vector<std::string> GetAllCardsStartingWith(std::string aszText);
 

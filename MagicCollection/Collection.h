@@ -2,6 +2,7 @@
 #include <vector>
 #include <memory>
 #include <string>
+#include <stdlib.h>
 
 #include "CollectionIO.h"
 #include "CollectionSource.h"
@@ -18,16 +19,12 @@ public:
 	Collection(std::string aszName,
 				   CollectionSource* aoSource,
 				   std::string aszFileCollection,
-				   std::shared_ptr<Collection> aptrCollection = std::shared_ptr<Collection>(nullptr));
+				   std::string aszID = "");
 	~Collection();
 
 	void SetName(std::string aszNewName);
 	std::string GetName();
-
-	// Once the parent is set, it can't change. This would lead to weird relations with no obvious solution.
-	std::string GetParent();
-	// This is used if this parent is loaded later.
-	void RegisterParent(std::shared_ptr<Collection> aptrCollection);
+	std::string GetIdentifier();
 
 	void AddItem(std::string aszName,
 		std::vector<Tag> alstAttrs = std::vector<Tag>(),
@@ -44,6 +41,10 @@ public:
 	void TagItem(std::string aszHash, Tag atag);
 	void UntagItem(std::string aszHash, std::string aszTagKey);
 
+	// Used to track the number of children in of this collection to avoid name clashes.
+	void ChildAdded();
+	int ChildCount();
+
 	void SaveCollection();
 	void LoadCollection(std::string aszFileName, CollectionFactory* aoFactory);
 	void LoadChanges(std::vector<std::string> aszLines);
@@ -56,11 +57,13 @@ public:
 
 private:
 	std::string m_szName;
+	int m_iChildrenCount; // Needed to avoid name clashes.
+	int m_iID;
+	std::string m_szID;
 	std::string m_szFileName;
-	// The parent name can be loaded from a file or captured in the constructor with a parent.
-	std::string m_szParentName;
-	std::shared_ptr<Collection> m_ptrParentCollection;
 	CollectionSource* m_ptrCollectionSource;
+
+	void setID(std::string aszIDString);
 
 	bool m_bRecordChanges;
 	std::vector<Transaction> m_lstTransactions;
@@ -72,6 +75,7 @@ private:
 	std::vector<int> m_lstItemCacheIndexes;
 
 	std::vector<int> getCollection();
+	std::string getCollectionIdentifier();
 
 	// These all locate by name and hash for a second time so we dont risk dangling pointers.
 	void addItem(std::string aszName, std::vector<Tag> alstAttrs, std::vector<Tag> alstMetaTags);
@@ -100,7 +104,5 @@ private:
 	void saveHistory();
 	void saveMeta();
 	void saveCollection();
-
-	bool isEditingAllowed();
 };
 

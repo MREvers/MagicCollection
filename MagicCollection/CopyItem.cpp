@@ -2,9 +2,10 @@
 
 CopyItem::CopyItem(std::vector<TraitItem>* alstTraits, std::string aszParentCollection)
 {
-	m_szParentCollection = aszParentCollection;
 	m_lstResidentIn.push_back(aszParentCollection);
 	m_plstRestrictedTraits = alstTraits;
+
+	setParent(aszParentCollection);
 
 	std::vector<TraitItem>::iterator iter_DefaultVals = m_plstRestrictedTraits->begin();
 	for (; iter_DefaultVals != m_plstRestrictedTraits->end(); ++iter_DefaultVals)
@@ -78,16 +79,16 @@ std::string CopyItem::GetHash()
 		return m_lstMetaTags[iMetaHash].GetVal();
 	}
 }
-
-std::string CopyItem::GetParent()
+std::string  CopyItem::GetParent()
 {
 	return m_szParentCollection;
 }
-
-void CopyItem::SetParent(std::string aszParentName)
+bool CopyItem::IsParent(std::string aszParent)
 {
-	m_szParentCollection = aszParentName;
-	m_bNeedHash = true;
+	std::pair<std::string, int> pairEnt = Config::Instance()->GetIDInfo(aszParent);
+	int iIsIDParent = m_iID % pairEnt.second;
+
+	return iIsIDParent == 0 && pairEnt.first == m_szOwnerID;
 }
 
 void CopyItem::AddResident(std::string aszNewResi)
@@ -225,6 +226,14 @@ std::function<std::string(MetaTag)> CopyItem::GetMetaTagValueViewer(MetaTagType 
 std::function<std::string(MetaTag)> CopyItem::GetMetaTagKeyViewer()
 {
 	return [](MetaTag atag)->std::string { return atag.GetKey(); };
+}
+
+void CopyItem::setParent(std::string aszNewParent)
+{
+	m_szParentCollection = aszNewParent;
+	std::pair<std::string, int> pID = Config::Instance()->GetIDInfo(aszNewParent);
+	m_iID = pID.second;
+	m_szOwnerID = pID.first;
 }
 
 void CopyItem::setPairedAttributes(std::string aszKey, int iVal)

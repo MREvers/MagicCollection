@@ -27,10 +27,10 @@ namespace StoreFrontPro.Server
 
             private void inLoadCollection(string aszCollectionFileName)
             {
-                string szColName = SCI.LoadCollection(aszCollectionFileName);
-                if (szColName != "NF")
+                string szColID = SCI.LoadCollection(aszCollectionFileName);
+                if (szColID != "NF")
                 {
-                    inGenerateCollectionModel(szColName);
+                    inGenerateCollectionModel(szColID);
                 }
             }
 
@@ -48,12 +48,12 @@ namespace StoreFrontPro.Server
                 });
             }
 
-            private void inGenerateCollectionModel(string aszCollectionName)
+            private void inGenerateCollectionModel(string aszCollectionID)
             {
                 List<string> lstLoadedCollections = SCI.GetLoadedCollections();
-                if (lstLoadedCollections.Contains(aszCollectionName))
+                if (lstLoadedCollections.Contains(aszCollectionID))
                 {
-                    CollectionModel newCM = new CollectionModel(aszCollectionName);
+                    CollectionModel newCM = new CollectionModel(aszCollectionID);
                     m_lstCollectionModels.Add(newCM);
                 }
             }

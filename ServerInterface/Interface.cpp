@@ -95,19 +95,6 @@ ServerClientInterface::GetCollectionList(System::String^ ahszCollectionName, Sys
 	return hlstCollection;
 }
 
-System::Collections::Generic::List<System::String^>^ ServerClientInterface::GetCollectionAnalysis(System::String^ ahszCollectionName, System::String^ ahszAnalysisCommand)
-{
-	std::string szCollectionName = msclr::interop::marshal_as<std::string>(ahszCollectionName);
-	std::string szCmd = msclr::interop::marshal_as<std::string>(ahszAnalysisCommand);
-
-	std::vector<std::string> lstResults = m_StoreFrontBackEnd->GetCollectionAnalysis(szCollectionName, szCmd);
-
-	System::Collections::Generic::List<System::String^>^ hlstCollection;
-	hlstCollection = stringVectorToList(lstResults);
-
-	return hlstCollection;
-}
-
 void ServerClientInterface::SubmitBulkChanges(System::String^ ahszCollectionName, System::Collections::Generic::List<System::String^>^ ahlstBulkChanges)
 {
 	std::string szCollection = msclr::interop::marshal_as<std::string>(ahszCollectionName);

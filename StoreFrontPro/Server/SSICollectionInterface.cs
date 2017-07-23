@@ -44,17 +44,17 @@ namespace StoreFrontPro.Server
                 }, UICallback);
             }
 
-            public void GetCollectionList(string aszCollectionName, bool abCollapsed, Action<List<string>> aCallback, bool UICallback = false)
+            public List<string> GetCollectionMetaDataSync(string aszColID)
+            {
+                    return SCI.GetCollectionMetaData(aszColID);
+            }
+
+            public void GetCollectionList(string aszColID, bool abCollapsed, Action<List<string>> aCallback, bool UICallback = false)
             {
                 singleton.enqueueService(() =>
                 {
-                    aCallback(SCI.GetCollectionList(aszCollectionName, abCollapsed));
+                    aCallback(SCI.GetCollectionList(aszColID, abCollapsed));
                 }, UICallback);
-            }
-
-            public List<string> GetCollectionAnalysis(string aszCollectionName, string aszCommand)
-            {
-                return SCI.GetCollectionAnalysis(aszCollectionName, aszCommand);
             }
         }
 

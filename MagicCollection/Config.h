@@ -11,6 +11,7 @@
 #include "rapidxml-1.13\rapidxml_utils.hpp"
 #include "MD5.h"
 #include "ListHelper.h"
+#include "StringHelper.h"
 
 typedef std::pair<std::string, std::string> Tag;
 
@@ -46,6 +47,7 @@ public:
 	std::vector<std::string>& GetPerCollectionMetaTags();
 
 	std::function<std::string(Tag)> GetTagHelper(TagHelperType aiMode = Key);
+	std::pair<std::string, int> GetIDInfo(std::string aszColID);
 
 	bool IsPairedKey(std::string aszKey);
 	bool IsValidKey(std::string aszKey);
@@ -59,6 +61,7 @@ public:
 	static char* Config::HashKey;
 	static char* Config::NotFoundString;
 	static char* Config::CollectionDefinitionKey;
+	static const std::vector<int> primes;
 
 private:
 	std::vector<Tag> m_lstKeyCodeMappings;

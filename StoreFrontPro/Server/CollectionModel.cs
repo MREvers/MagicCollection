@@ -21,15 +21,18 @@ namespace StoreFrontPro.Server
         }
 
         public string CollectionName;
-        public string ParentCollection = "";
+        public string ID;
         public ObservableCollection<CardModel> CollectionItems;
         public List<CardModel> LstLastQuery; // NOT CURRENTLY USED
 
         private bool m_bHardRebuild = false;
 
-        public CollectionModel(string aszName)
+        public CollectionModel(string aszID)
         {
-            CollectionName = aszName;
+            ID = aszID;
+
+            analyzeMetaData(ServerInterface.Collection.GetCollectionMetaDataSync(ID));
+
             CollectionItems = new ObservableCollection<CardModel>();
             LstLastQuery = new List<CardModel>();
 
@@ -44,12 +47,12 @@ namespace StoreFrontPro.Server
         public void Sync(Action aCallback = null)
         {
             ServerInterface.Collection.GetCollectionMetaData(
-                CollectionName,
+                ID,
                 analyzeMetaData,
                 true);
 
             ServerInterface.Collection.GetCollectionList(
-                CollectionName,
+                ID,
                 IsCollapsedCollection,
                 (alstCol) => { setCollectionModels(alstCol, aCallback); },
                 true);
@@ -159,8 +162,6 @@ namespace StoreFrontPro.Server
             }
 
             m_bHardRebuild = false;
-
-            List<string> szTest = ServerInterface.Collection.GetCollectionAnalysis(this.CollectionName, "mana");
         }
 
         private void setCollectionModels(List<string> aLstCards, Action aCallback)
@@ -184,9 +185,9 @@ namespace StoreFrontPro.Server
                     {
                         string szKey = lstSplitLine[0];
                         string szVal = lstSplitLine[1];
-                        if (szKey == "Parent")
+                        if (szKey == "Name")
                         {
-                            ParentCollection = szVal.Trim('"');
+                            CollectionName = szVal.Trim('"');
                         }
                     }
                 }

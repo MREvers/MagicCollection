@@ -69,10 +69,6 @@ void CollectionItem::RemoveCopyItem(std::string aszCollectionName, std::string a
 				{
 					m_lstCopies.erase(iter_Copies);
 				}
-				else
-				{
-					(*iter_Copies)->SetParent("");
-				}
 			}
 			else
 			{

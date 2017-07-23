@@ -23,5 +23,7 @@ public:
 private:
    std::vector<std::shared_ptr<Collection>> m_lstCollections;
    CollectionSource* m_ColSource;
+
+   std::string getNextChildName(std::string aszParentID);
 };
 
