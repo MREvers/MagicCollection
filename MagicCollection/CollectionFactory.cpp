@@ -108,17 +108,32 @@ std::string CollectionFactory::getNextChildName(std::string aszParentID)
 		iID = std::stoi(lstUIandPF[1]);
 	}
 
-	int iNextPrime = 1;
+	// To name a child from set UI-C, where C is a composite of 
+	//  primes, P_k * P_k-r1 * P_k-r2 ..., take the largest prime in
+	//  C, and find the nth following prime, where n is the number of
+	//  existing children. i.e. Take P_k if there are no children yet.
+	//  Then get C2 = P_k+n * P_k * P_k-r1 * P_k-r2 .... Then use UI -C2
+	int iLargestPrime = 1;
+	int iPrimeIndex = 0;
+
 	// Find the largest prime number divisor
-	for each (int iPrime in Config::primes)
+	// The way this is written, you can only have branching subcollections up to the number of primes
+	// stored in config::primes.
+	for (size_t i = Config::primes.size()-1; i >= 0; i--)
 	{
-		if (iID % iPrime != 0)
+		int iPrime = Config::primes[i];
+		if (iID % iPrime == 0)
 		{
-			iNextPrime = iPrime;
+			iPrimeIndex = i;
+			iLargestPrime = iPrime;
 			break;
 		}
 	}
+
+	int iChildren = GetCollection(aszParentID)->ChildCount();
+	iPrimeIndex += iChildren;
+
 	int iChild = GetCollection(aszParentID)->ChildCount();
-	std::string szRetval = lstUIandPF[0] + "-" + std::to_string(iID*(iNextPrime^iChild));
+	std::string szRetval = lstUIandPF[0] + "-" + std::to_string(iID*(Config::primes[iPrimeIndex]));
 	return szRetval;
 }

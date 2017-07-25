@@ -47,7 +47,9 @@ public:
 	std::vector<std::string>& GetPerCollectionMetaTags();
 
 	std::function<std::string(Tag)> GetTagHelper(TagHelperType aiMode = Key);
-	std::pair<std::string, int> GetIDInfo(std::string aszColID);
+	std::pair<std::string, std::vector<unsigned int>> GetIDInfo(std::string aszColID);
+	int GetPrimeIndex(unsigned int aiComposite);
+	int GetHighPrimeIndex(unsigned int aiComposite);
 
 	bool IsPairedKey(std::string aszKey);
 	bool IsValidKey(std::string aszKey);

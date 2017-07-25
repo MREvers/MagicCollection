@@ -63,7 +63,7 @@ void CollectionItem::RemoveCopyItem(std::string aszCollectionName, std::string a
 	{
 		if ((*iter_Copies)->GetMetaTag(Config::HashKey, Hidden) == aszHash)
 		{
-			if ((*iter_Copies)->GetParent() == aszCollectionName)
+			if ((*iter_Copies)->IsParent(aszCollectionName))
 			{
 				if ((*iter_Copies)->GetResidentIn().size() > 1)
 				{
@@ -128,12 +128,12 @@ std::vector<CopyItem*> CollectionItem::GetCopiesForCollection(std::string aszCol
 
 	for (; iter_Copies != m_lstCopies.end(); ++iter_Copies)
 	{
-		if ((aItemType & Local) > 0 && (*iter_Copies)->GetParent() == aszCollection)
+		if ((aItemType & Local) > 0 && (*iter_Copies)->IsParent(aszCollection))
 		{
 			lstRetVal.push_back(*iter_Copies);
 		}
 		else if ((aItemType & Borrowed) > 0            &&
-			(*iter_Copies)->GetParent() != aszCollection  &&
+			!(*iter_Copies)->IsParent(aszCollection)   &&
 			(*iter_Copies)->IsResidentIn(aszCollection))
 		{
 			lstRetVal.push_back(*iter_Copies);
@@ -333,13 +333,6 @@ std::string CollectionItem::ToCardLine(std::string aszParentCollection,
 	std::string szLine = aszName;
 	szLine += " { ";
 
-	if (aszParentCollection != aszCompareParent && aszCompareParent != Config::NotFoundString)
-	{
-		szLine += "Parent=\"";
-		szLine += aszParentCollection;
-		szLine += "\" ";
-	}
-
 	std::vector<Tag>::iterator iter_keyValPairs;
 	if (alstAttrs.size() > 0)
 	{
@@ -363,8 +356,15 @@ std::string CollectionItem::ToCardLine(std::string aszParentCollection,
 	szLine += " : { ";
 
 	iter_keyValPairs = alstMetaTags.begin();
+	unsigned int iDummy;
 	for (; iter_keyValPairs != alstMetaTags.end(); ++iter_keyValPairs)
 	{
+		if (!(aszCompareParent == "") && 
+			(iter_keyValPairs->first == "Address") &&
+			(iter_keyValPairs->second == aszCompareParent))
+		{
+			continue;
+		}
 		szLine += iter_keyValPairs->first;
 		szLine += "=\"";
 		szLine += iter_keyValPairs->second;

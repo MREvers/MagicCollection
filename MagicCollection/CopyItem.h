@@ -42,14 +42,23 @@ public:
 	std::function<std::string(MetaTag)> GetMetaTagValueViewer(MetaTagType atagType);
 	std::function<std::string(MetaTag)> GetMetaTagKeyViewer();
 
+	static bool IsResidentIn(std::string aszResidentLocation, std::string aszTestCollection, unsigned int &riSubIn);
 private:
 	bool m_bNeedHash;
-	int m_iID;
-	std::string m_szOwnerID;
-	std::string m_szParentCollection; // This is a string number UI-fnfn1fn2....
+
+	// These are stored to save computation time.
+	std::vector<unsigned int> m_lstSubAddresses;
+	// Includes <Address>-<SubAddress1>,<SubAddress2>...
+	// SubAddressX's smallest prime factor is the xth prime.
+	std::string m_szAddress;
+	std::string m_szFullAddress;
 	std::vector<std::string> m_lstResidentIn;
 
-	void setParent(std::string aszNewParent);
+	void setParent(std::string aszNewParent, bool abSetMeta = true);
+
+	// Checks if aszCollectionName is contains the "ResidentLocation"
+
+	void setSubAddress(unsigned int aiOldVal, unsigned int aiNewVal);
 
 	// Metatags are visible by all collections. They 'may' be used to identify the card.
 	// In general, meta-tags are attached to some physical meaning related to the card such as
@@ -62,5 +71,8 @@ private:
 	std::vector<TraitItem>* m_plstRestrictedTraits;
 
 	void setPairedAttributes(std::string aszKey, int iVal);
+
+	static bool isResidentIn(std::string aszBaseAddress, std::vector<unsigned int> alstSubAddresses, std::string aszTestAdress, unsigned int aiTestAddress, unsigned int &riSubIn);
+	static bool isSuperSet(unsigned int aiSuperSet, unsigned int aiSubSet);
 };
 

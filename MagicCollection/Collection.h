@@ -57,8 +57,8 @@ public:
 
 private:
 	std::string m_szName;
-	int m_iChildrenCount; // Needed to avoid name clashes.
-	int m_iID;
+	unsigned int m_iChildrenCount; // Needed to avoid name clashes.
+	unsigned int m_iID;
 	std::string m_szID;
 	std::string m_szFileName;
 	CollectionSource* m_ptrCollectionSource;

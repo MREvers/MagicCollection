@@ -13,7 +13,7 @@ char* Config::HistoryFileExtension = "history";
 char* Config::HashKey = "__hash";
 char* Config::NotFoundString = "NF";
 char* Config::CollectionDefinitionKey = ":";
-const std::vector<int> Config::primes({ 2, 3, 5, 7, 11, 13 });
+const std::vector<int> Config::primes({ 1,2,3,5,7,11,13,17,19,23,29,31,37,41 }); // 1 is included for search algorithms.
 
 Config::Config()
 {
@@ -137,24 +137,59 @@ std::function<std::string(Tag)> Config::GetTagHelper(TagHelperType aiMode)
 	}
 }
 
-std::pair<std::string, int> Config::GetIDInfo(std::string aszColID)
+std::pair<std::string, std::vector<unsigned int>> Config::GetIDInfo(std::string aszColID)
 {
-	int iID;
-	std::string szID;
+	std::string szAddress;
+	std::vector<unsigned int> lstSubAddressNums;
 
 	std::vector<std::string> lstUIandPF = StringHelper::Str_Split(aszColID, std::string("-"));
 	if (lstUIandPF.size() == 1)
 	{
-		// The first child gets 2; the first prime.
-		iID = 1;
+		lstSubAddressNums.push_back(1);
 	}
 	else
 	{
-		iID = std::stoi(lstUIandPF[1]);
+		std::vector<std::string> lstSubAddresses = StringHelper::Str_Split(lstUIandPF[1], std::string(","));
+		for (size_t i = 0; i < lstSubAddresses.size(); i++)
+		{
+			std::string szSubAddress = lstSubAddresses[i];
+			unsigned int iNumChars;
+			unsigned int iSubAddress = std::stoi(szSubAddress, &iNumChars);
+			if (iNumChars > 0)
+			{
+				lstSubAddressNums.push_back(iSubAddress);
+			}
+		}
 	}
-	szID = lstUIandPF[0];
+	szAddress = lstUIandPF[0];
 
-	return std::make_pair(szID, iID);
+	return std::make_pair(szAddress, lstSubAddressNums);
+}
+
+int Config::GetPrimeIndex(unsigned int aiComposite)
+{
+	for (size_t i = 1; i < primes.size(); i++)
+	{
+		if ( aiComposite % primes[i] == 0)
+		{
+			return i;
+		}
+	}
+
+	return 0;
+}
+
+int Config::GetHighPrimeIndex(unsigned int aiComposite)
+{
+	for (size_t i = primes.size(); i > 1; i--)
+	{
+		if (aiComposite % primes[i-1] == 0)
+		{
+			return i-1;
+		}
+	}
+
+	return 0;
 }
 
 bool Config::IsIdentifyingAttributes(std::string aszAttrs)

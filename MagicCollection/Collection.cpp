@@ -7,7 +7,8 @@ Collection::Collection(std::string aszName, CollectionSource* aoSource, std::str
 	m_szName = aszName;
 	m_szFileName = aszFileCollection;
 	m_ptrCollectionSource = aoSource;
-	m_iID = 0;
+	m_iChildrenCount = 0;
+	m_iID = 1;
 
 	setID(aszID);
 
@@ -295,10 +296,47 @@ void Collection::LoadCollection(std::string aszFileName, CollectionFactory* aoFa
 	// This must be done first.
 	loadPreprocessingLines(lstPreprocessLines);
 
+	// Check if any children have items already loaded
+	std::map<std::string, std::vector<CopyItem*>> mapPreExistingItems;
+	std::vector<int> lstAllPossibleCacheItems = m_ptrCollectionSource->GetCollectionCache(GetIdentifier());
+	for (size_t i = 0; i < lstAllPossibleCacheItems.size(); i++)
+	{
+		CollectionItem* itemPrototype = m_ptrCollectionSource->GetCardPrototype(lstAllPossibleCacheItems[i]);
+		// This has to iterate over ALL cards because we don't know where dangling references are.
+		// Get all copies that claim to be in this collection.
+		std::vector<CopyItem*> lstPossibleLocals = itemPrototype->GetCopiesForCollection(GetIdentifier(), CollectionItemType::Local);
+		for (size_t t = 0; t < lstPossibleLocals.size(); t++)
+		{
+			if (lstPossibleLocals[t]->IsResidentIn(GetIdentifier()))
+			{
+				mapPreExistingItems[itemPrototype->GetName()].push_back(lstPossibleLocals[t]);
+			}
+		}
+	}
+
 	LoadChanges(lstCardLines);
 
 	// Also need to load metatags...
 	loadMetaTagFile();
+
+	// Account for any items that were already loaded by children.
+	std::map<std::string, std::vector<CopyItem*>> mapPreExistingItems;
+	std::vector<int> lstAllPossibleCacheItems = m_ptrCollectionSource->GetCollectionCache(GetIdentifier());
+	for (size_t i = 0; i < lstAllPossibleCacheItems.size(); i++)
+	{
+		CollectionItem* itemPrototype = m_ptrCollectionSource->GetCardPrototype(lstAllPossibleCacheItems[i]);
+		// This has to iterate over ALL cards because we don't know where dangling references are.
+		// Get all copies that claim to be in this collection.
+		std::vector<CopyItem*> lstPossibleLocals = itemPrototype->GetCopiesForCollection(GetIdentifier(), CollectionItemType::Local);
+		for (size_t t = 0; t < lstPossibleLocals.size(); t++)
+		{
+			CopyItem* cItem = lstPossibleLocals[t];
+			if (ListHelper::List_Find(cItem, mapPreExistingItems[itemPrototype->GetName()]) == -1 && cItem->IsResidentIn(GetIdentifier()))
+			{
+				// This is a newly created item.
+			}
+		}
+	}
 
 	// Now Verify Borrowed Cards (i.e. Parent != this) that were just loaded exist.
 	// Two things can happen in this case. 
@@ -485,9 +523,9 @@ void Collection::setID(std::string aszIDString)
 	}
 	else
 	{
-		std::pair<std::string, int> pOwnerID = Config::Instance()->GetIDInfo(aszIDString);
+		std::pair<std::string, std::vector<unsigned int>> pOwnerID = Config::Instance()->GetIDInfo(aszIDString);
 		m_szID = aszIDString;
-		m_iID = pOwnerID.second;
+		m_iID = pOwnerID.second[0];
 	}
 }
 
@@ -704,7 +742,7 @@ void Collection::loadPreprocessingLine(std::string aszLine)
 	}
 	else if (szKey == "ID")
 	{
-		m_iID = std::stoi(szValue);
+		setID(szValue);
 	}
 	else if (szKey == "CC")
 	{

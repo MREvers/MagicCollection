@@ -53,7 +53,7 @@ std::string CopyItem::GetHash()
 
 	if (iMetaHash == -1 || m_bNeedHash)
 	{
-		std::string szHashString = m_szParentCollection;
+		std::string szHashString = m_szFullAddress;
 		std::vector<Tag>::iterator iter_Tags = m_lstIdentifyingTags.begin();
 		for (; iter_Tags != m_lstIdentifyingTags.end(); ++iter_Tags)
 		{
@@ -79,24 +79,67 @@ std::string CopyItem::GetHash()
 		return m_lstMetaTags[iMetaHash].GetVal();
 	}
 }
+
 std::string  CopyItem::GetParent()
 {
-	return m_szParentCollection;
+	return m_szFullAddress;
 }
+
 bool CopyItem::IsParent(std::string aszParent)
 {
-	std::pair<std::string, int> pairEnt = Config::Instance()->GetIDInfo(aszParent);
-	int iIsIDParent = m_iID % pairEnt.second;
+	std::pair<std::string, std::vector<unsigned int>> pairAddressAndSubs = Config::Instance()->GetIDInfo(aszParent);
+	std::string szNewResiAddress = pairAddressAndSubs.first;
+	unsigned int iNewResiSubAddress = pairAddressAndSubs.second[0];
 
-	return iIsIDParent == 0 && pairEnt.first == m_szOwnerID;
+	unsigned int iDummy;
+	return isResidentIn(m_szAddress, m_lstSubAddresses, szNewResiAddress, iNewResiSubAddress, iDummy);
 }
 
+// This will detect if the adding 'resident' is a subset of the parent, if so, it will adjust the parent address.
 void CopyItem::AddResident(std::string aszNewResi)
 {
-	if (ListHelper::List_Find(aszNewResi, m_lstResidentIn) == -1)
+	Config* config = Config::Instance();
+
+	std::pair<std::string, std::vector<unsigned int>> pairAddressAndSubs = config->GetIDInfo(aszNewResi);
+	std::string szNewResiAddress = pairAddressAndSubs.first;
+	unsigned int iNewResiSubAddress = pairAddressAndSubs.second[0];
+
+	if (szNewResiAddress == m_szAddress)
 	{
-		m_lstResidentIn.push_back(aszNewResi);
+		// First check if the resident is a subset of the parent.
+		// We always want the 'Parent location' of the item to be as specific as possible, because
+		// the less specific locations will automatically pick up the more specific.
+		unsigned int iSubAddressIn;
+		bool bIsInSubset = isResidentIn(m_szAddress, m_lstSubAddresses, szNewResiAddress, iNewResiSubAddress, iSubAddressIn);
+
+		// The 'subset of newResi'-location will suffice to say that this item is already in newResi.
+		if (bIsInSubset) { return; }
+
+		// This item is not in a subset of newResi, but is newResi a more specific location than this item's
+		for each (unsigned int iPotentialSuperSet in m_lstSubAddresses)
+		{
+			if (isSuperSet(iPotentialSuperSet, iNewResiSubAddress))
+			{
+				// This item is in a superset of new resi, and is now in new resi, so change the address.
+				setSubAddress(iPotentialSuperSet, iNewResiSubAddress);
+				return;
+			}
+		}
 	}
+
+	// Otherwise, check the resident locations - these are locations that reference this item.
+	unsigned int iSubAddressIn;
+	for each (std::string szFullResiAddress in m_lstResidentIn)
+	{
+		if (IsResidentIn(szFullResiAddress, aszNewResi, iSubAddressIn))
+		{
+			// This item is already referenced by a subset of newresi.
+			return;
+		}
+	}
+
+	// If we've gotten this far, this item is not already referenced by newResi, so add it.
+	m_lstResidentIn.push_back(aszNewResi);
 }
 
 void CopyItem::RemoveResident(std::string aszRemoveResi)
@@ -115,11 +158,99 @@ std::vector<std::string> CopyItem::GetResidentIn()
 
 bool CopyItem::IsResidentIn(std::string aszResident)
 {
-	return ListHelper::List_Find(aszResident, m_lstResidentIn) != -1;
+	bool bSimple = false;
+	unsigned int iDummy;
+	for each (std::string szResi in m_lstResidentIn)
+	{
+		bSimple |= IsResidentIn(szResi, aszResident, iDummy);
+
+		if (bSimple) { break; }
+	}
+
+	return bSimple;
+}
+
+// Collection names have the form <Address>-<SubAddress>... only one subaddress.
+bool CopyItem::IsResidentIn(std::string aszResidentLocation, std::string aszCollectionName, unsigned int &riSubIn)
+{
+	Config* config = Config::Instance();
+
+	std::pair<std::string, std::vector<unsigned int>> pairSource = Config::Instance()->GetIDInfo(aszResidentLocation);
+	std::string szBaseAddress = pairSource.first;
+	std::vector<unsigned int> lstSubAddresses = pairSource.second;
+
+	std::pair<std::string, std::vector<unsigned int>> pairEnt = Config::Instance()->GetIDInfo(aszCollectionName);
+	std::string szTestAddress = pairEnt.first;
+	int iSubAddress = pairEnt.second[0];
+
+	return isResidentIn(szBaseAddress, lstSubAddresses, szTestAddress, iSubAddress, riSubIn);
+}
+
+bool CopyItem::isResidentIn(std::string aszBaseAddress,
+	std::vector<unsigned int> alstSubAddresses,
+	std::string aszTestAdress,
+	unsigned int aiTestSubAddress,
+	unsigned int &riSubIn)
+{
+	Config* config = Config::Instance();
+	riSubIn = 1;
+
+	bool bIsResident = true;
+
+	if (!(bIsResident &= aszTestAdress == aszBaseAddress)) { return bIsResident; }
+
+	bool bFoundSubAddressMatch = false;
+	for each (int subAddress in alstSubAddresses)
+	{
+		// Since the subAddress is the MOST specific location, it will be the LARGER than iSubAddress, if
+		// iSubAddress contains any item in subAddress.
+		bFoundSubAddressMatch |= isSuperSet(aiTestSubAddress, subAddress);
+		riSubIn = subAddress;
+		if (bFoundSubAddressMatch) { break; }
+	}
+
+	return bIsResident &= bFoundSubAddressMatch;
+}
+
+bool CopyItem::isSuperSet(unsigned int aiSuperSet, unsigned int aiSubSet)
+{
+	if (aiSubSet == aiSuperSet) { return true; }
+	Config* config = Config::Instance();
+
+	// The subset will have a larger code, ie 30. The superset will be, e.g. 6.
+	if (aiSubSet % aiSuperSet == 0)
+	{
+		int iSmallPrime = config->GetPrimeIndex(aiSubSet/aiSuperSet);
+		int iSuperLargePrime = config->GetHighPrimeIndex(aiSuperSet);
+
+		return iSmallPrime >= iSuperLargePrime;
+	}
+	else
+	{
+		return false;
+	}
+}
+
+void CopyItem::setSubAddress(unsigned int aiOldVal, unsigned int aiNewVal)
+{
+	int iAddressIndex = ListHelper::List_Find(aiOldVal, m_lstSubAddresses);
+	m_lstSubAddresses[iAddressIndex] = aiNewVal;
+
+	std::string szNewFullAddress = m_szAddress + "-";
+	bool bFirst = true;
+	for each (unsigned int iSubAddress in m_lstSubAddresses)
+	{
+		if (bFirst) { szNewFullAddress += ","; bFirst = false; }
+		szNewFullAddress += std::to_string(iSubAddress);
+	}
+
+	m_szFullAddress = szNewFullAddress;
 }
 
 void CopyItem::SetMetaTag(std::string aszKey, std::string aszVal, MetaTagType atagType)
 {
+	if (aszKey == "Address") { setParent(aszVal, false); }
+
 	std::function<std::string(MetaTag)> fnExtractor =
 		[](MetaTag atag1)-> std::string { return atag1.GetKey(); };
 	int iFound = ListHelper::List_Find(aszKey, m_lstMetaTags, fnExtractor);
@@ -183,12 +314,6 @@ bool CopyItem::SetIdentifyingAttribute(std::string aszKey, std::string aszValue)
 			return true;
 		}
 	}
-	else if (aszKey == "Parent")
-	{
-		m_szParentCollection = aszValue;
-		m_bNeedHash = true;
-		return true;
-	}
 
 	return false;
 }
@@ -228,12 +353,20 @@ std::function<std::string(MetaTag)> CopyItem::GetMetaTagKeyViewer()
 	return [](MetaTag atag)->std::string { return atag.GetKey(); };
 }
 
-void CopyItem::setParent(std::string aszNewParent)
+void CopyItem::setParent(std::string aszNewParent, bool abSetMeta)
 {
-	m_szParentCollection = aszNewParent;
-	std::pair<std::string, int> pID = Config::Instance()->GetIDInfo(aszNewParent);
-	m_iID = pID.second;
-	m_szOwnerID = pID.first;
+	// Call will look like setParent->SetMeta->SetParent...
+	// This ensures that both are set when this function is called.
+	if (abSetMeta)
+	{
+		SetMetaTag("Address", aszNewParent, MetaTagType::Public);
+		return;
+	}
+
+	m_szFullAddress = aszNewParent;
+	std::pair<std::string, std::vector<unsigned int>> pID = Config::Instance()->GetIDInfo(aszNewParent);
+	m_lstSubAddresses = pID.second;
+	m_szAddress = pID.first;
 }
 
 void CopyItem::setPairedAttributes(std::string aszKey, int iVal)
