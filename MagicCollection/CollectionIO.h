@@ -10,9 +10,11 @@
 #include "CopyItem.h"
 #include "CollectionItem.h"
 #include "Collection.h"
+#include "CollectionFactory.h"
 #include "CollectionSource.h"
 #include "ListHelper.h"
 
+class CollectionFactory;
 class Collection;
 
 class CollectionIO

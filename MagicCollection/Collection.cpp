@@ -8,7 +8,6 @@ Collection::Collection(std::string aszName, CollectionSource* aoSource, std::str
 	m_szFileName = aszFileCollection;
 	m_ptrCollectionSource = aoSource;
 	m_iChildrenCount = 0;
-	m_iID = 1;
 
 	setID(aszID);
 
@@ -387,24 +386,6 @@ std::vector<std::string> Collection::GetCollectionList(MetaTagType atagType, boo
 	return lstRetVal;
 }
 
-// Perhaps link this to the external scripts... idk.
-std::vector<std::string> Collection::GetCollectionAnalysis(std::string aszAnalysisCmd)
-{
-	std::vector<std::string> lstCmds = StringHelper::Str_Split(aszAnalysisCmd, ";");
-	std::vector<std::string> lstResults;
-	for (size_t i = 0; i < lstCmds.size(); i++)
-	{
-		if (lstCmds[i] == "mana")
-		{
-		}
-		else if (lstCmds[i] == "cmc")
-		{
-
-		}
-	}
-	return lstResults;
-}
-
 void Collection::setID(std::string aszIDString)
 {
 	if (aszIDString == "")
@@ -413,9 +394,7 @@ void Collection::setID(std::string aszIDString)
 	}
 	else
 	{
-		std::pair<std::string, std::vector<unsigned int>> pOwnerID = Config::Instance()->GetIDInfo(aszIDString);
 		m_szID = aszIDString;
-		m_iID = pOwnerID.second[0];
 	}
 }
 
@@ -808,24 +787,21 @@ void Collection::saveCollection()
 {
 	std::vector<std::string> lstLines = GetCollectionList(None);
 
-	if (lstLines.size() > 0)
+	CollectionIO ioHelper;
+	std::ofstream oColFile;
+	oColFile.open(ioHelper.GetCollectionFile(m_szFileName));
+
+	oColFile << Config::CollectionDefinitionKey << " Name=\"" << m_szName << "\"" << std::endl;
+
+	oColFile << Config::CollectionDefinitionKey << " ID=\"" << m_szID << "\"" << std::endl;
+
+	oColFile << Config::CollectionDefinitionKey << " CC=\"" << m_iChildrenCount << "\"" << std::endl;
+
+	std::vector<std::string>::iterator iter_Line = lstLines.begin();
+	for (; iter_Line != lstLines.end(); ++iter_Line)
 	{
-		CollectionIO ioHelper;
-		std::ofstream oColFile;
-		oColFile.open(ioHelper.GetCollectionFile(m_szFileName));
-
-		oColFile << Config::CollectionDefinitionKey << " Name=\"" << m_szName << "\"" << std::endl;
-
-		oColFile << Config::CollectionDefinitionKey << " ID=\"" << m_szID << "\"" << std::endl;
-
-		oColFile << Config::CollectionDefinitionKey << " CC=\"" << m_iChildrenCount << "\"" << std::endl;
-
-		std::vector<std::string>::iterator iter_Line = lstLines.begin();
-		for (; iter_Line != lstLines.end(); ++iter_Line)
-		{
-			oColFile << *iter_Line << std::endl;
-		}
-
-		oColFile.close();
+		oColFile << *iter_Line << std::endl;
 	}
+
+	oColFile.close();
 }

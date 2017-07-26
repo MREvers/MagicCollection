@@ -52,14 +52,11 @@ public:
 
 	std::vector<std::string> GetCollectionList(MetaTagType atagType = Visible, bool aiCollapsed = false);
 
-	std::vector<std::string> GetCollectionAnalysis(std::string aszAnalysisCmd);
-
 	bool IsLoaded = false;
 
 private:
 	std::string m_szName;
 	unsigned int m_iChildrenCount; // Needed to avoid name clashes.
-	unsigned int m_iID;
 	std::string m_szID;
 	std::string m_szFileName;
 	CollectionSource* m_ptrCollectionSource;

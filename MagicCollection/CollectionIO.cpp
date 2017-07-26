@@ -54,7 +54,6 @@ CollectionIO::CaptureUnlistedItems(std::string aszCollectionName,
 	std::map<int, std::list<CopyItem*>>& rlstAlreadyCapturedItems)
 {
 	// Identify already loaded cards in this collection.
-	std::map<int, std::list<CopyItem*>> mapExistingItems;
 	std::vector<int> lstAllPossibleCacheItems = aptCollectionSource->GetCollectionCache(aszCollectionName);
 	for (size_t i = 0; i < lstAllPossibleCacheItems.size(); i++)
 	{
@@ -68,7 +67,7 @@ CollectionIO::CaptureUnlistedItems(std::string aszCollectionName,
 			if (cItem->IsResidentIn(aszCollectionName) &&
 				-1 == ListHelper::List_Find(cItem, lstSearchItems))
 			{
-				mapExistingItems[lstAllPossibleCacheItems[i]].push_back(cItem);
+				rlstAdditionalItems[lstAllPossibleCacheItems[i]].push_back(cItem);
 			}
 		}
 	}
@@ -234,6 +233,8 @@ CollectionIO::ReleaseUnfoundReferences(std::string aszCollectionName,
 			}
 		}
 	}
+
+	return true;
 }
 
 bool CollectionIO::CollectionFileExists(std::string aszFileName)

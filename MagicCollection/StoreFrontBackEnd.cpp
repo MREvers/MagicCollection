@@ -65,19 +65,6 @@ CStoreFrontBackEnd::GetCollectionList(std::string aszCollection, int aiVisibilit
 	}
 }
 
-std::vector<std::string> CStoreFrontBackEnd::GetCollectionAnalysis(std::string aszCollection, std::string aszAnalysisCmd)
-{
-	if (m_ColFactory->CollectionExists(aszCollection))
-	{
-		return m_ColFactory->GetCollection(aszCollection)->GetCollectionAnalysis("mana");
-	}
-	else
-	{
-		std::vector<std::string> lstEmpty;
-		return lstEmpty;
-	}
-}
-
 std::string CStoreFrontBackEnd::GetCardPrototype(std::string aszCardName)
 {
 	int iValidCard = m_ColSource->LoadCard(aszCardName);
