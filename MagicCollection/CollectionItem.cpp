@@ -63,18 +63,15 @@ void CollectionItem::RemoveCopyItem(std::string aszCollectionName, std::string a
 	{
 		if ((*iter_Copies)->GetMetaTag(Config::HashKey, Hidden) == aszHash)
 		{
-			if ((*iter_Copies)->IsParent(aszCollectionName))
+			if ((*iter_Copies)->IsParent(aszCollectionName) && (*iter_Copies)->GetResidentIn().size() == 1)
 			{
-				if ((*iter_Copies)->GetResidentIn().size() > 1)
-				{
-					m_lstCopies.erase(iter_Copies);
-				}
+				m_lstCopies.erase(iter_Copies);
 			}
 			else
 			{
 				(*iter_Copies)->RemoveResident(aszCollectionName);
 			}
-			
+
 			break;
 		}
 	}
@@ -132,8 +129,8 @@ std::vector<CopyItem*> CollectionItem::GetCopiesForCollection(std::string aszCol
 		{
 			lstRetVal.push_back(*iter_Copies);
 		}
-		else if ((aItemType & Borrowed) > 0            &&
-			!(*iter_Copies)->IsParent(aszCollection)   &&
+		else if ((aItemType & Borrowed) > 0 &&
+			!(*iter_Copies)->IsParent(aszCollection) &&
 			(*iter_Copies)->IsResidentIn(aszCollection))
 		{
 			lstRetVal.push_back(*iter_Copies);
@@ -180,7 +177,7 @@ std::string CollectionItem::GetProtoTypeString()
 		}
 		lstAllCommonTraits.push_back(std::make_pair(trait.GetKeyName(), szTraitVal));
 	}
-	
+
 	return CollectionItem::ToCardLine("", "", lstAllCommonTraits);
 }
 
@@ -278,7 +275,7 @@ bool CollectionItem::ParseCardLine(std::string aszLine, PseudoIdentifier& rPIden
 		}
 	}
 
-	if (!hasMeta && hasDets) 
+	if (!hasMeta && hasDets)
 	{
 		while (i < iter_size && aszLine.at(i) != ':')
 		{
@@ -359,7 +356,7 @@ std::string CollectionItem::ToCardLine(std::string aszParentCollection,
 	unsigned int iDummy;
 	for (; iter_keyValPairs != alstMetaTags.end(); ++iter_keyValPairs)
 	{
-		if (!(aszCompareParent == "") && 
+		if (!(aszCompareParent == "") &&
 			(iter_keyValPairs->first == "Address") &&
 			(iter_keyValPairs->second == aszCompareParent))
 		{

@@ -66,13 +66,13 @@ namespace StoreFrontPro.Server
 
         public void SaveCollection()
         {
-            ServerInterface.Collection.SaveCollection(CollectionName);
+            ServerInterface.Collection.SaveCollection(ID);
         }
 
         public void SubmitBulkEdits(List<string> alstEdits, Action aCallBack = null)
         {
             ServerInterface.Collection.LoadBulkChanges(
-                this.CollectionName,
+                this.ID,
                 alstEdits,
                 () => { Sync(aCallBack); },
                 false);

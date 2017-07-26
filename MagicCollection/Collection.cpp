@@ -227,7 +227,7 @@ std::vector<std::string> Collection::GetMetaData()
 	lstRetval.push_back("Name=\"" + m_szName + "\"");
 
 	lstRetval.push_back("ID=\"" + m_szID + "\"");
-	
+
 	for each(auto metaData in m_lstTaggedItems)
 	{
 		lstRetval.push_back(metaData.first + ": {" + metaData.second.first + "=\"" + metaData.second.second + "\" }");
@@ -286,6 +286,11 @@ void Collection::LoadCollection(std::string aszFileName, CollectionFactory* aoFa
 		else { return ""; }
 	};
 
+	std::function<std::string(CopyItem*)> fnSimpleExtractor = [&](CopyItem* item)->std::string
+	{
+		return item->GetHash();
+	};
+
 	CollectionIO loader;
 	m_bRecordChanges = false;
 
@@ -296,20 +301,19 @@ void Collection::LoadCollection(std::string aszFileName, CollectionFactory* aoFa
 	// This must be done first.
 	loadPreprocessingLines(lstPreprocessLines);
 
-	// Check if any children have items already loaded
-	std::map<std::string, std::vector<CopyItem*>> mapPreExistingItems;
+	// Identify already loaded cards in this collection.
+	std::map<int, std::list<CopyItem*>> mapExistingItems;
 	std::vector<int> lstAllPossibleCacheItems = m_ptrCollectionSource->GetCollectionCache(GetIdentifier());
 	for (size_t i = 0; i < lstAllPossibleCacheItems.size(); i++)
 	{
 		CollectionItem* itemPrototype = m_ptrCollectionSource->GetCardPrototype(lstAllPossibleCacheItems[i]);
-		// This has to iterate over ALL cards because we don't know where dangling references are.
-		// Get all copies that claim to be in this collection.
 		std::vector<CopyItem*> lstPossibleLocals = itemPrototype->GetCopiesForCollection(GetIdentifier(), CollectionItemType::Local);
 		for (size_t t = 0; t < lstPossibleLocals.size(); t++)
 		{
-			if (lstPossibleLocals[t]->IsResidentIn(GetIdentifier()))
+			CopyItem* cItem = lstPossibleLocals[t];
+			if (cItem->IsResidentIn(GetIdentifier()))
 			{
-				mapPreExistingItems[itemPrototype->GetName()].push_back(lstPossibleLocals[t]);
+				mapExistingItems[lstAllPossibleCacheItems[i]].push_back(cItem);
 			}
 		}
 	}
@@ -319,21 +323,45 @@ void Collection::LoadCollection(std::string aszFileName, CollectionFactory* aoFa
 	// Also need to load metatags...
 	loadMetaTagFile();
 
-	// Account for any items that were already loaded by children.
-	std::map<std::string, std::vector<CopyItem*>> mapPreExistingItems;
-	std::vector<int> lstAllPossibleCacheItems = m_ptrCollectionSource->GetCollectionCache(GetIdentifier());
+	// Identify all the newly loaded cards that had at least one copy already loaded.
+	std::map<int, std::list<CopyItem*>> mapNewlyAddedItems;
 	for (size_t i = 0; i < lstAllPossibleCacheItems.size(); i++)
 	{
 		CollectionItem* itemPrototype = m_ptrCollectionSource->GetCardPrototype(lstAllPossibleCacheItems[i]);
-		// This has to iterate over ALL cards because we don't know where dangling references are.
-		// Get all copies that claim to be in this collection.
 		std::vector<CopyItem*> lstPossibleLocals = itemPrototype->GetCopiesForCollection(GetIdentifier(), CollectionItemType::Local);
 		for (size_t t = 0; t < lstPossibleLocals.size(); t++)
 		{
 			CopyItem* cItem = lstPossibleLocals[t];
-			if (ListHelper::List_Find(cItem, mapPreExistingItems[itemPrototype->GetName()]) == -1 && cItem->IsResidentIn(GetIdentifier()))
+			std::list<CopyItem*> lstListItems = mapExistingItems[lstAllPossibleCacheItems[i]];
+			std::vector<CopyItem*> lstSearchItems = std::vector<CopyItem*>(lstListItems.begin(), lstListItems.end());
+			if (cItem->IsResidentIn(GetIdentifier()) &&
+				-1 == ListHelper::List_Find(cItem, lstSearchItems))
 			{
-				// This is a newly created item.
+				mapNewlyAddedItems[lstAllPossibleCacheItems[i]].push_back(cItem);
+			}
+		}
+	}
+
+	for each (std::pair<int, std::list<CopyItem*>> pairItem in mapNewlyAddedItems)
+	{
+		int iItem = pairItem.first;
+		CollectionItem* item = m_ptrCollectionSource->GetCardPrototype(iItem);
+		std::list<CopyItem*> lstNewItems = pairItem.second;
+
+		if (mapExistingItems.find(iItem) != mapExistingItems.end())
+		{
+			for each (CopyItem* cItem in lstNewItems)
+			{
+				std::list<CopyItem*> lstListItems = mapExistingItems[iItem];
+				std::vector<CopyItem*> lstSearchItems = std::vector<CopyItem*>(lstListItems.begin(), lstListItems.end());
+				int iFound;
+				if (-1 != (iFound = ListHelper::List_Find(cItem->GetHash(), lstSearchItems, fnSimpleExtractor)))
+				{
+					CopyItem* foundItem = lstSearchItems[iFound];
+					mapExistingItems.at(iItem).remove(foundItem);
+					mapNewlyAddedItems.at(iItem).remove(cItem);
+					item->Erase(cItem);
+				}
 			}
 		}
 	}
@@ -379,7 +407,7 @@ void Collection::LoadCollection(std::string aszFileName, CollectionFactory* aoFa
 	// Now this collection is COMPLETELY LOADED. Since other collections can reference this collection, without this collection being loaded,
 	// those other collections may have created copies of card in this collection already; if that is the case, use those copies. Additionally,
 	// check that all the copies referenced by the other collections still exist, if not, delete those copies.
-	std::vector<int> lstAllPossibleCacheItems = m_ptrCollectionSource->GetCollectionCache(GetIdentifier());
+	lstAllPossibleCacheItems = m_ptrCollectionSource->GetCollectionCache(GetIdentifier());
 	for (size_t i = 0; i < lstAllPossibleCacheItems.size(); i++)
 	{
 		CollectionItem* itemPrototype = m_ptrCollectionSource->GetCardPrototype(lstAllPossibleCacheItems[i]);
@@ -558,7 +586,7 @@ void Collection::addItem(std::string aszName, std::vector<Tag> alstAttrs, std::v
 
 void Collection::addExistingItem(std::string aszName, std::string aszHash, std::string aszResidentIn)
 {
-	
+
 }
 
 void Collection::removeItem(std::string aszName, std::string aszIdentifyingHash, std::string aszResidentIn)
@@ -898,23 +926,20 @@ void Collection::saveMeta()
 {
 	std::vector<std::string> lstMetaLines = GetCollectionList(Visible);
 
-	if (lstMetaLines.size() > 0)
+	CollectionIO ioHelper;
+	std::ofstream oMetaFile;
+	oMetaFile.open(ioHelper.GetMetaFile(m_szFileName));
+
+	std::vector<std::string>::iterator iter_MetaLine = lstMetaLines.begin();
+	for (; iter_MetaLine != lstMetaLines.end(); ++iter_MetaLine)
 	{
-		CollectionIO ioHelper;
-		std::ofstream oMetaFile;
-		oMetaFile.open(ioHelper.GetMetaFile(m_szFileName));
-
-		std::vector<std::string>::iterator iter_MetaLine = lstMetaLines.begin();
-		for (; iter_MetaLine != lstMetaLines.end(); ++iter_MetaLine)
+		if (iter_MetaLine->find_first_of(':') != std::string::npos)
 		{
-			if (iter_MetaLine->find_first_of(':') != std::string::npos)
-			{
-				oMetaFile << *iter_MetaLine << std::endl;
-			}
+			oMetaFile << *iter_MetaLine << std::endl;
 		}
-
-		oMetaFile.close();
 	}
+
+	oMetaFile.close();
 }
 
 void Collection::saveCollection()
@@ -930,7 +955,7 @@ void Collection::saveCollection()
 		oColFile << Config::CollectionDefinitionKey << " Name=\"" << m_szName << "\"" << std::endl;
 
 		oColFile << Config::CollectionDefinitionKey << " ID=\"" << m_szID << "\"" << std::endl;
-		
+
 		oColFile << Config::CollectionDefinitionKey << " CC=\"" << m_iChildrenCount << "\"" << std::endl;
 
 		std::vector<std::string>::iterator iter_Line = lstLines.begin();

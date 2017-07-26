@@ -47,6 +47,7 @@ std::string CollectionFactory::CreateNewCollection(std::string aszColName, std::
 	if (CollectionExists(aszParentID))
 	{
 		oCol = new Collection(aszColName, m_ColSource, aszColName, getNextChildName(aszParentID));
+		GetCollection(aszParentID)->ChildAdded();
 	}
 	else
 	{

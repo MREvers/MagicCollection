@@ -1,5 +1,6 @@
 #pragma once
 #include <vector>
+#include <list>
 #include <memory>
 #include <string>
 #include <stdlib.h>
@@ -75,7 +76,6 @@ private:
 	std::vector<int> m_lstItemCacheIndexes;
 
 	std::vector<int> getCollection();
-	std::string getCollectionIdentifier();
 
 	// These all locate by name and hash for a second time so we dont risk dangling pointers.
 	void addItem(std::string aszName, std::vector<Tag> alstAttrs, std::vector<Tag> alstMetaTags);

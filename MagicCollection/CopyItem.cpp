@@ -62,7 +62,7 @@ std::string CopyItem::GetHash()
 			szHashString += iter_Tags->second;
 		}
 
-		std::vector<Tag> lstMetaList = this->GetMetaTags(Visible);
+		std::vector<Tag> lstMetaList = this->GetMetaTags(Public);
 		std::vector<Tag>::iterator iter_MetaTags = lstMetaList.begin();
 		for (; iter_MetaTags != lstMetaList.end(); ++iter_MetaTags)
 		{
@@ -125,6 +125,10 @@ void CopyItem::AddResident(std::string aszNewResi)
 				return;
 			}
 		}
+
+		// If we have gotten this far, then this is a new chain off the parent
+		m_lstSubAddresses.push_back(iNewResiSubAddress);
+		return;
 	}
 
 	// Otherwise, check the resident locations - these are locations that reference this item.
@@ -144,11 +148,51 @@ void CopyItem::AddResident(std::string aszNewResi)
 
 void CopyItem::RemoveResident(std::string aszRemoveResi)
 {
-	int iFound;
-	if ((iFound = ListHelper::List_Find(aszRemoveResi, m_lstResidentIn)) != -1)
+	std::pair<std::string, std::vector<unsigned int>> pairAddSub = Config::Instance()->GetIDInfo(aszRemoveResi);
+	std::string szAddress = pairAddSub.first;
+	int iRemoveSubAddress = pairAddSub.second[0];
+
+	if (szAddress != m_szAddress)
 	{
-		m_lstResidentIn.erase(m_lstResidentIn.begin() + iFound);
+		auto iter_Resi = m_lstResidentIn.begin();
+		for (; iter_Resi != m_lstResidentIn.end(); ++iter_Resi)
+		{
+			std::string szResident = *iter_Resi;
+			if (szResident == aszRemoveResi)
+			{
+				m_lstResidentIn.erase(iter_Resi);
+				return;
+			}
+
+			unsigned int iDummy;
+			if (IsResidentIn(aszRemoveResi, szResident, iDummy))
+			{
+				int iHighPrime = Config::primes[Config::Instance()->GetHighPrimeIndex(iRemoveSubAddress)];
+				int iNewSubAddress = iRemoveSubAddress / iHighPrime;
+
+				m_lstResidentIn.erase(iter_Resi);
+
+				std::string szNewAddress = szAddress + "-" + std::to_string(iNewSubAddress);
+				return;
+			}
+		}
 	}
+	else
+	{
+		for (size_t i = 0; i < m_lstSubAddresses.size(); i++)
+		{
+			int iSubAddress = m_lstSubAddresses[i];
+			if (isSuperSet(iRemoveSubAddress, iSubAddress))
+			{
+				int iHighPrime = Config::primes[Config::Instance()->GetHighPrimeIndex(iRemoveSubAddress)];
+				int iNewSubAddress = iRemoveSubAddress / iHighPrime;
+
+				setSubAddress(iSubAddress, iNewSubAddress);
+				return;
+			}
+		}
+	}
+	
 }
 
 std::vector<std::string> CopyItem::GetResidentIn()
@@ -160,11 +204,12 @@ bool CopyItem::IsResidentIn(std::string aszResident)
 {
 	bool bSimple = false;
 	unsigned int iDummy;
+
 	for each (std::string szResi in m_lstResidentIn)
 	{
-		bSimple |= IsResidentIn(szResi, aszResident, iDummy);
-
 		if (bSimple) { break; }
+
+		bSimple |= IsResidentIn(szResi, aszResident, iDummy);
 	}
 
 	return bSimple;
@@ -220,7 +265,7 @@ bool CopyItem::isSuperSet(unsigned int aiSuperSet, unsigned int aiSubSet)
 	// The subset will have a larger code, ie 30. The superset will be, e.g. 6.
 	if (aiSubSet % aiSuperSet == 0)
 	{
-		int iSmallPrime = config->GetPrimeIndex(aiSubSet/aiSuperSet);
+		int iSmallPrime = config->GetPrimeIndex(aiSubSet / aiSuperSet);
 		int iSuperLargePrime = config->GetHighPrimeIndex(aiSuperSet);
 
 		return iSmallPrime >= iSuperLargePrime;
@@ -234,14 +279,26 @@ bool CopyItem::isSuperSet(unsigned int aiSuperSet, unsigned int aiSubSet)
 void CopyItem::setSubAddress(unsigned int aiOldVal, unsigned int aiNewVal)
 {
 	int iAddressIndex = ListHelper::List_Find(aiOldVal, m_lstSubAddresses);
-	m_lstSubAddresses[iAddressIndex] = aiNewVal;
+	if (iAddressIndex == -1) { return; }
+
+	int iAlreadyIndex = ListHelper::List_Find(aiNewVal, m_lstSubAddresses);
+	if (iAlreadyIndex != -1)
+	{
+		m_lstSubAddresses.erase(m_lstSubAddresses.begin() + iAddressIndex);
+	}
+	else
+	{
+		m_lstSubAddresses[iAddressIndex] = aiNewVal;
+	}
 
 	std::string szNewFullAddress = m_szAddress + "-";
 	bool bFirst = true;
 	for each (unsigned int iSubAddress in m_lstSubAddresses)
 	{
-		if (bFirst) { szNewFullAddress += ","; bFirst = false; }
+		if (!bFirst) { szNewFullAddress += ","; }
 		szNewFullAddress += std::to_string(iSubAddress);
+
+		bFirst = false;
 	}
 
 	m_szFullAddress = szNewFullAddress;
@@ -253,12 +310,14 @@ void CopyItem::SetMetaTag(std::string aszKey, std::string aszVal, MetaTagType at
 
 	std::function<std::string(MetaTag)> fnExtractor =
 		[](MetaTag atag1)-> std::string { return atag1.GetKey(); };
+
 	int iFound = ListHelper::List_Find(aszKey, m_lstMetaTags, fnExtractor);
 	if (iFound == -1)
 	{
 		MetaTag newMeta(aszKey, aszVal, atagType);
 		std::function<int(MetaTag, MetaTag)> fnComparer =
 			[](MetaTag atag1, MetaTag atag2)-> int { return atag1.GetKey().compare(atag2.GetKey()); };
+
 		ListHelper::List_Insert(newMeta, m_lstMetaTags, fnComparer);
 	}
 	else if (m_lstMetaTags[iFound].CanView(atagType))
