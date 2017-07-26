@@ -279,191 +279,53 @@ void  Collection::SaveCollection()
 
 void Collection::LoadCollection(std::string aszFileName, CollectionFactory* aoFactory)
 {
-	// Used to filter out already used existing copies
-	std::function<std::string(CopyItem*)> fnExtractor = [&](CopyItem* item)->std::string
-	{
-		if (!item->IsResidentIn(GetIdentifier())) { return item->GetHash(); }
-		else { return ""; }
-	};
-
-	std::function<std::string(CopyItem*)> fnSimpleExtractor = [&](CopyItem* item)->std::string
-	{
-		return item->GetHash();
-	};
-
+	std::vector<std::string> lstPreprocessLines;
+	std::vector<std::string> lstCardLines;
+	std::map<int, std::list<CopyItem*>> mapNewlyAddedItems;
+	std::map<int, std::list<CopyItem*>> mapExistingItems;
+	std::vector<std::string> lstFileLines;
 	CollectionIO loader;
+
 	m_bRecordChanges = false;
 
-	std::vector<std::string> lstLines = loader.GetFileLines(aszFileName);
-	std::vector<std::string> lstPreprocessLines;
-	std::vector<std::string> lstCardLines = loader.GetPreprocessLines(lstLines, lstPreprocessLines);
+	lstFileLines = loader.GetFileLines(aszFileName);
+
+	loader.GetPreprocessLines(lstFileLines, lstCardLines, lstPreprocessLines);
 
 	// This must be done first.
 	loadPreprocessingLines(lstPreprocessLines);
 
-	// Identify already loaded cards in this collection.
-	std::map<int, std::list<CopyItem*>> mapExistingItems;
-	std::vector<int> lstAllPossibleCacheItems = m_ptrCollectionSource->GetCollectionCache(GetIdentifier());
-	for (size_t i = 0; i < lstAllPossibleCacheItems.size(); i++)
-	{
-		CollectionItem* itemPrototype = m_ptrCollectionSource->GetCardPrototype(lstAllPossibleCacheItems[i]);
-		std::vector<CopyItem*> lstPossibleLocals = itemPrototype->GetCopiesForCollection(GetIdentifier(), CollectionItemType::Local);
-		for (size_t t = 0; t < lstPossibleLocals.size(); t++)
-		{
-			CopyItem* cItem = lstPossibleLocals[t];
-			if (cItem->IsResidentIn(GetIdentifier()))
-			{
-				mapExistingItems[lstAllPossibleCacheItems[i]].push_back(cItem);
-			}
-		}
-	}
+	loader.CaptureUnlistedItems(GetIdentifier(),
+		m_ptrCollectionSource,
+		mapExistingItems,
+		mapNewlyAddedItems);
 
 	LoadChanges(lstCardLines);
-
-	// Also need to load metatags...
 	loadMetaTagFile();
 
-	// Identify all the newly loaded cards that had at least one copy already loaded.
-	std::map<int, std::list<CopyItem*>> mapNewlyAddedItems;
-	for (size_t i = 0; i < lstAllPossibleCacheItems.size(); i++)
-	{
-		CollectionItem* itemPrototype = m_ptrCollectionSource->GetCardPrototype(lstAllPossibleCacheItems[i]);
-		std::vector<CopyItem*> lstPossibleLocals = itemPrototype->GetCopiesForCollection(GetIdentifier(), CollectionItemType::Local);
-		for (size_t t = 0; t < lstPossibleLocals.size(); t++)
-		{
-			CopyItem* cItem = lstPossibleLocals[t];
-			std::list<CopyItem*> lstListItems = mapExistingItems[lstAllPossibleCacheItems[i]];
-			std::vector<CopyItem*> lstSearchItems = std::vector<CopyItem*>(lstListItems.begin(), lstListItems.end());
-			if (cItem->IsResidentIn(GetIdentifier()) &&
-				-1 == ListHelper::List_Find(cItem, lstSearchItems))
-			{
-				mapNewlyAddedItems[lstAllPossibleCacheItems[i]].push_back(cItem);
-			}
-		}
-	}
+	loader.CaptureUnlistedItems(GetIdentifier(),
+		m_ptrCollectionSource,
+		mapNewlyAddedItems,
+		mapExistingItems);
 
-	for each (std::pair<int, std::list<CopyItem*>> pairItem in mapNewlyAddedItems)
-	{
-		int iItem = pairItem.first;
-		CollectionItem* item = m_ptrCollectionSource->GetCardPrototype(iItem);
-		std::list<CopyItem*> lstNewItems = pairItem.second;
-
-		if (mapExistingItems.find(iItem) != mapExistingItems.end())
-		{
-			for each (CopyItem* cItem in lstNewItems)
-			{
-				std::list<CopyItem*> lstListItems = mapExistingItems[iItem];
-				std::vector<CopyItem*> lstSearchItems = std::vector<CopyItem*>(lstListItems.begin(), lstListItems.end());
-				int iFound;
-				if (-1 != (iFound = ListHelper::List_Find(cItem->GetHash(), lstSearchItems, fnSimpleExtractor)))
-				{
-					CopyItem* foundItem = lstSearchItems[iFound];
-					mapExistingItems.at(iItem).remove(foundItem);
-					mapNewlyAddedItems.at(iItem).remove(cItem);
-					item->Erase(cItem);
-				}
-			}
-		}
-	}
+	loader.ConsolodateLocalItems(GetIdentifier(),
+		m_ptrCollectionSource,
+		mapNewlyAddedItems,
+		mapExistingItems);
 
 	// Now Verify Borrowed Cards (i.e. Parent != this) that were just loaded exist.
 	// Two things can happen in this case. 
 	// If the claimed collection exists, then try to find the referenced item and use that instead, if that fails, delete the item.
 	// If the claimed collection does not exist, then try to find an identical copy that may have been created by another collection and use that. If that fails, use the one created.
-	for (size_t i = 0; i < m_lstItemCacheIndexes.size(); i++)
-	{
-		CollectionItem* itemPrototype = m_ptrCollectionSource->GetCardPrototype(m_lstItemCacheIndexes[i]);
-		std::vector<CopyItem*> lstBorrowedItems = itemPrototype->GetCopiesForCollection(GetIdentifier(), CollectionItemType::Borrowed);
-		for (size_t t = 0; t < lstBorrowedItems.size(); t++)
-		{
-			std::string szItemParent = lstBorrowedItems[t]->GetParent();
-			std::string szItemHash = lstBorrowedItems[t]->GetHash();
-			if (aoFactory->CollectionExists(szItemParent)) // The aoFactory is used to check if the collection is loaded.
-			{
-				itemPrototype->Erase(lstBorrowedItems[t]);// This copy is erased either way. These were added as placeholders.
-
-				std::vector<CopyItem*> existingItems = itemPrototype->FindAllCopyItems(szItemHash, szItemParent); // This list will be checked for any unused copy that matches this description.
-				int iFoundAlreadyUsed = ListHelper::List_Find(szItemHash, existingItems, fnExtractor);
-				if (iFoundAlreadyUsed != -1)
-				{
-					existingItems[iFoundAlreadyUsed]->AddResident(GetIdentifier());
-				}
-			}
-			else
-			{ // Check if any other collection referenced the unverified copy.
-				// Get a list of all other cards that supposedly belong to this collection
-				std::vector<CopyItem*> lstPotentiallyAlreadyUsedItems = itemPrototype->GetCopiesForCollection(szItemParent, CollectionItemType::Local);
-
-				int iFoundAlreadyUsed = ListHelper::List_Find(szItemHash, lstPotentiallyAlreadyUsedItems, fnExtractor);
-				if (iFoundAlreadyUsed != -1)
-				{
-					itemPrototype->Erase(lstBorrowedItems[t]);
-					lstPotentiallyAlreadyUsedItems[iFoundAlreadyUsed]->AddResident(GetIdentifier());
-				}
-			}
-		}
-	}
+	loader.ConsolodateBorrowedItems(GetIdentifier(),
+		m_ptrCollectionSource,
+		aoFactory);
 
 	// Now this collection is COMPLETELY LOADED. Since other collections can reference this collection, without this collection being loaded,
 	// those other collections may have created copies of card in this collection already; if that is the case, use those copies. Additionally,
 	// check that all the copies referenced by the other collections still exist, if not, delete those copies.
-	lstAllPossibleCacheItems = m_ptrCollectionSource->GetCollectionCache(GetIdentifier());
-	for (size_t i = 0; i < lstAllPossibleCacheItems.size(); i++)
-	{
-		CollectionItem* itemPrototype = m_ptrCollectionSource->GetCardPrototype(lstAllPossibleCacheItems[i]);
-		// This has to iterate over ALL cards because we don't know where dangling references are.
-		// Get all copies that claim to be in this collection.
-		std::vector<CopyItem*> lstPossibleLocals = itemPrototype->GetCopiesForCollection(GetIdentifier(), CollectionItemType::Local);
-		for (size_t t = 0; t < lstPossibleLocals.size(); t++)
-		{
-			if (!lstPossibleLocals[t]->IsResidentIn(GetIdentifier()))
-			{
-				// This copy is not already resident in this collection. That means that this copy was loaded by a non-child collection.
-				// We must check if that copy truly exists. If not, delete it.
-
-				std::string szItemHash = lstPossibleLocals[t]->GetHash();
-				// Duplicate duplicates because there might be a copy of an existing item.
-				// The second param is empty because we want ALL items with a matching hash.
-				std::vector<CopyItem*> lstDuplicateDuplicates = itemPrototype->FindAllCopyItems(szItemHash, "");
-
-				// If there is more than one, count the number that were just added to this col, then try to find matching existing ones for each.
-				// Make sure that we account for the fact that other collections can borrow up to the amount in this col.
-				std::map<std::string, std::vector<CopyItem*>> mapColExistingItems;
-				std::vector<CopyItem*> lstNewlyAddedItems;
-				for (size_t q = 0; q < lstDuplicateDuplicates.size(); q++)
-				{
-					if (lstDuplicateDuplicates[q]->IsResidentIn(GetIdentifier()))
-					{
-						lstNewlyAddedItems.push_back(lstDuplicateDuplicates[q]);
-					}
-					else
-					{
-						std::string szTargetCol = lstDuplicateDuplicates[q]->GetParent();
-						mapColExistingItems[szTargetCol].push_back(lstDuplicateDuplicates[q]);
-					}
-				}
-
-				// Now go through each collection and account for each one.
-				std::map<std::string, std::vector<CopyItem*>>::iterator iter_existingCol = mapColExistingItems.begin();
-				for (; iter_existingCol != mapColExistingItems.end(); ++iter_existingCol)
-				{
-					std::vector<CopyItem*>::iterator iter_existingColItem = iter_existingCol->second.begin();
-					int q = 0;
-					for (; iter_existingColItem != iter_existingCol->second.end() && q < lstNewlyAddedItems.size(); ++iter_existingColItem, q++)
-					{
-						lstNewlyAddedItems[q]->AddResident(iter_existingCol->first);
-						itemPrototype->Erase(*iter_existingColItem);
-					}
-
-					// Delete the items unaccounted for.
-					for (; q >= lstNewlyAddedItems.size() && iter_existingColItem != iter_existingCol->second.end(); ++iter_existingColItem, q++)
-					{
-						itemPrototype->Erase(*iter_existingColItem);
-					}
-				}
-			}
-		}
-	}
+	loader.ReleaseUnfoundReferences(GetIdentifier(),
+		m_ptrCollectionSource);
 
 	m_bRecordChanges = true;
 	IsLoaded = (GetIdentifier() != Config::NotFoundString);
