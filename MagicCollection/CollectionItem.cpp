@@ -63,7 +63,7 @@ void CollectionItem::RemoveCopyItem(std::string aszCollectionName, std::string a
 	{
 		if ((*iter_Copies)->GetMetaTag(Config::HashKey, Hidden) == aszHash)
 		{
-			if ((*iter_Copies)->IsParent(aszCollectionName) && (*iter_Copies)->GetResidentIn().size() == 1)
+			if ((*iter_Copies)->IsParent(aszCollectionName) && (*iter_Copies)->GetResidentIn().size() <= 1)
 			{
 				m_lstCopies.erase(iter_Copies);
 			}
@@ -78,13 +78,26 @@ void CollectionItem::RemoveCopyItem(std::string aszCollectionName, std::string a
 
 }
 
+void CollectionItem::RemoveResidentFromItem(CopyItem* acItem, std::string aszRemoveResi)
+{
+	int iFound = ListHelper::List_Find(acItem, m_lstCopies);
+	if (-1 != iFound)
+	{
+		acItem->RemoveResident(aszRemoveResi);
+		if (acItem->GetParent() == "" && acItem->GetResidentIn().size() == 0)
+		{
+			m_lstCopies.erase(m_lstCopies.begin() + iFound);
+		}
+	}
+}
+
 CopyItem* CollectionItem::FindCopyItem(std::string aszHash, std::string aszResidentIn)
 {
 	std::vector<CopyItem*>::iterator iter_Copies = m_lstCopies.begin();
 
 	for (; iter_Copies != m_lstCopies.end(); ++iter_Copies)
 	{
-		if ((*iter_Copies)->GetMetaTag(Config::HashKey, Hidden) == aszHash &&
+		if ((*iter_Copies)->GetHash() == aszHash &&
 			(aszResidentIn == "" || (*iter_Copies)->IsResidentIn(aszResidentIn)))
 		{
 			return *iter_Copies;

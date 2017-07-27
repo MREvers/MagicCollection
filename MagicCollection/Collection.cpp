@@ -8,6 +8,7 @@ Collection::Collection(std::string aszName, CollectionSource* aoSource, std::str
 	m_szFileName = aszFileCollection;
 	m_ptrCollectionSource = aoSource;
 	m_iChildrenCount = 0;
+	m_ulTimeStamp = std::time(nullptr);
 
 	setID(aszID);
 
@@ -267,6 +268,11 @@ int  Collection::ChildCount()
 	return m_iChildrenCount;
 }
 
+long Collection::GetTimeStamp()
+{
+	return m_ulTimeStamp;
+}
+
 void  Collection::SaveCollection()
 {
 	saveHistory();
@@ -307,8 +313,15 @@ void Collection::LoadCollection(std::string aszFileName, CollectionFactory* aoFa
 		mapNewlyAddedItems,
 		mapExistingItems);
 
+	// Consolodate local items that match exactly.
 	loader.ConsolodateLocalItems(GetIdentifier(),
 		m_ptrCollectionSource,
+		mapNewlyAddedItems,
+		mapExistingItems);
+
+	loader.RejoinAsyncedLocalItems(GetIdentifier(),
+		m_ptrCollectionSource,
+		GetTimeStamp(),
 		mapNewlyAddedItems,
 		mapExistingItems);
 
@@ -390,11 +403,51 @@ void Collection::setID(std::string aszIDString)
 {
 	if (aszIDString == "")
 	{
-		m_szID = std::to_string(std::rand() % 1000000); // 1,000,000 - 6 digits
+		m_szID = std::to_string(Config::Instance()->GetRandom() % 1000000); // 1,000,000 - 6 digits
 	}
 	else
 	{
 		m_szID = aszIDString;
+	}
+}
+
+void Collection::captureChanges()
+{
+	bool bChangesCaptured = false;
+
+	std::map<int, std::vector<CopyItem*>> mapNewCollection;
+	for each (int index in m_lstItemCacheIndexes)
+	{
+		CollectionItem* item = m_ptrCollectionSource->GetCardPrototype(index);
+		std::vector<CopyItem*> lstCopies = item->GetCopiesForCollection(m_szName, CollectionItemType::All);
+		mapNewCollection[index] = lstCopies;
+	}
+
+	for each (std::pair<int, std::vector<CopyItem*>> itemGroup in m_mapCollectionTracker)
+	{
+		std::map<int, std::vector<CopyItem*>>::iterator iter_oldItems = mapNewCollection.find(itemGroup.first);
+		if (iter_oldItems != mapNewCollection.end())
+		{
+
+			// Calculate differences
+			mapNewCollection.erase(iter_oldItems);
+		}
+		else
+		{
+			// all of these items were removed.
+		}
+	}
+
+	for each (std::pair<int, std::vector<CopyItem*>> itemGroup in mapNewCollection)
+	{
+		// These are all additions.
+	}
+
+	if (bChangesCaptured)
+	{
+		// Time since epoch
+		std::time_t result = std::time(nullptr);
+		m_ulTimeStamp = result;
 	}
 }
 
@@ -404,6 +457,7 @@ std::vector<int> Collection::getCollection()
 	{
 		m_lstItemCacheIndexes = m_ptrCollectionSource->GetCollectionCache(GetIdentifier());
 	}
+
 	return m_lstItemCacheIndexes;
 }
 
@@ -413,8 +467,6 @@ void Collection::addItem(std::string aszName, std::vector<Tag> alstAttrs, std::v
 
 	CollectionItem* item = m_ptrCollectionSource->GetCardPrototype(iCache);
 
-	// If this is a super collection, it will just add the item.
-	// If this is a child collection, it will add this to its resident and set the parent to this' parent.
 	CopyItem* cItem = item->AddCopyItem(m_szID, alstAttrs, alstMetaTags);
 	std::string szHash = cItem->GetHash();
 
@@ -507,14 +559,10 @@ void Collection::modifyItem(CopyItem* aptCopy, std::vector<Tag> alstChanges, std
 		aptCopy->SetIdentifyingAttribute(alstChanges[i].first, alstChanges[i].second);
 	}
 
-	MetaTagType mtt = MetaTagType::Public;
 	for (size_t i = 0; i < alstMetaChanges.size(); i++)
 	{
-		if (alstMetaChanges[i].first.size() > 0 && alstMetaChanges[i].first[0] == '_')
-		{
-			mtt == MetaTagType::Ignored;
-		}
-		aptCopy->SetMetaTag(alstMetaChanges[i].first, alstMetaChanges[i].second, mtt);
+		MetaTagType mTagType = CopyItem::DetermineMetaTagType(alstMetaChanges[i].first);
+		aptCopy->SetMetaTag(alstMetaChanges[i].first, alstMetaChanges[i].second, mTagType);
 	}
 }
 
@@ -568,7 +616,8 @@ void Collection::loadMetaTagFile()
 		{
 			for (size_t t = 0; t < lstMetaTags.size(); t++)
 			{
-				matchingCopy->SetMetaTag(lstMetaTags[t].first, lstMetaTags[t].second, MetaTagType::Public);
+				MetaTagType mTagType = CopyItem::DetermineMetaTagType(lstMetaTags[t].first);
+				matchingCopy->SetMetaTag(lstMetaTags[t].first, lstMetaTags[t].second, mTagType, false);
 			}
 		}
 
@@ -616,6 +665,14 @@ void Collection::loadPreprocessingLine(std::string aszLine)
 	else if (szKey == "CC")
 	{
 		m_iChildrenCount = std::stoi(szValue);
+	}
+	else if (szKey == "Session")
+	{
+		std::tm tm{};
+		std::istringstream str_stream(szValue);
+		str_stream >> std::get_time(&tm, "%Y-%m-%d_%T");
+		std::time_t time = std::mktime(&tm);
+		m_ulTimeStamp = time;
 	}
 }
 
@@ -765,7 +822,7 @@ void Collection::saveHistory()
 
 void Collection::saveMeta()
 {
-	std::vector<std::string> lstMetaLines = GetCollectionList(Visible);
+	std::vector<std::string> lstMetaLines = GetCollectionList(Persistent);
 
 	CollectionIO ioHelper;
 	std::ofstream oMetaFile;
@@ -787,6 +844,10 @@ void Collection::saveCollection()
 {
 	std::vector<std::string> lstLines = GetCollectionList(None);
 
+	std::time_t time = m_ulTimeStamp;
+	std::tm otm;
+	localtime_s(&otm, &time);
+
 	CollectionIO ioHelper;
 	std::ofstream oColFile;
 	oColFile.open(ioHelper.GetCollectionFile(m_szFileName));
@@ -796,6 +857,8 @@ void Collection::saveCollection()
 	oColFile << Config::CollectionDefinitionKey << " ID=\"" << m_szID << "\"" << std::endl;
 
 	oColFile << Config::CollectionDefinitionKey << " CC=\"" << m_iChildrenCount << "\"" << std::endl;
+
+	oColFile << Config::CollectionDefinitionKey << " Session=\"" << std::put_time(&otm, "%F_%T") << "\"" << std::endl;
 
 	std::vector<std::string>::iterator iter_Line = lstLines.begin();
 	for (; iter_Line != lstLines.end(); ++iter_Line)

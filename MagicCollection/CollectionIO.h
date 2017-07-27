@@ -27,17 +27,27 @@ public:
 	bool GetPreprocessLines(std::vector<std::string> alstAllLines,
 		std::vector<std::string>& rlstIOLines,
 		std::vector<std::string>& rlstPreprocessingLines);
+
 	bool CaptureUnlistedItems(std::string aszCollectionName,
 		CollectionSource* aptCollectionSource,
 		std::map<int, std::list<CopyItem*>>& rlstAdditionalItems,
 		std::map<int, std::list<CopyItem*>>& rlstAlreadyCapturedItems);
+
 	bool ConsolodateLocalItems(std::string aszCollectionName,
 		CollectionSource* aptCollectionSource,
 		std::map<int, std::list<CopyItem*>>& rlstPotentialDuplicates,
 		std::map<int, std::list<CopyItem*>>& rlstNonDuplicates);
+
+	bool RejoinAsyncedLocalItems(std::string aszCollectionName,
+		CollectionSource* aptCollectionSource,
+		unsigned long aulNewItemTS,
+		std::map<int, std::list<CopyItem*>>& rlstPotentialDuplicates,
+		std::map<int, std::list<CopyItem*>>& rlstNonDuplicates);
+
 	bool ConsolodateBorrowedItems(std::string aszCollectionName,
 		CollectionSource* aptCollectionSource,
 		CollectionFactory* aptCollFactory);
+
 	bool ReleaseUnfoundReferences(std::string aszCollectionName,
 		CollectionSource* aptCollectionSource);
 

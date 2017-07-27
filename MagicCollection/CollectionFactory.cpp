@@ -1,4 +1,3 @@
-
 #include "CollectionFactory.h"
 
 
@@ -16,11 +15,14 @@ CollectionFactory::~CollectionFactory()
 std::string CollectionFactory::LoadCollectionFromFile(std::string aszFileName)
 {
 	std::string szRetVal = Config::NotFoundString;
+	std::vector<std::string> lstSplitFile;
+	std::vector<std::string> lstSplitExt;
+	std::string szFile;
 
 	// Get the file name.
-	std::vector<std::string> lstSplitFile = StringHelper::Str_Split(aszFileName, "\\");
-	std::string szFile = lstSplitFile[lstSplitFile.size() - 1];
-	std::vector<std::string> lstSplitExt = StringHelper::Str_Split(szFile, ".");
+	lstSplitFile = StringHelper::Str_Split(aszFileName, "\\");
+	szFile = lstSplitFile[lstSplitFile.size() - 1];
+	lstSplitExt = StringHelper::Str_Split(szFile, ".");
 	szFile = lstSplitExt[0];
 
 	Collection* oCol = new Collection(Config::NotFoundString, m_ColSource, szFile);
@@ -55,7 +57,7 @@ std::string CollectionFactory::CreateNewCollection(std::string aszColName, std::
 	}
 
 	m_lstCollections.push_back(std::shared_ptr<Collection>(oCol));
-	return oCol->GetName();
+	return oCol->GetIdentifier();
 }
 
 std::vector<std::string> CollectionFactory::GetLoadedCollections()

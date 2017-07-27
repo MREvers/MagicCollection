@@ -47,7 +47,7 @@ bool CollectionIO::GetPreprocessLines(std::vector<std::string> alstAllLines, std
 	return true;
 }
 
-bool 
+bool
 CollectionIO::CaptureUnlistedItems(std::string aszCollectionName,
 	CollectionSource* aptCollectionSource,
 	std::map<int, std::list<CopyItem*>>& rlstAdditionalItems,
@@ -94,9 +94,9 @@ CollectionIO::ConsolodateLocalItems(std::string aszCollectionName,
 
 		if (rlstNonDuplicates.find(iItem) != rlstNonDuplicates.end())
 		{
+			lstSearchItems = std::vector<CopyItem*>(rlstNonDuplicates[iItem].begin(), rlstNonDuplicates[iItem].end());
 			for each (CopyItem* cItem in lstNewItems)
 			{
-				lstSearchItems = std::vector<CopyItem*>(rlstNonDuplicates[iItem].begin(), rlstNonDuplicates[iItem].end());
 				int iFound = ListHelper::List_Find(cItem->GetHash(), lstSearchItems, fnSimpleExtractor);
 				if (-1 != iFound)
 				{
@@ -112,7 +112,90 @@ CollectionIO::ConsolodateLocalItems(std::string aszCollectionName,
 	return true;
 }
 
-bool 
+bool CollectionIO::RejoinAsyncedLocalItems(std::string aszCollectionName,
+	CollectionSource* aptCollectionSource,
+	unsigned long aulNewItemTS,
+	std::map<int, std::list<CopyItem*>>& rlstPotentialDuplicates,
+	std::map<int, std::list<CopyItem*>>& rlstNonDuplicates)
+{
+	std::function<std::string(CopyItem*)> fnChainIDExtractor;
+	std::vector<CopyItem*> lstSearchItems;
+
+	fnChainIDExtractor = [&](CopyItem* item)->std::string { return item->GetMetaTag("__ChainID", Tracking); };
+
+	for each (std::pair<int, std::list<CopyItem*>> pairItem in rlstPotentialDuplicates)
+	{
+		int iItem = pairItem.first;
+		CollectionItem* item = aptCollectionSource->GetCardPrototype(iItem);
+		std::list<CopyItem*> lstNewItems = pairItem.second;
+
+		if (rlstNonDuplicates.find(iItem) != rlstNonDuplicates.end())
+		{
+			lstSearchItems = std::vector<CopyItem*>(rlstNonDuplicates[iItem].begin(), rlstNonDuplicates[iItem].end());
+			for each (CopyItem* cItem in lstNewItems)
+			{
+				int iFound = ListHelper::List_Find(cItem->GetMetaTag("__ChainID", Tracking),
+					lstSearchItems,
+					fnChainIDExtractor);
+				if (-1 != iFound)
+				{
+					CopyItem* ceItem = lstSearchItems[iFound];
+
+					std::string szSessionNew = cItem->GetMetaTag("__Session", Tracking);
+					std::string szSessionOld = ceItem->GetMetaTag("__Session", Tracking);
+
+					// If there is a match, check the Session to see which one is newer.
+					unsigned long lSessNew = std::stoul(szSessionNew, nullptr, 16);
+					unsigned long lSessOld = std::stoul(szSessionOld, nullptr, 16);
+
+					if (lSessNew >= lSessOld)
+					{ // Use the new
+						rlstNonDuplicates.at(iItem).remove(ceItem);
+						item->Erase(ceItem);
+					}
+					else
+					{ // Use the old
+						rlstPotentialDuplicates.at(iItem).remove(cItem);
+						item->Erase(cItem);
+					}
+				}
+			}
+		}
+	}
+
+	// Now look for items that this collection may have removed.
+	for each (std::pair<int, std::list<CopyItem*>> pairItem in rlstNonDuplicates)
+	{
+		int iItem = pairItem.first;
+		CollectionItem* item = aptCollectionSource->GetCardPrototype(iItem);
+		std::list<CopyItem*> lstExistingItems = pairItem.second;
+
+		if (rlstPotentialDuplicates.find(iItem) != rlstPotentialDuplicates.end())
+		{
+			lstSearchItems = std::vector<CopyItem*>(rlstPotentialDuplicates[iItem].begin(), rlstPotentialDuplicates[iItem].end());
+			for each (CopyItem* cItem in lstExistingItems)
+			{
+				std::string szSessionOld = cItem->GetMetaTag("__Session", Tracking);
+
+				// If there is a match, check the Session to see which one is newer.
+				unsigned long lSessOld = std::stoul(szSessionOld, nullptr, 16);
+
+				if (aulNewItemTS >= lSessOld)
+				{ // Use the new
+					item->RemoveResidentFromItem(cItem, aszCollectionName);
+				}
+				else
+				{ 
+					// Do nothing. Keep the item.
+				}
+			}
+		}
+
+	}
+	return true;
+}
+
+bool
 CollectionIO::ConsolodateBorrowedItems(std::string aszCollectionName,
 	CollectionSource* aptCollectionSource,
 	CollectionFactory* aptCollFactory)
@@ -169,7 +252,7 @@ CollectionIO::ConsolodateBorrowedItems(std::string aszCollectionName,
 	return true;
 }
 
-bool 
+bool
 CollectionIO::ReleaseUnfoundReferences(std::string aszCollectionName,
 	CollectionSource* aptCollectionSource)
 {

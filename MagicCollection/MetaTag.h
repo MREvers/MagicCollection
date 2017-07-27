@@ -8,7 +8,9 @@ enum MetaTagType : unsigned short
 	Public = 0x1, // 001
 	Ignored = 0x2, // 010
 	Visible = 0x3, // 011
-	Hidden = 0x4, // 100
+	Tracking = 0x4, // 100
+	Persistent = 0x7, // 0111
+	Hidden = 0x8, // 1000
 	Any = 0xF // 1111
 };
 

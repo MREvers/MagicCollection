@@ -1,4 +1,6 @@
 #include "Config.h"
+#include <stdlib.h>
+#include <time.h>
 
 /*
 const char * const CollectionObject::LstUniqueTraits[] = { "manaCost", "colors", "name", "power",
@@ -19,6 +21,7 @@ Config::Config()
 {
 	m_fnKeyExtractor = [](Tag atag)->std::string { return atag.first; };
 	m_fnValueExtractor = [](Tag atag)->std::string { return atag.second; };
+	iRandom = 0; 
 
 	std::ifstream file(".\\Config\\Config.xml");
 	if (!file.good())
@@ -190,6 +193,13 @@ int Config::GetHighPrimeIndex(unsigned int aiComposite)
 	}
 
 	return 0;
+}
+
+int Config::GetRandom()
+{
+	iRandom++;
+	std::srand(std::time(0) - iRandom);
+	return std::rand();
 }
 
 bool Config::IsIdentifyingAttributes(std::string aszAttrs)

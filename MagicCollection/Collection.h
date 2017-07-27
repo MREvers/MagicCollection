@@ -4,6 +4,7 @@
 #include <memory>
 #include <string>
 #include <stdlib.h>
+#include <time.h>
 
 #include "CollectionIO.h"
 #include "CollectionSource.h"
@@ -46,6 +47,8 @@ public:
 	void ChildAdded();
 	int ChildCount();
 
+	long GetTimeStamp();
+
 	void SaveCollection();
 	void LoadCollection(std::string aszFileName, CollectionFactory* aoFactory);
 	void LoadChanges(std::vector<std::string> aszLines);
@@ -59,6 +62,7 @@ private:
 	unsigned int m_iChildrenCount; // Needed to avoid name clashes.
 	std::string m_szID;
 	std::string m_szFileName;
+	unsigned long m_ulTimeStamp;
 	CollectionSource* m_ptrCollectionSource;
 
 	void setID(std::string aszIDString);
@@ -66,12 +70,13 @@ private:
 	bool m_bRecordChanges;
 	std::vector<Transaction> m_lstTransactions;
 
-	// Contains information such as "Sideboard" or if the card is an "Icon" of the collection.
-	// Hash, Tag
 	std::vector<std::pair<std::string, Tag>> m_lstTaggedItems;
 
-	std::vector<int> m_lstItemCacheIndexes;
+	// This should be updated after loading, and whenever history is checked.
+	std::map<int, std::vector<CopyItem*>> m_mapCollectionTracker;
+	void captureChanges();
 
+	std::vector<int> m_lstItemCacheIndexes;
 	std::vector<int> getCollection();
 
 	// These all locate by name and hash for a second time so we dont risk dangling pointers.

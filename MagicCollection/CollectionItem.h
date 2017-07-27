@@ -46,6 +46,7 @@ public:
 		std::vector<Tag> alstMetaTags = std::vector<Tag>());
 
 	void RemoveCopyItem(std::string aszCollectionName, std::string aszHash);
+	void RemoveResidentFromItem(CopyItem* acItem, std::string aszRemoveResi);
 
 	// Finds First
 	CopyItem* FindCopyItem(std::string aszHash, std::string aszResidentIn = "");

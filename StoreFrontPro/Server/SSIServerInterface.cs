@@ -137,9 +137,10 @@ namespace StoreFrontPro.Server
 
             public void CreateCollection(string aszName, string aszParent = "")
             {
-                if (SCI.CreateNewCollection(aszName, aszParent) != "NF")
+                string szID = SCI.CreateNewCollection(aszName, aszParent);
+                if (szID != "NF")
                 {
-                    inGenerateCollectionModel(aszName);
+                    inGenerateCollectionModel(szID);
                 }
             }
 

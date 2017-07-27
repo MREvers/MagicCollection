@@ -41,7 +41,7 @@ namespace StoreFrontPro.Server
 
         public void CreateChildCollection(string aszNewName)
         {
-            ServerInterface.Server.CreateCollection(aszNewName, CollectionName);
+            ServerInterface.Server.CreateCollection(aszNewName, ID);
         }
 
         public void Sync(Action aCallback = null)

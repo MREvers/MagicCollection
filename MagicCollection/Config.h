@@ -50,6 +50,7 @@ public:
 	std::pair<std::string, std::vector<unsigned int>> GetIDInfo(std::string aszColID);
 	int GetPrimeIndex(unsigned int aiComposite);
 	int GetHighPrimeIndex(unsigned int aiComposite);
+	int GetRandom();
 
 	bool IsPairedKey(std::string aszKey);
 	bool IsValidKey(std::string aszKey);
@@ -66,6 +67,8 @@ public:
 	static const std::vector<int> primes;
 
 private:
+	int iRandom;
+
 	std::vector<Tag> m_lstKeyCodeMappings;
 	std::vector<Tag> m_lstPairedKeys;
 	std::vector<std::string> m_lstIdentifyingAttributes;

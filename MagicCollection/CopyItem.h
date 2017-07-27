@@ -31,11 +31,11 @@ public:
 	std::vector<std::string> GetResidentIn();
 	bool IsResidentIn(std::string aszResident);
 
-	void SetMetaTag(std::string aszKey, std::string aszVal, MetaTagType atagType);
+	void SetMetaTag(std::string aszKey, std::string aszVal, MetaTagType atagType, bool bTimeChange = true);
 	std::string GetMetaTag(std::string aszKey, MetaTagType atagType);
 	std::vector<Tag> GetMetaTags(MetaTagType atagType);
 
-	bool SetIdentifyingAttribute(std::string aszKey, std::string aszValue);
+	bool SetIdentifyingAttribute(std::string aszKey, std::string aszValue, bool bTimeChange = true);
 	std::string GetIdentifyingAttribute(std::string aszKey);
 	std::vector<Tag> GetIdentifyingAttributes();
 
@@ -43,6 +43,7 @@ public:
 	std::function<std::string(MetaTag)> GetMetaTagKeyViewer();
 
 	static bool IsResidentIn(std::string aszResidentLocation, std::string aszTestCollection, unsigned int &riSubIn);
+	static MetaTagType DetermineMetaTagType(std::string aszTagKey);
 private:
 	bool m_bNeedHash;
 
@@ -54,10 +55,10 @@ private:
 	std::string m_szFullAddress;
 	std::vector<std::string> m_lstResidentIn;
 
-	void setParent(std::string aszNewParent, bool abSetMeta = true);
-
-	// Checks if aszCollectionName is contains the "ResidentLocation"
-
+	void itemChanged();
+	void setChainID(std::string aszNewID);
+	void setParent(std::string aszNewParent);
+	void _setParent(std::string aszNewParent);
 	void setSubAddress(unsigned int aiOldVal, unsigned int aiNewVal);
 
 	// Metatags are visible by all collections. They 'may' be used to identify the card.
@@ -67,9 +68,7 @@ private:
 
 	// Note that these will correspond 1-1 to each traititem in m_plstRest...
 	std::vector<Tag> m_lstIdentifyingTags;
-
 	std::vector<TraitItem>* m_plstRestrictedTraits;
-
 	void setPairedAttributes(std::string aszKey, int iVal);
 
 	static bool isResidentIn(std::string aszBaseAddress, std::vector<unsigned int> alstSubAddresses, std::string aszTestAdress, unsigned int aiTestAddress, unsigned int &riSubIn);
