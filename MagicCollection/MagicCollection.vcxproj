@@ -154,6 +154,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Action.cpp" />
+    <ClCompile Include="Addresser.cpp" />
     <ClCompile Include="CollectionFactory.cpp" />
     <ClCompile Include="CollectionIO.cpp" />
     <ClCompile Include="CollectionItem.cpp" />
@@ -166,7 +167,6 @@
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MaxSpeed</Optimization>
     </ClCompile>
     <ClCompile Include="ListHelper.cpp" />
-    <ClCompile Include="MagicCollection.cpp" />
     <ClCompile Include="MD5.cpp" />
     <ClCompile Include="MetaTag.cpp" />
     <ClCompile Include="ServerIFace.cpp" />
@@ -184,6 +184,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Action.h" />
+    <ClInclude Include="Addresser.h" />
     <ClInclude Include="CollectionFactory.h" />
     <ClInclude Include="CollectionIO.h" />
     <ClInclude Include="CollectionItem.h" />

@@ -13,17 +13,17 @@
 class Action
 {
 public:
-	Action(std::function<void()> aDo, std::function<void()> aUndo);
-	~Action();
+   Action(std::function<void()> aDo, std::function<void()> aUndo);
+   ~Action();
 
-	void SetIdentifier(std::string aszId);
-	std::string GetIdentifier();
+   void SetIdentifier(std::string aszId);
+   std::string GetIdentifier();
 
-	void Execute();
-	void Rollback();
+   void Execute();
+   void Rollback();
 
 private:
-	std::string Identifier;
-	std::function<void()> Do;
-	std::function<void()> Undo;
+   std::string Identifier;
+   std::function<void()> Do;
+   std::function<void()> Undo;
 };

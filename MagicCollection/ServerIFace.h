@@ -14,6 +14,6 @@ public:
 
    Server* ServerActual;
 private:
-	static unsigned int __stdcall serverLoop(void * arg);
+   static unsigned int __stdcall serverLoop(void * arg);
 };
 

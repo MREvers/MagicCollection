@@ -17,19 +17,19 @@ SourceObject::~SourceObject()
 unsigned int 
 SourceObject::AddAttribute(std::string aszkey, std::string value, char* aplstCharBuf, unsigned int aiBufSize)
 {
-	std::string key = aszkey;
-	std::string szFixedKey = Config::Instance()->GetKeyCode(key);
-	if (szFixedKey != "")
-	{
-		key = szFixedKey;
-	}
+   std::string key = aszkey;
+   std::string szFixedKey = Config::Instance()->GetKeyCode(key);
+   if (szFixedKey != "")
+   {
+      key = szFixedKey;
+   }
 
    unsigned short iKeyValPair = 0;
    unsigned short iSize = value.size();
 
    if (Config::Instance()->IsIdentifyingAttributes(Config::Instance()->GetFullKey(key)))
    {
-	   iKeyValPair = 1 << 15;
+      iKeyValPair = 1 << 15;
    }
 
    iKeyValPair = (iKeyValPair | iSize);
@@ -140,14 +140,14 @@ void SourceObject::Cache(unsigned short aiCacheIndex)
 
 void SourceObject::FinalizeSize()
 {
-	unsigned short* newList = new unsigned short[m_iKeyValArraySize];
-	for (int i = 0; i < m_iKeyValArraySize; i++)
-	{
-		newList[i] = m_pLstKeyVals[i];
-	}
-	delete[] m_pLstKeyVals;
+   unsigned short* newList = new unsigned short[m_iKeyValArraySize];
+   for (int i = 0; i < m_iKeyValArraySize; i++)
+   {
+      newList[i] = m_pLstKeyVals[i];
+   }
+   delete[] m_pLstKeyVals;
 
-	m_pLstKeyVals = newList;
+   m_pLstKeyVals = newList;
 }
 
 bool SourceObject::isNonUniqueFlag(short aiCheck)

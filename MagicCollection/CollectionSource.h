@@ -39,11 +39,11 @@ public:
 
    // This needs to be called whenever a child collection adds a card.
    // It will let other collections know that they need to check their lists.
-   void NotifyNeedToSync(std::string aszCollectionID);
-   bool IsSyncNeeded(std::string aszCollectionID);
+   void NotifyNeedToSync(const Address& aAddrForcedSync);
+   bool IsSyncNeeded(const Address& aAddrNeedSync);
 
-   std::vector<int> GetCollectionCache(std::string aszCollectionID, CollectionItemType aColItemType = CollectionItemType::All);
-   std::vector<CopyItem*> GetCollection(std::string aszCollectionID, CollectionItemType aColItemType = CollectionItemType::All);
+   std::vector<int> GetCollectionCache(Address aAddrColID, CollectionItemType aColItemType = CollectionItemType::All);
+   std::vector<CopyItem*> GetCollection(Address aAddrColID, CollectionItemType aColItemType = CollectionItemType::All);
 
    std::vector<std::string> GetAllCardsStartingWith(std::string aszText);
 
@@ -54,7 +54,7 @@ private:
    // This is used to track whether or not a collection has the most up to date
    //  list of its cards. A collection should only come out of sync if a child
    //  collection of it adds a card.
-   std::map<std::string, bool> m_mapSync;
+   std::vector<std::pair<Address, bool>> m_lstSync;
 
    // Used for caching searches over 5 chars.
    std::vector<std::pair<std::string, std::vector<SourceObject>>> m_lstSearchCache;

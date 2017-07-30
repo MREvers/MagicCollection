@@ -24,41 +24,41 @@ std::string StringHelper::Str_Trim(const std::string& src, char removeChar)
 
 std::string StringHelper::Str_Replace(const std::string& srz, char removeChar, char replaceChar)
 {
-	std::string szRetVal = "";
-	for (char c : srz)
-	{
-		if (c != ' ')
-		{
-			szRetVal += c;
-		}
-	}
-	return szRetVal;
+   std::string szRetVal = "";
+   for (char c : srz)
+   {
+      if (c != ' ')
+      {
+         szRetVal += c;
+      }
+   }
+   return szRetVal;
 }
 
 std::string StringHelper::Str_Clean(const std::string& src)
 {
-	std::string szRetVal = "";
-	for (char c : src)
-	{
-		if (c == 145)
-		{
-			szRetVal += "ae";
-		}
-		else if (c == 146)
-		{
-			szRetVal += "AE";
-		}
-		else if (c == '\'' || c == '\"')
-		{
-			// leave out
-		}
-		else
-		{
-			szRetVal += c;
-		}
-	}
+   std::string szRetVal = "";
+   for (char c : src)
+   {
+      if (c == 145)
+      {
+         szRetVal += "ae";
+      }
+      else if (c == 146)
+      {
+         szRetVal += "AE";
+      }
+      else if (c == '\'' || c == '\"')
+      {
+         // leave out
+      }
+      else
+      {
+         szRetVal += c;
+      }
+   }
 
-	return szRetVal;
+   return szRetVal;
 }
 
 std::vector<std::string> StringHelper::Str_Split(std::string& aszSplit, std::string aszDelim)
@@ -129,26 +129,26 @@ std::vector<std::string> StringHelper::Str_Split(std::string& aszSplit, std::str
 
 std::vector<std::string> StringHelper::SplitIntoLines(std::string aszString)
 {
-	std::vector<std::string> lstLines;
-	std::string szLine = "";
-	for (int i = 0; i < aszString.size(); i++)
-	{
+   std::vector<std::string> lstLines;
+   std::string szLine = "";
+   for (int i = 0; i < aszString.size(); i++)
+   {
 
-		if (aszString[i] == '\n')
-		{
-			lstLines.push_back(szLine);
-			szLine = "";
-		}
-		else
-		{
-			szLine = szLine + aszString[i];
-			if (i == aszString.size() - 1)
-			{
-				lstLines.push_back(szLine);
-				szLine = "";
-			}
-		}
+      if (aszString[i] == '\n')
+      {
+         lstLines.push_back(szLine);
+         szLine = "";
+      }
+      else
+      {
+         szLine = szLine + aszString[i];
+         if (i == aszString.size() - 1)
+         {
+            lstLines.push_back(szLine);
+            szLine = "";
+         }
+      }
 
-	}
-	return lstLines;
+   }
+   return lstLines;
 }

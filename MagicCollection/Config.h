@@ -17,78 +17,70 @@ typedef std::pair<std::string, std::string> Tag;
 
 enum TagHelperType : int
 {
-	Key = 0x0,
-	Value = 0x1
+   Key = 0x0,
+   Value = 0x1
 };
 
 class Config
 {
 public:
-	Config();
-	~Config();
+   Config();
+   ~Config();
 
-	std::string GetImportSourceFile();
-	std::string GetSourceFile();
-	std::string GetHistoryFolderName();
-	std::string GetMetaFolderName();
-	std::string GetImagesFolder();
-	
-	std::string GetCollectionsDirectory();
-	std::string GetCollectionsFolderName();
+   std::string GetImportSourceFile();
+   std::string GetSourceFile();
+   std::string GetHistoryFolderName();
+   std::string GetMetaFolderName();
+   std::string GetImagesFolder();
+   
+   std::string GetCollectionsDirectory();
+   std::string GetCollectionsFolderName();
 
-	std::string GetKeyCode(std::string aszFullKey);
-	std::string GetFullKey(std::string aszKeyCode);
+   std::string GetKeyCode(std::string aszFullKey);
+   std::string GetFullKey(std::string aszKeyCode);
 
-	std::string GetHash(std::string& aszHashingString);
+   std::string GetHash(std::string& aszHashingString);
 
-	std::vector<Tag>& GetPairedKeysList();
-	std::vector<std::string>& GetIdentifyingAttributes();
-	std::vector<std::string>& GetStaticAttributes();
-	std::vector<std::string>& GetPerCollectionMetaTags();
+   std::vector<Tag>& GetPairedKeysList();
+   std::vector<std::string>& GetIdentifyingAttributes();
+   std::vector<std::string>& GetStaticAttributes();
+   std::vector<std::string>& GetPerCollectionMetaTags();
 
-	std::function<std::string(Tag)> GetTagHelper(TagHelperType aiMode = Key);
-	std::pair<std::string, std::vector<unsigned int>> GetIDInfo(std::string aszColID);
-	int GetPrimeIndex(unsigned int aiComposite);
-	int GetHighPrimeIndex(unsigned int aiComposite);
-	int GetRandom();
+   std::function<std::string(Tag)> GetTagHelper(TagHelperType aiMode = Key);
 
-	bool IsPairedKey(std::string aszKey);
-	bool IsValidKey(std::string aszKey);
-	bool IsStaticAttribute(std::string aszAttrs);
-	bool IsIdentifyingAttributes(std::string aszAttrs);
+   bool IsPairedKey(std::string aszKey);
+   bool IsValidKey(std::string aszKey);
+   bool IsStaticAttribute(std::string aszAttrs);
+   bool IsIdentifyingAttributes(std::string aszAttrs);
 
-	static Config* Instance();
+   static Config* Instance();
 
-	static char* Config::MetaFileExtension;
-	static char* Config::HistoryFileExtension;
-	static char* Config::HashKey;
-	static char* Config::NotFoundString;
-	static char* Config::CollectionDefinitionKey;
-	static const std::vector<int> primes;
-
+   static char* Config::MetaFileExtension;
+   static char* Config::HistoryFileExtension;
+   static char* Config::HashKey;
+   static char* Config::NotFoundString;
+   static char* Config::CollectionDefinitionKey;
 private:
-	int iRandom;
+   std::vector<Tag> m_lstKeyCodeMappings;
+   std::vector<Tag> m_lstPairedKeys;
+   std::vector<std::string> m_lstIdentifyingAttributes;
+   std::vector<std::string> m_lstStaticAttributes;
+   std::vector<std::string> m_lstPerCollectionMetaTags;
 
-	std::vector<Tag> m_lstKeyCodeMappings;
-	std::vector<Tag> m_lstPairedKeys;
-	std::vector<std::string> m_lstIdentifyingAttributes;
-	std::vector<std::string> m_lstStaticAttributes;
-	std::vector<std::string> m_lstPerCollectionMetaTags;
+   std::string m_szImportSource;
+   std::string m_szSourceFile;
+   std::string m_szSourceFolder;
 
-	std::string m_szImportSource;
-	std::string m_szSourceFile;
-	std::string m_szSourceFolder;
+   std::string m_szCollectionsFolder;
+   std::string m_szHistoryFolder;
+   std::string m_szMetaFolder;
+   std::string m_szImagesFolder;
 
-	std::string m_szCollectionsFolder;
-	std::string m_szHistoryFolder;
-	std::string m_szMetaFolder;
-	std::string m_szImagesFolder;
+   std::function<std::string(Tag)> m_fnKeyExtractor;
+   std::function<std::string(Tag)> m_fnValueExtractor;
 
-	std::function<std::string(Tag)> m_fnKeyExtractor;
-	std::function<std::string(Tag)> m_fnValueExtractor;
+   void initDefaultSettings();
+   void initConfigSettings(std::ifstream& asConfig);
 
-	void initDefaultSettings();
-	void initConfigSettings(std::ifstream& asConfig);
-
-	static Config* Config::ms_pConfig;
+   static Config* Config::ms_pConfig;
 };

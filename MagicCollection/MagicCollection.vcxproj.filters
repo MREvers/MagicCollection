@@ -1,183 +1,189 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="Source Files">
-      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
-      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
-    </Filter>
-    <Filter Include="Header Files">
-      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
-      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
-    </Filter>
-    <Filter Include="Resource Files">
-      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
-      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
-    </Filter>
-    <Filter Include="ServerIFace">
-      <UniqueIdentifier>{ce578a7d-7d0d-4ea6-95dc-66065f825216}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Importer">
-      <UniqueIdentifier>{e7ff58c1-f859-45a4-b5f0-105fedff968a}</UniqueIdentifier>
-    </Filter>
     <Filter Include="CollectorsBackEnd">
       <UniqueIdentifier>{67651209-ffdb-4fb7-84f1-c576c189d19f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Collection">
+      <UniqueIdentifier>{cd67b214-315e-493f-9772-97eb62d0f0c2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="CollectionItems">
+      <UniqueIdentifier>{c08e21ed-e1d5-497f-8053-12da9ee25104}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Collection\DataHelpers">
+      <UniqueIdentifier>{d87da800-fad3-4160-8760-945adb93e2a8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="CollectionItems\DataHelpers">
+      <UniqueIdentifier>{385c345a-d4e8-431c-a831-e05d0d09759f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Support">
+      <UniqueIdentifier>{9e92dfe9-6986-4a51-8916-e5a89b63fb2b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="CollectorsBackEnd\ServerIFace">
+      <UniqueIdentifier>{ce578a7d-7d0d-4ea6-95dc-66065f825216}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="CollectorsBackEnd\Importer">
+      <UniqueIdentifier>{e7ff58c1-f859-45a4-b5f0-105fedff968a}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="MagicCollection.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="CollectionSource.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="SourceObject.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="CollectionFactory.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="JSONImporter.cpp">
-      <Filter>Importer</Filter>
+      <Filter>CollectorsBackEnd\Importer</Filter>
     </ClCompile>
     <ClCompile Include="ServerIFace\ClientSocket.cpp">
-      <Filter>ServerIFace</Filter>
+      <Filter>CollectorsBackEnd\ServerIFace</Filter>
     </ClCompile>
     <ClCompile Include="ServerIFace\ProgramServer.cpp">
-      <Filter>ServerIFace</Filter>
+      <Filter>CollectorsBackEnd\ServerIFace</Filter>
     </ClCompile>
     <ClCompile Include="ServerIFace\Server.cpp">
-      <Filter>ServerIFace</Filter>
+      <Filter>CollectorsBackEnd\ServerIFace</Filter>
     </ClCompile>
     <ClCompile Include="ServerIFace\WinAPINetworkServices.cpp">
-      <Filter>ServerIFace</Filter>
+      <Filter>CollectorsBackEnd\ServerIFace</Filter>
     </ClCompile>
     <ClCompile Include="ServerIFace\WinSocket.cpp">
-      <Filter>ServerIFace</Filter>
+      <Filter>CollectorsBackEnd\ServerIFace</Filter>
     </ClCompile>
     <ClCompile Include="ServerIFace\WinSocketListener.cpp">
-      <Filter>ServerIFace</Filter>
+      <Filter>CollectorsBackEnd\ServerIFace</Filter>
     </ClCompile>
     <ClCompile Include="ServerIFace.cpp">
-      <Filter>ServerIFace</Filter>
-    </ClCompile>
-    <ClCompile Include="StoreFrontBackEnd.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="StringHelper.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Config.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="jsoncpp.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Transaction.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="ListHelper.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="MD5.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="CollectionItem.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="CopyItem.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="MetaTag.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="TraitItem.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="CollectionIO.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Action.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>CollectorsBackEnd\ServerIFace</Filter>
     </ClCompile>
     <ClCompile Include="Collection.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Collection</Filter>
+    </ClCompile>
+    <ClCompile Include="CollectionFactory.cpp">
+      <Filter>Collection</Filter>
+    </ClCompile>
+    <ClCompile Include="CollectionIO.cpp">
+      <Filter>Collection</Filter>
+    </ClCompile>
+    <ClCompile Include="CollectionSource.cpp">
+      <Filter>Collection</Filter>
+    </ClCompile>
+    <ClCompile Include="SourceObject.cpp">
+      <Filter>Collection</Filter>
+    </ClCompile>
+    <ClCompile Include="CopyItem.cpp">
+      <Filter>CollectionItems</Filter>
+    </ClCompile>
+    <ClCompile Include="CollectionItem.cpp">
+      <Filter>CollectionItems</Filter>
+    </ClCompile>
+    <ClCompile Include="Transaction.cpp">
+      <Filter>Collection\DataHelpers</Filter>
+    </ClCompile>
+    <ClCompile Include="Action.cpp">
+      <Filter>Collection\DataHelpers</Filter>
+    </ClCompile>
+    <ClCompile Include="Addresser.cpp">
+      <Filter>CollectionItems\DataHelpers</Filter>
+    </ClCompile>
+    <ClCompile Include="TraitItem.cpp">
+      <Filter>CollectionItems\DataHelpers</Filter>
+    </ClCompile>
+    <ClCompile Include="StringHelper.cpp">
+      <Filter>Support</Filter>
+    </ClCompile>
+    <ClCompile Include="ListHelper.cpp">
+      <Filter>Support</Filter>
+    </ClCompile>
+    <ClCompile Include="Config.cpp">
+      <Filter>Support</Filter>
+    </ClCompile>
+    <ClCompile Include="jsoncpp.cpp">
+      <Filter>Support</Filter>
+    </ClCompile>
+    <ClCompile Include="MD5.cpp">
+      <Filter>Support</Filter>
+    </ClCompile>
+    <ClCompile Include="MetaTag.cpp">
+      <Filter>CollectionItems\DataHelpers</Filter>
+    </ClCompile>
+    <ClCompile Include="StoreFrontBackEnd.cpp">
+      <Filter>CollectorsBackEnd</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="CollectionSource.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="SourceObject.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="CollectionFactory.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="JSONImporter.h">
-      <Filter>Importer</Filter>
+      <Filter>CollectorsBackEnd\Importer</Filter>
     </ClInclude>
     <ClInclude Include="ServerIFace\ClientSocket.h">
-      <Filter>ServerIFace</Filter>
+      <Filter>CollectorsBackEnd\ServerIFace</Filter>
     </ClInclude>
     <ClInclude Include="ServerIFace\ProgramServer.h">
-      <Filter>ServerIFace</Filter>
+      <Filter>CollectorsBackEnd\ServerIFace</Filter>
     </ClInclude>
     <ClInclude Include="ServerIFace\Server.h">
-      <Filter>ServerIFace</Filter>
+      <Filter>CollectorsBackEnd\ServerIFace</Filter>
     </ClInclude>
     <ClInclude Include="ServerIFace\WinAPINetworkServices.h">
-      <Filter>ServerIFace</Filter>
+      <Filter>CollectorsBackEnd\ServerIFace</Filter>
     </ClInclude>
     <ClInclude Include="ServerIFace\WinSocket.h">
-      <Filter>ServerIFace</Filter>
+      <Filter>CollectorsBackEnd\ServerIFace</Filter>
     </ClInclude>
     <ClInclude Include="ServerIFace\WinSocketListener.h">
-      <Filter>ServerIFace</Filter>
+      <Filter>CollectorsBackEnd\ServerIFace</Filter>
     </ClInclude>
     <ClInclude Include="ServerIFace.h">
-      <Filter>ServerIFace</Filter>
-    </ClInclude>
-    <ClInclude Include="StoreFrontBackEnd.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="StringHelper.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Config.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Action.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Transaction.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ListHelper.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="MD5.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="CollectionItem.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="CopyItem.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="MetaTag.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="TraitItem.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="CollectionIO.h">
-      <Filter>Header Files</Filter>
+      <Filter>CollectorsBackEnd\ServerIFace</Filter>
     </ClInclude>
     <ClInclude Include="Collection.h">
-      <Filter>Header Files</Filter>
+      <Filter>Collection</Filter>
+    </ClInclude>
+    <ClInclude Include="CollectionIO.h">
+      <Filter>Collection</Filter>
+    </ClInclude>
+    <ClInclude Include="CollectionFactory.h">
+      <Filter>Collection</Filter>
+    </ClInclude>
+    <ClInclude Include="CollectionSource.h">
+      <Filter>Collection</Filter>
+    </ClInclude>
+    <ClInclude Include="SourceObject.h">
+      <Filter>Collection</Filter>
+    </ClInclude>
+    <ClInclude Include="CopyItem.h">
+      <Filter>CollectionItems</Filter>
+    </ClInclude>
+    <ClInclude Include="CollectionItem.h">
+      <Filter>CollectionItems</Filter>
+    </ClInclude>
+    <ClInclude Include="Action.h">
+      <Filter>Collection\DataHelpers</Filter>
+    </ClInclude>
+    <ClInclude Include="Transaction.h">
+      <Filter>Collection\DataHelpers</Filter>
+    </ClInclude>
+    <ClInclude Include="Addresser.h">
+      <Filter>CollectionItems\DataHelpers</Filter>
+    </ClInclude>
+    <ClInclude Include="TraitItem.h">
+      <Filter>CollectionItems\DataHelpers</Filter>
+    </ClInclude>
+    <ClInclude Include="StringHelper.h">
+      <Filter>Support</Filter>
+    </ClInclude>
+    <ClInclude Include="ListHelper.h">
+      <Filter>Support</Filter>
+    </ClInclude>
+    <ClInclude Include="Config.h">
+      <Filter>Support</Filter>
+    </ClInclude>
+    <ClInclude Include="MD5.h">
+      <Filter>Support</Filter>
+    </ClInclude>
+    <ClInclude Include="MetaTag.h">
+      <Filter>CollectionItems\DataHelpers</Filter>
+    </ClInclude>
+    <ClInclude Include="StoreFrontBackEnd.h">
+      <Filter>CollectorsBackEnd</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

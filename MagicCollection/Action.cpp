@@ -2,8 +2,8 @@
 
 Action::Action(std::function<void()> aDo, std::function<void()> aUndo)
 {
-	Do = aDo;
-	Undo = aUndo;
+   Do = aDo;
+   Undo = aUndo;
 }
 
 Action::~Action()
@@ -13,20 +13,20 @@ Action::~Action()
 
 void Action::SetIdentifier(std::string aszId)
 {
-	Identifier = aszId;
+   Identifier = aszId;
 }
 
 std::string Action::GetIdentifier()
 {
-	return Identifier;
+   return Identifier;
 }
 
 void Action::Execute()
 {
-	Do();
+   Do();
 }
 
 void Action::Rollback()
 {
-	Undo();
+   Undo();
 }

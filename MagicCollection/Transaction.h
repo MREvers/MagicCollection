@@ -16,23 +16,23 @@ class Collection;
 class Transaction
 {
 public:
-	Transaction(Collection* aoCol);
-	~Transaction();
+   Transaction(Collection* aoCol);
+   ~Transaction();
 
-	void AddAction(Action& aoAct);
-	void RemoveAction(int i);
-	void Finalize(bool abRecordable = true);
-	void Rollback();
-	
-	std::vector<std::string> GetDescriptions();
+   void AddAction(Action& aoAct);
+   void RemoveAction(int i);
+   void Finalize(bool abRecordable = true);
+   void Rollback();
+   
+   std::vector<std::string> GetDescriptions();
 
-	bool IsOpen();
-	bool IsRecordable();
+   bool IsOpen();
+   bool IsRecordable();
 
 private:
-	bool m_bIsOpen = true;
-	bool m_bIsRecordable = true;
+   bool m_bIsOpen = true;
+   bool m_bIsRecordable = true;
 
-	Collection* m_Col;
-	std::vector<Action> Actions;
+   Collection* m_Col;
+   std::vector<Action> Actions;
 };

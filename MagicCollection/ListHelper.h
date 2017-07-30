@@ -8,61 +8,61 @@
 class ListHelper
 {
 public:
-	ListHelper();
-	~ListHelper();
+   ListHelper();
+   ~ListHelper();
 
  
-	static std::vector<std::pair<std::string, std::string>>
-		ConvertMapToList(std::map<std::string, std::string>  aMap);
+   static std::vector<std::pair<std::string, std::string>>
+      ConvertMapToList(std::map<std::string, std::string>  aMap);
 
-	static bool CompareKeyValPairList(std::vector<std::pair<std::string, std::string>> alstFirst,
-		std::vector<std::pair<std::string, std::string>> alstSecond);
+   static bool CompareKeyValPairList(std::vector<std::pair<std::string, std::string>> alstFirst,
+      std::vector<std::pair<std::string, std::string>> alstSecond);
 
-	template<typename T> static
-	int List_Find(T aFind, std::vector<T>& alstFindList)
-	{
-		std::vector<T>::iterator iter_list = alstFindList.begin();
-		int index = 0;
-		for (; iter_list != alstFindList.end(); iter_list++)
-		{
-			if (*iter_list == aFind)
-			{
-				return index;
-			}
-			index++;
-		}
-		return -1;
-	}
+   template<typename T> static
+   int List_Find(T aFind, std::vector<T>& alstFindList)
+   {
+      std::vector<T>::iterator iter_list = alstFindList.begin();
+      int index = 0;
+      for (; iter_list != alstFindList.end(); iter_list++)
+      {
+         if (*iter_list == aFind)
+         {
+            return index;
+         }
+         index++;
+      }
+      return -1;
+   }
 
-	template<class T, class R> static
-	int List_Find(T& aiFind, std::vector<R>& alstFindList, std::function<T(R)> afuncExtractor)
-	{
-		std::vector<R>::iterator iter_list = alstFindList.begin();
-		int index = 0;
-		for (; iter_list != alstFindList.end(); iter_list++)
-		{
-			T tRetval = afuncExtractor(*iter_list);
-			if (aiFind == tRetval)
-			{
-				return index;
-			}
-			index++;
-		}
-		return -1;
-	}
+   template<class T, class R> static
+   int List_Find(T& aiFind, std::vector<R>& alstFindList, std::function<T(R)> afuncExtractor)
+   {
+      std::vector<R>::iterator iter_list = alstFindList.begin();
+      int index = 0;
+      for (; iter_list != alstFindList.end(); iter_list++)
+      {
+         T tRetval = afuncExtractor(*iter_list);
+         if (aiFind == tRetval)
+         {
+            return index;
+         }
+         index++;
+      }
+      return -1;
+   }
 
-	template<class T> static
-		void List_Insert(T& aInsert, std::vector<T>& alstInsertList, std::function<int(T, T)> afuncComparer)
-	{
-		std::vector<T>::iterator iter = alstInsertList.begin();
-		for (; iter != alstInsertList.end(); ++iter)
-		{
-			int iCmp = afuncComparer(aInsert, *iter);
-			if (iCmp >= 0) { break; }
-		}
+   template<class T> static
+      void List_Insert(T& aInsert, std::vector<T>& alstInsertList, std::function<int(T, T)> afuncComparer)
+   {
+      std::vector<T>::iterator iter = alstInsertList.begin();
+      for (; iter != alstInsertList.end(); ++iter)
+      {
+         int iCmp = afuncComparer(aInsert, *iter);
+         if (iCmp >= 0) { break; }
+      }
 
-		alstInsertList.insert(iter, aInsert);
-	}
+      alstInsertList.insert(iter, aInsert);
+   }
 
 };
 

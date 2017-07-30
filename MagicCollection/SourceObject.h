@@ -21,9 +21,9 @@ public:
 
    //std::vector<std::pair<std::string, std::string>> Attribs;
    unsigned int AddAttribute(std::string key,
-	   std::string value,
-	   char* aplstCharBuf,
-	   unsigned int aiBufSize);
+      std::string value,
+      char* aplstCharBuf,
+      unsigned int aiBufSize);
 
    // Used in loading from source DB.
    std::string GetName(char* aiSearchBuffer);

@@ -7,20 +7,20 @@
 class TraitItem
 {
 public:
-	TraitItem(std::string aszKeyname,
-		std::vector<std::string> alstKeyVals, 
-		std::vector<Tag> alstPairedTraits = std::vector<Tag>());
-	~TraitItem();
-	
-	std::string GetKeyName();
-	std::string GetDefaultValue();
-	std::vector<std::string> GetAllowedValues();
+   TraitItem(std::string aszKeyname,
+      std::vector<std::string> alstKeyVals, 
+      std::vector<Tag> alstPairedTraits = std::vector<Tag>());
+   ~TraitItem();
+   
+   std::string GetKeyName();
+   std::string GetDefaultValue();
+   std::vector<std::string> GetAllowedValues();
 
-	bool IsAllowedValue(std::string aszTestVal);
+   bool IsAllowedValue(std::string aszTestVal);
 
 private:
-	std::vector<std::string> m_lstPairedValues;
-	std::vector<std::string> m_lstPossibleValues;
-	std::string m_szKeyName;
+   std::vector<std::string> m_lstPairedValues;
+   std::vector<std::string> m_lstPossibleValues;
+   std::string m_szKeyName;
 };
 

@@ -30,7 +30,7 @@ void Server::RecvFromClient(int iClient)
    int iBitsReceived = m_ServerSocket->ReceiveData(iClient, m_RecvBuf);
    if (iBitsReceived  > 0)
    {
-	   std::cout << m_RecvBuf << std::endl;
+      std::cout << m_RecvBuf << std::endl;
    }
 }
 
