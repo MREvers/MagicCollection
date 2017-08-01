@@ -108,9 +108,11 @@ int CollectionSource::LoadCard(std::string aszCardName)
             lstStaticAttrs.push_back(std::make_pair(Config::Instance()->GetFullKey(att_iter->first), att_iter->second));
          }
 
-         std::map<std::string, std::vector<std::string>> lstUnfixedAttrs = oSource->GetNonUniqueAttributeRestrictions(m_AllCharBuff);
+         std::map<std::string, std::vector<std::string>> 
+			 lstUnfixedAttrs = oSource->GetNonUniqueAttributeRestrictions(m_AllCharBuff);
 
-         std::map<std::string, std::vector<std::string>> lstFixedAttrs;
+         std::map<std::string, std::vector<std::string>> 
+			 lstFixedAttrs;
 
          std::map<std::string, std::vector<std::string>>::iterator iter_UnfixedAttrs = lstUnfixedAttrs.begin();
          for (; iter_UnfixedAttrs != lstUnfixedAttrs.end(); ++iter_UnfixedAttrs)

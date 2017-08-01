@@ -29,15 +29,15 @@ public:
    int GetHighPrimeIndex(unsigned int aiComposite);
    int GetRandom();
 
-   bool IsResidentIn( Address aAddress,
-                      Address aTestLocation,
+   bool IsResidentIn( const Address& aAddress,
+                      const Address& aTestLocation,
                       Address& rAddrIn );
-   bool DoesLocationContain( Address aLocation,
-                             Address aAddress,
+   bool DoesLocationContain( const Address& aLocation,
+                             const Address& aAddress,
                              Address& rAddrIn );
 
-   bool PitheLocation(Address& aAddress, Address& aPitheLocation);
-   bool InceptLocation(Address& aAddress, Address& aNewLocation);
+   bool PitheLocation(Address& aAddress, const Address& aPitheLocation);
+   bool InceptLocation(Address& aAddress, const Address& aNewLocation);
 
    static const std::vector<int> Primes;
 private:

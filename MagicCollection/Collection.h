@@ -19,51 +19,79 @@ class CollectionFactory;
 class Collection
 {
 public:
-   Collection(std::string aszName,
-               CollectionSource* aoSource,
-               std::string aszFileCollection,
-               std::string aszID = "");
+   Collection(
+      std::string aszName,
+      CollectionSource* aoSource,
+      std::string aszFileCollection,
+      std::string aszID = "");
    ~Collection();
 
    void SetName(std::string aszNewName);
    std::string GetName();
    Address  GetIdentifier();
 
-   void AddItem(std::string aszName,
+   void AddItem(
+      std::string aszName,
       std::vector<Tag> alstAttrs = std::vector<Tag>(),
       std::vector<Tag> alstMetaTags = std::vector<Tag>(),
       bool abCloseTransaction = true);
-   void AddItem(std::string aszName, std::string aszHash, std::string aszResidentIn = "", bool abCloseTransaction = true);
-   void RemoveItem(std::string aszName, std::string aszIdentifyingHash, bool abCloseTransaction = true);
-   void ChangeItem(std::string aszName, std::string aszIdentifyingHash, std::vector<Tag> alstIdChanges, std::vector<Tag> alstMetaChanges, bool abCloseTransaction = true);
-   void ReplaceItem(std::string aszName, std::string aszIdentifyingHash, std::string aszNewName, std::vector<Tag> alstIdChanges, std::vector<Tag> alstMetaChanges, bool abCloseTransaction = true);
+
+   void AddItem(
+      std::string aszName,
+      std::string aszHash, 
+      std::string aszResidentIn = "", 
+      bool abCloseTransaction = true);
+
+   void RemoveItem(
+      std::string aszName, 
+      std::string aszIdentifyingHash, 
+      bool abCloseTransaction = true);
+
+   void ChangeItem(
+      std::string aszName, 
+      std::string aszIdentifyingHash, 
+      std::vector<Tag> alstIdChanges, 
+      std::vector<Tag> alstMetaChanges, 
+      bool abCloseTransaction = true);
+
+   void ReplaceItem(
+      std::string aszName, 
+      std::string aszIdentifyingHash, 
+      std::string aszNewName, 
+      std::vector<Tag> alstIdChanges, 
+      std::vector<Tag> alstMetaChanges, 
+      bool abCloseTransaction = true);
 
    std::vector<std::string> GetMetaData();
 
-   std::vector<std::pair<std::string, Tag>> GetTags();
-   void TagItem(std::string aszHash, Tag atag);
-   void UntagItem(std::string aszHash, std::string aszTagKey);
-
-   // Used to track the number of children in of this collection to avoid name clashes.
+   // Used to track the number of children in of this collection to 
+   // avoid name clashes.
    void ChildAdded();
    int ChildCount();
 
    long GetTimeStamp();
 
    void SaveCollection();
-   void LoadCollection(std::string aszFileName, CollectionFactory* aoFactory);
+
+   void LoadCollection(
+      std::string aszFileName, 
+      CollectionFactory* aoFactory);
+
    void LoadChanges(std::vector<std::string> aszLines);
 
-   std::vector<std::string> GetCollectionList(MetaTagType atagType = Visible, bool aiCollapsed = false);
+   std::vector<std::string> GetCollectionList(
+      MetaTagType atagType = Visible,
+      bool aiCollapsed = false);
 
    bool IsLoaded = false;
 
 private:
    std::string m_szName;
-   unsigned int m_iChildrenCount; // Needed to avoid name clashes.
    Address m_Address;
    std::string m_szFileName;
    unsigned long m_ulTimeStamp;
+   unsigned int m_iChildrenCount; // Needed to avoid name clashes.
+
    CollectionSource* m_ptrCollectionSource;
 
    bool m_bRecordChanges;
@@ -78,15 +106,43 @@ private:
    std::vector<int> m_lstItemCacheIndexes;
    std::vector<int> getCollection();
 
-   // These all locate by name and hash for a second time so we dont risk dangling pointers.
-   void addItem(std::string aszName, std::vector<Tag> alstAttrs, std::vector<Tag> alstMetaTags);
-   void addExistingItem(std::string aszName, std::string aszHash, std::string aszResidentIn); // this is for an Item from another collection
-   void removeItem(std::string aszName, std::string aszIdentifyingHash,Address aszResidentIn);
-   void changeItem(std::string aszName, std::string aszIdentifyingHash, std::vector<Tag> alstChanges, std::vector<Tag> alstMetaChanges);
-   void replaceItem(std::string aszName, std::string aszIdentifyingHash, std::string aszNewName, std::vector<Tag> alstIdChanges, std::vector<Tag> alstMetaChanges);
+   // These all locate by name and hash for a second 
+   // time so we dont risk dangling references.
+   void addItem(
+      std::string aszName, 
+      std::vector<Tag> alstAttrs, 
+      std::vector<Tag> alstMetaTags);
+   
+   // this is for an Item from another collection
+   void addExistingItem(
+      std::string aszName, 
+      std::string aszHash, 
+      std::string aszResidentIn);
+   
+   void removeItem(
+      std::string aszName, 
+      std::string aszIdentifyingHash, 
+      Address aszResidentIn);
+
+   void changeItem(
+      std::string aszName,  
+      std::string aszIdentifyingHash, 
+      std::vector<Tag> alstChanges, 
+      std::vector<Tag> alstMetaChanges);
+
+   void replaceItem(
+      std::string aszName, 
+      std::string aszIdentifyingHash, 
+      std::string aszNewName, 
+      std::vector<Tag> alstIdChanges, 
+      std::vector<Tag> alstMetaChanges);
+
    void registerItem(int aiCacheIndex);
 
-   void modifyItem(CopyItem* aptCopy, std::vector<Tag> alstChanges, std::vector<Tag> alstMetaChanges);
+   void modifyItem(
+      CopyItem* aptCopy,
+      std::vector<Tag> alstChanges, 
+      std::vector<Tag> alstMetaChanges);
 
    Transaction* getOpenTransaction();
    void finalizeTransaction();

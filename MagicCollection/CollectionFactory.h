@@ -13,7 +13,7 @@ public:
    ~CollectionFactory();
 
    bool CollectionExists(std::string aszCollectionName);
-   bool CollectionExists(Address aAddrColID);
+   bool CollectionExists(const Address& aAddrColID);
    Collection* GetCollection(std::string aszCollectionName);
 
    std::string LoadCollectionFromFile(std::string aszColFile);

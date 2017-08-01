@@ -76,7 +76,7 @@ bool CollectionFactory::CollectionExists(std::string aszCollectionName)
    return CollectionExists(Address(aszCollectionName));
 }
 
-bool CollectionFactory::CollectionExists(Address aAddrColID)
+bool CollectionFactory::CollectionExists(const Address& aAddrColID)
 {
    std::vector<std::shared_ptr<Collection>>::iterator iter_cols = m_lstCollections.begin();
    for (; iter_cols != m_lstCollections.end(); ++iter_cols)

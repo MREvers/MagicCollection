@@ -39,18 +39,26 @@ namespace StoreFrontPro
             m_ucMainWindow.Close();
         }
 
-        // Creates collections if needed. Does not sync already existing collections.
         public void SyncCollectionList()
         {
             ServerInterface.Server.GetCollectionModels(
-                Callback: (alstColMos) => { Collections.Clear(); alstColMos.ForEach((x) => { Collections.Add(x); }); StoreFrontVM.Notify(); },
+                Callback: (alstColMos) => 
+                {
+                    Collections.Clear();
+                    alstColMos.ForEach((x) => { Collections.Add(x); });
+                    StoreFrontVM.Notify();
+                },
                 UICallback: true);
         }
 
         public void SyncAllCollections()
         {
             ServerInterface.Server.GetCollectionModels(
-               Callback: (alstColMos) => { Collections.Clear(); alstColMos.ForEach((x) => { x.Sync(); }); },
+               Callback: (alstColMos) => 
+               {
+                   Collections.Clear();
+                   alstColMos.ForEach((x) => { x.Sync(); });
+               },
                UICallback: true);
         }
 

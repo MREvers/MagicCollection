@@ -4,7 +4,10 @@
 using namespace std;
 
 // An ID will be given to the collection if there is a parent.
-Collection::Collection(string aszName, CollectionSource* aoSource, string aszFileCollection, string aszID)
+Collection::Collection(string aszName, 
+	CollectionSource* aoSource,
+	string aszFileCollection, 
+	string aszID)
 {
    m_szName = aszName;
    m_szFileName = aszFileCollection;
@@ -50,16 +53,34 @@ void Collection::AddItem(string aszName,
    string szHash = item->GetHash(GetIdentifier(), alstAttrs, alstMetaTags);
 
    function<void()> fnDo;
-   fnDo = bind(&Collection::addItem, this, aszName, alstAttrs, alstMetaTags);
+   fnDo = bind(
+	   &Collection::addItem, 
+	   this, 
+	   aszName, 
+	   alstAttrs, 
+	   alstMetaTags);
 
    function<void()> fnUndo;
-   fnUndo = bind(&Collection::removeItem, this, aszName, szHash, GetIdentifier());
+   fnUndo = bind(
+	   &Collection::removeItem, 
+	   this, 
+	   aszName, 
+	   szHash, 
+	   GetIdentifier());
 
    Action action(fnDo, fnUndo);
 
    // Use a generated copy to ensure that default values are set.
-   CopyItem* newCopy = item->GenerateCopy(GetIdentifier(), alstAttrs, alstMetaTags);
-   string szIdentifier = "+ " + CollectionItem::ToCardLine(GetIdentifier(), aszName, newCopy->GetIdentifyingAttributes(), newCopy->GetMetaTags(MetaTagType::Visible), GetIdentifier());
+   CopyItem* newCopy = item->
+	   GenerateCopy(GetIdentifier(), alstAttrs, alstMetaTags);
+   
+   string szIdentifier = "+ " + CollectionItem::ToCardLine(
+	   GetIdentifier(), 
+	   aszName, 
+	   newCopy->GetIdentifyingAttributes(), 
+	   newCopy->GetMetaTags(MetaTagType::Visible), 
+	   GetIdentifier());
+
    delete newCopy;
    
    action.SetIdentifier(szIdentifier); 
@@ -73,7 +94,10 @@ void Collection::AddItem(string aszName,
    }
 }
 
-void Collection::AddItem(string aszName, string aszHash, string aszResidentIn, bool abCloseTransaction)
+void Collection::AddItem(string aszName,
+	string aszHash, 
+	string aszResidentIn, 
+	bool abCloseTransaction)
 {
    // Verify the card name entered is valid
    int iValidItem = m_ptrCollectionSource->LoadCard(aszName);
@@ -86,15 +110,30 @@ void Collection::AddItem(string aszName, string aszHash, string aszResidentIn, b
    if (cItem == nullptr) { return; }
 
    function<void()> fnDo;
-   fnDo = bind(&Collection::addExistingItem, this, aszName, aszHash, aszResidentIn);
+   fnDo = bind(
+	   &Collection::addExistingItem, 
+	   this, 
+	   aszName, 
+	   aszHash, 
+	   aszResidentIn);
 
    function<void()> fnUndo;
-   fnUndo = bind(&Collection::removeItem, this, aszName, aszHash, aszResidentIn);
+   fnUndo = bind(
+	   &Collection::removeItem, 
+	   this, 
+	   aszName, 
+	   aszHash, 
+	   aszResidentIn);
 
    Action action(fnDo, fnUndo);
 
    // Use a generated copy to ensure that default values are set.
-   string szIdentifier = "+ " + CollectionItem::ToCardLine(GetIdentifier(), aszName, cItem->GetIdentifyingAttributes(), cItem->GetMetaTags(MetaTagType::Visible), GetIdentifier());
+   string szIdentifier = "+ " + CollectionItem::ToCardLine(
+	   GetIdentifier(), 
+	   aszName, 
+	   cItem->GetIdentifyingAttributes(), 
+	   cItem->GetMetaTags(MetaTagType::Visible), 
+	   GetIdentifier());
    
    //"Set Meta-Tag '" + aszKey + "' to '" + aszValue + "' on " + aszLongName;// + szCard;
    action.SetIdentifier(szIdentifier); 
@@ -108,7 +147,9 @@ void Collection::AddItem(string aszName, string aszHash, string aszResidentIn, b
    }
 }
 
-void Collection::RemoveItem(string aszName, string aszIdentifyingHash, bool abCloseTransaction)
+void Collection::RemoveItem(string aszName, 
+	string aszIdentifyingHash, 
+	bool abCloseTransaction)
 {
    int iValidItem = m_ptrCollectionSource->LoadCard(aszName);
    if (iValidItem == -1) { return; }
@@ -118,7 +159,12 @@ void Collection::RemoveItem(string aszName, string aszIdentifyingHash, bool abCl
    if (copy == nullptr) { return; }
 
    function<void()> fnDo;
-   fnDo = bind(&Collection::removeItem, this, aszName, aszIdentifyingHash, GetIdentifier());
+   fnDo = bind(
+	   &Collection::removeItem, 
+	   this, 
+	   aszName, 
+	   aszIdentifyingHash, 
+	   GetIdentifier());
 
    vector<Tag> lstAttrs = copy->GetIdentifyingAttributes();
    vector<Tag> lstMetas = copy->GetMetaTags(Visible);
@@ -127,8 +173,15 @@ void Collection::RemoveItem(string aszName, string aszIdentifyingHash, bool abCl
 
    Action action(fnDo, fnUndo);
 
-   string szIdentifier = "- " + CollectionItem::ToCardLine(GetIdentifier(), aszName, lstAttrs, lstMetas, GetIdentifier());
-   action.SetIdentifier(szIdentifier); //"Set Meta-Tag '" + aszKey + "' to '" + aszValue + "' on " + aszLongName;// + szCard;
+   string szIdentifier = "- " + CollectionItem::ToCardLine(
+	   GetIdentifier(), 
+	   aszName, 
+	   lstAttrs, 
+	   lstMetas, 
+	   GetIdentifier());
+
+   //"Set Meta-Tag '" + aszKey + "' to '" + aszValue + "' on " + aszLongName;
+   action.SetIdentifier(szIdentifier); 
 
    Transaction* transaction = getOpenTransaction();
    transaction->AddAction(action);
@@ -139,7 +192,11 @@ void Collection::RemoveItem(string aszName, string aszIdentifyingHash, bool abCl
    }
 }
 
-void Collection::ChangeItem(string aszName, string aszIdentifyingHash, vector<Tag> alstChanges, vector<Tag> alstMetaChanges, bool abCloseTransaction)
+void Collection::ChangeItem(string aszName, 
+	string aszIdentifyingHash, 
+	vector<Tag> alstChanges, 
+	vector<Tag> alstMetaChanges, 
+	bool abCloseTransaction)
 {
    int iValidItem = m_ptrCollectionSource->LoadCard(aszName);
    if (iValidItem == -1) { return; }
@@ -149,7 +206,13 @@ void Collection::ChangeItem(string aszName, string aszIdentifyingHash, vector<Ta
    if (copy == nullptr) { return; }
 
    function<void()> fnDo;
-   fnDo = bind(&Collection::changeItem, this, aszName, aszIdentifyingHash, alstChanges, alstMetaChanges);
+   fnDo = bind(
+	   &Collection::changeItem, 
+	   this, 
+	   aszName, 
+	   aszIdentifyingHash, 
+	   alstChanges, 
+	   alstMetaChanges);
 
    // Simulate the change so we can determine the hash and the exact traits when change is complete.
    CopyItem* falseCopy = new CopyItem(*copy);
@@ -162,14 +225,33 @@ void Collection::ChangeItem(string aszName, string aszIdentifyingHash, vector<Ta
    vector<Tag> lstOldMeta = copy->GetMetaTags(MetaTagType::Visible);
 
    // This is the hash that the itme will have after the properties are changed. So we need this to undo this change.
-   string szPostHash = item->GetHash(GetIdentifier(), lstFutureIds, lstFutureMeta);
+   string szPostHash = item->
+	   GetHash(GetIdentifier(), lstFutureIds, lstFutureMeta);
+
    function<void()> fnUndo;
-   fnUndo = bind(&Collection::changeItem, this, aszName, szPostHash, lstOldIds, lstOldMeta);
+   fnUndo = bind(
+	   &Collection::changeItem, 
+	   this, 
+	   aszName, 
+	   szPostHash, 
+	   lstOldIds, 
+	   lstOldMeta);
 
    Action action(fnDo, fnUndo);
 
-   string szIdentifier = "% " + CollectionItem::ToCardLine(GetIdentifier(), aszName, lstOldIds, lstOldMeta, GetIdentifier()) + "->";
-   szIdentifier += CollectionItem::ToCardLine(GetIdentifier(), aszName, lstFutureIds, lstFutureMeta, GetIdentifier());
+   string szIdentifier = "% " + CollectionItem::ToCardLine(
+	   GetIdentifier(), 
+	   aszName, 
+	   lstOldIds, 
+	   lstOldMeta, 
+	   GetIdentifier()) + "->";
+
+   szIdentifier += CollectionItem::ToCardLine(
+	   GetIdentifier(), 
+	   aszName, 
+	   lstFutureIds, 
+	   lstFutureMeta, 
+	   GetIdentifier());
    action.SetIdentifier(szIdentifier);
 
    Transaction* transaction = getOpenTransaction();
@@ -181,38 +263,75 @@ void Collection::ChangeItem(string aszName, string aszIdentifyingHash, vector<Ta
    }
 }
 
-void Collection::ReplaceItem(string aszName, string aszIdentifyingHash, string aszNewName, vector<Tag> alstIdChanges, vector<Tag> alstMetaChanges, bool abCloseTransaction)
+void Collection::ReplaceItem(
+	string aszName, 
+	string aszIdentifyingHash, 
+	string aszNewName, 
+	vector<Tag> alstIdChanges, 
+	vector<Tag> alstMetaChanges, 
+	bool abCloseTransaction)
 {
    int iValidItem = m_ptrCollectionSource->LoadCard(aszName);
    int iValidNewItem = m_ptrCollectionSource->LoadCard(aszNewName);
    if (iValidItem == -1 || iValidNewItem == -1) { return; }
 
-   CollectionItem* item = m_ptrCollectionSource->GetCardPrototype(iValidItem);
-   CollectionItem* newItem = m_ptrCollectionSource->GetCardPrototype(iValidNewItem);
+   CollectionItem* item = m_ptrCollectionSource->
+	   GetCardPrototype(iValidItem);
+   CollectionItem* nItem = m_ptrCollectionSource->
+	   GetCardPrototype(iValidNewItem);
+
    CopyItem* copy = item->FindCopyItem(aszIdentifyingHash);
    if (copy == nullptr) { return; }
 
    function<void()> fnDo;
-   fnDo = bind(&Collection::replaceItem, this, aszName, aszIdentifyingHash, aszNewName, alstIdChanges, alstMetaChanges);
+   fnDo = bind(
+	   &Collection::replaceItem, 
+	   this, 
+	   aszName, 
+	   aszIdentifyingHash, 
+	   aszNewName, 
+	   alstIdChanges, 
+	   alstMetaChanges);
 
    vector<Tag> lstOldIds = copy->GetIdentifyingAttributes();
    vector<Tag> lstOldMeta = copy->GetMetaTags(MetaTagType::Visible);
 
    // Generate a temp copy to see what the actual result is.
-   CopyItem* falseCopy = newItem->GenerateCopy(GetIdentifier(), alstIdChanges, alstMetaChanges);
+   CopyItem* falseCopy = nItem->
+	   GenerateCopy(GetIdentifier(), alstIdChanges, alstMetaChanges);
+
    vector<Tag> lstFutureIds = falseCopy->GetIdentifyingAttributes();
    vector<Tag> lstFutureMeta = falseCopy->GetMetaTags(MetaTagType::Visible);
    delete falseCopy;
 
-   // This is the hash that the itme will have after the properties are changed. So we need this to undo this change.
-   string szPostHash = newItem->GetHash(GetIdentifier(), alstIdChanges, alstMetaChanges);
+   // This is the hash that the itme will have after the properties are
+   // changed. So we need this to undo this change.
+   string szPostHash = nItem->
+	   GetHash(GetIdentifier(), alstIdChanges, alstMetaChanges);
    function<void()> fnUndo;
-   fnUndo = bind(&Collection::replaceItem, this, aszNewName, szPostHash, aszName, lstOldIds, lstOldMeta);
+   fnUndo = bind(
+	   &Collection::replaceItem, 
+	   this, 
+	   aszNewName, 
+	   szPostHash, 
+	   aszName, 
+	   lstOldIds, 
+	   lstOldMeta);
 
    Action action(fnDo, fnUndo);
 
-   string szIdentifier = "% " + CollectionItem::ToCardLine(GetIdentifier(), aszName, lstOldIds, lstOldMeta, GetIdentifier()) + "->";
-   szIdentifier += CollectionItem::ToCardLine(GetIdentifier(), aszNewName, alstIdChanges, alstMetaChanges, GetIdentifier());
+   string szIdentifier = "% " + CollectionItem::ToCardLine(
+	   GetIdentifier(), 
+	   aszName, 
+	   lstOldIds, 
+	   lstOldMeta, 
+	   GetIdentifier()) + "->";
+   szIdentifier += CollectionItem::ToCardLine(
+	   GetIdentifier(), 
+	   aszNewName, 
+	   alstIdChanges, 
+	   alstMetaChanges, 
+	   GetIdentifier());
    action.SetIdentifier(szIdentifier);
 
    Transaction* transaction = getOpenTransaction();
@@ -233,34 +352,13 @@ vector<string> Collection::GetMetaData()
 
    for each(auto metaData in m_lstTaggedItems)
    {
-      lstRetval.push_back(metaData.first + ": {" + metaData.second.first + "=\"" + metaData.second.second + "\" }");
+	  string szMetaData = metaData.first + ": {" +
+					      metaData.second.first + "=\"" +
+	                      metaData.second.second + "\" }";
+      lstRetval.push_back(szMetaData);
    }
 
    return lstRetval;
-}
-
-vector<pair<string, Tag>> Collection::GetTags()
-{
-   return m_lstTaggedItems;
-}
-
-void Collection::TagItem(string aszHash, Tag atag)
-{
-   pair<string, Tag> pairItem = make_pair(aszHash, atag);
-   m_lstTaggedItems.push_back(pairItem);
-}
-
-void Collection::UntagItem(string aszHash, string aszTagKey)
-{
-   function<string(pair<string, Tag>)> fnExtractor;
-   fnExtractor = [aszTagKey](pair<string, Tag> itemTag)
-                           ->string { return itemTag.first; };
-
-   int iFound = ListHelper::List_Find(aszHash, m_lstTaggedItems, fnExtractor);
-   if (iFound != -1)
-   {
-      m_lstTaggedItems.erase(m_lstTaggedItems.begin() + iFound);
-   }
 }
 
 void  Collection::ChildAdded()
@@ -287,7 +385,9 @@ void  Collection::SaveCollection()
    saveCollection();
 }
 
-void Collection::LoadCollection(string aszFileName, CollectionFactory* aoFactory)
+void Collection::LoadCollection(
+	string aszFileName, 
+	CollectionFactory* aoFactory)
 {
    vector<string> lstPreprocessLines;
    vector<string> lstCardLines;
@@ -330,17 +430,23 @@ void Collection::LoadCollection(string aszFileName, CollectionFactory* aoFactory
       mapNewlyAddedItems,
       mapExistingItems);
 
-   // Now Verify Borrowed Cards (i.e. Parent != this) that were just loaded exist.
-   // Two things can happen in this case. 
-   // If the claimed collection exists, then try to find the referenced item and use that instead, if that fails, delete the item.
-   // If the claimed collection does not exist, then try to find an identical copy that may have been created by another collection and use that. If that fails, use the one created.
+   // Now Verify Borrowed Cards (i.e. Parent != this) that were just
+   //  loaded exist. Two things can happen in this case. 
+   // If the claimed collection exists, then try to find the referenced item
+   //  and use that instead, if that fails, delete the item.
+   // If the claimed collection does not exist, then try to find an identical
+   //  copy that may have been created by another collection and use that.
+   //  If that fails, use the one created.
    loader.ConsolodateBorrowedItems(GetIdentifier(),
       m_ptrCollectionSource,
       aoFactory);
 
-   // Now this collection is COMPLETELY LOADED. Since other collections can reference this collection, without this collection being loaded,
-   // those other collections may have created copies of card in this collection already; if that is the case, use those copies. Additionally,
-   // check that all the copies referenced by the other collections still exist, if not, delete those copies.
+   // Now this collection is COMPLETELY LOADED. Since other collections can
+   //  reference this collection, without this collection being loaded,
+   //  those other collections may have created copies of card in this 
+   //  collection already; if that is the case, use those copies. Additionally,
+   //  check that all the copies referenced by the other collections still
+   //  exist, if not, delete those copies.
    loader.ReleaseUnfoundReferences(GetIdentifier(),
       m_ptrCollectionSource);
 
@@ -358,7 +464,8 @@ void Collection::LoadChanges(vector<string> lstLines)
    }
 }
 
-vector<string> Collection::GetCollectionList(MetaTagType atagType, bool aiCollapsed)
+vector<string> 
+Collection::GetCollectionList(MetaTagType atagType, bool aiCollapsed)
 {
    function<string(pair<string, int>)> fnExtractor;
    fnExtractor = [](pair<string, int> pVal)
@@ -369,8 +476,10 @@ vector<string> Collection::GetCollectionList(MetaTagType atagType, bool aiCollap
    vector<int>::iterator iter_Items = lstCol.begin();
    for (; iter_Items != lstCol.end(); ++iter_Items)
    {
-      CollectionItem* item = m_ptrCollectionSource->GetCardPrototype(*iter_Items);
-      vector<CopyItem*> lstCopies = item->GetCopiesForCollection(GetIdentifier(), All);
+      CollectionItem* item = m_ptrCollectionSource->
+		  GetCardPrototype(*iter_Items);
+      vector<CopyItem*> lstCopies = item->
+		  GetCopiesForCollection(GetIdentifier(), All);
 
       vector<CopyItem*>::iterator iter_Copy = lstCopies.begin();
       for (; iter_Copy != lstCopies.end(); ++iter_Copy)
@@ -414,13 +523,15 @@ void Collection::captureChanges()
    for each (int index in m_lstItemCacheIndexes)
    {
       CollectionItem* item = m_ptrCollectionSource->GetCardPrototype(index);
-      vector<CopyItem*> lstCopies = item->GetCopiesForCollection(m_szName, CollectionItemType::All);
+      vector<CopyItem*> lstCopies = item->
+		  GetCopiesForCollection(m_szName, CollectionItemType::All);
       mapNewCollection[index] = lstCopies;
    }
 
    for each (pair<int, vector<CopyItem*>> itemGroup in m_mapCollectionTracker)
    {
-      map<int, vector<CopyItem*>>::iterator iter_oldItems = mapNewCollection.find(itemGroup.first);
+      map<int, vector<CopyItem*>>::iterator iter_oldItems = 
+		  mapNewCollection.find(itemGroup.first);
       if (iter_oldItems != mapNewCollection.end())
       {
          // Calculate differences
@@ -456,7 +567,10 @@ vector<int> Collection::getCollection()
    return m_lstItemCacheIndexes;
 }
 
-void Collection::addItem(string aszName, vector<Tag> alstAttrs, vector<Tag> alstMetaTags)
+void Collection::addItem(
+	string aszName, 
+	vector<Tag> alstAttrs, 
+	vector<Tag> alstMetaTags)
 {
    CollectionItem* item; CopyItem* cItem; string szHash;
    
@@ -469,8 +583,10 @@ void Collection::addItem(string aszName, vector<Tag> alstAttrs, vector<Tag> alst
 
    registerItem(iCache);
 
-   // Notify other collections they may need to sync since this may have been borrowed by other collections.
-   // There should never be other copies with that hash not in resident. They are removed at load time.
+   // Notify other collections they may need to sync since this may have
+   //  been borrowed by other collections.
+   // There should never be other copies with that hash not in resident. 
+   // They are removed at load time.
    m_ptrCollectionSource->NotifyNeedToSync(GetIdentifier());
 }
 
@@ -505,7 +621,8 @@ Collection::removeItem( string aszName,
       m_lstItemCacheIndexes = lstNewCacheIndexes;
    }
 
-   // Notify other collections they may need to sync since this may have been borrowed by other collections.
+   // Notify other collections they may need to sync since this may have been 
+   //  borrowed by other collections.
    m_ptrCollectionSource->NotifyNeedToSync(GetIdentifier());
 }
 
@@ -523,7 +640,8 @@ Collection::changeItem( string aszName,
 
    modifyItem(cItem, alstChanges, alstMetaChanges);
 
-   // Notify other collections they may need to sync since this may have been borrowed by other collections.
+   // Notify other collections they may need to sync since this may have been
+   //  borrowed by other collections.
    m_ptrCollectionSource->NotifyNeedToSync(GetIdentifier());
 }
 
@@ -556,17 +674,23 @@ void Collection::registerItem(int aiCacheIndex)
    }
 }
 
-void Collection::modifyItem(CopyItem* aptCopy, vector<Tag> alstChanges, vector<Tag> alstMetaChanges)
+void 
+Collection::modifyItem(
+	CopyItem* aptCopy, 
+	vector<Tag> alstChanges, 
+	vector<Tag> alstMetaChanges)
 {
    for (size_t i = 0; i < alstChanges.size(); i++)
    {
-      aptCopy->SetIdentifyingAttribute(alstChanges[i].first, alstChanges[i].second);
+      aptCopy->
+		  SetIdentifyingAttribute(alstChanges[i].first, alstChanges[i].second);
    }
 
    for (size_t i = 0; i < alstMetaChanges.size(); i++)
    {
       MetaTagType mTagType = CopyItem::DetermineMetaTagType(alstMetaChanges[i].first);
-      aptCopy->SetMetaTag(alstMetaChanges[i].first, alstMetaChanges[i].second, mTagType);
+      aptCopy->
+		  SetMetaTag(alstMetaChanges[i].first, alstMetaChanges[i].second, mTagType);
    }
 }
 
@@ -621,7 +745,8 @@ void Collection::loadMetaTagFile()
          for (size_t t = 0; t < lstMetaTags.size(); t++)
          {
             MetaTagType mTagType = CopyItem::DetermineMetaTagType(lstMetaTags[t].first);
-            matchingCopy->SetMetaTag(lstMetaTags[t].first, lstMetaTags[t].second, mTagType, false);
+            matchingCopy->
+				SetMetaTag(lstMetaTags[t].first, lstMetaTags[t].second, mTagType, false);
          }
       }
 
@@ -868,13 +993,17 @@ void Collection::saveCollection()
    ofstream oColFile;
    oColFile.open(ioHelper.GetCollectionFile(m_szFileName));
 
-   oColFile << Config::CollectionDefinitionKey << " Name=\"" << m_szName << "\"" << endl;
+   oColFile << Config::CollectionDefinitionKey
+	        << " Name=\"" << m_szName << "\"" << endl;
 
-   oColFile << Config::CollectionDefinitionKey << " ID=\"" << GetIdentifier().GetFullAddress() << "\"" << endl;
+   oColFile << Config::CollectionDefinitionKey
+	        << " ID=\"" << GetIdentifier().GetFullAddress() << "\"" << endl;
 
-   oColFile << Config::CollectionDefinitionKey << " CC=\"" << m_iChildrenCount << "\"" << endl;
+   oColFile << Config::CollectionDefinitionKey 
+	        << " CC=\"" << m_iChildrenCount << "\"" << endl;
 
-   oColFile << Config::CollectionDefinitionKey << " Session=\"" << put_time(&otm, "%F_%T") << "\"" << endl;
+   oColFile << Config::CollectionDefinitionKey 
+	        << " Session=\"" << put_time(&otm, "%F_%T") << "\"" << endl;
 
    vector<string>::iterator iter_Line = lstLines.begin();
    for (; iter_Line != lstLines.end(); ++iter_Line)

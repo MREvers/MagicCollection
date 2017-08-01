@@ -26,10 +26,10 @@ public:
    Address GetAddress();
    bool IsParent(Address aAddrTestAddress);
 
-   void AddResident(Address aAddrAddress);
-   void RemoveResident(Address aAddrAddress);
+   void AddResident(const Address& aAddrAddress);
+   void RemoveResident(const Address& aAddrAddress);
    std::vector<Address> GetResidentIn();
-   bool IsResidentIn(Address aAddrAddress);
+   bool IsResidentIn(const Address& aAddrAddress);
 
    void SetMetaTag(std::string aszKey, std::string aszVal, MetaTagType atagType, bool bTimeChange = true);
    std::string GetMetaTag(std::string aszKey, MetaTagType atagType);

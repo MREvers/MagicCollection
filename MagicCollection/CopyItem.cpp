@@ -121,13 +121,13 @@ bool CopyItem::IsParent(Address aAddrParent)
 }
 
 // This will detect if the adding 'resident' is a subset of the parent, if so, it will adjust the parent address.
-void CopyItem::AddResident(Address aAddrAddress)
+void CopyItem::AddResident(const Address& aAddrAddress)
 {
    Addresser addr;
    addr.InceptLocation(m_Address, aAddrAddress);
 }
 
-void CopyItem::RemoveResident(Address aAddrAddress)
+void CopyItem::RemoveResident(const Address& aAddrAddress)
 {
    Addresser addr;
    addr.PitheLocation(m_Address, aAddrAddress);
@@ -138,7 +138,7 @@ std::vector<Address> CopyItem::GetResidentIn()
    return m_lstResidentIn;
 }
 
-bool CopyItem::IsResidentIn(Address aAddrTest)
+bool CopyItem::IsResidentIn(const Address& aAddrTest)
 {
    Addresser addr;
    Address aDummy;

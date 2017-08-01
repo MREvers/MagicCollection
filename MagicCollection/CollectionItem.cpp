@@ -38,7 +38,7 @@ std::string CollectionItem::GetName()
    return m_szName;
 }
 
-CopyItem* CollectionItem::AddCopyItem( Address aAddrColID,
+CopyItem* CollectionItem::AddCopyItem( const Address& aAddrColID,
                                        std::vector<Tag> alstAttrs,
                                        std::vector<Tag> alstMetaTags )
 {
@@ -47,7 +47,7 @@ CopyItem* CollectionItem::AddCopyItem( Address aAddrColID,
    return newCopy;
 }
 
-CopyItem* CollectionItem::GenerateCopy( Address aAddrColID,
+CopyItem* CollectionItem::GenerateCopy( const Address& aAddrColID,
                                         std::vector<Tag> alstAttrs,
                                         std::vector<Tag> alstMetaTags )
 {
@@ -56,7 +56,7 @@ CopyItem* CollectionItem::GenerateCopy( Address aAddrColID,
    return newCopy;
 }
 
-void CollectionItem::RemoveCopyItem(Address aAddrColID, std::string aszHash)
+void CollectionItem::RemoveCopyItem(const Address& aAddrColID, std::string aszHash)
 {
    std::vector<CopyItem*>::iterator iter_Copies = m_lstCopies.begin();
 
@@ -79,7 +79,7 @@ void CollectionItem::RemoveCopyItem(Address aAddrColID, std::string aszHash)
 
 }
 
-void CollectionItem::RemoveResidentFromItem(CopyItem* acItem, Address aAddrColID)
+void CollectionItem::RemoveResidentFromItem(CopyItem* acItem, const Address& aAddrColID)
 {
    int iFound = ListHelper::List_Find(acItem, m_lstCopies);
    if (-1 != iFound)
@@ -92,7 +92,7 @@ void CollectionItem::RemoveResidentFromItem(CopyItem* acItem, Address aAddrColID
    }
 }
 
-CopyItem* CollectionItem::FindCopyItem(std::string aszHash, Address aAddrResidentIn)
+CopyItem* CollectionItem::FindCopyItem(std::string aszHash, const Address& aAddrResidentIn)
 {
    Addresser addr;
    std::vector<CopyItem*>::iterator iter_Copies = m_lstCopies.begin();
@@ -109,7 +109,7 @@ CopyItem* CollectionItem::FindCopyItem(std::string aszHash, Address aAddrResiden
    return nullptr;
 }
 
-std::vector<CopyItem*> CollectionItem::FindAllCopyItems(std::string aszHash, Address aptAddress)
+std::vector<CopyItem*> CollectionItem::FindAllCopyItems(std::string aszHash,const Address& aptAddress)
 {
    std::vector<CopyItem*> lstRetval;
    std::vector<CopyItem*>::iterator iter_Copies = m_lstCopies.begin();
@@ -136,7 +136,7 @@ void CollectionItem::Erase(CopyItem* ociRemove)
    }
 }
 
-std::vector<CopyItem*> CollectionItem::GetCopiesForCollection(Address aAddrCollectionIdentifier, CollectionItemType aItemType)
+std::vector<CopyItem*> CollectionItem::GetCopiesForCollection(const Address& aAddrCollectionIdentifier, CollectionItemType aItemType)
 {
    std::vector<CopyItem*> lstRetVal;
    std::vector<CopyItem*>::iterator iter_Copies = m_lstCopies.begin();
@@ -164,7 +164,7 @@ std::vector<CopyItem*> CollectionItem::GetCopiesForCollection(Address aAddrColle
    return lstRetVal;
 }
 
-std::string CollectionItem::GetHash(Address aAddrIdentifier,
+std::string CollectionItem::GetHash(const Address& aAddrIdentifier,
    std::vector<Tag> alstAttrs,
    std::vector<Tag> alstMetaTags)
 {
@@ -173,7 +173,7 @@ std::string CollectionItem::GetHash(Address aAddrIdentifier,
    return copyToHash.GetHash();
 }
 
-std::string CollectionItem::GetCardString(CopyItem* aItem, MetaTagType aTagType, Address aAddrAddress)
+std::string CollectionItem::GetCardString(CopyItem* aItem, MetaTagType aTagType, const Address& aAddrAddress)
 {
    return CollectionItem::ToCardLine(aItem->GetParent(), m_szName, aItem->GetIdentifyingAttributes(), aItem->GetMetaTags(aTagType), aAddrAddress);
 }
@@ -339,11 +339,11 @@ bool CollectionItem::ParseTagString(std::string aszDetails, std::vector<Tag>& rl
    return true;
 }
 
-std::string CollectionItem::ToCardLine(Address aAddrParentID,
+std::string CollectionItem::ToCardLine(const Address& aAddrParentID,
    std::string aszName,
    std::vector<Tag> alstAttrs,
    std::vector<Tag> alstMetaTags,
-   Address aAddrCompareID)
+   const Address& aAddrCompareID)
 {
    std::string szLine = aszName;
    szLine += " { ";

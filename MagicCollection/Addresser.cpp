@@ -145,8 +145,8 @@ int Addresser::GetRandom()
 }
 
 bool 
-Addresser::IsResidentIn(Address aAddress,
-                        Address aTestAddress,
+Addresser::IsResidentIn(const Address& aAddress,
+                        const Address& aTestAddress,
                         Address& rAddrIn)
 {
    bool bIsResident = true;
@@ -172,8 +172,8 @@ Addresser::IsResidentIn(Address aAddress,
 }
 
 bool 
-Addresser::DoesLocationContain( Address aLocation,
-                                Address aAddress,
+Addresser::DoesLocationContain( const Address& aLocation,
+                                const Address& aAddress,
                                 Address& rAddrIn )
 {
    bool bIsResident = true;
@@ -199,7 +199,7 @@ Addresser::DoesLocationContain( Address aLocation,
 }
 
 bool 
-Addresser::PitheLocation(Address& aAddress, Address& aPitheLocation)
+Addresser::PitheLocation(Address& aAddress, const Address& aPitheLocation)
 {
    Addresser addr;
    bool bDidPithe = false;
@@ -237,7 +237,7 @@ Addresser::PitheLocation(Address& aAddress, Address& aPitheLocation)
    return bDidPithe;
 }
 
-bool Addresser::InceptLocation(Address& aAddress, Address& aNewLocation)
+bool Addresser::InceptLocation(Address& aAddress, const Address& aNewLocation)
 {
    Addresser addr;
    bool bDidAdd = false;

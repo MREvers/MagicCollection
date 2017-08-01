@@ -38,39 +38,39 @@ public:
 
    std::string GetName();
 
-   CopyItem* AddCopyItem( Address aAddrColID,
+   CopyItem* AddCopyItem( const Address& aAddrColID,
                           std::vector<Tag> alstAttrs = std::vector<Tag>(),
                           std::vector<Tag> alstMetaTags = std::vector<Tag>() );
 
-   CopyItem* GenerateCopy( Address aAddrColID,
+   CopyItem* GenerateCopy( const Address& aAddrColID,
                            std::vector<Tag> alstAttrs = std::vector<Tag>(),
                            std::vector<Tag> alstMetaTags = std::vector<Tag>() );
 
-   void RemoveCopyItem(Address aAddrColID, std::string aszHash);
-   void RemoveResidentFromItem(CopyItem* acItem, Address aAddrColID);
+   void RemoveCopyItem(const Address& aAddrColID, std::string aszHash);
+   void RemoveResidentFromItem(CopyItem* acItem, const Address& aAddrColID);
 
    // Finds First
-   CopyItem* FindCopyItem(std::string aszHash, Address aPairResi = Address());
-   std::vector<CopyItem*> FindAllCopyItems(std::string aszHash, Address aPairResi = Address());
+   CopyItem* FindCopyItem(std::string aszHash, const Address& aPairResi = Address());
+   std::vector<CopyItem*> FindAllCopyItems(std::string aszHash, const Address& aPairResi = Address());
    void Erase(CopyItem* ociRemove);
 
-   std::vector<CopyItem*> GetCopiesForCollection(Address aAddrCollectionIdentifier, CollectionItemType aItemType);
+   std::vector<CopyItem*> GetCopiesForCollection(const Address& aAddrCollectionIdentifier, CollectionItemType aItemType);
 
-   std::string GetHash(Address aAddrIdentifier,
+   std::string GetHash(const Address& aAddrIdentifier,
       std::vector<Tag> alstAttrs = std::vector<Tag>(),
       std::vector<Tag> alstMetaTags = std::vector<Tag>());
 
-   std::string GetCardString(CopyItem* aItem, MetaTagType aTagType = Visible, Address aAddrCompareID = Address());
+   std::string GetCardString(CopyItem* aItem, MetaTagType aTagType = Visible, const Address& aAddrCompareID = Address());
    std::string GetProtoTypeString();
    std::vector<Tag> GetCommonTraits();
 
    static bool ParseCardLine(std::string aszLine, PseudoIdentifier& rPIdentifier);
    static bool ParseTagString(std::string aszDetails, std::vector<Tag>& rlstTags);
-   static std::string ToCardLine( Address aAddrParentID, 
+   static std::string ToCardLine( const Address& aAddrParentID, 
                                   std::string aszName,
                                   std::vector<Tag> alstAttrs = std::vector<Tag>(),
                                   std::vector<Tag> alstMetaTags = std::vector<Tag>(), 
-                                  Address aAddrCompareID = Address() );
+                                  const Address& aAddrCompareID = Address() );
 
 private:
    std::string m_szName;

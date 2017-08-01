@@ -60,7 +60,6 @@ namespace StoreFrontPro
             DownloadSetsCommand = new RelayCommand(eDownloadSetsCommand);
 
             showCollectionsOverview();
-            
         }
 
         public void Notify()
