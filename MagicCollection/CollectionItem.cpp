@@ -43,7 +43,7 @@ CopyItem* CollectionItem::AddCopyItem( const Address& aAddrColID,
                                        std::vector<Tag> alstMetaTags )
 {
    CopyItem* newCopy = GenerateCopy(aAddrColID, alstAttrs, alstMetaTags);
-   m_lstCopies.push_back(newCopy);
+   m_lstCopies.push_back(std::shared_ptr<CopyItem>(newCopy));
    return newCopy;
 }
 
@@ -58,7 +58,7 @@ CopyItem* CollectionItem::GenerateCopy( const Address& aAddrColID,
 
 void CollectionItem::RemoveCopyItem(const Address& aAddrColID, std::string aszHash)
 {
-   std::vector<CopyItem*>::iterator iter_Copies = m_lstCopies.begin();
+   std::vector<std::shared_ptr<CopyItem>>::iterator iter_Copies = m_lstCopies.begin();
 
    for (; iter_Copies != m_lstCopies.end(); ++iter_Copies)
    {
@@ -81,7 +81,9 @@ void CollectionItem::RemoveCopyItem(const Address& aAddrColID, std::string aszHa
 
 void CollectionItem::RemoveResidentFromItem(CopyItem* acItem, const Address& aAddrColID)
 {
-   int iFound = ListHelper::List_Find(acItem, m_lstCopies);
+   std::function<CopyItem* (std::shared_ptr<CopyItem>)> fnExtractor;
+   fnExtractor = [](std::shared_ptr<CopyItem> aptr)->CopyItem* { return aptr.get(); };
+   int iFound = ListHelper::List_Find(acItem, m_lstCopies, fnExtractor);
    if (-1 != iFound)
    {
       acItem->RemoveResident(aAddrColID);
@@ -92,10 +94,10 @@ void CollectionItem::RemoveResidentFromItem(CopyItem* acItem, const Address& aAd
    }
 }
 
-CopyItem* CollectionItem::FindCopyItem(std::string aszHash, const Address& aAddrResidentIn)
+std::shared_ptr<CopyItem> CollectionItem::FindCopyItem(std::string aszHash, const Address& aAddrResidentIn)
 {
    Addresser addr;
-   std::vector<CopyItem*>::iterator iter_Copies = m_lstCopies.begin();
+   std::vector<std::shared_ptr<CopyItem>>::iterator iter_Copies = m_lstCopies.begin();
 
    for (; iter_Copies != m_lstCopies.end(); ++iter_Copies)
    {
@@ -109,10 +111,11 @@ CopyItem* CollectionItem::FindCopyItem(std::string aszHash, const Address& aAddr
    return nullptr;
 }
 
-std::vector<CopyItem*> CollectionItem::FindAllCopyItems(std::string aszHash,const Address& aptAddress)
+std::vector<std::shared_ptr<CopyItem>>
+CollectionItem::FindAllCopyItems(std::string aszHash, const Address& aptAddress)
 {
-   std::vector<CopyItem*> lstRetval;
-   std::vector<CopyItem*>::iterator iter_Copies = m_lstCopies.begin();
+   std::vector<std::shared_ptr<CopyItem>> lstRetval;
+   std::vector<std::shared_ptr<CopyItem>>::iterator iter_Copies = m_lstCopies.begin();
 
    for (; iter_Copies != m_lstCopies.end(); ++iter_Copies)
    {
@@ -128,8 +131,11 @@ std::vector<CopyItem*> CollectionItem::FindAllCopyItems(std::string aszHash,cons
 
 void CollectionItem::Erase(CopyItem* ociRemove)
 {
-   std::vector<CopyItem*>::iterator iter_copy = m_lstCopies.begin();
-   int iFound = ListHelper::List_Find(ociRemove, m_lstCopies);
+   std::function<CopyItem* (std::shared_ptr<CopyItem>)> fnExtractor;
+   fnExtractor = [](std::shared_ptr<CopyItem> aptr)->CopyItem* { return aptr.get(); };
+
+   std::vector<std::shared_ptr<CopyItem>>::iterator iter_copy = m_lstCopies.begin();
+   int iFound = ListHelper::List_Find(ociRemove, m_lstCopies, fnExtractor);
    if (iFound > -1)
    {
       m_lstCopies.erase(m_lstCopies.begin() + iFound);

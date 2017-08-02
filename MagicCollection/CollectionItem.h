@@ -51,8 +51,8 @@ public:
    void RemoveResidentFromItem(CopyItem* acItem, const Address& aAddrColID);
 
    // Finds First
-   CopyItem* FindCopyItem(std::string aszHash, const Address& aPairResi = Address());
-   std::vector<CopyItem*> FindAllCopyItems(std::string aszHash, const Address& aPairResi = Address());
+   std::shared_ptr<CopyItem> FindCopyItem(std::string aszHash, const Address& aPairResi = Address());
+   std::vector<std::shared_ptr<CopyItem>> FindAllCopyItems(std::string aszHash, const Address& aPairResi = Address());
    void Erase(CopyItem* ociRemove);
 
    std::vector<std::shared_ptr<CopyItem>> GetCopiesForCollection(const Address& aAddrCollectionIdentifier, CollectionItemType aItemType);

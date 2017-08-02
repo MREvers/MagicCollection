@@ -43,7 +43,7 @@ public:
    bool IsSyncNeeded(const Address& aAddrNeedSync);
 
    std::vector<int> GetCollectionCache(Address aAddrColID, CollectionItemType aColItemType = CollectionItemType::All);
-   std::vector<CopyItem*> GetCollection(Address aAddrColID, CollectionItemType aColItemType = CollectionItemType::All);
+   std::vector<std::shared_ptr<CopyItem>> GetCollection(Address aAddrColID, CollectionItemType aColItemType = CollectionItemType::All);
 
    std::vector<std::string> GetAllCardsStartingWith(std::string aszText);
 

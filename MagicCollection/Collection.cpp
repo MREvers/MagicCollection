@@ -9,7 +9,7 @@ Collection::Collection(string aszName,
 	string aszFileCollection, 
 	string aszID)
 {
-   m_ptrCollectionTracker = new CollectionTracker();
+   m_ptrCollectionTracker = new CollectionTracker(this);
    m_ptrCollectionDetails = new CollectionDetails();
 
    m_ptrCollectionDetails->SetName(aszName);
@@ -20,6 +20,8 @@ Collection::Collection(string aszName,
    m_ptrCollectionSource = aoSource;
 
    m_bRecordChanges = true;
+
+   m_ptrCollectionTracker->Track();
 }
 
 
@@ -29,19 +31,26 @@ Collection::~Collection()
    delete m_ptrCollectionDetails;
 }
 
-void Collection::SetName(string aszNewName)
-{
-   m_szName = aszNewName;
-}
-
 string Collection::GetName()
 {
-   return m_szName;
+   return m_ptrCollectionDetails->GetName();
 }
 
 Address Collection::GetIdentifier()
 {
-   return m_Address;
+   return Address(*m_ptrCollectionDetails->GetAddress());
+}
+
+unsigned int 
+Collection::GetChildCount()
+{
+   return m_ptrCollectionDetails->GetChildrenCount();
+}
+
+void 
+Collection::ChildAdded()
+{
+   m_ptrCollectionDetails->IncrementChildCount();
 }
 
 void Collection::AddItem(string aszName,
@@ -112,7 +121,7 @@ void Collection::AddItem(string aszName,
    CollectionItem* item = m_ptrCollectionSource->GetCardPrototype(iValidItem);
 
    // This is needed for removal
-   CopyItem* cItem = item->FindCopyItem(aszHash);
+   CopyItem* cItem = item->FindCopyItem(aszHash).get();
    if (cItem == nullptr) { return; }
 
    function<void()> fnDo;
@@ -161,7 +170,7 @@ void Collection::RemoveItem(string aszName,
    if (iValidItem == -1) { return; }
 
    CollectionItem* item = m_ptrCollectionSource->GetCardPrototype(iValidItem);
-   CopyItem* copy = item->FindCopyItem(aszIdentifyingHash);
+   CopyItem* copy = item->FindCopyItem(aszIdentifyingHash).get();
    if (copy == nullptr) { return; }
 
    function<void()> fnDo;
@@ -208,7 +217,7 @@ void Collection::ChangeItem(string aszName,
    if (iValidItem == -1) { return; }
 
    CollectionItem* item = m_ptrCollectionSource->GetCardPrototype(iValidItem);
-   CopyItem* copy = item->FindCopyItem(aszIdentifyingHash);
+   CopyItem* copy = item->FindCopyItem(aszIdentifyingHash).get();
    if (copy == nullptr) { return; }
 
    function<void()> fnDo;
@@ -287,7 +296,7 @@ void Collection::ReplaceItem(
    CollectionItem* nItem = m_ptrCollectionSource->
 	   GetCardPrototype(iValidNewItem);
 
-   CopyItem* copy = item->FindCopyItem(aszIdentifyingHash);
+   CopyItem* copy = item->FindCopyItem(aszIdentifyingHash).get();
    if (copy == nullptr) { return; }
 
    function<void()> fnDo;
@@ -353,7 +362,7 @@ void Collection::ReplaceItem(
 vector<string> Collection::GetMetaData()
 {
    vector<string> lstRetval;
-   lstRetval.push_back("Name=\"" + m_szName + "\"");
+   lstRetval.push_back("Name=\"" + GetName() + "\"");
 
    lstRetval.push_back("ID=\"" + GetIdentifier().GetFullAddress() + "\"");
 
@@ -366,21 +375,6 @@ vector<string> Collection::GetMetaData()
    }
 
    return lstRetval;
-}
-
-void  Collection::ChildAdded()
-{
-   m_iChildrenCount++;
-}
-
-int  Collection::ChildCount()
-{
-   return m_iChildrenCount;
-}
-
-long Collection::GetTimeStamp()
-{
-   return m_ulTimeStamp;
 }
 
 void  Collection::SaveCollection()
@@ -433,7 +427,7 @@ void Collection::LoadCollection(
 
    loader.RejoinAsyncedLocalItems(GetIdentifier(),
       m_ptrCollectionSource,
-      GetTimeStamp(),
+      m_ptrCollectionDetails->GetTimeStamp(),
       mapNewlyAddedItems,
       mapExistingItems);
 
@@ -459,6 +453,8 @@ void Collection::LoadCollection(
 
    m_bRecordChanges = true;
    IsLoaded = (GetIdentifier().Main != "");
+
+   if (IsLoaded){ m_ptrCollectionTracker->Track(); }
 }
 
 // Returns all the copies impacted by this function.
@@ -485,17 +481,17 @@ Collection::GetCollectionList(MetaTagType atagType, bool aiCollapsed)
    {
       CollectionItem* item = m_ptrCollectionSource->
 		  GetCardPrototype(*iter_Items);
-      vector<CopyItem*> lstCopies = item->
+      vector<shared_ptr<CopyItem>> lstCopies = item->
 		  GetCopiesForCollection(GetIdentifier(), All);
 
-      vector<CopyItem*>::iterator iter_Copy = lstCopies.begin();
+      vector<shared_ptr<CopyItem>>::iterator iter_Copy = lstCopies.begin();
       for (; iter_Copy != lstCopies.end(); ++iter_Copy)
       {
          string szHash = (*iter_Copy)->GetHash();
          int iCounted = ListHelper::List_Find(szHash, lstSeenHashes, fnExtractor);
          if (!aiCollapsed || (iCounted == -1))
          {
-            string szRep = item->GetCardString(*iter_Copy, atagType, GetIdentifier());
+            string szRep = item->GetCardString(iter_Copy->get(), atagType, GetIdentifier());
             lstRetVal.push_back(szRep);
             lstSeenHashes.push_back(make_pair(szHash, 1));
          }
@@ -522,47 +518,6 @@ Collection::GetCollectionList(MetaTagType atagType, bool aiCollapsed)
    return lstRetVal;
 }
 
-void Collection::captureChanges()
-{
-   bool bChangesCaptured = false;
-
-   map<int, vector<CopyItem*>> mapNewCollection;
-   for each (int index in m_lstItemCacheIndexes)
-   {
-      CollectionItem* item = m_ptrCollectionSource->GetCardPrototype(index);
-      vector<CopyItem*> lstCopies = item->
-		  GetCopiesForCollection(m_szName, CollectionItemType::All);
-      mapNewCollection[index] = lstCopies;
-   }
-
-   for each (pair<int, vector<CopyItem*>> itemGroup in m_mapCollectionTracker)
-   {
-      map<int, vector<CopyItem*>>::iterator iter_oldItems = 
-		  mapNewCollection.find(itemGroup.first);
-      if (iter_oldItems != mapNewCollection.end())
-      {
-         // Calculate differences
-         mapNewCollection.erase(iter_oldItems);
-      }
-      else
-      {
-         // all of these items were removed.
-      }
-   }
-
-   for each (pair<int, vector<CopyItem*>> itemGroup in mapNewCollection)
-   {
-      // These are all additions.
-   }
-
-   if (bChangesCaptured)
-   {
-      // Time since epoch
-      time_t result = time(nullptr);
-      m_ulTimeStamp = result;
-   }
-}
-
 vector<int> Collection::getCollection()
 {
    if (m_ptrCollectionSource->IsSyncNeeded(GetIdentifier()))
@@ -585,7 +540,7 @@ void Collection::addItem(
 
    item = m_ptrCollectionSource->GetCardPrototype(iCache);
 
-   cItem = item->AddCopyItem(m_Address, alstAttrs, alstMetaTags);
+   cItem = item->AddCopyItem(GetIdentifier(), alstAttrs, alstMetaTags);
    szHash = cItem->GetHash();
 
    registerItem(iCache);
@@ -642,7 +597,7 @@ Collection::changeItem( string aszName,
    int iCache = m_ptrCollectionSource->LoadCard(aszName);
 
    CollectionItem* item = m_ptrCollectionSource->GetCardPrototype(iCache);
-   CopyItem* cItem = item->FindCopyItem(aszIdentifyingHash);
+   CopyItem* cItem = item->FindCopyItem(aszIdentifyingHash).get();
    if (cItem == nullptr) { return; }
 
    modifyItem(cItem, alstChanges, alstMetaChanges);
@@ -665,7 +620,7 @@ Collection::replaceItem( string aszName,
 
    CollectionItem* item = m_ptrCollectionSource->GetCardPrototype(iCache);
    CollectionItem* newItem = m_ptrCollectionSource->GetCardPrototype(iNewCache);
-   CopyItem* cItem = item->FindCopyItem(aszIdentifyingHash);
+   CopyItem* cItem = item->FindCopyItem(aszIdentifyingHash).get();
    if (cItem == nullptr) { return; }
 
    removeItem(item->GetName(), cItem->GetHash(), GetIdentifier());
@@ -725,7 +680,7 @@ void Collection::loadMetaTagFile()
 {
    // This should only be called during initial loading.
    CollectionIO ioHelper;
-   string szFileName = ioHelper.GetMetaFile(m_szFileName);
+   string szFileName = ioHelper.GetMetaFile(m_ptrCollectionDetails->GetFileName());
    vector<string> lstMetaLines = ioHelper.GetFileLines(szFileName);
 
    for (size_t i = 0; i < lstMetaLines.size(); i++)
@@ -746,7 +701,7 @@ void Collection::loadMetaTagFile()
       string szPlainHash = item->GetHash(GetIdentifier(), sudoItem.Identifiers);
 
       // Gets the first matching item resident in this collection.
-      CopyItem* matchingCopy = item->FindCopyItem(szPlainHash, GetIdentifier());
+      CopyItem* matchingCopy = item->FindCopyItem(szPlainHash, GetIdentifier()).get();
       if (matchingCopy != nullptr)
       {
          for (size_t t = 0; t < lstMetaTags.size(); t++)
@@ -792,15 +747,15 @@ void Collection::loadPreprocessingLine(string aszLine)
 
    if (szKey == "Name")
    {
-      m_szName = szValue;
+      m_ptrCollectionDetails->SetName(szValue);
    }
    else if (szKey == "ID")
    {
-      m_Address = Address(szValue);
+      m_ptrCollectionDetails->AssignAddress(szValue);
    }
    else if (szKey == "CC")
    {
-      m_iChildrenCount = stoi(szValue);
+      m_ptrCollectionDetails->SetChildrenCount(stoi(szValue));
    }
    else if (szKey == "Session")
    {
@@ -808,7 +763,7 @@ void Collection::loadPreprocessingLine(string aszLine)
       istringstream str_stream(szValue);
       str_stream >> get_time(&tm, "%Y-%m-%d_%T");
       time_t time = mktime(&tm);
-      m_ulTimeStamp = time;
+      m_ptrCollectionDetails->SetTimeStamp(time);
    }
 }
 
@@ -901,7 +856,7 @@ void Collection::loadDeltaLine(string aszLine)
       
       szHash = sudoOldItem.MetaTags[iHash].second;
       itemOld = m_ptrCollectionSource->GetCardPrototype(iCache);
-      cItem = itemOld->FindCopyItem(szHash);
+      cItem = itemOld->FindCopyItem(szHash).get();
 
       for (size_t i = 0; i < sudoOldItem.Count; i++)
       {
@@ -931,14 +886,23 @@ void Collection::loadDeltaLine(string aszLine)
 
 void Collection::saveHistory()
 {
+   m_ptrCollectionTracker->Track();
+   CollectionDeltaClass cdc = m_ptrCollectionTracker->CalculateChanges();
+
    vector<string> lstHistoryLines;
-   for (size_t i = 0; i < m_lstTransactions.size(); i++)
+   for (size_t i = 0; i < cdc.Additions.size(); i++)
    {
-      vector<string> lstTransLines = m_lstTransactions[i].GetDescriptions();
-      for (size_t t = 0; t < lstTransLines.size(); t++)
-      {
-         lstHistoryLines.push_back(lstTransLines[t]);
-      }
+      lstHistoryLines.push_back( cdc.Additions[i]);
+   }
+
+   for (size_t i = 0; i < cdc.Removals.size(); i++)
+   {
+      lstHistoryLines.push_back( cdc.Removals[i]);
+   }
+
+   for (size_t i = 0; i < cdc.Changes.size(); i++)
+   {
+      lstHistoryLines.push_back( cdc.Changes[i]);
    }
 
    if (lstHistoryLines.size() > 0)
@@ -953,7 +917,7 @@ void Collection::saveHistory()
 
       CollectionIO ioHelper;
       ofstream oHistFile;
-      string szHistFile = ioHelper.GetHistoryFile(m_szFileName);
+      string szHistFile = ioHelper.GetHistoryFile(m_ptrCollectionDetails->GetFileName());
       oHistFile.open(szHistFile, ios_base::app);
 
       oHistFile << "[" << str << "] " << endl;
@@ -974,7 +938,7 @@ void Collection::saveMeta()
 
    CollectionIO ioHelper;
    ofstream oMetaFile;
-   oMetaFile.open(ioHelper.GetMetaFile(m_szFileName));
+   oMetaFile.open(ioHelper.GetMetaFile(m_ptrCollectionDetails->GetFileName()));
 
    vector<string>::iterator iter_MetaLine = lstMetaLines.begin();
    for (; iter_MetaLine != lstMetaLines.end(); ++iter_MetaLine)
@@ -992,22 +956,22 @@ void Collection::saveCollection()
 {
    vector<string> lstLines = GetCollectionList(None);
 
-   time_t time = m_ulTimeStamp;
+   time_t time = m_ptrCollectionDetails->GetTimeStamp();
    tm otm;
    localtime_s(&otm, &time);
 
    CollectionIO ioHelper;
    ofstream oColFile;
-   oColFile.open(ioHelper.GetCollectionFile(m_szFileName));
+   oColFile.open(ioHelper.GetCollectionFile(m_ptrCollectionDetails->GetFileName()));
 
    oColFile << Config::CollectionDefinitionKey
-	        << " Name=\"" << m_szName << "\"" << endl;
+	        << " Name=\"" << m_ptrCollectionDetails->GetName() << "\"" << endl;
 
    oColFile << Config::CollectionDefinitionKey
 	        << " ID=\"" << GetIdentifier().GetFullAddress() << "\"" << endl;
 
    oColFile << Config::CollectionDefinitionKey 
-	        << " CC=\"" << m_iChildrenCount << "\"" << endl;
+	        << " CC=\"" << m_ptrCollectionDetails->GetChildrenCount() << "\"" << endl;
 
    oColFile << Config::CollectionDefinitionKey 
 	        << " Session=\"" << put_time(&otm, "%F_%T") << "\"" << endl;

@@ -28,9 +28,10 @@ public:
       std::string aszID = "");
    ~Collection();
 
-   void SetName(std::string aszNewName);
    std::string GetName();
    Address  GetIdentifier();
+   unsigned int GetChildCount();
+   void ChildAdded();
 
    void AddItem(
       std::string aszName,
@@ -66,14 +67,11 @@ public:
 
    std::vector<std::string> GetMetaData();
 
-   long GetTimeStamp();
-
    void SaveCollection();
 
    void LoadCollection(
       std::string aszFileName, 
       CollectionFactory* aoFactory);
-
    void LoadChanges(std::vector<std::string> aszLines);
 
    std::vector<std::string> GetCollectionList(

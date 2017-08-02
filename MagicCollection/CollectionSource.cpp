@@ -203,16 +203,16 @@ CollectionSource::GetCollectionCache(Address aAddrColID, CollectionItemType aCol
    return lstRetVal;
 }
 
-std::vector<CopyItem*>
+std::vector<std::shared_ptr<CopyItem>>
 CollectionSource::GetCollection(Address aAddrColID, CollectionItemType aColItemType)
 {
-   std::vector<CopyItem*> lstRetVal;
+   std::vector<std::shared_ptr<CopyItem>> lstRetVal;
 
    for (size_t i = 0; i < m_lstoCardCache.size(); i++)
    {
-      std::vector<CopyItem*> lstCopies = m_lstoCardCache[i].GetCopiesForCollection(aAddrColID, aColItemType);
+      std::vector<std::shared_ptr<CopyItem>> lstCopies = m_lstoCardCache[i].GetCopiesForCollection(aAddrColID, aColItemType);
 
-      std::vector<CopyItem*>::iterator iter_Copy = lstCopies.begin();
+      std::vector<std::shared_ptr<CopyItem>>::iterator iter_Copy = lstCopies.begin();
       for (; iter_Copy != lstCopies.end(); ++iter_Copy)
       {
          lstRetVal.push_back(*iter_Copy);

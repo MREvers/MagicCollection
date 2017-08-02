@@ -88,8 +88,8 @@ CollectionTracker::CalculateChanges()
                                                 fnPtrCmper );
             if (iFound != -1 )
             {
-               CopyItem* cFound = iter_FoundItem->second.at(iFound).first.get();
-               if (cToFind->GetHash() != cFound->GetHash())
+               CopyItem cFound = iter_FoundItem->second.at(iFound).second;
+               if (cToFind->GetHash() != cFound.GetHash())
                {
                   // If this item has been changed since last track.
                   // Otherwise, do nothing.
@@ -109,9 +109,6 @@ CollectionTracker::CalculateChanges()
                // This item has been added.
                mapAdded[iter_Current->first].push_back(*iter_CopyCurrent);
             }
-
-            // Erase the item in mapNew.
-            iter_Current->second.erase(iter_CopyCurrent);
          }
       }
       else

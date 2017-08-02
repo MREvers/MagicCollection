@@ -42,7 +42,8 @@ std::string CollectionFactory::LoadCollectionFromFile(std::string aszFileName)
    return szRetVal;
 }
 
-std::string CollectionFactory::CreateNewCollection(std::string aszColName, std::string aszParentID)
+std::string 
+CollectionFactory::CreateNewCollection(std::string aszColName, std::string aszParentID)
 {
    Collection* oCol;
    // The parent is required to be loaded to have it as a parent
@@ -138,10 +139,10 @@ std::string CollectionFactory::getNextChildName(std::string aszParentID)
       }
    }
 
-   int iChildren = GetCollection(aszParentID)->ChildCount();
+   int iChildren = GetCollection(aszParentID)->GetChildCount();
    iPrimeIndex += iChildren;
 
-   int iChild = GetCollection(aszParentID)->ChildCount();
+   int iChild = GetCollection(aszParentID)->GetChildCount();
    std::string szRetval = lstUIandPF[0] + "-" + std::to_string(iID*(Addresser::Primes[iPrimeIndex]));
    return szRetval;
 }

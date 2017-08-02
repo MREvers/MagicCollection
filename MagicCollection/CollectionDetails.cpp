@@ -4,6 +4,7 @@
 
 CollectionDetails::CollectionDetails()
 {
+   m_ptrAddress = new Address();
 }
 
 

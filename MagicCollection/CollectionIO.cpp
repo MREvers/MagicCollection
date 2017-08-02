@@ -58,10 +58,10 @@ CollectionIO::CaptureUnlistedItems(Address aAddrColID,
    for (size_t i = 0; i < lstAllPossibleCacheItems.size(); i++)
    {
       CollectionItem* itemPrototype = aptCollectionSource->GetCardPrototype(lstAllPossibleCacheItems[i]);
-      std::vector<CopyItem*> lstPossibleLocals = itemPrototype->GetCopiesForCollection(aAddrColID, CollectionItemType::Local);
+      std::vector<std::shared_ptr<CopyItem>> lstPossibleLocals = itemPrototype->GetCopiesForCollection(aAddrColID, CollectionItemType::Local);
       for (size_t t = 0; t < lstPossibleLocals.size(); t++)
       {
-         CopyItem* cItem = lstPossibleLocals[t];
+         CopyItem* cItem = lstPossibleLocals[t].get();
          std::list<CopyItem*> lstListItems = rlstAlreadyCapturedItems[lstAllPossibleCacheItems[i]];
          std::vector<CopyItem*> lstSearchItems = std::vector<CopyItem*>(lstListItems.begin(), lstListItems.end());
          if (cItem->IsResidentIn(aAddrColID) &&
@@ -203,13 +203,13 @@ CollectionIO::ConsolodateBorrowedItems(Address aAddrColID,
    CollectionItem* itemPrototype;
    std::string szItemParent;
    std::string szItemHash;
-   std::vector<CopyItem*> lstBorrowedItems;
-   std::vector<CopyItem*> lstCItems;
-   std::function<std::string(CopyItem*)> fnExtractor;
+   std::vector<std::shared_ptr<CopyItem>> lstBorrowedItems;
+   std::vector<std::shared_ptr<CopyItem>> lstCItems;
+   std::function<std::string(std::shared_ptr<CopyItem>)> fnExtractor;
    std::vector<int> lstCacheIndexes = aptCollectionSource->GetCollectionCache(aAddrColID);
 
    // Used to filter out already used existing copies
-   fnExtractor = [aAddrColID](CopyItem* item)->std::string
+   fnExtractor = [aAddrColID](std::shared_ptr<CopyItem> item)->std::string
    {
       if (!item->IsResidentIn(aAddrColID)) { return item->GetHash(); }
       else { return ""; }
@@ -225,7 +225,7 @@ CollectionIO::ConsolodateBorrowedItems(Address aAddrColID,
          szItemHash = lstBorrowedItems[t]->GetHash();
          if (aptCollFactory->CollectionExists(szItemParent)) // The aoFactory is used to check if the collection is loaded.
          {
-            itemPrototype->Erase(lstBorrowedItems[t]);// This copy is erased either way. These were added as placeholders.
+            itemPrototype->Erase(lstBorrowedItems[t].get());// This copy is erased either way. These were added as placeholders.
 
             lstCItems = itemPrototype->FindAllCopyItems(szItemHash, lstBorrowedItems[t]->GetAddress()); // This list will be checked for any unused copy that matches this description.
             int iFoundAlreadyUsed = ListHelper::List_Find(szItemHash, lstCItems, fnExtractor);
@@ -242,7 +242,7 @@ CollectionIO::ConsolodateBorrowedItems(Address aAddrColID,
             int iFoundAlreadyUsed = ListHelper::List_Find(szItemHash, lstCItems, fnExtractor);
             if (iFoundAlreadyUsed != -1)
             {
-               itemPrototype->Erase(lstBorrowedItems[t]);
+               itemPrototype->Erase(lstBorrowedItems[t].get());
                lstCItems[iFoundAlreadyUsed]->AddResident(aAddrColID);
             }
          }
@@ -257,7 +257,7 @@ CollectionIO::ReleaseUnfoundReferences(Address aAddrColID,
    CollectionSource* aptCollectionSource)
 {
    CollectionItem* itemPrototype;
-   std::vector<CopyItem*> lstPossibleLocals;
+   std::vector<std::shared_ptr<CopyItem>> lstPossibleLocals;
 
    auto lstAllPossibleCacheItems = aptCollectionSource->GetCollectionCache(aAddrColID);
    for (size_t i = 0; i < lstAllPossibleCacheItems.size(); i++)
@@ -276,12 +276,12 @@ CollectionIO::ReleaseUnfoundReferences(Address aAddrColID,
             std::string szItemHash = lstPossibleLocals[t]->GetHash();
             // Duplicate duplicates because there might be a copy of an existing item.
             // The second param is empty because we want ALL items with a matching hash.
-            std::vector<CopyItem*> lstDuplicateDuplicates = itemPrototype->FindAllCopyItems(szItemHash);
+            std::vector<std::shared_ptr<CopyItem>> lstDuplicateDuplicates = itemPrototype->FindAllCopyItems(szItemHash);
 
             // If there is more than one, count the number that were just added to this col, then try to find matching existing ones for each.
             // Make sure that we account for the fact that other collections can borrow up to the amount in this col.
-            std::map<std::string, std::vector<CopyItem*>> mapColExistingItems;
-            std::vector<CopyItem*> lstNewlyAddedItems;
+            std::map<std::string, std::vector<std::shared_ptr<CopyItem>>> mapColExistingItems;
+            std::vector<std::shared_ptr<CopyItem>> lstNewlyAddedItems;
             for (size_t q = 0; q < lstDuplicateDuplicates.size(); q++)
             {
                if (lstDuplicateDuplicates[q]->IsResidentIn(aAddrColID))
@@ -296,21 +296,21 @@ CollectionIO::ReleaseUnfoundReferences(Address aAddrColID,
             }
 
             // Now go through each collection and account for each one.
-            std::map<std::string, std::vector<CopyItem*>>::iterator iter_existingCol = mapColExistingItems.begin();
+            std::map<std::string, std::vector<std::shared_ptr<CopyItem>>>::iterator iter_existingCol = mapColExistingItems.begin();
             for (; iter_existingCol != mapColExistingItems.end(); ++iter_existingCol)
             {
-               std::vector<CopyItem*>::iterator iter_existingColItem = iter_existingCol->second.begin();
+               std::vector<std::shared_ptr<CopyItem>>::iterator iter_existingColItem = iter_existingCol->second.begin();
                int q = 0;
                for (; iter_existingColItem != iter_existingCol->second.end() && q < lstNewlyAddedItems.size(); ++iter_existingColItem, q++)
                {
                   lstNewlyAddedItems[q]->AddResident(iter_existingCol->first);
-                  itemPrototype->Erase(*iter_existingColItem);
+                  itemPrototype->Erase(iter_existingColItem->get());
                }
 
                // Delete the items unaccounted for.
                for (; q >= lstNewlyAddedItems.size() && iter_existingColItem != iter_existingCol->second.end(); ++iter_existingColItem, q++)
                {
-                  itemPrototype->Erase(*iter_existingColItem);
+                  itemPrototype->Erase(iter_existingColItem->get());
                }
             }
          }
