@@ -144,13 +144,17 @@ namespace StoreFrontPro
             {
                 string szSelectedFile = openFile.FileName;
                 ServerInterface.Server.LoadCollection(szSelectedFile);
-                ServerInterface.Server.SyncServerTask(() => { Model.SyncAllCollections(); Model.SyncCollectionList(); });
+                ServerInterface.Server.SyncServerTask(() => {
+                    Model.SyncAllCollections();
+                    Model.SyncCollectionList(); });
             }
         }
 
         private void eSyncCollections()
         {
-            ServerInterface.Server.SyncServerTask(() => { Model.SyncAllCollections(); Model.SyncCollectionList(); });
+            ServerInterface.Server.SyncServerTask(() => {
+                Model.SyncAllCollections();
+                Model.SyncCollectionList(); });
         }
 
         private void eCloseCommand(object aoCanExecute)

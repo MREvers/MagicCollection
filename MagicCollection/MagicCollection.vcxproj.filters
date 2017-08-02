@@ -108,6 +108,13 @@
     <ClCompile Include="StoreFrontBackEnd.cpp">
       <Filter>CollectorsBackEnd</Filter>
     </ClCompile>
+    <ClCompile Include="CollectionDetails.cpp">
+      <Filter>Collection\DataHelpers</Filter>
+    </ClCompile>
+    <ClCompile Include="CollectionTracker.cpp">
+      <Filter>Collection\DataHelpers</Filter>
+    </ClCompile>
+    <ClCompile Include="CollectionDeltaClass.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="JSONImporter.h">
@@ -185,5 +192,12 @@
     <ClInclude Include="StoreFrontBackEnd.h">
       <Filter>CollectorsBackEnd</Filter>
     </ClInclude>
+    <ClInclude Include="CollectionDetails.h">
+      <Filter>Collection\DataHelpers</Filter>
+    </ClInclude>
+    <ClInclude Include="CollectionTracker.h">
+      <Filter>Collection\DataHelpers</Filter>
+    </ClInclude>
+    <ClInclude Include="CollectionDeltaClass.h" />
   </ItemGroup>
 </Project>

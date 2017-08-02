@@ -9,11 +9,15 @@ Collection::Collection(string aszName,
 	string aszFileCollection, 
 	string aszID)
 {
-   m_szName = aszName;
-   m_szFileName = aszFileCollection;
+   m_ptrCollectionTracker = new CollectionTracker();
+   m_ptrCollectionDetails = new CollectionDetails();
+
+   m_ptrCollectionDetails->SetName(aszName);
+   m_ptrCollectionDetails->SetFileName(aszFileCollection);
+   m_ptrCollectionDetails->SetChildrenCount(0);
+   m_ptrCollectionDetails->AssignAddress(aszID);
+
    m_ptrCollectionSource = aoSource;
-   m_iChildrenCount = 0;
-   m_ulTimeStamp = time(nullptr);
 
    m_bRecordChanges = true;
 }
@@ -21,6 +25,8 @@ Collection::Collection(string aszName,
 
 Collection::~Collection()
 {
+   delete m_ptrCollectionTracker;
+   delete m_ptrCollectionDetails;
 }
 
 void Collection::SetName(string aszNewName)
@@ -224,7 +230,8 @@ void Collection::ChangeItem(string aszName,
    vector<Tag> lstOldIds = copy->GetIdentifyingAttributes();
    vector<Tag> lstOldMeta = copy->GetMetaTags(MetaTagType::Visible);
 
-   // This is the hash that the itme will have after the properties are changed. So we need this to undo this change.
+   // This is the hash that the itme will have after the properties
+   // are changed. So we need this to undo this change.
    string szPostHash = item->
 	   GetHash(GetIdentifier(), lstFutureIds, lstFutureMeta);
 

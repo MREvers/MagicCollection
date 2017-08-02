@@ -136,10 +136,11 @@ void CollectionItem::Erase(CopyItem* ociRemove)
    }
 }
 
-std::vector<CopyItem*> CollectionItem::GetCopiesForCollection(const Address& aAddrCollectionIdentifier, CollectionItemType aItemType)
+std::vector<std::shared_ptr<CopyItem>> 
+CollectionItem::GetCopiesForCollection(const Address& aAddrCollectionIdentifier, CollectionItemType aItemType)
 {
-   std::vector<CopyItem*> lstRetVal;
-   std::vector<CopyItem*>::iterator iter_Copies = m_lstCopies.begin();
+   std::vector<std::shared_ptr<CopyItem>> lstRetVal;
+   std::vector<std::shared_ptr<CopyItem>> ::iterator iter_Copies = m_lstCopies.begin();
 
    for (; iter_Copies != m_lstCopies.end(); ++iter_Copies)
    {

@@ -9,10 +9,12 @@
 #include "CollectionIO.h"
 #include "CollectionSource.h"
 #include "CollectionItem.h"
+#include "CollectionTracker.h"
 #include "StringHelper.h"
 #include "Transaction.h"
 #include "CollectionFactory.h"
 #include "Addresser.h"
+#include "CollectionDetails.h"
 
 class CollectionFactory;
 
@@ -64,11 +66,6 @@ public:
 
    std::vector<std::string> GetMetaData();
 
-   // Used to track the number of children in of this collection to 
-   // avoid name clashes.
-   void ChildAdded();
-   int ChildCount();
-
    long GetTimeStamp();
 
    void SaveCollection();
@@ -86,22 +83,16 @@ public:
    bool IsLoaded = false;
 
 private:
-   std::string m_szName;
-   Address m_Address;
-   std::string m_szFileName;
-   unsigned long m_ulTimeStamp;
-   unsigned int m_iChildrenCount; // Needed to avoid name clashes.
+   friend class CollectionTracker;
 
+   CollectionDetails* m_ptrCollectionDetails;
    CollectionSource* m_ptrCollectionSource;
+   CollectionTracker* m_ptrCollectionTracker;
 
    bool m_bRecordChanges;
    std::vector<Transaction> m_lstTransactions;
 
    std::vector<std::pair<std::string, Tag>> m_lstTaggedItems;
-
-   // This should be updated after loading, and whenever history is checked.
-   std::map<int, std::vector<CopyItem*>> m_mapCollectionTracker;
-   void captureChanges();
 
    std::vector<int> m_lstItemCacheIndexes;
    std::vector<int> getCollection();

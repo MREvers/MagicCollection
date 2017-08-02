@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include <memory>
 #include "CopyItem.h"
 #include "Config.h"
 #include "TraitItem.h"
@@ -54,7 +55,7 @@ public:
    std::vector<CopyItem*> FindAllCopyItems(std::string aszHash, const Address& aPairResi = Address());
    void Erase(CopyItem* ociRemove);
 
-   std::vector<CopyItem*> GetCopiesForCollection(const Address& aAddrCollectionIdentifier, CollectionItemType aItemType);
+   std::vector<std::shared_ptr<CopyItem>> GetCopiesForCollection(const Address& aAddrCollectionIdentifier, CollectionItemType aItemType);
 
    std::string GetHash(const Address& aAddrIdentifier,
       std::vector<Tag> alstAttrs = std::vector<Tag>(),
@@ -75,7 +76,7 @@ public:
 private:
    std::string m_szName;
 
-   std::vector<CopyItem*> m_lstCopies;
+   std::vector<std::shared_ptr<CopyItem>> m_lstCopies;
 
    // We are guaranteed that identifying traits are not themselves lists.
    // If a list is not an identifying trait. It is kept as "thing1::thing2"
