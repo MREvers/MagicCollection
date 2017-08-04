@@ -1,82 +1,51 @@
 #include "Transaction.h"
+#include "Action.h"
 
-Transaction::Transaction(Collection* aoCol)
+Transaction::Transaction()
 {
-   m_Col = aoCol;
-   m_bIsRecordable = true;
-
+   m_bIsOpen = true;
 }
 
 Transaction::~Transaction()
 {
-   Actions.clear();
 }
 
-void Transaction::AddAction(Action& aoAct)
+void 
+Transaction::AddAction(const Action& aAct)
 {
-   if (m_bIsOpen)
-   {
-      Actions.push_back(aoAct);
-   }
+
 }
 
-void Transaction::RemoveAction(int i)
+void 
+Transaction::Finalize(TransactionManager* aoCol)
 {
-   if (m_bIsOpen)
+   std::vector<Action>::iterator iter_Action;
+   for (iter_Action  = m_lstActions.begin();
+        iter_Action != m_lstActions.end();
+        ++iter_Action )
    {
-      Actions.erase(Actions.begin() + i);
-   }
-}
-
-void Transaction::Finalize(bool abRecordable)
-{
-   if (m_bIsOpen)
-   {
-      m_bIsOpen = false;
-      int iSize = Actions.size();
-      for (int i = 0; i < iSize; i++)
-      {
-         Actions.at(i).Execute();
-      }
-      m_bIsRecordable = abRecordable;
+      iter_Action->Execute(aoCol);
    }
 
+   m_bIsOpen = false;
 }
 
-void Transaction::Rollback()
+void 
+Transaction::Rollback(TransactionManager* aoCol)
 {
-   if (!m_bIsOpen)
+   std::vector<Action>::reverse_iterator iter_Action;
+   for (iter_Action  = m_lstActions.rbegin();
+        iter_Action != m_lstActions.rend();
+        ++iter_Action )
    {
-      int iSize = Actions.size();
-      for (int i = 0; i < iSize; i++)
-      {
-         Actions.at(i).Rollback();
-      }
-      m_bIsOpen = true;
-   }
-}
-
-std::vector<std::string> Transaction::GetDescriptions()
-{
-   std::vector<std::string> lstRetVal;
-
-   if (m_bIsRecordable)
-   {
-      for (size_t i = 0; i < Actions.size(); i++)
-      {
-         lstRetVal.push_back(Actions[i].GetIdentifier());
-      }
+      iter_Action->Rollback(aoCol);
    }
 
-   return lstRetVal;
+   m_bIsOpen = true;
 }
 
-bool Transaction::IsOpen()
+bool 
+Transaction::IsOpen()
 {
    return m_bIsOpen;
-}
-
-bool Transaction::IsRecordable()
-{
-   return m_bIsRecordable;
 }

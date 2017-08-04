@@ -1,5 +1,6 @@
 #include "Collection.h"
 #include "Addresser.h"
+#include "AddItemAction.h"
 
 using namespace std;
 
@@ -300,14 +301,9 @@ void Collection::ReplaceItem(
    if (copy == nullptr) { return; }
 
    function<void()> fnDo;
-   fnDo = bind(
-	   &Collection::replaceItem, 
-	   this, 
-	   aszName, 
-	   aszIdentifyingHash, 
-	   aszNewName, 
-	   alstIdChanges, 
-	   alstMetaChanges);
+   fnDo = bind(&Collection::replaceItem, this, aszName, 
+	            aszIdentifyingHash, aszNewName, 
+	            alstIdChanges, alstMetaChanges);
 
    vector<Tag> lstOldIds = copy->GetIdentifyingAttributes();
    vector<Tag> lstOldMeta = copy->GetMetaTags(MetaTagType::Visible);

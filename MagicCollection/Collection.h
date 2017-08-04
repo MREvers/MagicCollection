@@ -11,7 +11,7 @@
 #include "CollectionItem.h"
 #include "CollectionTracker.h"
 #include "StringHelper.h"
-#include "Transaction.h"
+#include "TransactionManager.h"
 #include "CollectionFactory.h"
 #include "Addresser.h"
 #include "CollectionDetails.h"
@@ -82,6 +82,7 @@ public:
 
 private:
    friend class CollectionTracker;
+   friend class TransactionManager;
 
    CollectionDetails* m_ptrCollectionDetails;
    CollectionSource* m_ptrCollectionSource;

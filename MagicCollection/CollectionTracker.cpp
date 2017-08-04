@@ -41,7 +41,8 @@ CollectionTracker::Track()
             iter_Copy++ )
       {
          // Map a copy of the current state so that it may be used to track.
-         m_mapNew[*iter_Item].push_back(std::make_pair(*iter_Copy, CopyItem(**iter_Copy)));
+         m_mapNew[*iter_Item].
+            push_back(std::make_pair(*iter_Copy, CopyItem(**iter_Copy)));
       }
    }
 

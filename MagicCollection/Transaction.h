@@ -5,34 +5,29 @@
 #include <iterator>
 #include <string>
 
-#include "Action.h"
 
-class Collection;
+
+class TransactionManager;
+class Action;
 
 /* Class Transaction
 * Wraps a list of actions. Provides interface for executing associated
-* actions and rolling back those actions.
+* actions and rolling back those actions. Performs action 'on a collection'
+* through the passed in TransactionManager.
 */
 class Transaction
 {
 public:
-   Transaction(Collection* aoCol);
+   Transaction();
    ~Transaction();
 
-   void AddAction(Action& aoAct);
-   void RemoveAction(int i);
-   void Finalize(bool abRecordable = true);
-   void Rollback();
-   
-   std::vector<std::string> GetDescriptions();
+   void AddAction(const Action& aAct);
+   void Finalize(TransactionManager* aoCol);
+   void Rollback(TransactionManager* aoCol);
 
    bool IsOpen();
-   bool IsRecordable();
 
 private:
-   bool m_bIsOpen = true;
-   bool m_bIsRecordable = true;
-
-   Collection* m_Col;
-   std::vector<Action> Actions;
+   bool m_bIsOpen;
+   std::vector<Action> m_lstActions;
 };

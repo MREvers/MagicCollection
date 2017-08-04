@@ -154,6 +154,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Action.cpp" />
+    <ClCompile Include="AddAction.cpp" />
     <ClCompile Include="Addresser.cpp" />
     <ClCompile Include="CollectionDeltaClass.cpp" />
     <ClCompile Include="CollectionDetails.cpp" />
@@ -172,6 +173,7 @@
     <ClCompile Include="ListHelper.cpp" />
     <ClCompile Include="MD5.cpp" />
     <ClCompile Include="MetaTag.cpp" />
+    <ClCompile Include="RemoveAction.cpp" />
     <ClCompile Include="ServerIFace.cpp" />
     <ClCompile Include="ServerIFace\ClientSocket.cpp" />
     <ClCompile Include="ServerIFace\ProgramServer.cpp" />
@@ -184,9 +186,11 @@
     <ClCompile Include="StringHelper.cpp" />
     <ClCompile Include="TraitItem.cpp" />
     <ClCompile Include="Transaction.cpp" />
+    <ClCompile Include="TransactionManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Action.h" />
+    <ClInclude Include="AddAction.h" />
     <ClInclude Include="Addresser.h" />
     <ClInclude Include="CollectionDeltaClass.h" />
     <ClInclude Include="CollectionDetails.h" />
@@ -202,6 +206,7 @@
     <ClInclude Include="ListHelper.h" />
     <ClInclude Include="MD5.h" />
     <ClInclude Include="MetaTag.h" />
+    <ClInclude Include="RemoveAction.h" />
     <ClInclude Include="ServerIFace.h" />
     <ClInclude Include="ServerIFace\ClientSocket.h" />
     <ClInclude Include="ServerIFace\ProgramServer.h" />
@@ -214,6 +219,7 @@
     <ClInclude Include="StringHelper.h" />
     <ClInclude Include="TraitItem.h" />
     <ClInclude Include="Transaction.h" />
+    <ClInclude Include="TransactionManager.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

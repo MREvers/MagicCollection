@@ -25,6 +25,9 @@
     <Filter Include="CollectorsBackEnd\Importer">
       <UniqueIdentifier>{e7ff58c1-f859-45a4-b5f0-105fedff968a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Collection\Actions">
+      <UniqueIdentifier>{f11d3764-3842-471e-bc1c-7b7cac0a26ba}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -78,9 +81,6 @@
     <ClCompile Include="Transaction.cpp">
       <Filter>Collection\DataHelpers</Filter>
     </ClCompile>
-    <ClCompile Include="Action.cpp">
-      <Filter>Collection\DataHelpers</Filter>
-    </ClCompile>
     <ClCompile Include="Addresser.cpp">
       <Filter>CollectionItems\DataHelpers</Filter>
     </ClCompile>
@@ -115,6 +115,18 @@
       <Filter>Collection\DataHelpers</Filter>
     </ClCompile>
     <ClCompile Include="CollectionDeltaClass.cpp" />
+    <ClCompile Include="TransactionManager.cpp">
+      <Filter>Collection\DataHelpers</Filter>
+    </ClCompile>
+    <ClCompile Include="Action.cpp">
+      <Filter>Collection\Actions</Filter>
+    </ClCompile>
+    <ClCompile Include="AddAction.cpp">
+      <Filter>Collection\Actions</Filter>
+    </ClCompile>
+    <ClCompile Include="RemoveAction.cpp">
+      <Filter>Collection\Actions</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="JSONImporter.h">
@@ -162,9 +174,6 @@
     <ClInclude Include="CollectionItem.h">
       <Filter>CollectionItems</Filter>
     </ClInclude>
-    <ClInclude Include="Action.h">
-      <Filter>Collection\DataHelpers</Filter>
-    </ClInclude>
     <ClInclude Include="Transaction.h">
       <Filter>Collection\DataHelpers</Filter>
     </ClInclude>
@@ -199,5 +208,17 @@
       <Filter>Collection\DataHelpers</Filter>
     </ClInclude>
     <ClInclude Include="CollectionDeltaClass.h" />
+    <ClInclude Include="TransactionManager.h">
+      <Filter>Collection\DataHelpers</Filter>
+    </ClInclude>
+    <ClInclude Include="Action.h">
+      <Filter>Collection\Actions</Filter>
+    </ClInclude>
+    <ClInclude Include="AddAction.h">
+      <Filter>Collection\Actions</Filter>
+    </ClInclude>
+    <ClInclude Include="RemoveAction.h">
+      <Filter>Collection\Actions</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

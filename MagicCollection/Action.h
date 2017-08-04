@@ -1,7 +1,19 @@
 #pragma once
 
 #include <string>
-#include <functional>
+
+typedef std::pair<std::string, std::string> Tag;
+
+enum ActionType
+{
+   Add,
+   AddFrom,
+   Remove,
+   Change, 
+   Replace
+};
+
+class TransactionManager;
 
 /* Class Action (Used In Collection.cpp)
 * Used to wrap an action that changes the collection with an action
@@ -13,17 +25,12 @@
 class Action
 {
 public:
-   Action(std::function<void()> aDo, std::function<void()> aUndo);
+   Action();
    ~Action();
 
-   void SetIdentifier(std::string aszId);
-   std::string GetIdentifier();
+   virtual void Execute(TransactionManager* aoCol) = 0;
+   virtual void Rollback(TransactionManager* aoCol) = 0;
 
-   void Execute();
-   void Rollback();
-
-private:
-   std::string Identifier;
-   std::function<void()> Do;
-   std::function<void()> Undo;
+protected:
+   bool m_bCanRollBack;
 };
