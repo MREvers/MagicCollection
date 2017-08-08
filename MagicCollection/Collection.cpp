@@ -285,6 +285,8 @@ vector<int> Collection::getCollection()
    {
       m_lstItemCacheIndexes = m_ptrCollectionSource->
                               GetCollectionCache(GetIdentifier());
+
+      m_ptrTransactionManager->TransactionsAsynced();
    }
 
    return m_lstItemCacheIndexes;
