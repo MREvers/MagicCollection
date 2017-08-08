@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <memory>
 
 typedef std::pair<std::string, std::string> Tag;
 
@@ -28,8 +29,10 @@ public:
    Action();
    ~Action();
 
-   virtual void Execute(TransactionManager* aoCol) = 0;
-   virtual void Rollback(TransactionManager* aoCol) = 0;
+   virtual bool Execute(TransactionManager* aoCol) = 0;
+   virtual bool Rollback(TransactionManager* aoCol) = 0;
+
+   virtual Action* GetCopy() const = 0;
 
 protected:
    bool m_bCanRollBack;

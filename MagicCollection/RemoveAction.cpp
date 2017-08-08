@@ -12,16 +12,54 @@ RemoveAction::~RemoveAction()
 {
 }
 
-void 
+bool 
 RemoveAction::Execute(TransactionManager* aoCol)
 {
+   CollectionSource* refSource = aoCol->GetSource();
+
+   int iItem = refSource->LoadCard(m_szName);
+   CollectionItem* refItem = refSource->GetCardPrototype(iItem);
+   if (refItem == nullptr) { return false; }
+
+   std::shared_ptr<CopyItem> refCItem;
+   refCItem = refItem->FindCopyItem(m_szIdentifyingHash, m_AddrResidentIn);
+   if (refCItem == nullptr) { return false; }
+
+   m_lstMetaOfRMItem = refCItem->GetMetaTags(MetaTagType::Any);
+   m_lstTagsOfRMItem = refCItem->GetIdentifyingAttributes();
+
    aoCol->Remove(m_szName, m_szIdentifyingHash, m_AddrResidentIn);
+   return true;
 }
 
-void 
+bool 
 RemoveAction::Rollback(TransactionManager* aoCol)
 {
+   std::unique_ptr<AddAction> adAction;
 
+   adAction = std::unique_ptr<AddAction>(GetUndoAction(aoCol));
+   return adAction->Execute(aoCol);
+}
+
+AddAction* 
+RemoveAction::GetUndoAction(TransactionManager* aoCol) const
+{
+   Collection* refCollection = aoCol->GetCollection();
+
+   AddAction* adRetVal = new AddAction();
+   adRetVal->SetIDs(m_lstTagsOfRMItem);
+   adRetVal->SetMeta(m_lstMetaOfRMItem);
+   adRetVal->SetName(m_szName);
+
+   return adRetVal;
+}
+
+// It is the responsibility of the caller to delete this.
+Action* 
+RemoveAction::GetCopy() const
+{
+   RemoveAction* ptCopy = new RemoveAction(*this);
+   return ptCopy;
 }
 
 void 
@@ -37,7 +75,7 @@ RemoveAction::SetHash(std::string aszIDHash)
 }
 
 void 
-RemoveAction::SetMeta(const Address& aAddress)
+RemoveAction::SetResi(const Address& aAddress)
 {
    m_AddrResidentIn = aAddress;
 }

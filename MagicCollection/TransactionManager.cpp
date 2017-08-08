@@ -10,33 +10,71 @@ TransactionManager::TransactionManager(Collection* aptrCollection)
 
 TransactionManager::~TransactionManager()
 {
-
+   for each (Transaction* ptTr in m_lstOpenTransactions)
+   {
+      delete ptTr;
+   }
+   m_lstOpenTransactions.clear();
 }
 
 void 
 TransactionManager::IncludeAction(const Action& aAction)
 {
-
+   Transaction* ptrTrans = getTransaction();
+   ptrTrans->AddAction(aAction);
 }
 
 void 
-TransactionManager::FinalizeTransaction()
+TransactionManager::FinalizeTransaction(bool abActual)
 {
+   if (!abActual) { return; }
+   bool bGood = true;
+
    Transaction* ptrTrans = getTransaction();
    if (ptrTrans->IsOpen())
    {
-      ptrTrans->Finalize(this);
+      bGood = ptrTrans->Finalize(this);
+   }
+
+   if (!bGood)
+   {
+      clearTransactions();
    }
 }
 
 void 
 TransactionManager::RollbackTransaction()
 {
-   Transaction* ptrTrans = getTransaction();
+   bool bGood = true;
+
+   Transaction* ptrTrans = getLastTransaction();
    if (!ptrTrans->IsOpen())
    {
-      ptrTrans->Rollback(this);
+      bGood = ptrTrans->Rollback(this);
    }
+   
+   if (!bGood)
+   {
+      clearTransactions();
+   }
+}
+
+void 
+TransactionManager::TransactionsAsynced()
+{
+   clearTransactions();
+}
+
+Collection* 
+TransactionManager::GetCollection()
+{
+   return m_ptrCollection;
+}
+
+CollectionSource* 
+TransactionManager::GetSource()
+{
+   return m_ptrCollection->m_ptrCollectionSource;
 }
 
 void 
@@ -89,6 +127,7 @@ TransactionManager::getTransaction()
    {
       Transaction* ptrNewTrans = new Transaction();
       m_lstOpenTransactions.push_back(ptrNewTrans);
+      uiTransacts++;
    }
 
    if (!m_lstOpenTransactions.at(uiTransacts - 1)->IsOpen())
@@ -98,4 +137,20 @@ TransactionManager::getTransaction()
    }
 
    return m_lstOpenTransactions.back();
+}
+
+Transaction* 
+TransactionManager::getLastTransaction()
+{
+   return m_lstOpenTransactions.back();
+}
+
+void 
+TransactionManager::clearTransactions()
+{
+   for each (Transaction* ptTr in m_lstOpenTransactions)
+   {
+      delete ptTr;
+   }
+   m_lstOpenTransactions.clear();
 }

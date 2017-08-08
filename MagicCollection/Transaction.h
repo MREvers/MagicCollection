@@ -22,12 +22,12 @@ public:
    ~Transaction();
 
    void AddAction(const Action& aAct);
-   void Finalize(TransactionManager* aoCol);
-   void Rollback(TransactionManager* aoCol);
+   bool Finalize(TransactionManager* aoCol);
+   bool Rollback(TransactionManager* aoCol);
 
    bool IsOpen();
 
 private:
    bool m_bIsOpen;
-   std::vector<Action> m_lstActions;
+   std::vector<Action*> m_lstActions;
 };

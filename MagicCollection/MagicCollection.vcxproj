@@ -156,6 +156,7 @@
     <ClCompile Include="Action.cpp" />
     <ClCompile Include="AddAction.cpp" />
     <ClCompile Include="Addresser.cpp" />
+    <ClCompile Include="ChangeAction.cpp" />
     <ClCompile Include="CollectionDeltaClass.cpp" />
     <ClCompile Include="CollectionDetails.cpp" />
     <ClCompile Include="CollectionFactory.cpp" />
@@ -174,6 +175,7 @@
     <ClCompile Include="MD5.cpp" />
     <ClCompile Include="MetaTag.cpp" />
     <ClCompile Include="RemoveAction.cpp" />
+    <ClCompile Include="ReplaceAction.cpp" />
     <ClCompile Include="ServerIFace.cpp" />
     <ClCompile Include="ServerIFace\ClientSocket.cpp" />
     <ClCompile Include="ServerIFace\ProgramServer.cpp" />
@@ -192,6 +194,7 @@
     <ClInclude Include="Action.h" />
     <ClInclude Include="AddAction.h" />
     <ClInclude Include="Addresser.h" />
+    <ClInclude Include="ChangeAction.h" />
     <ClInclude Include="CollectionDeltaClass.h" />
     <ClInclude Include="CollectionDetails.h" />
     <ClInclude Include="CollectionFactory.h" />
@@ -207,6 +210,7 @@
     <ClInclude Include="MD5.h" />
     <ClInclude Include="MetaTag.h" />
     <ClInclude Include="RemoveAction.h" />
+    <ClInclude Include="ReplaceAction.h" />
     <ClInclude Include="ServerIFace.h" />
     <ClInclude Include="ServerIFace\ClientSocket.h" />
     <ClInclude Include="ServerIFace\ProgramServer.h" />

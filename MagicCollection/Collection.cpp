@@ -1,6 +1,7 @@
 #include "Collection.h"
 #include "Addresser.h"
-#include "AddItemAction.h"
+#include "AddAction.h"
+#include "RemoveAction.h"
 
 using namespace std;
 
@@ -12,6 +13,7 @@ Collection::Collection(string aszName,
 {
    m_ptrCollectionTracker = new CollectionTracker(this);
    m_ptrCollectionDetails = new CollectionDetails();
+   m_ptrTransactionManager = new TransactionManager(this);
 
    m_ptrCollectionDetails->SetName(aszName);
    m_ptrCollectionDetails->SetFileName(aszFileCollection);
@@ -19,8 +21,6 @@ Collection::Collection(string aszName,
    m_ptrCollectionDetails->AssignAddress(aszID);
 
    m_ptrCollectionSource = aoSource;
-
-   m_bRecordChanges = true;
 
    m_ptrCollectionTracker->Track();
 }
@@ -30,6 +30,7 @@ Collection::~Collection()
 {
    delete m_ptrCollectionTracker;
    delete m_ptrCollectionDetails;
+   delete m_ptrTransactionManager;
 }
 
 string Collection::GetName()
@@ -63,51 +64,14 @@ void Collection::AddItem(string aszName,
    int iValidItem = m_ptrCollectionSource->LoadCard(aszName);
    if (iValidItem == -1) { return; }
 
-   CollectionItem* item = m_ptrCollectionSource->GetCardPrototype(iValidItem);
+   AddAction addAction;
+   addAction.SetIDs(alstAttrs);
+   addAction.SetMeta(alstMetaTags);
+   addAction.SetName(aszName);
 
-   // This is needed for removal
-   string szHash = item->GetHash(GetIdentifier(), alstAttrs, alstMetaTags);
+   m_ptrTransactionManager->IncludeAction(addAction);
 
-   function<void()> fnDo;
-   fnDo = bind(
-	   &Collection::addItem, 
-	   this, 
-	   aszName, 
-	   alstAttrs, 
-	   alstMetaTags);
-
-   function<void()> fnUndo;
-   fnUndo = bind(
-	   &Collection::removeItem, 
-	   this, 
-	   aszName, 
-	   szHash, 
-	   GetIdentifier());
-
-   Action action(fnDo, fnUndo);
-
-   // Use a generated copy to ensure that default values are set.
-   CopyItem* newCopy = item->
-	   GenerateCopy(GetIdentifier(), alstAttrs, alstMetaTags);
-   
-   string szIdentifier = "+ " + CollectionItem::ToCardLine(
-	   GetIdentifier(), 
-	   aszName, 
-	   newCopy->GetIdentifyingAttributes(), 
-	   newCopy->GetMetaTags(MetaTagType::Visible), 
-	   GetIdentifier());
-
-   delete newCopy;
-   
-   action.SetIdentifier(szIdentifier); 
-
-   Transaction* transaction = getOpenTransaction();
-   transaction->AddAction(action);
-
-   if (abCloseTransaction)
-   {
-      finalizeTransaction();
-   }
+   m_ptrTransactionManager->FinalizeTransaction(abCloseTransaction);
 }
 
 void Collection::AddItem(string aszName,
@@ -115,97 +79,14 @@ void Collection::AddItem(string aszName,
 	string aszResidentIn, 
 	bool abCloseTransaction)
 {
-   // Verify the card name entered is valid
-   int iValidItem = m_ptrCollectionSource->LoadCard(aszName);
-   if (iValidItem == -1) { return; }
-
-   CollectionItem* item = m_ptrCollectionSource->GetCardPrototype(iValidItem);
-
-   // This is needed for removal
-   CopyItem* cItem = item->FindCopyItem(aszHash).get();
-   if (cItem == nullptr) { return; }
-
-   function<void()> fnDo;
-   fnDo = bind(
-	   &Collection::addExistingItem, 
-	   this, 
-	   aszName, 
-	   aszHash, 
-	   aszResidentIn);
-
-   function<void()> fnUndo;
-   fnUndo = bind(
-	   &Collection::removeItem, 
-	   this, 
-	   aszName, 
-	   aszHash, 
-	   aszResidentIn);
-
-   Action action(fnDo, fnUndo);
-
-   // Use a generated copy to ensure that default values are set.
-   string szIdentifier = "+ " + CollectionItem::ToCardLine(
-	   GetIdentifier(), 
-	   aszName, 
-	   cItem->GetIdentifyingAttributes(), 
-	   cItem->GetMetaTags(MetaTagType::Visible), 
-	   GetIdentifier());
    
-   //"Set Meta-Tag '" + aszKey + "' to '" + aszValue + "' on " + aszLongName;// + szCard;
-   action.SetIdentifier(szIdentifier); 
-
-   Transaction* transaction = getOpenTransaction();
-   transaction->AddAction(action);
-
-   if (abCloseTransaction)
-   {
-      finalizeTransaction();
-   }
 }
 
 void Collection::RemoveItem(string aszName, 
 	string aszIdentifyingHash, 
 	bool abCloseTransaction)
 {
-   int iValidItem = m_ptrCollectionSource->LoadCard(aszName);
-   if (iValidItem == -1) { return; }
-
-   CollectionItem* item = m_ptrCollectionSource->GetCardPrototype(iValidItem);
-   CopyItem* copy = item->FindCopyItem(aszIdentifyingHash).get();
-   if (copy == nullptr) { return; }
-
-   function<void()> fnDo;
-   fnDo = bind(
-	   &Collection::removeItem, 
-	   this, 
-	   aszName, 
-	   aszIdentifyingHash, 
-	   GetIdentifier());
-
-   vector<Tag> lstAttrs = copy->GetIdentifyingAttributes();
-   vector<Tag> lstMetas = copy->GetMetaTags(Visible);
-   function<void()> fnUndo;
-   fnUndo = bind(&Collection::addItem, this, aszName, lstAttrs, lstMetas);
-
-   Action action(fnDo, fnUndo);
-
-   string szIdentifier = "- " + CollectionItem::ToCardLine(
-	   GetIdentifier(), 
-	   aszName, 
-	   lstAttrs, 
-	   lstMetas, 
-	   GetIdentifier());
-
-   //"Set Meta-Tag '" + aszKey + "' to '" + aszValue + "' on " + aszLongName;
-   action.SetIdentifier(szIdentifier); 
-
-   Transaction* transaction = getOpenTransaction();
-   transaction->AddAction(action);
-
-   if (abCloseTransaction)
-   {
-      finalizeTransaction();
-   }
+  
 }
 
 void Collection::ChangeItem(string aszName, 
@@ -214,70 +95,7 @@ void Collection::ChangeItem(string aszName,
 	vector<Tag> alstMetaChanges, 
 	bool abCloseTransaction)
 {
-   int iValidItem = m_ptrCollectionSource->LoadCard(aszName);
-   if (iValidItem == -1) { return; }
-
-   CollectionItem* item = m_ptrCollectionSource->GetCardPrototype(iValidItem);
-   CopyItem* copy = item->FindCopyItem(aszIdentifyingHash).get();
-   if (copy == nullptr) { return; }
-
-   function<void()> fnDo;
-   fnDo = bind(
-	   &Collection::changeItem, 
-	   this, 
-	   aszName, 
-	   aszIdentifyingHash, 
-	   alstChanges, 
-	   alstMetaChanges);
-
-   // Simulate the change so we can determine the hash and the exact traits when change is complete.
-   CopyItem* falseCopy = new CopyItem(*copy);
-   modifyItem(falseCopy, alstChanges, alstMetaChanges);
-   vector<Tag> lstFutureIds = falseCopy->GetIdentifyingAttributes();
-   vector<Tag> lstFutureMeta = falseCopy->GetMetaTags(MetaTagType::Visible);
-   delete falseCopy;
-
-   vector<Tag> lstOldIds = copy->GetIdentifyingAttributes();
-   vector<Tag> lstOldMeta = copy->GetMetaTags(MetaTagType::Visible);
-
-   // This is the hash that the itme will have after the properties
-   // are changed. So we need this to undo this change.
-   string szPostHash = item->
-	   GetHash(GetIdentifier(), lstFutureIds, lstFutureMeta);
-
-   function<void()> fnUndo;
-   fnUndo = bind(
-	   &Collection::changeItem, 
-	   this, 
-	   aszName, 
-	   szPostHash, 
-	   lstOldIds, 
-	   lstOldMeta);
-
-   Action action(fnDo, fnUndo);
-
-   string szIdentifier = "% " + CollectionItem::ToCardLine(
-	   GetIdentifier(), 
-	   aszName, 
-	   lstOldIds, 
-	   lstOldMeta, 
-	   GetIdentifier()) + "->";
-
-   szIdentifier += CollectionItem::ToCardLine(
-	   GetIdentifier(), 
-	   aszName, 
-	   lstFutureIds, 
-	   lstFutureMeta, 
-	   GetIdentifier());
-   action.SetIdentifier(szIdentifier);
-
-   Transaction* transaction = getOpenTransaction();
-   transaction->AddAction(action);
-
-   if (abCloseTransaction)
-   {
-      finalizeTransaction();
-   }
+   
 }
 
 void Collection::ReplaceItem(
@@ -288,71 +106,7 @@ void Collection::ReplaceItem(
 	vector<Tag> alstMetaChanges, 
 	bool abCloseTransaction)
 {
-   int iValidItem = m_ptrCollectionSource->LoadCard(aszName);
-   int iValidNewItem = m_ptrCollectionSource->LoadCard(aszNewName);
-   if (iValidItem == -1 || iValidNewItem == -1) { return; }
-
-   CollectionItem* item = m_ptrCollectionSource->
-	   GetCardPrototype(iValidItem);
-   CollectionItem* nItem = m_ptrCollectionSource->
-	   GetCardPrototype(iValidNewItem);
-
-   CopyItem* copy = item->FindCopyItem(aszIdentifyingHash).get();
-   if (copy == nullptr) { return; }
-
-   function<void()> fnDo;
-   fnDo = bind(&Collection::replaceItem, this, aszName, 
-	            aszIdentifyingHash, aszNewName, 
-	            alstIdChanges, alstMetaChanges);
-
-   vector<Tag> lstOldIds = copy->GetIdentifyingAttributes();
-   vector<Tag> lstOldMeta = copy->GetMetaTags(MetaTagType::Visible);
-
-   // Generate a temp copy to see what the actual result is.
-   CopyItem* falseCopy = nItem->
-	   GenerateCopy(GetIdentifier(), alstIdChanges, alstMetaChanges);
-
-   vector<Tag> lstFutureIds = falseCopy->GetIdentifyingAttributes();
-   vector<Tag> lstFutureMeta = falseCopy->GetMetaTags(MetaTagType::Visible);
-   delete falseCopy;
-
-   // This is the hash that the itme will have after the properties are
-   // changed. So we need this to undo this change.
-   string szPostHash = nItem->
-	   GetHash(GetIdentifier(), alstIdChanges, alstMetaChanges);
-   function<void()> fnUndo;
-   fnUndo = bind(
-	   &Collection::replaceItem, 
-	   this, 
-	   aszNewName, 
-	   szPostHash, 
-	   aszName, 
-	   lstOldIds, 
-	   lstOldMeta);
-
-   Action action(fnDo, fnUndo);
-
-   string szIdentifier = "% " + CollectionItem::ToCardLine(
-	   GetIdentifier(), 
-	   aszName, 
-	   lstOldIds, 
-	   lstOldMeta, 
-	   GetIdentifier()) + "->";
-   szIdentifier += CollectionItem::ToCardLine(
-	   GetIdentifier(), 
-	   aszNewName, 
-	   alstIdChanges, 
-	   alstMetaChanges, 
-	   GetIdentifier());
-   action.SetIdentifier(szIdentifier);
-
-   Transaction* transaction = getOpenTransaction();
-   transaction->AddAction(action);
-
-   if (abCloseTransaction)
-   {
-      finalizeTransaction();
-   }
+  
 }
 
 vector<string> Collection::GetMetaData()
@@ -392,8 +146,6 @@ void Collection::LoadCollection(
    map<int, list<CopyItem*>> mapExistingItems;
    vector<string> lstFileLines;
    CollectionIO loader;
-
-   m_bRecordChanges = false;
 
    lstFileLines = loader.GetFileLines(aszFileName);
 
@@ -447,7 +199,6 @@ void Collection::LoadCollection(
    loader.ReleaseUnfoundReferences(GetIdentifier(),
       m_ptrCollectionSource);
 
-   m_bRecordChanges = true;
    IsLoaded = (GetIdentifier().Main != "");
 
    if (IsLoaded){ m_ptrCollectionTracker->Track(); }
@@ -649,26 +400,6 @@ Collection::modifyItem(
       MetaTagType mTagType = CopyItem::DetermineMetaTagType(alstMetaChanges[i].first);
       aptCopy->
 		  SetMetaTag(alstMetaChanges[i].first, alstMetaChanges[i].second, mTagType);
-   }
-}
-
-Transaction* Collection::getOpenTransaction()
-{
-   if (m_lstTransactions.size() == 0 ||
-      !m_lstTransactions.at(m_lstTransactions.size() - 1).IsOpen())
-   {
-      m_lstTransactions.push_back(Transaction(this));
-   }
-
-   return &m_lstTransactions.at(m_lstTransactions.size() - 1);
-}
-
-void Collection::finalizeTransaction()
-{
-   Transaction* transaction = getOpenTransaction();
-   if (transaction->IsOpen())
-   {
-      transaction->Finalize(m_bRecordChanges);
    }
 }
 

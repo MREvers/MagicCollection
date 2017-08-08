@@ -6,6 +6,8 @@
 typedef std::pair<std::string, std::string> Tag;
 
 class Address;
+class Collection;
+class CollectionSource;
 
 /* TransactionManager
 *  Stores a list of transactions. Exposes the private interface of the stored
@@ -20,8 +22,13 @@ public:
    
    void IncludeAction(const Action& aAction);
 
-   void FinalizeTransaction();
+   void FinalizeTransaction(bool abActual = true);
    void RollbackTransaction();
+
+   void TransactionsAsynced();
+
+   Collection* GetCollection();
+   CollectionSource* GetSource();
 
    void Add(
       std::string aszName, 
@@ -51,5 +58,8 @@ private:
    std::vector<Transaction*> m_lstOpenTransactions;
 
    Transaction* getTransaction();
+   Transaction* getLastTransaction();
+
+   void clearTransactions();
 };
 

@@ -8,40 +8,56 @@ Transaction::Transaction()
 
 Transaction::~Transaction()
 {
+   for each (Action* ptAction in m_lstActions)
+   {
+      delete ptAction;
+   }
+   m_lstActions.clear();
 }
 
 void 
 Transaction::AddAction(const Action& aAct)
 {
-
+   Action* ptNewAct = aAct.GetCopy();
+   m_lstActions.push_back(ptNewAct);
 }
 
-void 
+bool 
 Transaction::Finalize(TransactionManager* aoCol)
 {
-   std::vector<Action>::iterator iter_Action;
+   bool bAllSuccess = true;
+
+   std::vector<Action*>::iterator iter_Action;
    for (iter_Action  = m_lstActions.begin();
         iter_Action != m_lstActions.end();
         ++iter_Action )
    {
-      iter_Action->Execute(aoCol);
+      Action* action = *iter_Action;
+      bAllSuccess |= action->Execute(aoCol);
    }
 
    m_bIsOpen = false;
+
+   return bAllSuccess;
 }
 
-void 
+bool 
 Transaction::Rollback(TransactionManager* aoCol)
 {
-   std::vector<Action>::reverse_iterator iter_Action;
+   bool bAllSuccess = true;
+
+   std::vector<Action*>::reverse_iterator iter_Action;
    for (iter_Action  = m_lstActions.rbegin();
         iter_Action != m_lstActions.rend();
         ++iter_Action )
    {
-      iter_Action->Rollback(aoCol);
+      Action* action = *iter_Action;
+      bAllSuccess |= action->Rollback(aoCol);
    }
 
    m_bIsOpen = true;
+
+   return bAllSuccess;
 }
 
 bool 

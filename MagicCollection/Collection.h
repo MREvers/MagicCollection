@@ -87,9 +87,7 @@ private:
    CollectionDetails* m_ptrCollectionDetails;
    CollectionSource* m_ptrCollectionSource;
    CollectionTracker* m_ptrCollectionTracker;
-
-   bool m_bRecordChanges;
-   std::vector<Transaction> m_lstTransactions;
+   TransactionManager* m_ptrTransactionManager;
 
    std::vector<std::pair<std::string, Tag>> m_lstTaggedItems;
 
@@ -133,9 +131,6 @@ private:
       CopyItem* aptCopy,
       std::vector<Tag> alstChanges, 
       std::vector<Tag> alstMetaChanges);
-
-   Transaction* getOpenTransaction();
-   void finalizeTransaction();
 
    void loadMetaTagFile();
 

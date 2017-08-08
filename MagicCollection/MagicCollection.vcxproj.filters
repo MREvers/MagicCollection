@@ -127,6 +127,12 @@
     <ClCompile Include="RemoveAction.cpp">
       <Filter>Collection\Actions</Filter>
     </ClCompile>
+    <ClCompile Include="ChangeAction.cpp">
+      <Filter>Collection\Actions</Filter>
+    </ClCompile>
+    <ClCompile Include="ReplaceAction.cpp">
+      <Filter>Collection\Actions</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="JSONImporter.h">
@@ -218,6 +224,12 @@
       <Filter>Collection\Actions</Filter>
     </ClInclude>
     <ClInclude Include="RemoveAction.h">
+      <Filter>Collection\Actions</Filter>
+    </ClInclude>
+    <ClInclude Include="ChangeAction.h">
+      <Filter>Collection\Actions</Filter>
+    </ClInclude>
+    <ClInclude Include="ReplaceAction.h">
       <Filter>Collection\Actions</Filter>
     </ClInclude>
   </ItemGroup>
