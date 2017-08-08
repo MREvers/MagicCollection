@@ -17,9 +17,15 @@ ReplaceAction::Execute(TransactionManager* aoCol)
    CollectionSource* refSource = aoCol->GetSource();
    Collection* refCollection = aoCol->GetCollection();
 
+   // Verify the first item
    int iItem = refSource->LoadCard(m_szName);
    CollectionItem* refItem = refSource->GetCardPrototype(iItem);
    if (refItem == nullptr) { return false; }
+
+   // Verify the second item
+   iItem = refSource->LoadCard(m_szNewName);
+   CollectionItem* refItemTwo = refSource->GetCardPrototype(iItem);
+   if (refItemTwo == nullptr) { return false; }
 
    std::shared_ptr<CopyItem> refCItem;
    refCItem = refItem->FindCopyItem( m_szIdentifyingHash, 

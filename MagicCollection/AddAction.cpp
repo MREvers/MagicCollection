@@ -17,6 +17,13 @@ AddAction::~AddAction()
 bool 
 AddAction::Execute(TransactionManager* aoCol)
 {
+   CollectionSource* refSource = aoCol->GetSource();
+   Collection* refCollection = aoCol->GetCollection();
+
+   int iItem = refSource->LoadCard(m_szName);
+   CollectionItem* refItem = refSource->GetCardPrototype(iItem);
+   if (refItem == nullptr) { return false; }
+
    aoCol->Add(m_szName, m_lstIDs, m_lstMetas);
 
    return true;

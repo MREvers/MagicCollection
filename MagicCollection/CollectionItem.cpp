@@ -62,15 +62,16 @@ void CollectionItem::RemoveCopyItem(const Address& aAddrColID, std::string aszHa
 
    for (; iter_Copies != m_lstCopies.end(); ++iter_Copies)
    {
-      if ((*iter_Copies)->GetMetaTag(Config::HashKey, Hidden) == aszHash)
+      CopyItem* cItem = iter_Copies->get();
+      if (cItem->GetMetaTag(Config::HashKey, Hidden) == aszHash)
       {
-         if ((*iter_Copies)->IsParent(aAddrColID) && (*iter_Copies)->GetResidentIn().size() <= 1)
+         if (cItem->IsParent(aAddrColID) && cItem->GetResidentIn().size() <= 1)
          {
             m_lstCopies.erase(iter_Copies);
          }
          else
          {
-            (*iter_Copies)->RemoveResident(aAddrColID);
+            cItem->RemoveResident(aAddrColID);
          }
 
          break;
@@ -97,18 +98,21 @@ void CollectionItem::RemoveResidentFromItem(CopyItem* acItem, const Address& aAd
 std::shared_ptr<CopyItem> CollectionItem::FindCopyItem(std::string aszHash, const Address& aAddrResidentIn)
 {
    Addresser addr;
-   std::vector<std::shared_ptr<CopyItem>>::iterator iter_Copies = m_lstCopies.begin();
+   std::vector<std::shared_ptr<CopyItem>>::iterator iter_Copies;
 
-   for (; iter_Copies != m_lstCopies.end(); ++iter_Copies)
+   for ( iter_Copies  = m_lstCopies.begin(); 
+         iter_Copies != m_lstCopies.end(); 
+         ++iter_Copies )
    {
-      if ( (*iter_Copies)->GetHash() == aszHash &&
-           (aAddrResidentIn.Main != "" || (*iter_Copies)->IsResidentIn(aAddrResidentIn)))
+      CopyItem* cItem = iter_Copies->get();
+      if ( cItem->GetHash() == aszHash &&
+           (aAddrResidentIn.Main == "" || cItem->IsResidentIn(aAddrResidentIn)) )
       {
          return *iter_Copies;
       }
    }
 
-   return nullptr;
+   return std::shared_ptr<CopyItem>(nullptr);
 }
 
 std::vector<std::shared_ptr<CopyItem>>
@@ -119,8 +123,9 @@ CollectionItem::FindAllCopyItems(std::string aszHash, const Address& aptAddress)
 
    for (; iter_Copies != m_lstCopies.end(); ++iter_Copies)
    {
-      if ((*iter_Copies)->GetMetaTag(Config::HashKey, Hidden) == aszHash &&
-         (aptAddress.Main != "" || (*iter_Copies)->IsResidentIn(aptAddress)))
+      CopyItem* cItem = iter_Copies->get();
+      if (cItem->GetMetaTag(Config::HashKey, Hidden) == aszHash &&
+         (aptAddress.Main == "" || cItem->IsResidentIn(aptAddress)))
       {
          lstRetval.push_back(*iter_Copies);
       }

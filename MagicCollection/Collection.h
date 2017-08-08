@@ -39,12 +39,6 @@ public:
       std::vector<Tag> alstMetaTags = std::vector<Tag>(),
       bool abCloseTransaction = true);
 
-   void AddItem(
-      std::string aszName,
-      std::string aszHash, 
-      std::string aszResidentIn = "", 
-      bool abCloseTransaction = true);
-
    void RemoveItem(
       std::string aszName, 
       std::string aszIdentifyingHash, 
@@ -100,12 +94,6 @@ private:
       std::string aszName, 
       std::vector<Tag> alstAttrs, 
       std::vector<Tag> alstMetaTags);
-   
-   // this is for an Item from another collection
-   void addExistingItem(
-      std::string aszName, 
-      std::string aszHash, 
-      std::string aszResidentIn);
    
    void removeItem(
       std::string aszName, 

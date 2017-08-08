@@ -2,6 +2,8 @@
 #include "Addresser.h"
 #include "AddAction.h"
 #include "RemoveAction.h"
+#include "ChangeAction.h"
+#include "ReplaceAction.h"
 
 using namespace std;
 
@@ -60,10 +62,6 @@ void Collection::AddItem(string aszName,
    vector<Tag> alstMetaTags,
    bool abCloseTransaction)
 {
-   // Verify the card name entered is valid
-   int iValidItem = m_ptrCollectionSource->LoadCard(aszName);
-   if (iValidItem == -1) { return; }
-
    AddAction addAction;
    addAction.SetIDs(alstAttrs);
    addAction.SetMeta(alstMetaTags);
@@ -74,19 +72,18 @@ void Collection::AddItem(string aszName,
    m_ptrTransactionManager->FinalizeTransaction(abCloseTransaction);
 }
 
-void Collection::AddItem(string aszName,
-	string aszHash, 
-	string aszResidentIn, 
-	bool abCloseTransaction)
-{
-   
-}
-
 void Collection::RemoveItem(string aszName, 
 	string aszIdentifyingHash, 
 	bool abCloseTransaction)
 {
-  
+   RemoveAction rmAction;
+   rmAction.SetResi(GetIdentifier());
+   rmAction.SetHash(aszIdentifyingHash);
+   rmAction.SetName(aszName);
+
+   m_ptrTransactionManager->IncludeAction(rmAction);
+
+   m_ptrTransactionManager->FinalizeTransaction(abCloseTransaction); 
 }
 
 void Collection::ChangeItem(string aszName, 
@@ -95,7 +92,15 @@ void Collection::ChangeItem(string aszName,
 	vector<Tag> alstMetaChanges, 
 	bool abCloseTransaction)
 {
-   
+   ChangeAction chAction;
+   chAction.SetIDs(alstChanges);
+   chAction.SetMeta(alstMetaChanges);
+   chAction.SetHash(aszIdentifyingHash);
+   chAction.SetName(aszName);
+
+   m_ptrTransactionManager->IncludeAction(chAction);
+
+   m_ptrTransactionManager->FinalizeTransaction(abCloseTransaction); 
 }
 
 void Collection::ReplaceItem(
@@ -106,7 +111,16 @@ void Collection::ReplaceItem(
 	vector<Tag> alstMetaChanges, 
 	bool abCloseTransaction)
 {
-  
+   ReplaceAction rpAction;
+   rpAction.SetIDs(alstIdChanges);
+   rpAction.SetMeta(alstMetaChanges);
+   rpAction.SetNewCard(aszNewName);
+   rpAction.SetHash(aszIdentifyingHash);
+   rpAction.SetName(aszName);
+
+   m_ptrTransactionManager->IncludeAction(rpAction);
+
+   m_ptrTransactionManager->FinalizeTransaction(abCloseTransaction); 
 }
 
 vector<string> Collection::GetMetaData()
@@ -297,11 +311,6 @@ void Collection::addItem(
    // There should never be other copies with that hash not in resident. 
    // They are removed at load time.
    m_ptrCollectionSource->NotifyNeedToSync(GetIdentifier());
-}
-
-void Collection::addExistingItem(string aszName, string aszHash, string aszResidentIn)
-{
-
 }
 
 void 
