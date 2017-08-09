@@ -16,14 +16,18 @@ CopyItem::CopyItem(vector<TraitItem>* alstTraits, Address aAddrParentIdentifier)
    // Use the interface that is used to load the parent from the meta file.
    m_Address = aAddrParentIdentifier;
 
-   vector<TraitItem>::iterator iter_DefaultVals = m_plstRestrictedTraits->begin();
-   for (; iter_DefaultVals != m_plstRestrictedTraits->end(); ++iter_DefaultVals)
+   vector<TraitItem>::iterator iter_DefaultVals;
+
+   for (iter_DefaultVals = m_plstRestrictedTraits->begin();
+        iter_DefaultVals != m_plstRestrictedTraits->end();
+        ++iter_DefaultVals)
    {
       m_lstIdentifyingTags.push_back(make_pair(iter_DefaultVals->GetKeyName(),
                                                iter_DefaultVals->GetDefaultValue()));
    }
 
-   // Set the chain ID and session here. If one is set later, it will just overwrite this...
+   // Set the chain ID and session here. 
+   // If one is set later, it will just overwrite this...
    setChainID(to_string(addr.GetRandom()));
    itemChanged();
 
@@ -80,8 +84,9 @@ string CopyItem::GetHash()
       vector<Tag>::iterator iter_Tags = m_lstIdentifyingTags.begin();
       for (; iter_Tags != m_lstIdentifyingTags.end(); ++iter_Tags)
       {
-         // This requires that the tags have an ordering. This ordering can be determined,
-         // by the order of the MetaTag object in the collection object.
+         // This requires that the tags have an ordering.
+         // This ordering can be determined, by the order
+         // of the MetaTag object in the collection object.
          szHashString += iter_Tags->second;
       }
 
@@ -120,7 +125,8 @@ bool CopyItem::IsParent(Address aAddrParent)
    return addr.DoesLocationContain(aAddrParent, m_Address, aDummy);
 }
 
-// This will detect if the adding 'resident' is a subset of the parent, if so, it will adjust the parent address.
+// This will detect if the adding 'resident' is a subset of the parent,
+// if so, it will adjust the parent address.
 void CopyItem::AddResident(const Address& aAddrAddress)
 {
    Addresser addr;
@@ -159,7 +165,9 @@ MetaTagType CopyItem::DetermineMetaTagType(string aszTagKey)
    return mTagType;
 }
 
-void CopyItem::SetMetaTag(string aszKey, string aszVal, MetaTagType atagType, bool bTimeChange)
+void 
+CopyItem::SetMetaTag(string aszKey, string aszVal,
+                     MetaTagType atagType, bool bTimeChange)
 {
    if (bTimeChange) { itemChanged(); }
 
@@ -172,7 +180,8 @@ void CopyItem::SetMetaTag(string aszKey, string aszVal, MetaTagType atagType, bo
    int iFound = ListHelper::List_Find(aszKey, m_lstMetaTags, fnExtractor);
    if (iFound == -1)
    {
-      fnComparer = [](MetaTag atag1, MetaTag atag2)-> int { return atag1.GetKey().compare(atag2.GetKey()); };
+      fnComparer = [](MetaTag atag1, MetaTag atag2)-> 
+                       int { return atag1.GetKey().compare(atag2.GetKey()); };
 
       MetaTag newMeta(aszKey, aszVal, atagType);
       ListHelper::List_Insert(newMeta, m_lstMetaTags, fnComparer);
@@ -214,11 +223,15 @@ vector<Tag> CopyItem::GetMetaTags(MetaTagType atagType)
    return lstRetVal;
 }
 
-bool CopyItem::SetIdentifyingAttribute(string aszKey, string aszValue, bool bTimeChange)
+bool 
+CopyItem::SetIdentifyingAttribute(string aszKey, string aszValue,
+                                  bool bTimeChange)
 {
    if (bTimeChange) { itemChanged(); }
 
-   function<string(TraitItem)> fnExtractor = [](TraitItem aTI)->string { return aTI.GetKeyName(); };
+   function<string(TraitItem)> fnExtractor;
+   fnExtractor = [](TraitItem aTI)->string { return aTI.GetKeyName(); };
+
    int iIsAttr = ListHelper::List_Find(aszKey, *m_plstRestrictedTraits, fnExtractor);
    if (iIsAttr != -1)
    {
@@ -238,7 +251,8 @@ bool CopyItem::SetIdentifyingAttribute(string aszKey, string aszValue, bool bTim
 
 string CopyItem::GetIdentifyingAttribute(string aszKey)
 {
-   int iFound = ListHelper::List_Find(aszKey, m_lstIdentifyingTags, Config::Instance()->GetTagHelper(Key));
+   int iFound = ListHelper::List_Find(aszKey, m_lstIdentifyingTags,
+                                      Config::Instance()->GetTagHelper(Key));
    if (iFound != -1)
    {
       return m_lstIdentifyingTags.at(iFound).second;
@@ -252,8 +266,10 @@ string CopyItem::GetIdentifyingAttribute(string aszKey)
 vector<Tag> CopyItem::GetIdentifyingAttributes()
 {
    vector<Tag> lstRetVal;
-   vector<Tag>::iterator iter_Tags = m_lstIdentifyingTags.begin();
-   for (; iter_Tags != m_lstIdentifyingTags.end(); ++iter_Tags)
+   vector<Tag>::iterator iter_Tags;
+   for (iter_Tags = m_lstIdentifyingTags.begin(); 
+        iter_Tags != m_lstIdentifyingTags.end(); 
+        ++iter_Tags)
    {
       lstRetVal.push_back(make_pair(iter_Tags->first, iter_Tags->second));
    }
@@ -312,16 +328,20 @@ void CopyItem::_setParent(string aszNewParent)
 
 void CopyItem::setPairedAttributes(string aszKey, int iVal)
 {
-   function<string(TraitItem)> fnExtractor = [](TraitItem aTI)->string { return aTI.GetKeyName(); };
+   function<string(TraitItem)> fnExtractor;
+   fnExtractor = [](TraitItem aTI)->string { return aTI.GetKeyName(); };
+
    vector<string> lstPartners;
    vector<Tag> lstPairs = Config::Instance()->GetPairedKeysList();
    for each (Tag var in lstPairs)
    {
-      if (var.first == aszKey && ListHelper::List_Find(var.second, lstPartners) == -1)
+      if (var.first == aszKey &&
+          ListHelper::List_Find(var.second, lstPartners) == -1)
       {
          lstPartners.push_back(var.second);
       }
-      else if (var.second == aszKey && ListHelper::List_Find(var.first, lstPartners) == -1)
+      else if (var.second == aszKey &&
+               ListHelper::List_Find(var.first, lstPartners) == -1)
       {
          lstPartners.push_back(var.first);
       }

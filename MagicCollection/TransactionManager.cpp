@@ -48,7 +48,7 @@ TransactionManager::RollbackTransaction()
    bool bGood = true;
 
    Transaction* ptrTrans = getLastTransaction();
-   if (!ptrTrans->IsOpen())
+   if (ptrTrans != nullptr && !ptrTrans->IsOpen())
    {
       bGood = ptrTrans->Rollback(this);
    }
@@ -142,7 +142,14 @@ TransactionManager::getTransaction()
 Transaction* 
 TransactionManager::getLastTransaction()
 {
-   return m_lstOpenTransactions.back();
+   if (m_lstOpenTransactions.size() > 0)
+   {
+      return m_lstOpenTransactions.back();
+   }
+   else
+   {
+      return nullptr;
+   }
 }
 
 void 

@@ -5,7 +5,10 @@ CollectionItem::PseudoIdentifier::PseudoIdentifier()
 {
 }
 
-CollectionItem::PseudoIdentifier::PseudoIdentifier(unsigned int aiCount, std::string aszName, std::string aszDetails, std::string aszMeta)
+CollectionItem::PseudoIdentifier::PseudoIdentifier(unsigned int aiCount,
+                                                   std::string aszName, 
+                                                   std::string aszDetails, 
+                                                   std::string aszMeta)
 {
    Count = aiCount;
    Name = aszName;
@@ -20,7 +23,9 @@ CollectionItem::PseudoIdentifier::~PseudoIdentifier()
 {
 }
 
-CollectionItem::CollectionItem(std::string aszName, std::vector<Tag> alstCommon, std::vector<TraitItem> alstRestrictions)
+CollectionItem::CollectionItem(std::string aszName,
+                               std::vector<Tag> alstCommon, 
+                               std::vector<TraitItem> alstRestrictions)
 {
    m_szName = aszName;
    m_lstCommonTraits = alstCommon;
@@ -38,34 +43,42 @@ std::string CollectionItem::GetName()
    return m_szName;
 }
 
-CopyItem* CollectionItem::AddCopyItem( const Address& aAddrColID,
-                                       std::vector<Tag> alstAttrs,
-                                       std::vector<Tag> alstMetaTags )
+CopyItem* 
+CollectionItem::AddCopyItem( const Address& aAddrColID,
+                             std::vector<Tag> alstAttrs,
+                             std::vector<Tag> alstMetaTags )
 {
    CopyItem* newCopy = GenerateCopy(aAddrColID, alstAttrs, alstMetaTags);
    m_lstCopies.push_back(std::shared_ptr<CopyItem>(newCopy));
    return newCopy;
 }
 
-CopyItem* CollectionItem::GenerateCopy( const Address& aAddrColID,
-                                        std::vector<Tag> alstAttrs,
-                                        std::vector<Tag> alstMetaTags )
+CopyItem* 
+CollectionItem::GenerateCopy( const Address& aAddrColID,
+                              std::vector<Tag> alstAttrs,
+                              std::vector<Tag> alstMetaTags )
 {
-   CopyItem* newCopy = new CopyItem(&m_lstIdentifyingTraits, aAddrColID, alstAttrs, alstMetaTags);
+   CopyItem* newCopy = new CopyItem(&m_lstIdentifyingTraits, aAddrColID,
+                                    alstAttrs, alstMetaTags);
 
    return newCopy;
 }
 
-void CollectionItem::RemoveCopyItem(const Address& aAddrColID, std::string aszHash)
+void 
+CollectionItem::RemoveCopyItem( const Address& aAddrColID,
+                                std::string aszHash )
 {
-   std::vector<std::shared_ptr<CopyItem>>::iterator iter_Copies = m_lstCopies.begin();
+   std::vector<std::shared_ptr<CopyItem>>::iterator iter_Copies;
 
-   for (; iter_Copies != m_lstCopies.end(); ++iter_Copies)
+   for ( iter_Copies = m_lstCopies.begin();
+         iter_Copies != m_lstCopies.end(); 
+         ++iter_Copies)
    {
       CopyItem* cItem = iter_Copies->get();
       if (cItem->GetMetaTag(Config::HashKey, Hidden) == aszHash)
       {
-         if (cItem->IsParent(aAddrColID) && cItem->GetResidentIn().size() <= 1)
+         if (cItem->IsParent(aAddrColID) && 
+             cItem->GetResidentIn().size() <= 1)
          {
             m_lstCopies.erase(iter_Copies);
          }
@@ -80,22 +93,28 @@ void CollectionItem::RemoveCopyItem(const Address& aAddrColID, std::string aszHa
 
 }
 
-void CollectionItem::RemoveResidentFromItem(CopyItem* acItem, const Address& aAddrColID)
+void 
+CollectionItem::RemoveResidentFromItem( CopyItem* acItem, 
+                                        const Address& aAddrColID )
 {
    std::function<CopyItem* (std::shared_ptr<CopyItem>)> fnExtractor;
-   fnExtractor = [](std::shared_ptr<CopyItem> aptr)->CopyItem* { return aptr.get(); };
+   fnExtractor = [](std::shared_ptr<CopyItem> aptr)->
+                                    CopyItem* { return aptr.get(); };
    int iFound = ListHelper::List_Find(acItem, m_lstCopies, fnExtractor);
    if (-1 != iFound)
    {
       acItem->RemoveResident(aAddrColID);
-      if (acItem->GetParent() == "" && acItem->GetResidentIn().size() == 0)
+      if (acItem->GetParent() == "" &&
+          acItem->GetResidentIn().size() == 0)
       {
          m_lstCopies.erase(m_lstCopies.begin() + iFound);
       }
    }
 }
 
-std::shared_ptr<CopyItem> CollectionItem::FindCopyItem(std::string aszHash, const Address& aAddrResidentIn)
+std::shared_ptr<CopyItem> 
+CollectionItem::FindCopyItem( std::string aszHash,
+                              const Address& aAddrResidentIn )
 {
    Addresser addr;
    std::vector<std::shared_ptr<CopyItem>>::iterator iter_Copies;
@@ -119,9 +138,11 @@ std::vector<std::shared_ptr<CopyItem>>
 CollectionItem::FindAllCopyItems(std::string aszHash, const Address& aptAddress)
 {
    std::vector<std::shared_ptr<CopyItem>> lstRetval;
-   std::vector<std::shared_ptr<CopyItem>>::iterator iter_Copies = m_lstCopies.begin();
+   std::vector<std::shared_ptr<CopyItem>>::iterator iter_Copies;
 
-   for (; iter_Copies != m_lstCopies.end(); ++iter_Copies)
+   for (iter_Copies = m_lstCopies.begin();
+        iter_Copies != m_lstCopies.end();
+        ++iter_Copies)
    {
       CopyItem* cItem = iter_Copies->get();
       if (cItem->GetMetaTag(Config::HashKey, Hidden) == aszHash &&
@@ -137,9 +158,9 @@ CollectionItem::FindAllCopyItems(std::string aszHash, const Address& aptAddress)
 void CollectionItem::Erase(CopyItem* ociRemove)
 {
    std::function<CopyItem* (std::shared_ptr<CopyItem>)> fnExtractor;
-   fnExtractor = [](std::shared_ptr<CopyItem> aptr)->CopyItem* { return aptr.get(); };
+   fnExtractor = [](std::shared_ptr<CopyItem> aptr)->
+                                    CopyItem* { return aptr.get(); };
 
-   std::vector<std::shared_ptr<CopyItem>>::iterator iter_copy = m_lstCopies.begin();
    int iFound = ListHelper::List_Find(ociRemove, m_lstCopies, fnExtractor);
    if (iFound > -1)
    {
@@ -148,14 +169,16 @@ void CollectionItem::Erase(CopyItem* ociRemove)
 }
 
 std::vector<std::shared_ptr<CopyItem>> 
-CollectionItem::GetCopiesForCollection(const Address& aAddrCollectionIdentifier, CollectionItemType aItemType)
+CollectionItem::GetCopiesForCollection(const Address& aAddrCollectionIdentifier,
+                                       CollectionItemType aItemType)
 {
    std::vector<std::shared_ptr<CopyItem>> lstRetVal;
    std::vector<std::shared_ptr<CopyItem>> ::iterator iter_Copies = m_lstCopies.begin();
 
    for (; iter_Copies != m_lstCopies.end(); ++iter_Copies)
    {
-      if ((aItemType & Local) > 0 && (*iter_Copies)->IsParent(aAddrCollectionIdentifier))
+      if ((aItemType & Local) > 0 &&
+          (*iter_Copies)->IsParent(aAddrCollectionIdentifier))
       {
          lstRetVal.push_back(*iter_Copies);
       }
@@ -176,21 +199,28 @@ CollectionItem::GetCopiesForCollection(const Address& aAddrCollectionIdentifier,
    return lstRetVal;
 }
 
-std::string CollectionItem::GetHash(const Address& aAddrIdentifier,
-   std::vector<Tag> alstAttrs,
-   std::vector<Tag> alstMetaTags)
+std::string 
+CollectionItem::GetHash(const Address& aAddrIdentifier,
+                        std::vector<Tag> alstAttrs,
+                        std::vector<Tag> alstMetaTags)
 {
-   CopyItem copyToHash(&m_lstIdentifyingTraits, aAddrIdentifier, alstAttrs, alstMetaTags);
+   CopyItem copyToHash(&m_lstIdentifyingTraits, aAddrIdentifier, 
+                       alstAttrs, alstMetaTags);
 
    return copyToHash.GetHash();
 }
 
-std::string CollectionItem::GetCardString(CopyItem* aItem, MetaTagType aTagType, const Address& aAddrAddress)
+std::string 
+CollectionItem::GetCardString(CopyItem* aItem, MetaTagType aTagType,
+                              const Address& aAddrAddress)
 {
-   return CollectionItem::ToCardLine(aItem->GetParent(), m_szName, aItem->GetIdentifyingAttributes(), aItem->GetMetaTags(aTagType), aAddrAddress);
+   return CollectionItem::ToCardLine(aItem->GetParent(), m_szName, 
+                                     aItem->GetIdentifyingAttributes(), 
+                                     aItem->GetMetaTags(aTagType), aAddrAddress);
 }
 
-std::string CollectionItem::GetProtoTypeString()
+std::string 
+CollectionItem::GetProtoTypeString()
 {
    // Include multi traits in this list
    std::vector<Tag> lstAllCommonTraits(m_lstCommonTraits);
@@ -216,7 +246,8 @@ std::vector<Tag> CollectionItem::GetCommonTraits()
    return m_lstCommonTraits;
 }
 
-bool CollectionItem::ParseCardLine(std::string aszLine, PseudoIdentifier& rPIdentifier)
+bool
+CollectionItem::ParseCardLine(std::string aszLine, PseudoIdentifier& rPIdentifier)
 {
    unsigned int iCount;
    std::string szMeta;
@@ -333,13 +364,20 @@ bool CollectionItem::ParseCardLine(std::string aszLine, PseudoIdentifier& rPIden
 bool CollectionItem::ParseTagString(std::string aszDetails, std::vector<Tag>& rlstTags)
 {
    std::vector<Tag> lstKeyVals;
+   std::vector<std::string> lstPairs;
+   std::vector<std::string> lstVal;
+
    std::vector<std::string> lstDetails = StringHelper::Str_Split(aszDetails, " ");
-   for (std::vector<std::string>::iterator iter_attrs = lstDetails.begin(); iter_attrs != lstDetails.end(); ++iter_attrs)
+
+   std::vector<std::string>::iterator iter_attrs;
+   for (iter_attrs = lstDetails.begin(); 
+        iter_attrs != lstDetails.end(); 
+        ++iter_attrs)
    {
-      std::vector<std::string> lstPairs = StringHelper::Str_Split(*iter_attrs, "=");
+      lstPairs = StringHelper::Str_Split(*iter_attrs, "=");
       if (lstPairs.size() > 1)
       {
-         std::vector<std::string> lstVal = StringHelper::Str_Split(lstPairs[1], "\"");
+         lstVal = StringHelper::Str_Split(lstPairs[1], "\"");
          if (lstVal.size() == 3)
          {
             std::string szVal = lstVal[1];

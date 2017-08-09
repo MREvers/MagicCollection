@@ -23,7 +23,8 @@ public:
    {
    public:
       PseudoIdentifier();
-      PseudoIdentifier(unsigned int aiCount, std::string aszName, std::string aszDetails, std::string aszMeta);
+      PseudoIdentifier( unsigned int aiCount, std::string aszName,
+                        std::string aszDetails, std::string aszMeta );
       ~PseudoIdentifier();
 
       unsigned int Count;
@@ -34,7 +35,8 @@ public:
       std::vector<Tag> MetaTags;
    };
 
-   CollectionItem(std::string aszItemName, std::vector<Tag> alstCommon, std::vector<TraitItem> alstRestrictions);
+   CollectionItem( std::string aszItemName, std::vector<Tag> alstCommon,
+                   std::vector<TraitItem> alstRestrictions );
    ~CollectionItem();
 
    std::string GetName();
@@ -51,17 +53,22 @@ public:
    void RemoveResidentFromItem(CopyItem* acItem, const Address& aAddrColID);
 
    // Finds First
-   std::shared_ptr<CopyItem> FindCopyItem(std::string aszHash, const Address& aPairResi = Address());
-   std::vector<std::shared_ptr<CopyItem>> FindAllCopyItems(std::string aszHash, const Address& aPairResi = Address());
+   std::shared_ptr<CopyItem> FindCopyItem( std::string aszHash, 
+                                           const Address& aPairResi = Address() );
+   std::vector<std::shared_ptr<CopyItem>> 
+      FindAllCopyItems(std::string aszHash, const Address& aPairResi = Address());
    void Erase(CopyItem* ociRemove);
 
-   std::vector<std::shared_ptr<CopyItem>> GetCopiesForCollection(const Address& aAddrCollectionIdentifier, CollectionItemType aItemType);
+   std::vector<std::shared_ptr<CopyItem>> 
+      GetCopiesForCollection( const Address& aAddrCollectionIdentifier, 
+                              CollectionItemType aItemType );
 
    std::string GetHash(const Address& aAddrIdentifier,
       std::vector<Tag> alstAttrs = std::vector<Tag>(),
       std::vector<Tag> alstMetaTags = std::vector<Tag>());
 
-   std::string GetCardString(CopyItem* aItem, MetaTagType aTagType = Visible, const Address& aAddrCompareID = Address());
+   std::string GetCardString( CopyItem* aItem, MetaTagType aTagType = Visible, 
+                              const Address& aAddrCompareID = Address() );
    std::string GetProtoTypeString();
    std::vector<Tag> GetCommonTraits();
 

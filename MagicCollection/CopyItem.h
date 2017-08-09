@@ -31,11 +31,13 @@ public:
    std::vector<Address> GetResidentIn();
    bool IsResidentIn(const Address& aAddrAddress);
 
-   void SetMetaTag(std::string aszKey, std::string aszVal, MetaTagType atagType, bool bTimeChange = true);
+   void SetMetaTag(std::string aszKey, std::string aszVal,
+                   MetaTagType atagType, bool bTimeChange = true);
    std::string GetMetaTag(std::string aszKey, MetaTagType atagType);
    std::vector<Tag> GetMetaTags(MetaTagType atagType);
 
-   bool SetIdentifyingAttribute(std::string aszKey, std::string aszValue, bool bTimeChange = true);
+   bool SetIdentifyingAttribute(std::string aszKey, std::string aszValue,
+                                bool bTimeChange = true);
    std::string GetIdentifyingAttribute(std::string aszKey);
    std::vector<Tag> GetIdentifyingAttributes();
 

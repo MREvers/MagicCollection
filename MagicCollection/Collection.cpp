@@ -133,7 +133,7 @@ vector<string> Collection::GetMetaData()
    for each(auto metaData in m_lstTaggedItems)
    {
 	  string szMetaData = metaData.first + ": {" +
-					      metaData.second.first + "=\"" +
+					          metaData.second.first + "=\"" +
 	                      metaData.second.second + "\" }";
       lstRetval.push_back(szMetaData);
    }
