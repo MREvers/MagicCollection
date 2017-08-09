@@ -109,8 +109,7 @@ std::string CollectionFactory::getNextChildName(std::string aszParentID)
    std::vector<std::string> lstUIandPF = StringHelper::Str_Split(aszParentID, std::string("-"));
    if (lstUIandPF.size() == 1)
    {
-      // The first child gets 2; the first prime.
-      iID = 2;
+      iID = 1;
    }
    else
    {
@@ -122,22 +121,20 @@ std::string CollectionFactory::getNextChildName(std::string aszParentID)
    //  C, and find the nth following prime, where n is the number of
    //  existing children. i.e. Take P_k if there are no children yet.
    //  Then get C2 = P_k+n * P_k * P_k-r1 * P_k-r2 .... Then use UI -C2
-   int iLargestPrime = 1;
    int iPrimeIndex = 0;
 
    // Find the largest prime number divisor
-   // The way this is written, you can only have branching subcollections up to the number of primes
-   // stored in config::primes.
    for (size_t i = Addresser::Primes.size()-1; i >= 0; i--)
    {
       int iPrime = Addresser::Primes[i];
       if (iID % iPrime == 0)
       {
          iPrimeIndex = i;
-         iLargestPrime = iPrime;
          break;
       }
    }
+
+   if (iPrimeIndex == 0) { iPrimeIndex = 1; }
 
    int iChildren = GetCollection(aszParentID)->GetChildCount();
    iPrimeIndex += iChildren;
