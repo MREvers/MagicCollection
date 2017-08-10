@@ -17,9 +17,8 @@ RemoveAction::Execute(TransactionManager* aoCol)
 {
    CollectionSource* refSource = aoCol->GetSource();
 
-   int iItem = refSource->LoadCard(m_szName);
-   CollectionItem* refItem = refSource->GetCardPrototype(iItem);
-   if (refItem == nullptr) { return false; }
+   TryGet<CollectionItem> refItem = refSource->GetCardPrototype(m_szName);
+   if (!refItem.Good()) { return false; }
 
    std::shared_ptr<CopyItem> refCItem;
    refCItem = refItem->FindCopyItem(m_szIdentifyingHash, m_AddrResidentIn);
@@ -35,14 +34,14 @@ RemoveAction::Execute(TransactionManager* aoCol)
 bool 
 RemoveAction::Rollback(TransactionManager* aoCol)
 {
-   std::unique_ptr<AddAction> adAction;
+   std::shared_ptr<Action> adAction;
 
-   adAction = std::unique_ptr<AddAction>(GetUndoAction(aoCol));
+   adAction = getUndoAction(aoCol);
    return adAction->Execute(aoCol);
 }
 
-AddAction* 
-RemoveAction::GetUndoAction(TransactionManager* aoCol) const
+std::shared_ptr<Action>
+RemoveAction::getUndoAction(TransactionManager* aoCol) const
 {
    Collection* refCollection = aoCol->GetCollection();
 
@@ -51,15 +50,15 @@ RemoveAction::GetUndoAction(TransactionManager* aoCol) const
    adRetVal->SetMeta(m_lstMetaOfRMItem);
    adRetVal->SetName(m_szName);
 
-   return adRetVal;
+   return std::shared_ptr<Action>(adRetVal);
 }
 
 // It is the responsibility of the caller to delete this.
-Action* 
+std::shared_ptr<Action>
 RemoveAction::GetCopy() const
 {
    RemoveAction* ptCopy = new RemoveAction(*this);
-   return ptCopy;
+   return std::shared_ptr<Action>(ptCopy);
 }
 
 void 

@@ -57,7 +57,7 @@ CollectionIO::CaptureUnlistedItems(Address aAddrColID,
    std::vector<int> lstAllPossibleCacheItems = aptCollectionSource->GetCollectionCache(aAddrColID);
    for (size_t i = 0; i < lstAllPossibleCacheItems.size(); i++)
    {
-      CollectionItem* itemPrototype = aptCollectionSource->GetCardPrototype(lstAllPossibleCacheItems[i]);
+      TryGet<CollectionItem> itemPrototype = aptCollectionSource->GetCardPrototype(lstAllPossibleCacheItems[i]);
       std::vector<std::shared_ptr<CopyItem>> lstPossibleLocals = itemPrototype->GetCopiesForCollection(aAddrColID, CollectionItemType::Local);
       for (size_t t = 0; t < lstPossibleLocals.size(); t++)
       {
@@ -89,7 +89,7 @@ CollectionIO::ConsolodateLocalItems(Address aAddrColID,
    for each (std::pair<int, std::list<CopyItem*>> pairItem in rlstPotentialDuplicates)
    {
       int iItem = pairItem.first;
-      CollectionItem* item = aptCollectionSource->GetCardPrototype(iItem);
+      TryGet<CollectionItem> item = aptCollectionSource->GetCardPrototype(iItem);
       std::list<CopyItem*> lstNewItems = pairItem.second;
 
       if (rlstNonDuplicates.find(iItem) != rlstNonDuplicates.end())
@@ -126,7 +126,7 @@ bool CollectionIO::RejoinAsyncedLocalItems(Address aAddrColID,
    for each (std::pair<int, std::list<CopyItem*>> pairItem in rlstPotentialDuplicates)
    {
       int iItem = pairItem.first;
-      CollectionItem* item = aptCollectionSource->GetCardPrototype(iItem);
+      TryGet<CollectionItem> item = aptCollectionSource->GetCardPrototype(iItem);
       std::list<CopyItem*> lstNewItems = pairItem.second;
 
       if (rlstNonDuplicates.find(iItem) != rlstNonDuplicates.end())
@@ -167,7 +167,7 @@ bool CollectionIO::RejoinAsyncedLocalItems(Address aAddrColID,
    for each (std::pair<int, std::list<CopyItem*>> pairItem in rlstNonDuplicates)
    {
       int iItem = pairItem.first;
-      CollectionItem* item = aptCollectionSource->GetCardPrototype(iItem);
+      TryGet<CollectionItem> item = aptCollectionSource->GetCardPrototype(iItem);
       std::list<CopyItem*> lstExistingItems = pairItem.second;
 
       if (rlstPotentialDuplicates.find(iItem) != rlstPotentialDuplicates.end())
@@ -200,7 +200,6 @@ CollectionIO::ConsolodateBorrowedItems(Address aAddrColID,
    CollectionSource* aptCollectionSource,
    CollectionFactory* aptCollFactory)
 {
-   CollectionItem* itemPrototype;
    std::string szItemParent;
    std::string szItemHash;
    std::vector<std::shared_ptr<CopyItem>> lstBorrowedItems;
@@ -217,7 +216,7 @@ CollectionIO::ConsolodateBorrowedItems(Address aAddrColID,
 
    for (size_t i = 0; i < lstCacheIndexes.size(); i++)
    {
-      itemPrototype = aptCollectionSource->GetCardPrototype(lstCacheIndexes[i]);
+      TryGet<CollectionItem> itemPrototype = aptCollectionSource->GetCardPrototype(lstCacheIndexes[i]);
       lstBorrowedItems = itemPrototype->GetCopiesForCollection(aAddrColID, CollectionItemType::Borrowed);
       for (size_t t = 0; t < lstBorrowedItems.size(); t++)
       {
@@ -256,7 +255,7 @@ bool
 CollectionIO::ReleaseUnfoundReferences(Address aAddrColID,
    CollectionSource* aptCollectionSource)
 {
-   CollectionItem* itemPrototype;
+   TryGet<CollectionItem> itemPrototype;
    std::vector<std::shared_ptr<CopyItem>> lstPossibleLocals;
 
    auto lstAllPossibleCacheItems = aptCollectionSource->GetCollectionCache(aAddrColID);

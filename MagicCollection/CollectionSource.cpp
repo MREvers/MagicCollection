@@ -142,22 +142,31 @@ int CollectionSource::LoadCard(std::string aszCardName)
    return iCacheLocation;
 }
 
-CollectionItem* CollectionSource::GetCardPrototype(int aiCacheIndex)
+TryGet<CollectionItem>
+CollectionSource::GetCardPrototype(int aiCacheIndex)
 {
+   TryGet<CollectionItem> ColRetVal;
    if (aiCacheIndex < m_lstoCardCache.size())
    {
-      return &m_lstoCardCache.at(aiCacheIndex);
+      ColRetVal.Set(&m_lstoCardCache.at(aiCacheIndex));
    }
-   else
-   {
-      return NULL;
-   }
+   
+   return ColRetVal;
+}
+
+TryGet<CollectionItem> 
+CollectionSource::GetCardPrototype(std::string aszCardName)
+{
+   int iCacheIndex = LoadCard(aszCardName);
+   return GetCardPrototype(iCacheIndex);
 }
 
 void CollectionSource::NotifyNeedToSync(const Address& aAddrForcedSync)
 {
-   std::vector<std::pair<Address, bool>>::iterator iter_SyncCols = m_lstSync.begin();
-   for (; iter_SyncCols != m_lstSync.end(); ++iter_SyncCols)
+   std::vector<std::pair<Address, bool>>::iterator iter_SyncCols;
+   for ( iter_SyncCols = m_lstSync.begin();
+         iter_SyncCols != m_lstSync.end(); 
+         ++iter_SyncCols )
    {
       if (!(iter_SyncCols->first == aAddrForcedSync))
       {
@@ -165,7 +174,7 @@ void CollectionSource::NotifyNeedToSync(const Address& aAddrForcedSync)
       }
       else
       {
-          iter_SyncCols->second = false;
+         iter_SyncCols->second = false;
       }
    }
 }

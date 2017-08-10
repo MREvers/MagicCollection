@@ -27,13 +27,18 @@ class Action
 {
 public:
    Action();
-   ~Action();
+
+   // Pointers to Action* can access a child destructor
+   // only if this is virtual.
+   virtual ~Action();
 
    virtual bool Execute(TransactionManager* aoCol) = 0;
    virtual bool Rollback(TransactionManager* aoCol) = 0;
 
-   virtual Action* GetCopy() const = 0;
+   virtual std::shared_ptr<Action> GetCopy() const = 0;
 
 protected:
    bool m_bCanRollBack;
+
+   virtual std::shared_ptr<Action> getUndoAction(TransactionManager* aoCol) const = 0;
 };

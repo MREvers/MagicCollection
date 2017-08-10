@@ -12,7 +12,8 @@ CollectionFactory::~CollectionFactory()
 {
 }
 
-std::string CollectionFactory::LoadCollectionFromFile(std::string aszFileName)
+std::string 
+CollectionFactory::LoadCollectionFromFile(std::string aszFileName)
 {
    std::string szRetVal = Config::NotFoundString;
    std::vector<std::string> lstSplitFile;
@@ -46,10 +47,12 @@ std::string
 CollectionFactory::CreateNewCollection(std::string aszColName, std::string aszParentID)
 {
    Collection* oCol;
+
    // The parent is required to be loaded to have it as a parent
    if (CollectionExists(aszParentID))
    {
-      oCol = new Collection(aszColName, m_ColSource, aszColName, getNextChildName(aszParentID));
+      oCol = new Collection(aszColName, m_ColSource,
+                            aszColName, getNextChildName(aszParentID));
       GetCollection(aszParentID)->ChildAdded();
    }
    else
@@ -61,52 +64,67 @@ CollectionFactory::CreateNewCollection(std::string aszColName, std::string aszPa
    return oCol->GetIdentifier().GetFullAddress();
 }
 
-std::vector<std::string> CollectionFactory::GetLoadedCollections()
+std::vector<std::string>
+CollectionFactory::GetLoadedCollections()
 {
    std::vector<std::string> lstRetval;
-   auto iter_Colo = m_lstCollections.begin();
-   for (; iter_Colo != m_lstCollections.end(); ++iter_Colo)
+   std::vector<std::shared_ptr<Collection>>::iterator iter_Colo;
+   for ( iter_Colo = m_lstCollections.begin();
+         iter_Colo != m_lstCollections.end(); 
+         ++iter_Colo)
    {
-      lstRetval.push_back((*iter_Colo)->GetIdentifier().GetFullAddress());
+      Collection* curr_Col = iter_Colo->get();
+      lstRetval.push_back(curr_Col->GetIdentifier().GetFullAddress());
    }
    return lstRetval;
 }
 
-bool CollectionFactory::CollectionExists(std::string aszCollectionName)
+bool 
+CollectionFactory::CollectionExists(std::string aszCollectionName)
 {
    return CollectionExists(Address(aszCollectionName));
 }
 
-bool CollectionFactory::CollectionExists(const Address& aAddrColID)
+bool 
+CollectionFactory::CollectionExists(const Address& aAddrColID)
 {
-   std::vector<std::shared_ptr<Collection>>::iterator iter_cols = m_lstCollections.begin();
-   for (; iter_cols != m_lstCollections.end(); ++iter_cols)
-   {
-      if (aAddrColID == (*iter_cols)->GetIdentifier())
-      {
-         return true;
-      }
-   }
-   return false;
+   return GetCollection(aAddrColID).Good();
 }
 
-Collection* CollectionFactory::GetCollection(std::string aszCollectionName)
+TryGet<Collection> 
+CollectionFactory::GetCollection(std::string aszCollectionName)
 {
-   std::vector<std::shared_ptr<Collection>>::iterator iter_cols = m_lstCollections.begin();
-   for (; iter_cols != m_lstCollections.end(); ++iter_cols)
-   {
-      if (Address(aszCollectionName) == (*iter_cols)->GetIdentifier())
-      {
-         return iter_cols->get();
-      }
-   }
-   return nullptr;
+   return GetCollection(Address(aszCollectionName));
 }
 
-std::string CollectionFactory::getNextChildName(std::string aszParentID)
+TryGet<Collection> 
+CollectionFactory::GetCollection(const Address& aAddrColID)
+{
+   TryGet<Collection> oRetVal;
+
+   std::vector<std::shared_ptr<Collection>>::iterator iter_cols;
+   for ( iter_cols  = m_lstCollections.begin();
+         iter_cols != m_lstCollections.end(); 
+         ++iter_cols)
+   {
+      Collection* curr_Col = iter_cols->get();
+      if (aAddrColID == curr_Col->GetIdentifier())
+      {
+         oRetVal.Set(iter_cols->get());
+         break;
+      }
+   }
+
+   return oRetVal;
+}
+
+std::string 
+CollectionFactory::getNextChildName(std::string aszParentID)
 {
    int iID;
-   std::vector<std::string> lstUIandPF = StringHelper::Str_Split(aszParentID, std::string("-"));
+   std::vector<std::string> lstUIandPF;
+   
+   lstUIandPF = StringHelper::Str_Split(aszParentID, std::string("-"));
    if (lstUIandPF.size() == 1)
    {
       iID = 1;
@@ -136,10 +154,19 @@ std::string CollectionFactory::getNextChildName(std::string aszParentID)
 
    if (iPrimeIndex == 0) { iPrimeIndex = 1; }
 
-   int iChildren = GetCollection(aszParentID)->GetChildCount();
-   iPrimeIndex += iChildren;
+   std::string szSubAddress;
+   std::string szRetval = aszParentID;
+   TryGet<Collection> oCol = GetCollection(aszParentID);
+   if (oCol.Good())
+   {
+      int iChildren = oCol->GetChildCount();
+      iPrimeIndex += iChildren;
+      
+      int iChild = oCol->GetChildCount();
 
-   int iChild = GetCollection(aszParentID)->GetChildCount();
-   std::string szRetval = lstUIandPF[0] + "-" + std::to_string(iID*(Addresser::Primes[iPrimeIndex]));
+      szSubAddress = std::to_string(iID*(Addresser::Primes[iPrimeIndex]));
+      szRetval = lstUIandPF[0] + "-" + szSubAddress;
+   }
+
    return szRetval;
 }

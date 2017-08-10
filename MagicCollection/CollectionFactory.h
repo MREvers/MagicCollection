@@ -6,6 +6,8 @@
 #include "Collection.h"
 #include "StringHelper.h"
 #include "CollectionSource.h"
+#include "TryGet.h"
+
 class CollectionFactory
 {
 public:
@@ -14,7 +16,8 @@ public:
 
    bool CollectionExists(std::string aszCollectionName);
    bool CollectionExists(const Address& aAddrColID);
-   Collection* GetCollection(std::string aszCollectionName);
+   TryGet<Collection> GetCollection(std::string aszCollectionName);
+   TryGet<Collection> GetCollection(const Address& aAddrColID);
 
    std::string LoadCollectionFromFile(std::string aszColFile);
    std::string CreateNewCollection(std::string aszColName, std::string aszParent = "");

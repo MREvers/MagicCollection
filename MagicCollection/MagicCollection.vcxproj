@@ -224,6 +224,7 @@
     <ClInclude Include="TraitItem.h" />
     <ClInclude Include="Transaction.h" />
     <ClInclude Include="TransactionManager.h" />
+    <ClInclude Include="TryGet.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

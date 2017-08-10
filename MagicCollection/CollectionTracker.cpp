@@ -3,6 +3,7 @@
 #include "CollectionItem.h"
 #include "Collection.h"
 #include "ListHelper.h"
+#include "TryGet.h"
 
 CollectionTracker::CollectionTracker(Collection* aptrTCollection)
 {
@@ -33,7 +34,7 @@ CollectionTracker::Track()
         iter_Item != lstNewItems.end();
         iter_Item++ )
    {
-      CollectionItem* item = source->GetCardPrototype(*iter_Item);
+      TryGet<CollectionItem> item = source->GetCardPrototype(*iter_Item);
       RealCopyList lstCList = item->
          GetCopiesForCollection(colAddress, CollectionItemType::All);
       for ( iter_Copy  = lstCList.begin(); 
@@ -155,7 +156,7 @@ CollectionTracker::CalculateChanges()
          iter_Items != mapAdded.end();
          iter_Items++ )
    {
-      CollectionItem* item = colSource->GetCardPrototype(iter_Items->first);
+      TryGet<CollectionItem> item = colSource->GetCardPrototype(iter_Items->first);
       for (iter_Copy  = iter_Items->second.begin();
            iter_Copy != iter_Items->second.end();
            iter_Copy++)
@@ -174,7 +175,7 @@ CollectionTracker::CalculateChanges()
         iter_Items != mapRemoved.end();
         iter_Items++)
    {
-      CollectionItem* item = colSource->GetCardPrototype(iter_Items->first);
+      TryGet<CollectionItem> item = colSource->GetCardPrototype(iter_Items->first);
       for (iter_Copy  = iter_Items->second.begin();
            iter_Copy != iter_Items->second.end();
            iter_Copy++)
@@ -193,7 +194,7 @@ CollectionTracker::CalculateChanges()
         iter_Items != mapChanged.end();
         iter_Items++)
    {
-      CollectionItem* item = colSource->GetCardPrototype(iter_Items->first);
+      TryGet<CollectionItem> item = colSource->GetCardPrototype(iter_Items->first);
       for (iter_Copy  = iter_Items->second.begin();
            iter_Copy != iter_Items->second.end();
            iter_Copy++)

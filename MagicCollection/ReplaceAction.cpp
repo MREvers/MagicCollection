@@ -18,14 +18,12 @@ ReplaceAction::Execute(TransactionManager* aoCol)
    Collection* refCollection = aoCol->GetCollection();
 
    // Verify the first item
-   int iItem = refSource->LoadCard(m_szName);
-   CollectionItem* refItem = refSource->GetCardPrototype(iItem);
-   if (refItem == nullptr) { return false; }
+   TryGet<CollectionItem> refItem = refSource->GetCardPrototype(m_szName);
+   if (!refItem.Good()) { return false; }
 
    // Verify the second item
-   iItem = refSource->LoadCard(m_szNewName);
-   CollectionItem* refItemTwo = refSource->GetCardPrototype(iItem);
-   if (refItemTwo == nullptr) { return false; }
+   TryGet<CollectionItem> refItemTwo = refSource->GetCardPrototype(m_szNewName);
+   if (!refItemTwo.Good()) { return false; }
 
    std::shared_ptr<CopyItem> refCItem;
    refCItem = refItem->FindCopyItem( m_szIdentifyingHash, 
@@ -43,17 +41,17 @@ ReplaceAction::Execute(TransactionManager* aoCol)
 bool
 ReplaceAction::Rollback(TransactionManager* aoCol)
 {
-   std::unique_ptr<ReplaceAction> chAction;
+   std::shared_ptr<Action> chAction;
 
-   chAction = std::unique_ptr<ReplaceAction>(GetUndoAction(aoCol));
+   chAction = getUndoAction(aoCol);
    return chAction->Execute(aoCol);
 }
 
-Action*
+std::shared_ptr<Action>
 ReplaceAction::GetCopy() const
 {
    ReplaceAction* ptCopy = new ReplaceAction(*this);
-   return ptCopy;
+   return std::shared_ptr<Action>(ptCopy);
 }
 
 void
@@ -86,15 +84,14 @@ ReplaceAction::SetMeta(std::vector<Tag> alstMetas)
    m_lstMetaChanges = alstMetas;
 }
 
-ReplaceAction*
-ReplaceAction::GetUndoAction(TransactionManager* aoCol) const
+std::shared_ptr<Action>
+ReplaceAction::getUndoAction(TransactionManager* aoCol) const
 {
    Collection* refCollection = aoCol->GetCollection();
    CollectionSource* refSource = aoCol->GetSource();
 
-   int iItem = refSource->LoadCard(m_szNewName);
-   CollectionItem* refItem = refSource->GetCardPrototype(iItem);
-   if (refItem == nullptr) { return false; }
+   TryGet<CollectionItem> refItem = refSource->GetCardPrototype(m_szNewName);
+   if (!refItem.Good()) { return false; }
    
    std::string szHashRM;  
    szHashRM = refItem->GetHash( refCollection->GetIdentifier(),
@@ -107,5 +104,5 @@ ReplaceAction::GetUndoAction(TransactionManager* aoCol) const
    rpAction->SetMeta(m_lstUndoMetaChanges);
    rpAction->SetNewCard(m_szName);
 
-   return rpAction;
+   return std::shared_ptr<Action>(rpAction);
 }

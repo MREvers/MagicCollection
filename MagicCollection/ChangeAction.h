@@ -12,7 +12,7 @@ public:
    bool Execute(TransactionManager* aoCol) override;
    bool Rollback(TransactionManager* aoCol) override;
 
-   Action* GetCopy() const override;
+   std::shared_ptr<Action> GetCopy() const override;
 
    void SetName(std::string aszName);
    void SetIDs(std::vector<Tag> alstIds);
@@ -29,6 +29,6 @@ private:
    std::vector<Tag> m_lstUndoID;
    std::vector<Tag> m_lstUndoMeta;
 
-   ChangeAction* GetUndoAction(TransactionManager* aoCol) const;
+   std::shared_ptr<Action> getUndoAction(TransactionManager* aoCol) const override;
 };
 

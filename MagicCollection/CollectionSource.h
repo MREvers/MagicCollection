@@ -1,5 +1,4 @@
 #pragma once
-#pragma message ("Starting CollectionSource.h")
 #include "rapidxml-1.13\rapidxml_print.hpp"
 #include "rapidxml-1.13\rapidxml.hpp"
 #include "rapidxml-1.13\rapidxml_utils.hpp"
@@ -17,6 +16,7 @@
 #include "SourceObject.h"
 #include "CollectionItem.h"
 #include "Config.h"
+#include "TryGet.h"
 
 class CollectionItem;
 class Collection;
@@ -35,15 +35,18 @@ public:
    int LoadCard(std::string aszCardName);
 
    // Expose the Collection Object to get copies etc..
-   CollectionItem* GetCardPrototype(int aiCacheIndex);
+   TryGet<CollectionItem> GetCardPrototype(int aiCacheIndex);
+   TryGet<CollectionItem> GetCardPrototype(std::string aszCardName);
 
    // This needs to be called whenever a child collection adds a card.
    // It will let other collections know that they need to check their lists.
    void NotifyNeedToSync(const Address& aAddrForcedSync);
    bool IsSyncNeeded(const Address& aAddrNeedSync);
 
-   std::vector<int> GetCollectionCache(Address aAddrColID, CollectionItemType aColItemType = CollectionItemType::All);
-   std::vector<std::shared_ptr<CopyItem>> GetCollection(Address aAddrColID, CollectionItemType aColItemType = CollectionItemType::All);
+   std::vector<int> GetCollectionCache(
+      Address aAddrColID, CollectionItemType aColItemType = CollectionItemType::All);
+   std::vector<std::shared_ptr<CopyItem>> GetCollection(
+      Address aAddrColID, CollectionItemType aColItemType = CollectionItemType::All);
 
    std::vector<std::string> GetAllCardsStartingWith(std::string aszText);
 
@@ -77,5 +80,3 @@ private:
    char* m_AllCharBuff;
    unsigned int m_iAllCharBuffSize;
 };
-
-#pragma message ("Finish CollectionSource.h")

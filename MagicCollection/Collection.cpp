@@ -240,7 +240,7 @@ Collection::GetCollectionList(MetaTagType atagType, bool aiCollapsed)
    vector<int>::iterator iter_Items = lstCol.begin();
    for (; iter_Items != lstCol.end(); ++iter_Items)
    {
-      CollectionItem* item = m_ptrCollectionSource->
+      TryGet<CollectionItem> item = m_ptrCollectionSource->
 		  GetCardPrototype(*iter_Items);
       vector<shared_ptr<CopyItem>> lstCopies = item->
 		  GetCopiesForCollection(GetIdentifier(), All);
@@ -297,7 +297,7 @@ void Collection::addItem(
 	vector<Tag> alstAttrs, 
 	vector<Tag> alstMetaTags)
 {
-   CollectionItem* item; CopyItem* cItem; string szHash;
+   TryGet<CollectionItem> item; CopyItem* cItem; string szHash;
    
    int iCache = m_ptrCollectionSource->LoadCard(aszName);
 
@@ -323,7 +323,7 @@ Collection::removeItem( string aszName,
    // The copy is already verified to exist at this point
    int iCache = m_ptrCollectionSource->LoadCard(aszName);
 
-   CollectionItem* item = m_ptrCollectionSource->GetCardPrototype(iCache);
+   TryGet<CollectionItem> item = m_ptrCollectionSource->GetCardPrototype(iCache);
 
    item->RemoveCopyItem(aAddrResidentIn, aszIdentifyingHash);
 
@@ -354,7 +354,7 @@ Collection::changeItem( string aszName,
 {
    int iCache = m_ptrCollectionSource->LoadCard(aszName);
 
-   CollectionItem* item = m_ptrCollectionSource->GetCardPrototype(iCache);
+   TryGet<CollectionItem> item = m_ptrCollectionSource->GetCardPrototype(iCache);
    CopyItem* cItem = item->FindCopyItem(aszIdentifyingHash).get();
    if (cItem == nullptr) { return; }
 
@@ -376,8 +376,8 @@ Collection::replaceItem( string aszName,
    int iCache = m_ptrCollectionSource->LoadCard(aszName);
    int iNewCache = m_ptrCollectionSource->LoadCard(aszNewName);
 
-   CollectionItem* item = m_ptrCollectionSource->GetCardPrototype(iCache);
-   CollectionItem* newItem = m_ptrCollectionSource->GetCardPrototype(iNewCache);
+   TryGet<CollectionItem> item = m_ptrCollectionSource->GetCardPrototype(iCache);
+   TryGet<CollectionItem> newItem = m_ptrCollectionSource->GetCardPrototype(iNewCache);
    CopyItem* cItem = item->FindCopyItem(aszIdentifyingHash).get();
    if (cItem == nullptr) { return; }
 
@@ -435,7 +435,7 @@ void Collection::loadMetaTagFile()
       int iRealCard = m_ptrCollectionSource->LoadCard(sudoItem.Name);
       if (iRealCard == -1) { continue; }
 
-      CollectionItem* item = m_ptrCollectionSource->GetCardPrototype(iRealCard);
+      TryGet<CollectionItem> item = m_ptrCollectionSource->GetCardPrototype(iRealCard);
       string szPlainHash = item->GetHash(GetIdentifier(), sudoItem.Identifiers);
 
       // Gets the first matching item resident in this collection.
@@ -590,7 +590,7 @@ void Collection::loadDeltaLine(string aszLine)
    if (iHash != -1 && 
       (iCache = m_ptrCollectionSource->LoadCard(sudoOldItem.Name)) != -1)
    {
-      string szHash; CollectionItem* itemOld; CopyItem* cItem;
+      string szHash; TryGet<CollectionItem> itemOld; CopyItem* cItem;
       
       szHash = sudoOldItem.MetaTags[iHash].second;
       itemOld = m_ptrCollectionSource->GetCardPrototype(iCache);
@@ -608,7 +608,7 @@ void Collection::loadDeltaLine(string aszLine)
          }
          else if ((iNewCache = m_ptrCollectionSource->LoadCard(sudoNewItem.Name)) != -1)
          {
-            CollectionItem* itemNew = m_ptrCollectionSource->
+            TryGet<CollectionItem> itemNew = m_ptrCollectionSource->
                                       GetCardPrototype(iNewCache);
             ReplaceItem( sudoOldItem.Name, 
                          szHash, 

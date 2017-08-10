@@ -232,5 +232,8 @@
     <ClInclude Include="ReplaceAction.h">
       <Filter>Collection\Actions</Filter>
     </ClInclude>
+    <ClInclude Include="TryGet.h">
+      <Filter>Support</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
