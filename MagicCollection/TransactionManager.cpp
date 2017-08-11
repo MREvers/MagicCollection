@@ -87,6 +87,15 @@ TransactionManager::Add(
 }
 
 void 
+TransactionManager::AddFrom(
+   std::string aszName,
+   std::string aszIdentifyingHash,
+   const Address& aResiAddress)
+{
+   m_ptrCollection->addItemFrom(aszName, aszIdentifyingHash, aResiAddress);
+}
+
+void 
 TransactionManager::Remove(
    std::string aszName,
    std::string aszIdentifyingHash,

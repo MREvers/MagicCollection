@@ -4,6 +4,7 @@
 #include "RemoveAction.h"
 #include "ChangeAction.h"
 #include "ReplaceAction.h"
+#include "AddFromAction.h"
 
 using namespace std;
 
@@ -68,6 +69,22 @@ void Collection::AddItem(string aszName,
    addAction.SetName(aszName);
 
    m_ptrTransactionManager->IncludeAction(addAction);
+
+   m_ptrTransactionManager->FinalizeTransaction(abCloseTransaction);
+}
+
+void Collection::AddItemFrom(
+   std::string aszName,
+   std::string aszIdentifyingHash,
+   const Address& aAddress,
+   bool abCloseTransaction = true)
+{
+   AddFromAction afAction;
+   afAction.SetHash(aszIdentifyingHash);
+   afAction.SetName(aszName);
+   afAction.SetResi(aAddress);
+
+   m_ptrTransactionManager->IncludeAction(afAction);
 
    m_ptrTransactionManager->FinalizeTransaction(abCloseTransaction);
 }
@@ -316,6 +333,24 @@ void Collection::addItem(
 }
 
 void 
+Collection::addItemFrom(
+   std::string aszName,
+   std::string aszIdentifyingHash,
+   const Address& aResiAddress)
+{
+   TryGet<CollectionItem> item;
+   std::shared_ptr<CopyItem> cItem;
+
+   item = m_ptrCollectionSource->GetCardPrototype(aszName);
+   if (!item.Good()) { return; }
+
+   cItem = item->FindCopyItem(aszIdentifyingHash, aResiAddress);
+   if (cItem.get() == nullptr) { return; }
+
+   cItem->AddResident(GetIdentifier());
+}
+
+void 
 Collection::removeItem( string aszName, 
                         string aszIdentifyingHash, 
                         Address aAddrResidentIn )
@@ -543,12 +578,37 @@ void Collection::loadInterfaceLine(string aszLine)
 
 void Collection::loadAdditionLine(string aszLine)
 {
+   Address aParentAddress;
+   string szID = "";
    CollectionItem::PseudoIdentifier sudoItem;
+
    CollectionItem::ParseCardLine(aszLine, sudoItem);
 
-   for (size_t i = 0; i < sudoItem.Count; i++)
+   int iFoundAddress = ListHelper::List_Find( string("Parent"),
+                                              sudoItem.MetaTags,
+                                              Config::Instance()->GetTagHelper() );
+   if (iFoundAddress != -1)
    {
-      AddItem(sudoItem.Name, sudoItem.Identifiers, sudoItem.MetaTags);
+      aParentAddress = Address(sudoItem.MetaTags.at(iFoundAddress).second);
+      int iFoundHash = ListHelper::List_Find( string(Config::HashKey),
+                                              sudoItem.MetaTags,
+                                              Config::Instance()->GetTagHelper() );
+      szID = sudoItem.MetaTags.at(iFoundHash).second;
+   }
+
+   if (iFoundAddress == -1 && szID != "" && !(aParentAddress == GetIdentifier()))
+   {
+      for (size_t i = 0; i < sudoItem.Count; i++)
+      {
+         AddItem(sudoItem.Name, sudoItem.Identifiers, sudoItem.MetaTags);
+      }
+   }
+   else
+   {
+      for (size_t i = 0; i < sudoItem.Count; i++)
+      {
+         AddItemFrom(sudoItem.Name, szID, aParentAddress);
+      }
    }
 }
 

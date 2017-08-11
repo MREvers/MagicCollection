@@ -39,6 +39,12 @@ public:
       std::vector<Tag> alstMetaTags = std::vector<Tag>(),
       bool abCloseTransaction = true);
 
+   void AddItemFrom(
+      std::string aszName,
+      std::string aszIdentifyingHash,
+      const Address& aAddress,
+      bool abCloseTransaction = true);
+
    void RemoveItem(
       std::string aszName, 
       std::string aszIdentifyingHash, 
@@ -95,6 +101,11 @@ private:
       std::vector<Tag> alstAttrs, 
       std::vector<Tag> alstMetaTags);
    
+   void addItemFrom(
+      std::string aszName, 
+      std::string aszIdentifyingHash,
+      const Address& aAddress);
+
    void removeItem(
       std::string aszName, 
       std::string aszIdentifyingHash, 
