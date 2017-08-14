@@ -58,7 +58,8 @@ Collection::ChildAdded()
    m_ptrCollectionDetails->IncrementChildCount();
 }
 
-void Collection::AddItem(string aszName,
+void
+Collection::AddItem(string aszName,
    vector<Tag> alstAttrs,
    vector<Tag> alstMetaTags,
    bool abCloseTransaction)
@@ -73,11 +74,12 @@ void Collection::AddItem(string aszName,
    m_ptrTransactionManager->FinalizeTransaction(abCloseTransaction);
 }
 
-void Collection::AddItemFrom(
+void
+Collection::AddItemFrom(
    std::string aszName,
    std::string aszIdentifyingHash,
    const Address& aAddress,
-   bool abCloseTransaction = true)
+   bool abCloseTransaction)
 {
    AddFromAction afAction;
    afAction.SetHash(aszIdentifyingHash);
@@ -89,7 +91,8 @@ void Collection::AddItemFrom(
    m_ptrTransactionManager->FinalizeTransaction(abCloseTransaction);
 }
 
-void Collection::RemoveItem(string aszName, 
+void 
+Collection::RemoveItem(string aszName, 
 	string aszIdentifyingHash, 
 	bool abCloseTransaction)
 {
@@ -103,7 +106,8 @@ void Collection::RemoveItem(string aszName,
    m_ptrTransactionManager->FinalizeTransaction(abCloseTransaction); 
 }
 
-void Collection::ChangeItem(string aszName, 
+void 
+Collection::ChangeItem(string aszName, 
 	string aszIdentifyingHash, 
 	vector<Tag> alstChanges, 
 	vector<Tag> alstMetaChanges, 
@@ -120,7 +124,8 @@ void Collection::ChangeItem(string aszName,
    m_ptrTransactionManager->FinalizeTransaction(abCloseTransaction); 
 }
 
-void Collection::ReplaceItem(
+void 
+Collection::ReplaceItem(
 	string aszName, 
 	string aszIdentifyingHash, 
 	string aszNewName, 
@@ -140,7 +145,8 @@ void Collection::ReplaceItem(
    m_ptrTransactionManager->FinalizeTransaction(abCloseTransaction); 
 }
 
-vector<string> Collection::GetMetaData()
+vector<string> 
+Collection::GetMetaData()
 {
    vector<string> lstRetval;
    lstRetval.push_back("Name=\"" + GetName() + "\"");
@@ -158,7 +164,8 @@ vector<string> Collection::GetMetaData()
    return lstRetval;
 }
 
-void  Collection::SaveCollection()
+void  
+Collection::SaveCollection()
 {
    saveHistory();
 
@@ -167,7 +174,8 @@ void  Collection::SaveCollection()
    saveCollection();
 }
 
-void Collection::LoadCollection(
+void 
+Collection::LoadCollection(
 	string aszFileName, 
 	CollectionFactory* aoFactory)
 {
@@ -236,7 +244,8 @@ void Collection::LoadCollection(
 }
 
 // Returns all the copies impacted by this function.
-void Collection::LoadChanges(vector<string> lstLines)
+void
+Collection::LoadChanges(vector<string> lstLines)
 {
    vector<string>::iterator iter_Lines = lstLines.begin();
    for (; iter_Lines != lstLines.end(); ++iter_Lines)
@@ -266,10 +275,12 @@ Collection::GetCollectionList(MetaTagType atagType, bool aiCollapsed)
       for (; iter_Copy != lstCopies.end(); ++iter_Copy)
       {
          string szHash = (*iter_Copy)->GetHash();
-         int iCounted = ListHelper::List_Find(szHash, lstSeenHashes, fnExtractor);
+         int iCounted = ListHelper::List_Find(szHash, lstSeenHashes,
+                                              fnExtractor);
          if (!aiCollapsed || (iCounted == -1))
          {
-            string szRep = item->GetCardString(iter_Copy->get(), atagType, GetIdentifier());
+            string szRep = item->GetCardString(iter_Copy->get(), atagType, 
+                                               GetIdentifier());
             lstRetVal.push_back(szRep);
             lstSeenHashes.push_back(make_pair(szHash, 1));
          }
@@ -296,7 +307,8 @@ Collection::GetCollectionList(MetaTagType atagType, bool aiCollapsed)
    return lstRetVal;
 }
 
-vector<int> Collection::getCollection()
+vector<int> 
+Collection::getCollection()
 {
    if (m_ptrCollectionSource->IsSyncNeeded(GetIdentifier()))
    {
@@ -309,7 +321,8 @@ vector<int> Collection::getCollection()
    return m_lstItemCacheIndexes;
 }
 
-void Collection::addItem(
+void 
+Collection::addItem(
 	string aszName, 
 	vector<Tag> alstAttrs, 
 	vector<Tag> alstMetaTags)
@@ -341,13 +354,16 @@ Collection::addItemFrom(
    TryGet<CollectionItem> item;
    std::shared_ptr<CopyItem> cItem;
 
-   item = m_ptrCollectionSource->GetCardPrototype(aszName);
+   int iCache = m_ptrCollectionSource->LoadCard(aszName);
+   item = m_ptrCollectionSource->GetCardPrototype(iCache);
    if (!item.Good()) { return; }
 
    cItem = item->FindCopyItem(aszIdentifyingHash, aResiAddress);
    if (cItem.get() == nullptr) { return; }
 
    cItem->AddResident(GetIdentifier());
+
+   registerItem(iCache);
 }
 
 void 
@@ -420,9 +436,11 @@ Collection::replaceItem( string aszName,
    addItem(newItem->GetName(), alstIdChanges, alstMetaChanges);
 }
 
-void Collection::registerItem(int aiCacheIndex)
+void 
+Collection::registerItem(int aiCacheIndex)
 {
    int iFound = ListHelper::List_Find(aiCacheIndex, m_lstItemCacheIndexes);
+
    if (iFound == -1)
    {
       m_lstItemCacheIndexes.push_back(aiCacheIndex);
@@ -581,6 +599,7 @@ void Collection::loadAdditionLine(string aszLine)
    Address aParentAddress;
    string szID = "";
    CollectionItem::PseudoIdentifier sudoItem;
+   bool bThisIsParent = true;
 
    CollectionItem::ParseCardLine(aszLine, sudoItem);
 
@@ -594,21 +613,27 @@ void Collection::loadAdditionLine(string aszLine)
                                               sudoItem.MetaTags,
                                               Config::Instance()->GetTagHelper() );
       szID = sudoItem.MetaTags.at(iFoundHash).second;
+      bThisIsParent = !(aParentAddress == GetIdentifier());
    }
 
-   if (iFoundAddress == -1 && szID != "" && !(aParentAddress == GetIdentifier()))
-   {
-      for (size_t i = 0; i < sudoItem.Count; i++)
-      {
-         AddItem(sudoItem.Name, sudoItem.Identifiers, sudoItem.MetaTags);
-      }
-   }
-   else
+   // If the ID is specified, then we assume the card already exists.
+   if (!bThisIsParent && // This is not the parent
+       szID != "")       // and the id was specified.
    {
       for (size_t i = 0; i < sudoItem.Count; i++)
       {
          AddItemFrom(sudoItem.Name, szID, aParentAddress);
       }
+   }
+   // If the parent was not specified, or this was designated the parent
+   // without an ID, then add it as a new card.
+   else
+   {
+      for (size_t i = 0; i < sudoItem.Count; i++)
+      {
+         AddItem(sudoItem.Name, sudoItem.Identifiers, sudoItem.MetaTags);
+      }
+
    }
 }
 

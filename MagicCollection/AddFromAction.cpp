@@ -17,12 +17,16 @@ AddFromAction::Execute(TransactionManager* aoCol)
 {
    m_ToAddress = aoCol->GetCollection()->GetIdentifier();
    aoCol->AddFrom(m_szName, m_szIdentifyingHash, m_FromAddress);
+
+   return true;
 }
 
 bool 
 AddFromAction::Rollback(TransactionManager* aoCol)
 {
    aoCol->Remove(m_szName, m_szIdentifyingHash, m_ToAddress);
+
+   return true;
 }
 
 std::shared_ptr<Action> 
