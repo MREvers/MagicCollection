@@ -34,6 +34,11 @@ public:
       std::string aszName, 
       std::vector<Tag> alstAttrs, 
       std::vector<Tag> alstMetaTags);
+
+   void AddFrom(
+      std::string aszName,
+      std::string aszIdentifyingHash,
+      const Address& aResiAddress);
    
    void Remove(
       std::string aszName, 

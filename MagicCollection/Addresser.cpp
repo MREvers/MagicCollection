@@ -49,7 +49,7 @@ Address::Address(std::string aszColBase, unsigned int aiSubAddress)
 }
 
 string
-Address::GetFullAddress()
+Address::GetFullAddress() const
 {
    std::string szFullString = Main;
    bool first = true;

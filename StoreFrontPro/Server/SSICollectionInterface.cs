@@ -11,7 +11,7 @@ namespace StoreFrontPro.Server
 
         public class CollectionIFace
         {
-            public void SaveCollection(string aszCollectionName)
+            public void SaveCollectionAS(string aszCollectionName)
             {
                 singleton.enqueueService(() =>
                 {
@@ -24,7 +24,9 @@ namespace StoreFrontPro.Server
                 //SCI.SetBaselineHistory(aszCollection);
             }
 
-            public void LoadBulkChanges(string aszCollection, List<string> alstChanges, Action aTask, bool UICallback = false)
+            public void LoadBulkChangesAS(
+                string aszCollection, List<string> alstChanges,
+                Action aTask, bool UICallback = false)
             {
                 singleton.enqueueService(() =>
                 {
@@ -37,24 +39,34 @@ namespace StoreFrontPro.Server
 
             }
 
-            public void GetCollectionMetaData(string aszCollectionName, Action<List<string>> aCallback, bool UICallback)
+            public void GetCollectionMetaDataAS(
+                string aszCollectionName, Action<List<string>> aCallback, 
+                bool UICallback)
             {
-                singleton.enqueueService(()=> {
+                singleton.enqueueService(() =>
+                {
                     aCallback(SCI.GetCollectionMetaData(aszCollectionName));
                 }, UICallback);
             }
 
-            public List<string> GetCollectionMetaDataSync(string aszColID)
+            public List<string> GetCollectionMetaData(string aszColID)
             {
-                    return SCI.GetCollectionMetaData(aszColID);
+                return SCI.GetCollectionMetaData(aszColID);
             }
 
-            public void GetCollectionList(string aszColID, bool abCollapsed, Action<List<string>> aCallback, bool UICallback = false)
+            public void GetCollectionListAS(
+                string aszColID, bool abCollapsed,
+                Action<List<string>> aCallback, bool UICallback = false)
             {
                 singleton.enqueueService(() =>
                 {
                     aCallback(SCI.GetCollectionList(aszColID, abCollapsed));
                 }, UICallback);
+            }
+
+            public List<string> GetCollectionList(string aszColID, bool abCollapsed)
+            {
+                return SCI.GetCollectionList(aszColID, abCollapsed);
             }
         }
 

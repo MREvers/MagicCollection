@@ -13,7 +13,7 @@ public:
    Address(std::string aszColAddress);
    Address(std::string aszColBase, unsigned int aiSubAddress);
 
-   std::string GetFullAddress();
+   std::string GetFullAddress() const;
 
    bool operator==(const Address& rhs) const;
    bool operator<(const Address& rhs) const;

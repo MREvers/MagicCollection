@@ -77,6 +77,12 @@ CollectionDetails::SetAddress(const Address& aAddress)
 void 
 CollectionDetails::AssignAddress(std::string aszStringAddress)
 {
+   if (aszStringAddress == "")
+   {
+      Addresser addr;
+      aszStringAddress = std::to_string(addr.GetRandom() % 1000000);
+   }
+
    delete m_ptrAddress;
    m_ptrAddress = new Address(aszStringAddress);
 }

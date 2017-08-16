@@ -114,7 +114,6 @@
     <ClCompile Include="CollectionTracker.cpp">
       <Filter>Collection\DataHelpers</Filter>
     </ClCompile>
-    <ClCompile Include="CollectionDeltaClass.cpp" />
     <ClCompile Include="TransactionManager.cpp">
       <Filter>Collection\DataHelpers</Filter>
     </ClCompile>
@@ -131,6 +130,12 @@
       <Filter>Collection\Actions</Filter>
     </ClCompile>
     <ClCompile Include="ReplaceAction.cpp">
+      <Filter>Collection\Actions</Filter>
+    </ClCompile>
+    <ClCompile Include="CollectionDeltaClass.cpp">
+      <Filter>Collection\DataHelpers</Filter>
+    </ClCompile>
+    <ClCompile Include="AddFromAction.cpp">
       <Filter>Collection\Actions</Filter>
     </ClCompile>
   </ItemGroup>
@@ -213,7 +218,6 @@
     <ClInclude Include="CollectionTracker.h">
       <Filter>Collection\DataHelpers</Filter>
     </ClInclude>
-    <ClInclude Include="CollectionDeltaClass.h" />
     <ClInclude Include="TransactionManager.h">
       <Filter>Collection\DataHelpers</Filter>
     </ClInclude>
@@ -230,6 +234,15 @@
       <Filter>Collection\Actions</Filter>
     </ClInclude>
     <ClInclude Include="ReplaceAction.h">
+      <Filter>Collection\Actions</Filter>
+    </ClInclude>
+    <ClInclude Include="TryGet.h">
+      <Filter>Support</Filter>
+    </ClInclude>
+    <ClInclude Include="CollectionDeltaClass.h">
+      <Filter>Collection\DataHelpers</Filter>
+    </ClInclude>
+    <ClInclude Include="AddFromAction.h">
       <Filter>Collection\Actions</Filter>
     </ClInclude>
   </ItemGroup>

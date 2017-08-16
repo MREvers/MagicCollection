@@ -17,13 +17,6 @@ AddAction::~AddAction()
 bool 
 AddAction::Execute(TransactionManager* aoCol)
 {
-   CollectionSource* refSource = aoCol->GetSource();
-   Collection* refCollection = aoCol->GetCollection();
-
-   int iItem = refSource->LoadCard(m_szName);
-   CollectionItem* refItem = refSource->GetCardPrototype(iItem);
-   if (refItem == nullptr) { return false; }
-
    aoCol->Add(m_szName, m_lstIDs, m_lstMetas);
 
    return true;
@@ -32,22 +25,21 @@ AddAction::Execute(TransactionManager* aoCol)
 bool 
 AddAction::Rollback(TransactionManager* aoCol)
 {
-   std::unique_ptr<RemoveAction> rmAction;
+   std::shared_ptr<Action> rmAction;
 
-   rmAction = std::unique_ptr<RemoveAction>(GetUndoAction(aoCol));
+   rmAction = getUndoAction(aoCol);
    return rmAction->Execute(aoCol);
 }
 
 // It is the responsibility of the caller to destroy the action.
-RemoveAction* 
-AddAction::GetUndoAction(TransactionManager* aoCol) const
+std::shared_ptr<Action>
+AddAction::getUndoAction(TransactionManager* aoCol) const
 {
    Collection* refCollection = aoCol->GetCollection();
    CollectionSource* refSource = aoCol->GetSource();
 
-   int iItem = refSource->LoadCard(m_szName);
-   CollectionItem* refItem = refSource->GetCardPrototype(iItem);
-   if (refItem == nullptr) { return false; }
+   TryGet<CollectionItem> refItem = refSource->GetCardPrototype(m_szName);
+   if (!refItem.Good()) { return false; }
    
    std::string szHashRM;  
    szHashRM = refItem->GetHash( refCollection->GetIdentifier(),
@@ -58,14 +50,14 @@ AddAction::GetUndoAction(TransactionManager* aoCol) const
    rmRetVal->SetResi(refCollection->GetIdentifier());
    rmRetVal->SetName(m_szName);
 
-   return rmRetVal;
+   return std::shared_ptr<Action>(rmRetVal);
 }
 
-Action* 
+std::shared_ptr<Action> 
 AddAction::GetCopy() const
 {
-   AddAction* ptCopy = new AddAction(*this);
-   return ptCopy;
+   Action* ptCopy = new AddAction(*this);
+   return std::shared_ptr<Action>(ptCopy);
 }
 
 void 

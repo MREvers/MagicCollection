@@ -4,6 +4,7 @@
 #include <map>
 #include <iterator>
 #include <string>
+#include <memory>
 
 
 
@@ -29,5 +30,5 @@ public:
 
 private:
    bool m_bIsOpen;
-   std::vector<Action*> m_lstActions;
+   std::vector<std::shared_ptr<Action>> m_lstActions;
 };

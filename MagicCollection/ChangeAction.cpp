@@ -16,9 +16,8 @@ ChangeAction::Execute(TransactionManager* aoCol)
    CollectionSource* refSource = aoCol->GetSource();
    Collection* refCollection = aoCol->GetCollection();
 
-   int iItem = refSource->LoadCard(m_szName);
-   CollectionItem* refItem = refSource->GetCardPrototype(iItem);
-   if (refItem == nullptr) { return false; }
+   TryGet<CollectionItem> refItem = refSource->GetCardPrototype(m_szName);
+   if (!refItem.Good()) { return false; }
 
    std::shared_ptr<CopyItem> refCItem;
    refCItem = refItem->FindCopyItem( m_szIdentifyingHash, 
@@ -40,17 +39,17 @@ ChangeAction::Execute(TransactionManager* aoCol)
 bool 
 ChangeAction::Rollback(TransactionManager* aoCol)
 {
-   std::unique_ptr<ChangeAction> chAction;
+   std::shared_ptr<Action> chAction;
 
-   chAction = std::unique_ptr<ChangeAction>(GetUndoAction(aoCol));
+   chAction = getUndoAction(aoCol);
    return chAction->Execute(aoCol);
 }
 
-Action*
+std::shared_ptr<Action>
 ChangeAction::GetCopy() const
 {
    ChangeAction* ptCopy = new ChangeAction(*this);
-   return ptCopy;
+   return std::shared_ptr<Action>((Action*)ptCopy);
 }
 
 void 
@@ -77,8 +76,8 @@ ChangeAction::SetMeta(std::vector<Tag> alstMeta)
    m_lstMetaChanges = alstMeta;
 }
 
-ChangeAction* 
-ChangeAction::GetUndoAction(TransactionManager* aoCol) const
+std::shared_ptr<Action>
+ChangeAction::getUndoAction(TransactionManager* aoCol) const
 {
    ChangeAction* chAction = new ChangeAction();
    chAction->SetHash(m_szUndoIdentifyingHash);
@@ -86,5 +85,5 @@ ChangeAction::GetUndoAction(TransactionManager* aoCol) const
    chAction->SetMeta(m_lstUndoMeta);
    chAction->SetName(m_szName);
 
-   return chAction;
+   return std::shared_ptr<Action>(chAction);
 }

@@ -13,7 +13,7 @@ namespace StoreFrontPro.Server
 {
     public partial class CollectionModel
     {
-        private bool _IsCollapsedCollection = false;
+        private bool _IsCollapsedCollection;
         public bool IsCollapsedCollection
         {
             get { return _IsCollapsedCollection; }
@@ -23,20 +23,17 @@ namespace StoreFrontPro.Server
         public string CollectionName;
         public string ID;
         public ObservableCollection<CardModel> CollectionItems;
-        public List<CardModel> LstLastQuery; // NOT CURRENTLY USED
 
         private bool m_bHardRebuild = false;
 
         public CollectionModel(string aszID)
         {
             ID = aszID;
-
-            analyzeMetaData(ServerInterface.Collection.GetCollectionMetaDataSync(ID));
-
+            _IsCollapsedCollection = true;
             CollectionItems = new ObservableCollection<CardModel>();
-            LstLastQuery = new List<CardModel>();
 
-            Sync();
+            // Synchonously build this collection.
+            Sync(Async: false);
         }
 
         public void CreateChildCollection(string aszNewName)
@@ -44,18 +41,30 @@ namespace StoreFrontPro.Server
             ServerInterface.Server.CreateCollection(aszNewName, ID);
         }
 
-        public void Sync(Action aCallback = null)
+        public void Sync(bool Async = true, Action aCallback = null)
         {
-            ServerInterface.Collection.GetCollectionMetaData(
-                ID,
-                analyzeMetaData,
-                true);
+            if (Async)
+            {
+                ServerInterface.Collection.GetCollectionMetaDataAS(
+                    ID, analyzeMetaData, true);
 
-            ServerInterface.Collection.GetCollectionList(
-                ID,
-                IsCollapsedCollection,
-                (alstCol) => { setCollectionModels(alstCol, aCallback); },
-                true);
+                ServerInterface.Collection.GetCollectionListAS(
+                    ID, IsCollapsedCollection,
+                    (alstCol) => { setCollectionModels(alstCol, aCallback); },
+                    true);
+            }
+            else
+            {
+                List<string> lstMDs   = ServerInterface.
+                                        Collection.
+                                        GetCollectionMetaData(ID);
+                analyzeMetaData(lstMDs);
+
+                List<string> lstItems = ServerInterface.
+                                        Collection.
+                                        GetCollectionList(ID, _IsCollapsedCollection);
+                setCollectionModels(lstItems);
+            }
 
         }
 
@@ -66,49 +75,28 @@ namespace StoreFrontPro.Server
 
         public void SaveCollection()
         {
-            ServerInterface.Collection.SaveCollection(ID);
+            ServerInterface.Collection.SaveCollectionAS(ID);
         }
 
         public void SubmitBulkEdits(List<string> alstEdits, Action aCallBack = null)
         {
-            ServerInterface.Collection.LoadBulkChanges(
-                this.ID,
-                alstEdits,
-                () => { Sync(aCallBack); },
-                false);
-        }
-
-        public List<string> GetAllCardsStartingWith(string aszString)
-        {
-            List<CardModel> LstStartingStrings = new List<CardModel>();
-            List<CardModel> LstContainingStrings = new List<CardModel>();
-            foreach (CardModel CM in CollectionItems)
-            {
-                string szShortName = CM.CardName.ToLower();
-                if (szShortName.Contains(aszString))
-                {
-                    if (szShortName.Substring(0, aszString.Length) == aszString)
-                    {
-                        LstStartingStrings.Add(CM);
-                    }
-                    else
-                    {
-                        LstContainingStrings.Add(CM);
-                    }
-                }
-            }
-
-            LstLastQuery = LstStartingStrings.Concat(LstContainingStrings).ToList();
-
-            return LstLastQuery.Select(x => x.CardNameLong).ToList();
+            ServerInterface.Collection.LoadBulkChangesAS(
+                this.ID, alstEdits,
+                () => { Sync(true, aCallBack); }, false);
         }
 
         private void setCollectionModels(List<string> aLstCards)
         {
             // Calculate differences.
-            List<string> lstHashesAndCounts = aLstCards.Select(x => fastExtractHash(x, true)).ToList();
-            List<string> lstNewHashes = lstHashesAndCounts.Select(x => x.Split(',')[1]).ToList();
-            List<string> lstNewCounts = lstHashesAndCounts.Select(x => x.Split(',')[0] == "" ? (1).ToString() : x.Split(',')[0]).ToList();
+            List<string> lstHashesAndCounts = aLstCards
+                .Select(x => fastExtractHash(x, true)).ToList();
+
+            List<string> lstNewHashes = lstHashesAndCounts
+                .Select(x => x.Split(',')[1]).ToList();
+
+            List<string> lstNewCounts = lstHashesAndCounts
+                .Select(x => x.Split(',')[0] == "" ? (1).ToString() : x.Split(',')[0]).ToList();
+
             DisableEvents(CollectionItems);
 
             List<CardModel> lstRemoves = new List<CardModel>();
@@ -120,7 +108,9 @@ namespace StoreFrontPro.Server
                     string szTargetHash = cm.GetMetaTag("__hash");
                     int iFound = lstNewHashes.IndexOf(szTargetHash);
                     int iCount;
-                    if (iFound != -1 && int.TryParse(lstNewCounts[iFound], out iCount) && iCount == cm.Count)
+                    if (iFound != -1 &&
+                        int.TryParse(lstNewCounts[iFound], out iCount) &&
+                        iCount == cm.Count)
                     {
                         // These CMs stay in the list
                         lstNewHashes.RemoveAt(iFound);

@@ -1,30 +1,29 @@
 #pragma once
-#include <string>
-#include <vector>
 #include "Action.h"
+#include <vector>
+#include "Addresser.h"
 
-class RemoveAction;
-class Collection;
-
-class AddAction : public Action
+class AddFromAction : public Action
 {
 public:
-   AddAction();
-   ~AddAction();
-
+   AddFromAction();
+   ~AddFromAction();
+   
    bool Execute(TransactionManager* aoCol) override;
    bool Rollback(TransactionManager* aoCol) override;
 
    std::shared_ptr<Action> GetCopy() const override;
 
    void SetName(std::string aszName);
-   void SetIDs(const std::vector<Tag>& alstIDs);
-   void SetMeta(const std::vector<Tag>& alstMetas);
+   void SetHash(std::string aszHash);
+   void SetResi(const Address& aAddress);
 
 private:
    std::string m_szName;
-   std::vector<Tag> m_lstIDs;
-   std::vector<Tag> m_lstMetas;
+   std::string m_szIdentifyingHash;
+   Address m_FromAddress;
+
+   Address m_ToAddress;
 
    std::shared_ptr<Action> getUndoAction(TransactionManager* aoCol) const override;
 };
