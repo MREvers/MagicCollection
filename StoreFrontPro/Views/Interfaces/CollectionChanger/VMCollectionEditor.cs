@@ -36,7 +36,8 @@ namespace StoreFrontPro.Views.Interfaces.CollectionChanger
 
             MSuggestionsSearchBox ssBoxMA = new MSuggestionsSearchBox(
                 ActionName: "Add Card",
-                SearchCollection: (szSearch) => { return ServerInterface.Server.GetAllCardsStartingWith(szSearch); });
+                SearchCollection: (szSearch) => 
+                { return ServerInterface.Server.GetAllCardsStartingWith(szSearch); });
             VMSuggestionsSearchBox ssBoxVMA = new VMSuggestionsSearchBox(ssBoxMA);
             AddCardSearchBox = new VSuggestionsSearchBox() { DataContext = ssBoxVMA };
             ssBoxVMA.DisplayEvent += eAddCardEventHandler;

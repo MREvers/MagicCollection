@@ -9,86 +9,86 @@ using StoreFrontPro.Tools;
 
 namespace StoreFrontPro.Views.CollectionViews.Cube
 {
-    class MCardGroupList
-    {
-        private ObservableCollection<CardModel> _ungroupedList;
-        public ObservableCollection<CardModel> GroupedList {
-            get
+   class MCardGroupList
+   {
+      private ObservableCollection<CardModel> _ungroupedList;
+      public ObservableCollection<CardModel> GroupedList
+      {
+         get { return getFilteredList(_ungroupedList); }
+      }
+
+      public string GroupName;
+      public List<string> ExpectedAttributes;
+      private string m_szFilteringAttribute;
+      private List<string> m_szAttributeSet;
+
+      public MCardGroupList(string FilteredAttribute, string ExpectedAttribute, List<string> AttributeSet, ObservableCollection<CardModel> BaseList)
+      {
+         _ungroupedList = BaseList;
+
+         m_szFilteringAttribute = FilteredAttribute;
+
+         // Split the expected attributes on '/'
+         ExpectedAttributes = ExpectedAttribute.Split('\\').ToList();
+
+         m_szAttributeSet = AttributeSet;
+
+         GroupName = ExpectedAttribute;
+      }
+
+      // Can eventually use a strategy pattern to decide how to filter. TODO
+      private ObservableCollection<CardModel> getFilteredList(ObservableCollection<CardModel> alstList)
+      {
+         return filterListOnIdentityAndCMC(alstList);
+      }
+
+
+      public ObservableCollection<CardModel> filterListOnIdentityAndCMC(ObservableCollection<CardModel> alstNew)
+      {
+         List<CardModel> lstRetVal = new List<CardModel>();
+
+         foreach (CardModel oCardModel in alstNew)
+         {
+            string szKeyAttr = oCardModel.GetAttr(m_szFilteringAttribute);
+
+            bool isNotElement = false;
+            foreach (string attr in m_szAttributeSet)
             {
-                return getFilteredList(_ungroupedList);
-            }
-        }
-
-        public string GroupName;
-        public List<string> ExpectedAttributes;
-        private string m_szFilteringAttribute;
-        private List<string> m_szAttributeSet;
-
-        public MCardGroupList(string FilteredAttribute, string ExpectedAttribute, List<string> AttributeSet, ObservableCollection<CardModel> BaseList)
-        {
-
-            _ungroupedList = BaseList;
-
-            m_szFilteringAttribute = FilteredAttribute;
-
-            // Split the expected attributes on '/'
-            ExpectedAttributes = ExpectedAttribute.Split('\\').ToList();
-
-            m_szAttributeSet = AttributeSet;
-
-            GroupName = ExpectedAttribute;
-        }
-
-        // Can eventually use a strategy pattern to decide how to filter. TODO
-        private ObservableCollection<CardModel> getFilteredList(ObservableCollection<CardModel> alstList)
-        {
-            return filterListOnIdentityAndCMC(alstList);
-        }
-
-
-        public ObservableCollection<CardModel> filterListOnIdentityAndCMC(ObservableCollection<CardModel> alstNew)
-        {
-            List<CardModel> lstRetVal = new List<CardModel>();
-
-            foreach (CardModel oCardModel in alstNew)
-            {
-                string szKeyAttr = oCardModel.GetAttr(m_szFilteringAttribute);
-
-                bool isNotElement = false;
-                foreach(string attr in m_szAttributeSet)
-                {
-                    isNotElement |= ExpectedAttributes.Contains(attr) != szKeyAttr.Contains(attr);
-                }
-
-                if (!isNotElement)
-                {
-                    lstRetVal.Add(oCardModel);
-                }
+               isNotElement |= ExpectedAttributes.Contains(attr) != szKeyAttr.Contains(attr);
             }
 
-            ObservableCollection<CardModel> lstRealRetVal = new ObservableCollection<CardModel>();
-            foreach (CardModel cm in lstRetVal.OrderBy(x => CMC(x)).ThenBy(x => x.GetIdealIdentifier())) { lstRealRetVal.Add(cm); }
-
-            return lstRealRetVal;
-        }
-
-        private int CMC(CardModel x)
-        {
-            int iCMC=0;
-            int iNumSpecs = 0;
-            string szMC = x.GetAttr("manaCost");
-            if (!string.IsNullOrEmpty(szMC))
+            if (!isNotElement)
             {
-                int iSpecStart = Math.Max(szMC.IndexOf('}'), 0);
-                if (!int.TryParse(szMC.Substring(1, iSpecStart - 1), out iCMC))
-                {
-                    iCMC = 0;
-                }
+               lstRetVal.Add(oCardModel);
+            }
+         }
 
-                iNumSpecs = szMC.Count((c) => c == '{') - 1;
+         ObservableCollection<CardModel> lstRealRetVal = new ObservableCollection<CardModel>();
+         foreach (CardModel cm in lstRetVal.OrderBy(x => CMC(x)).ThenBy(x => x.GetIdealIdentifier()))
+         {
+            lstRealRetVal.Add(cm);
+         }
+
+         return lstRealRetVal;
+      }
+
+      private int CMC(CardModel x)
+      {
+         int iCMC = 0;
+         int iNumSpecs = 0;
+         string szMC = x.GetAttr("manaCost");
+         if (!string.IsNullOrEmpty(szMC))
+         {
+            int iSpecStart = Math.Max(szMC.IndexOf('}'), 0);
+            if (!int.TryParse(szMC.Substring(1, iSpecStart - 1), out iCMC))
+            {
+               iCMC = 0;
             }
 
-            return iCMC + iNumSpecs;
-        }
-    }
+            iNumSpecs = szMC.Count((c) => c == '{') - 1;
+         }
+
+         return iCMC + iNumSpecs;
+      }
+   }
 }
