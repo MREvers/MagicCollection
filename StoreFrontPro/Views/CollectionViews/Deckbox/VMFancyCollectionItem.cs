@@ -12,54 +12,58 @@ using System.Windows.Media;
 
 namespace StoreFrontPro.Views.CollectionViews.Deckbox
 {
-    class VMFancyCollectionItem : ViewModel<CardModel>
-    {
-        public List<string> LST_TEMP_IMPORTANT_ATTRS = new List<string>()
+   class VMFancyCollectionItem : ViewModel<CardModel>
+   {
+      public List<string> LST_TEMP_IMPORTANT_ATTRS = new List<string>()
         {
             "manaCost",
             "set"
         };
 
-        public int Columns { get; set; } = 3;
+      public int Columns { get; set; } = 3;
 
-        public ObservableCollection<UIElement> DisplayedProperties { get; set; } = new ObservableCollection<UIElement>();
+      public ObservableCollection<UIElement> DisplayedProperties { get; set; } = new ObservableCollection<UIElement>();
 
-        public VMFancyCollectionItem(CardModel Model, int Columns = 3) : base(Model)
-        {
-            this.Columns = Columns;
-            SyncWithModel();
-        }
+      public VMFancyCollectionItem(CardModel Model, string RoutingName, int Columns = 3) : base(Model, RoutingName)
+      {
+         this.Columns = Columns;
+         SyncWithModel();
+      }
 
-        public void SyncWithModel()
-        {
-            DisplayedProperties.Clear();
+      public void SyncWithModel()
+      {
+         DisplayedProperties.Clear();
 
-            if (Columns != 1)
+         if (Columns != 1)
+         {
+            DisplayedProperties.Add(new TextBox() { Text = "x" + Model.Count, IsReadOnly = true });
+            DisplayedProperties.Add(new TextBox() { Text = Model.CardName, IsReadOnly = true });
+            foreach (string szKey in LST_TEMP_IMPORTANT_ATTRS)
             {
-                DisplayedProperties.Add(new TextBox() { Text = "x" + Model.Count, IsReadOnly = true });
-                DisplayedProperties.Add(new TextBox() { Text = Model.CardName, IsReadOnly = true });
-                foreach (string szKey in LST_TEMP_IMPORTANT_ATTRS)
-                {
-                    if (szKey == "manaCost")
-                    {
-                        VMManaViewer manaViewerVM = new VMManaViewer(Model.GetAttr(szKey));
-                        VManaViewer manaViewerV = new VManaViewer();
-                        manaViewerV.DataContext = manaViewerVM;
-                        DisplayedProperties.Add(manaViewerV);
-                    }
-                    else
-                    {
-                        DisplayedProperties.Add(new TextBox() { Text = Model.GetAttr(szKey), IsReadOnly = true });
-                    }
-                }
+               if (szKey == "manaCost")
+               {
+                  VMManaViewer manaViewerVM = new VMManaViewer(Model.GetAttr(szKey), "");
+                  VManaViewer manaViewerV = new VManaViewer();
+                  manaViewerV.DataContext = manaViewerVM;
+                  DisplayedProperties.Add(manaViewerV);
+               }
+               else
+               {
+                  DisplayedProperties.Add(new TextBox() { Text = Model.GetAttr(szKey), IsReadOnly = true });
+               }
             }
-            else
-            {
-                DisplayedProperties.Add(new TextBox() { Text = Model.CardName, IsReadOnly = true });
-            }
-            
-        }
+         }
+         else
+         {
+            DisplayedProperties.Add(new TextBox() { Text = Model.CardName, IsReadOnly = true });
+         }
+      }
 
- 
-    }
+      #region IViewModel
+      public override void ModelUpdated()
+      {
+         throw new NotImplementedException();
+      }
+      #endregion
+   }
 }

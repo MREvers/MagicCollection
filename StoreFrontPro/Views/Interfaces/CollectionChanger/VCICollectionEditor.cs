@@ -11,10 +11,10 @@ namespace StoreFrontPro.Views.Interfaces.CollectionChanger
         public const string Accept = "Accept";
         public const string Cancel = "Cancel";
 
-        private Action m_AcceptRelay;
-        private Action m_CancelRelay;
+        private Func<object, Action> m_AcceptRelay;
+        private Func<object, Action> m_CancelRelay;
 
-        public VCICollectionEditor(Action Accept, Action Cancel)
+        public VCICollectionEditor(Func<object,Action> Accept, Func<object,Action> Cancel)
         {
             m_AcceptRelay = Accept;
             m_CancelRelay = Cancel;
@@ -25,15 +25,15 @@ namespace StoreFrontPro.Views.Interfaces.CollectionChanger
             return typeof(VMCollectionEditor);
         }
 
-        public bool TryInvoke(string Key, object[] args)
+        public bool TryInvoke(object Caller, string Key, object[] args)
         {
             if (Key == Accept)
             {
-                m_AcceptRelay?.Invoke();
+                m_AcceptRelay?.Invoke(Caller).Invoke();
             }
             else
             {
-                m_CancelRelay?.Invoke();
+                m_CancelRelay?.Invoke(Caller).Invoke();
             }
 
             return true;

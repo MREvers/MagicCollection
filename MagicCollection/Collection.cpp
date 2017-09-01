@@ -153,6 +153,7 @@ Collection::GetMetaData()
 
    lstRetval.push_back("ID=\"" + GetIdentifier().GetFullAddress() + "\"");
 
+   // For Each tagged item, produces "LongName : MetaData"
    for each(auto metaData in m_lstTaggedItems)
    {
 	  string szMetaData = metaData.first + ": {" +

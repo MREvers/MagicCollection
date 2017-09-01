@@ -7,43 +7,35 @@ using System.Threading.Tasks;
 
 namespace StoreFrontPro.Views.CollectionViews.Deckbox
 {
-    class VCICollectionDeckBox : IViewComponentInterface
-    {
-        public const string SwitchToCube = "SwitchToCube";
-        public const string ChildCreated = "ChildCreated";
+   class VCICollectionDeckBox : IViewComponentInterface
+   {
+      public const string SwitchToCube = "SwitchToCube";
 
-        private Action<CollectionModel> m_SwitchToCubeRelay;
-        private Action m_CreatedChildRelay;
+      private Func<object, Action<CollectionModel>> m_SwitchToCubeRelay;
 
-        public VCICollectionDeckBox(Action<CollectionModel> SwitchToCube, Action ChildCreated)
-        {
-            m_SwitchToCubeRelay = SwitchToCube;
-            m_CreatedChildRelay = ChildCreated;
-        }
+      public VCICollectionDeckBox(Func<object, Action<CollectionModel>> SwitchToCube)
+      {
+         m_SwitchToCubeRelay = SwitchToCube;
+      }
 
-        public Type GetInterfaceType()
-        {
-            return typeof(VMCollectionDeckBox);
-        }
+      public Type GetInterfaceType()
+      {
+         return typeof(VMCollectionDeckBox);
+      }
 
-        public bool TryInvoke(string Key, object[] args)
-        {
-            if (Key == SwitchToCube)
+      public bool TryInvoke(object Caller, string Key, object[] args)
+      {
+         if (Key == SwitchToCube)
+         {
+            if (args?[0] is CollectionModel)
             {
-                if (args?[0] is CollectionModel)
-                {
-                    CollectionModel paramOne = args[0] as CollectionModel;
-                    m_SwitchToCubeRelay?.Invoke(paramOne);
-                    return true;
-                }
+               CollectionModel paramOne = args[0] as CollectionModel;
+               m_SwitchToCubeRelay?.Invoke(Caller).Invoke(paramOne);
+               return true;
             }
-            else if (Key == ChildCreated)
-            {
-                m_CreatedChildRelay?.Invoke();
-                return true;
-            }
+         }
 
-            return false;
-        }
-    }
+         return false;
+      }
+   }
 }

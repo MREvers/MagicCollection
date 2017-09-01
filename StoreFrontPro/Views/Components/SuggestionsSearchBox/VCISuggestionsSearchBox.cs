@@ -6,30 +6,31 @@ using System.Threading.Tasks;
 
 namespace StoreFrontPro.Views.Components.SuggestionsSearchBox
 {
-    class VCISuggestionsSearchBox : IViewComponentInterface
-    {
-        public const string OK = "OK";
+   class VCISuggestionsSearchBox : IViewComponentInterface
+   {
+      public const string OK = "OK";
 
-        private Action m_OKRelay;
+      private Func<object, Action<string>> m_OKRelay;
 
-        public VCISuggestionsSearchBox(Action OK)
-        {
-            m_OKRelay = OK;
-        }
+      public VCISuggestionsSearchBox(Func<object, Action<string>> OK)
+      {
+         m_OKRelay = OK;
+      }
 
-        public Type GetInterfaceType()
-        {
-            return typeof(VMSuggestionsSearchBox);
-        }
+      public Type GetInterfaceType()
+      {
+         return typeof(VMSuggestionsSearchBox);
+      }
 
-        public bool TryInvoke(string Key, object[] args)
-        {
-            if (Key == OK)
-            {
-                m_OKRelay?.Invoke();
-                return true;
-            }
-            return false;
-        }
-    }
+      public bool TryInvoke(object Caller, string Key, object[] args)
+      {
+         if (Key == OK)
+         {
+            string szRoutingName = args?[0] as string ?? "";
+            m_OKRelay?.Invoke(Caller).Invoke(szRoutingName);
+            return true;
+         }
+         return false;
+      }
+   }
 }

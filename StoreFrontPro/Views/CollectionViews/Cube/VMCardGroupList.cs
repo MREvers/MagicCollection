@@ -12,82 +12,91 @@ using System.Windows.Input;
 using StoreFrontPro.Tools;
 
 namespace StoreFrontPro.Views.CollectionViews.Cube
-{ 
-    class VMCardGroupList : ViewModel<MCardGroupList>
-    {
-        public string GroupName { get; set; }
-        public ObservableCollection<ListViewItem> CategoryList { get; set; } = new ObservableCollection<ListViewItem>() { };
+{
+   class VMCardGroupList : ViewModel<MCardGroupList>
+   {
+      private const string cszCardImageDisplayerName = "CIDN";
 
-        private VCardImageDisplayer _ToolTipDisplay = null;
-        public VCardImageDisplayer ToolTipDisplay
-        {
-            get { return _ToolTipDisplay; }
-            set { _ToolTipDisplay = value; OnPropertyChanged(); }
-        }
+      public string GroupName { get; set; }
+      public ObservableCollection<ListViewItem> CategoryList { get; set; } = new ObservableCollection<ListViewItem>() { };
 
-        public bool IsFullSize { get; set; } = false;
+      private VCardImageDisplayer _ToolTipDisplay = null;
+      public VCardImageDisplayer ToolTipDisplay
+      {
+         get { return _ToolTipDisplay; }
+         set { _ToolTipDisplay = value; OnPropertyChanged(); }
+      }
 
-        public VMCardGroupList(MCardGroupList Model, bool IsFullSize = false) : base(Model)
-        {
-            GroupName = Model.GroupName;
-            SyncWithModel();
-            this.IsFullSize = IsFullSize;
-        }
+      public bool IsFullSize { get; set; } = false;
 
-        public void SyncWithModel()
-        {
-            removeAllItems();
-            Model.GroupedList.ForEach(x => addItemToCategoryList(x.GetIdealIdentifier()));
-        }
+      public VMCardGroupList(MCardGroupList Model, string RoutingName, bool IsFullSize = false) : base(Model, RoutingName)
+      {
+         GroupName = Model.GroupName;
+         SyncWithModel();
+         this.IsFullSize = IsFullSize;
+      }
 
-        private void addItemToCategoryList(string aszItem)
-        {
-            ListViewItem newItem = new ListViewItem();
-            newItem.Content = aszItem;
-            newItem.MouseMove += displayToolTip;
+      public void SyncWithModel()
+      {
+         removeAllItems();
+         Model.GroupedList.ForEach(x => addItemToCategoryList(x.GetIdealIdentifier()));
+      }
 
-            CategoryList.Add(newItem);
-        }
+      private void addItemToCategoryList(string aszItem)
+      {
+         ListViewItem newItem = new ListViewItem();
+         newItem.Content = aszItem;
+         newItem.MouseMove += displayToolTip;
 
-        private void removeAllItems()
-        {
-            List<ListViewItem> lstTemp = new List<ListViewItem>();
-            foreach(ListViewItem lvi in CategoryList)
-            {
-                lstTemp.Add(lvi);
-            }
+         CategoryList.Add(newItem);
+      }
 
-            lstTemp.ForEach(x => removeItemFromCategoryList(x));
-        }
+      private void removeAllItems()
+      {
+         List<ListViewItem> lstTemp = new List<ListViewItem>();
+         foreach (ListViewItem lvi in CategoryList)
+         {
+            lstTemp.Add(lvi);
+         }
 
-        private void removeItemFromCategoryList(ListViewItem aoItem)
-        {
-            aoItem.MouseMove -= displayToolTip;
+         lstTemp.ForEach(x => removeItemFromCategoryList(x));
+      }
 
-            CategoryList.Remove(aoItem);
-        }
+      private void removeItemFromCategoryList(ListViewItem aoItem)
+      {
+         aoItem.MouseMove -= displayToolTip;
 
-        private void displayToolTip(object source, MouseEventArgs e)
-        {
-            ListViewItem item = (source as ListViewItem);
-            string szItemText = item.Content.ToString();
+         CategoryList.Remove(aoItem);
+      }
 
-            if ((ToolTipDisplay?.DataContext != null)&&
-                (szItemText == (ToolTipDisplay.DataContext as VMCardImageDisplayer).Model.GetIdealIdentifier()) &&
-                ((ToolTipDisplay.DataContext as VMCardImageDisplayer).CardImage != null))
-            {
-                return;
-            }
+      private void displayToolTip(object source, MouseEventArgs e)
+      {
+         ListViewItem item = (source as ListViewItem);
+         string szItemText = item.Content.ToString();
 
-            CardModel model = Model.GroupedList.Where(x => x.GetIdealIdentifier() == szItemText).FirstOrDefault();
-            if (model != null)
-            {
-                VMCardImageDisplayer cardImageDisplayerVM = new VMCardImageDisplayer(model);
-                VCardImageDisplayer cardImageDisplayerV = new VCardImageDisplayer();
-                cardImageDisplayerV.DataContext = cardImageDisplayerVM;
+         if ((ToolTipDisplay?.DataContext != null) &&
+             (szItemText == (ToolTipDisplay.DataContext as VMCardImageDisplayer).Model.GetIdealIdentifier()) &&
+             ((ToolTipDisplay.DataContext as VMCardImageDisplayer).CardImage != null))
+         {
+            return;
+         }
 
-                ToolTipDisplay = cardImageDisplayerV;
-            }
-        }
-    }
+         CardModel model = Model.GroupedList.Where(x => x.GetIdealIdentifier() == szItemText).FirstOrDefault();
+         if (model != null)
+         {
+            VMCardImageDisplayer cardImageDisplayerVM = new VMCardImageDisplayer(model, cszCardImageDisplayerName);
+            VCardImageDisplayer cardImageDisplayerV = new VCardImageDisplayer();
+            cardImageDisplayerV.DataContext = cardImageDisplayerVM;
+
+            ToolTipDisplay = cardImageDisplayerV;
+         }
+      }
+
+      #region IViewModel
+      public override void ModelUpdated()
+      {
+         throw new NotImplementedException();
+      }
+      #endregion
+   }
 }

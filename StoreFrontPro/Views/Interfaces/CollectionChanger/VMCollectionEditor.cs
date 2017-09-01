@@ -12,164 +12,184 @@ using System.Threading.Tasks;
 
 namespace StoreFrontPro.Views.Interfaces.CollectionChanger
 {
-    class VMCollectionEditor : ViewModel<CollectionModel>, IViewComponent, IVCISupporter
-    {
-        public ObservableCollection<VCollectionEditorItem> TextChangesList { get; set; } = new ObservableCollection<VCollectionEditorItem>();
+   class VMCollectionEditor : ViewModel<CollectionModel>, IViewComponent, IVCISupporter
+   {
+      private const string cszAddSearchBox = "ASB";
+      private const string cszRemoveSearchBox = "RSB";
+      private const string cszCollectionEditorItem = "CEI";
 
-        public VSuggestionsSearchBox AddCardSearchBox { get; set; }
-        public VSuggestionsSearchBox RemoveCardSearchBox { get; set; }
+      public ObservableCollection<VCollectionEditorItem> TextChangesList { get; set; } =
+         new ObservableCollection<VCollectionEditorItem>();
 
-        public RelayCommand AcceptCommand { get; set; }
-        public RelayCommand CancelCommand { get; set; }
+      public VSuggestionsSearchBox AddCardSearchBox { get; set; }
+      public VSuggestionsSearchBox RemoveCardSearchBox { get; set; }
 
-        private List<MCollectionEditorItem> m_lstItems { get; set; }
+      public RelayCommand AcceptCommand { get; set; }
+      public RelayCommand CancelCommand { get; set; }
 
-        public Dictionary<Type, IViewComponentInterface> SupportedInterface { get; set; } = new Dictionary<Type, IViewComponentInterface>();
+      private List<MCollectionEditorItem> m_lstItems { get; set; }
 
-        public event DisplayEventHandler DisplayEvent;
+      public string AddCardText
+      {
+         get { return (AddCardSearchBox.DataContext as VMSuggestionsSearchBox).TextBoxValue; }
+      }
 
-        public VMCollectionEditor(CollectionModel Model) : base(Model)
-        {
-            AcceptCommand = new RelayCommand(eAcceptCommand);
-            CancelCommand = new RelayCommand(eCancelCommand);
-            m_lstItems = new List<MCollectionEditorItem>();
+      public string RemoveCardText
+      {
+         get { return (RemoveCardSearchBox.DataContext as VMSuggestionsSearchBox).TextBoxValue; }
+      }
 
-            MSuggestionsSearchBox ssBoxMA = new MSuggestionsSearchBox(
-                ActionName: "Add Card",
-                SearchCollection: (szSearch) => 
-                { return ServerInterface.Server.GetAllCardsStartingWith(szSearch); });
-            VMSuggestionsSearchBox ssBoxVMA = new VMSuggestionsSearchBox(ssBoxMA);
-            AddCardSearchBox = new VSuggestionsSearchBox() { DataContext = ssBoxVMA };
-            ssBoxVMA.DisplayEvent += eAddCardEventHandler;
+      public event DisplayEventHandler DisplayEvent;
 
-            MSuggestionsSearchBox ssBoxMR = new MSuggestionsSearchBox(
-                ActionName: "Remove/Replace Card",
-                Collection: Model.CollectionItems.Select(x => getStandardShortId(x)));
-            VMSuggestionsSearchBox ssBoxVMR = new VMSuggestionsSearchBox(ssBoxMR);
-            RemoveCardSearchBox = new VSuggestionsSearchBox() { DataContext = ssBoxVMR };
-            ssBoxVMR.DisplayEvent += eRemoveCardEventHandler;
-        }
+      public VMCollectionEditor(CollectionModel Model, string RoutingName) : base(Model, RoutingName)
+      {
+         AcceptCommand = new RelayCommand(eAcceptCommand);
+         CancelCommand = new RelayCommand(eCancelCommand);
+         m_lstItems = new List<MCollectionEditorItem>();
 
-        public List<StoreFrontMenuItem> GetMenuItems()
-        {
-            return new List<StoreFrontMenuItem>();
-        }
+         ViewClass VCAdd = ViewFactory.CreateSuggestionSearchBox(
+            SearchCollection: ServerInterface.Server.GetAllCardsStartingWith,
+            ActionName: "Add Card",
+            RoutingName: cszAddSearchBox);
+         VCAdd.HookDisplayEvent(DisplayEventHandler);
+         AddCardSearchBox = VCAdd.View as VSuggestionsSearchBox;
 
-        public void DisplayEventHandler(object source, DisplayEventArgs e)
-        {
-            // throw new NotImplementedException();
-        }
+         ViewClass VCRemove = ViewFactory.CreateSuggestionSearchBox(
+            SearchCollection: Model.SearchCollection,
+            ActionName: "Remove/Replace Card",
+            RoutingName: cszRemoveSearchBox);
+         VCRemove.HookDisplayEvent(DisplayEventHandler);
+         RemoveCardSearchBox = VCRemove.View as VSuggestionsSearchBox;
+      }
 
-        private void eRemoveCardEventHandler(object Source, DisplayEventArgs Event)
-        {
-            // Only one event comes from the SSBox so we dont have to worry about checking whether this is the right function
-            VMSuggestionsSearchBox removeBoxVM = (RemoveCardSearchBox.DataContext as VMSuggestionsSearchBox);
-            if (removeBoxVM.ComboBoxList.Count > 0 &&
-                removeBoxVM.ComboBoxList.Contains(removeBoxVM.TextBoxValue))
-            {
-                string szBaseCard = removeBoxVM.TextBoxValue;
-                string szCmdString = "";
-                string szDisplay = "";
+      #region Private Methods
+      private void addEditorItem(CollectionDelta aCDelta)
+      {
+         ViewClass VC = ViewFactory.CreateCollectionEditorItem(aCDelta, cszCollectionEditorItem);
+         m_lstItems.Add((MCollectionEditorItem)VC.Model);
+         TextChangesList.Add((VCollectionEditorItem)VC.View);
+      }
 
-                CardModel oRemoveCard = Model.CollectionItems.Where(x => getStandardShortId(x) == szBaseCard).FirstOrDefault();
-                if (oRemoveCard != null)
-                {
-                    VMSuggestionsSearchBox addBoxVM = (AddCardSearchBox.DataContext as VMSuggestionsSearchBox);
-                    if (addBoxVM.ComboBoxList.Count > 0 &&
-                        addBoxVM.ComboBoxList.Contains(addBoxVM.TextBoxValue))
-                    {
-                        string szAddBaseCard = addBoxVM.TextBoxValue;
+      private List<string> getFunctionList()
+      {
+         foreach (MCollectionEditorItem item in m_lstItems)
+         {
+            item.FunctionText = item.FunctionText + " { set=\"" + item.SelectedSet + "\" } ";
+         }
 
-                        szDisplay += "% " + oRemoveCard.GetIdealIdentifier();
-                        szDisplay += " -> " + szAddBaseCard;
-                        // Replace
-                        szCmdString += "% " + oRemoveCard.GetFullIdentifier();
-                        szCmdString += " -> " + szAddBaseCard;
-                        addBoxVM.TextBoxValue = "";
-                        szBaseCard = szAddBaseCard;
-                    }
-                    else
-                    {
-                        szDisplay += "- " + oRemoveCard.GetIdealIdentifier();
-                        szCmdString += "- " + oRemoveCard.GetFullIdentifier();
-                        szBaseCard = "";
-                    }
+         List<string> lstOutput = m_lstItems
+             .Select(x => x.FunctionText.Substring(0, 1) + " x" + x.Amount + x.FunctionText.Substring(1))
+             .ToList();
+         return lstOutput;
+      }
 
-                    int iMaxOps = 0;
-                    Model.CollectionItems.ForEach(x => { if (oRemoveCard.GetMetaTag("__hash") == x.GetMetaTag("__hash")) { iMaxOps += x.Count; } });
-                    if (iMaxOps > 0)
-                    {
-                        addEditorItem(szDisplay, szCmdString, getIdentifierOptions(szBaseCard), iMaxOps);
-                    }
+      private List<string> getIdentifierOptions(string szCard)
+      {
+         List<string> lstSetOptions;
+         CardModel.GetPrototype(szCard).AttributeOptions.TryGetValue("set", out lstSetOptions);
+         return lstSetOptions ?? new List<string>();
+      }
 
-                    removeBoxVM.TextBoxValue = "";
-                }
-            }
-        }
+      private string getStandardShortId(CardModel aCM)
+      {
+         return aCM.GetIdealIdentifier();
+      }
 
-        private void eAddCardEventHandler(object Source, DisplayEventArgs Event)
-        {
-            // This gets the first item in the dropdown box list.
-            VMSuggestionsSearchBox addBoxVM = (AddCardSearchBox.DataContext as VMSuggestionsSearchBox);
-            if (addBoxVM.ComboBoxList.Count > 0 &&
-                addBoxVM.ComboBoxList.Contains(addBoxVM.TextBoxValue))
-            {
-                string szBaseCard = addBoxVM.TextBoxValue;
-                string szCmdString = "";
-                szCmdString += "+ " + szBaseCard;
-                addEditorItem(szCmdString, szCmdString, getIdentifierOptions(szBaseCard));
-                addBoxVM.TextBoxValue = "";
-            }
-        }
+      private void clearSearchBoxes()
+      {
+         VMSuggestionsSearchBox removeBoxVM = (RemoveCardSearchBox.DataContext as VMSuggestionsSearchBox);
+         removeBoxVM.TextBoxValue = "";
 
-        private void eAcceptCommand(object canExecute)
-        {
-            DisplayEventArgs eventArgs = new DisplayEventArgs(VCICollectionEditor.Accept);
-            Model.SubmitBulkEdits(getFunctionList(), () => { DisplayEvent?.Invoke(this, eventArgs); });
-            DisplayEvent?.Invoke(this, eventArgs);
-        }
+         VMSuggestionsSearchBox addBoxVM = (AddCardSearchBox.DataContext as VMSuggestionsSearchBox);
+         addBoxVM.TextBoxValue = "";
+      }
+      #endregion
 
-        private void eCancelCommand(object canExecute)
-        {
-            DisplayEventArgs eventArgs = new DisplayEventArgs(VCICollectionEditor.Cancel);
-            DisplayEvent(this, eventArgs);
-        }
+      #region Event Handlers
+      private void eSearchOKEventHandler(string aszSourceName)
+      {
+         if (aszSourceName == cszAddSearchBox)
+         {
+            eAddCardEventHandler(null, null);
+         }
+         else
+         {
+            eRemoveCardEventHandler(null, null);
+         }
+      }
 
-        private void addEditorItem(string aszDisplay, string aszFunction, List<string> alstPossibleSetValues, int aiMaxOps = 99)
-        {
-            MCollectionEditorItem ceiM = new MCollectionEditorItem(aszDisplay, aszFunction, alstPossibleSetValues, aiMaxOps);
-            VMCollectionEditorItem ceiVM = new VMCollectionEditorItem(ceiM);
-            m_lstItems.Add(ceiM);
-            TextChangesList.Add(new VCollectionEditorItem() { DataContext = ceiVM });
-        }
+      private void eRemoveCardEventHandler(object Source, DisplayEventArgs Event)
+      {
+         CollectionDelta delta = Model.GetDeltaCommand(AddCard: AddCardText, RemoveIdealIdentifier: RemoveCardText);
+         addEditorItem(delta);
+         clearSearchBoxes();
+      }
 
-        private string getSelectedSet(string szBaseCard)
-        {
-            return szBaseCard + "{ set=\"";
-        }
+      private void eAddCardEventHandler(object Source, DisplayEventArgs Event)
+      {
+         CollectionDelta delta = Model.GetDeltaCommand(AddCard: AddCardText, RemoveIdealIdentifier: RemoveCardText);
+         addEditorItem(delta);
+         clearSearchBoxes();
+      }
 
-        private List<string> getFunctionList()
-        {
-            foreach (MCollectionEditorItem item in m_lstItems)
-            {
-                item.FunctionText = item.FunctionText + " { set=\"" + item.SelectedSet + "\" } ";
-            }
+      private void eAcceptCommand(object canExecute)
+      {
+         DisplayEventArgs eventArgs = new DisplayEventArgs(VCICollectionEditor.Accept);
+         Model.SubmitBulkEdits(getFunctionList());
+         DisplayEvent?.Invoke(this, eventArgs);
+      }
 
-            List<string> lstOutput = m_lstItems
-                .Select(x =>
-                    x.FunctionText.Substring(0, 1) + " x" + x.Amount + x.FunctionText.Substring(1))
-                .ToList();
-            return lstOutput;
-        }
+      private void eCancelCommand(object canExecute)
+      {
+         DisplayEventArgs eventArgs = new DisplayEventArgs(VCICollectionEditor.Cancel);
+         DisplayEvent?.Invoke(this, eventArgs);
+      }
+      #endregion
 
-        private List<string> getIdentifierOptions(string szCard)
-        {
-            return CardModel.GetIdentifierOptions(szCard).Where(x => x.Item1 == "set").FirstOrDefault()?.Item2;
-        }
+      #region IViewComponent
+      public List<StoreFrontMenuItem> GetMenuItems()
+      {
+         return new List<StoreFrontMenuItem>();
+      }
+      #endregion
 
-        private string getStandardShortId(CardModel aCM)
-        {
-            return aCM.GetIdealIdentifier();
-        }
-    }
+      #region IVCISupporter
+      public void DisplayEventHandler(object source, DisplayEventArgs e)
+      {
+         GetRouter().Call(source.GetType(), this, e.Key, e.Args);
+      }
+
+      public InterfaceRouter GetRouter()
+      {
+         return IRouter;
+      }
+
+      static InterfaceRouter _IRouter = null;
+      static InterfaceRouter IRouter
+      {
+         get
+         {
+            if (_IRouter == null) { BuildInterface(); }
+            return _IRouter;
+         }
+      }
+
+      static void BuildInterface()
+      {
+         _IRouter = new InterfaceRouter();
+
+         VCISuggestionsSearchBox VCAddIS = new VCISuggestionsSearchBox(
+            OK: (x) => { return (x as VMCollectionEditor).eSearchOKEventHandler; });
+         
+         _IRouter.AddInterface(VCAddIS);
+      }
+      #endregion
+
+      #region IViewModel
+      public override void ModelUpdated()
+      {
+
+      }
+      #endregion
+   }
 }

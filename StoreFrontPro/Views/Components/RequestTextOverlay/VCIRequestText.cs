@@ -11,10 +11,10 @@ namespace StoreFrontPro.Views.Components.RequestTextOverlay
         public const string Accept = "Accept";
         public const string Cancel = "Cancel";
 
-        private Action<string> m_AcceptRelay;
-        private Action m_CancelRelay;
+        private Func<object, Action<string>> m_AcceptRelay;
+        private Func<object, Action> m_CancelRelay;
 
-        public VCIRequestText(Action<string> Accept, Action Cancel)
+        public VCIRequestText(Func<object,Action<string>> Accept, Func<object,Action> Cancel)
         {
             m_AcceptRelay = Accept;
             m_CancelRelay = Cancel;
@@ -25,20 +25,20 @@ namespace StoreFrontPro.Views.Components.RequestTextOverlay
             return typeof(VMRequestText);
         }
 
-        public bool TryInvoke(string Key, params object[] args)
+        public bool TryInvoke(object Caller, string Key, params object[] args)
         {
             if (Key == Accept)
             {
                 if (args?[0] is string)
                 {
                     string paramOne = args[0] as string;
-                    m_AcceptRelay?.Invoke(paramOne);
+                    m_AcceptRelay?.Invoke(Caller).Invoke(paramOne);
                     return true;
                 }
             }
             else if (Key == Cancel)
             {
-                m_CancelRelay?.Invoke();
+                m_CancelRelay?.Invoke(Caller).Invoke();
                 return true;
             }
 

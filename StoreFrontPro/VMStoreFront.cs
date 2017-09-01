@@ -1,6 +1,7 @@
 ﻿using StoreFrontPro.Server;
 using StoreFrontPro.Support.MultiDisplay;
 using StoreFrontPro.Views;
+using StoreFrontPro.Tools;
 using StoreFrontPro.Views.CollectionsOverview;
 using StoreFrontPro.Views.CollectionViews.Cube;
 using StoreFrontPro.Views.CollectionViews.Deckbox;
@@ -18,6 +19,10 @@ namespace StoreFrontPro
 {
    class VMStoreFront : ViewModel<StoreFront>, IVCISupporter
    {
+      public const string cszCollectionOverview = "ColOverview";
+      public const string cszDeckboxViewName = "DBVM";
+      public const string cszCubeViewName = "CVN";
+
       public RelayCommand CloseCommand { get; set; }
       public RelayCommand CollectionsOverviewCommand { get; set; }
       public RelayCommand DownloadSetsCommand { get; set; }
@@ -35,51 +40,23 @@ namespace StoreFrontPro
          set { _OperationWindow = value; OnPropertyChanged(); }
       }
 
-      public VMStoreFront(StoreFront Model) : base(Model)
+      public VMStoreFront(StoreFront Model, string RoutingName) : base(Model, RoutingName)
       {
+         Model.Register(this);
+
          OperationWindow = new MultiDisplay();
          OperationWindow.DisplayEvent += DisplayEventHandler;
 
-         VCICollectionDeckBox CDBIS = new VCICollectionDeckBox(
-             SwitchToCube: showCollectionCubeView,
-             ChildCreated: eSyncCollections);
-         VCICollectionCube CCIS = new VCICollectionCube(
-             SwitchToDeckBox: showCollectionDeckBox);
-         VCICollectionsOverview COIS = new VCICollectionsOverview(
-             ViewCollection: showCollectionDeckBox,
-             AddCollection: eAddNewCollectionClick,
-             LoadCollection: eLoadCollectionFromFile);
-         VCIMultiDisplay MDIS = new VCIMultiDisplay(
-             Change: eDisplayNewViewOptions);
-         SupportedInterface.Add(CDBIS.GetInterfaceType(), CDBIS);
-         SupportedInterface.Add(CCIS.GetInterfaceType(), CCIS);
-         SupportedInterface.Add(COIS.GetInterfaceType(), COIS);
-         SupportedInterface.Add(MDIS.GetInterfaceType(), MDIS);
-
-         CloseCommand = new RelayCommand(eCloseCommand);
+         CloseCommand               = new RelayCommand(eCloseCommand);
          CollectionsOverviewCommand = new RelayCommand((o) => { showCollectionsOverview(); });
-         DownloadSetsCommand = new RelayCommand(eDownloadSetsCommand);
+         DownloadSetsCommand        = new RelayCommand(eDownloadSetsCommand);
 
          showCollectionsOverview();
       }
 
-      public void Notify()
-      {
-         // do other updates here
-         notifyMultiDisplay();
-      }
-
-      public void DisplayEventHandler(object source, DisplayEventArgs e)
-      {
-         if (SupportedInterface.ContainsKey(source.GetType()))
-         {
-            SupportedInterface?[source.GetType()]?.TryInvoke(e.Key, e.Args);
-         }
-      }
-
       private void showCollectionsOverview()
       {
-         VMCollectionsOverview collectionsOverviewVM = new VMCollectionsOverview(Model.Collections);
+         VMCollectionsOverview collectionsOverviewVM = new VMCollectionsOverview(Model.Collections, cszCollectionOverview);
          OperationWindow.SetNewDisplay(
              Name: "Overview",
              NewDisplay: new VCollectionsOverview(),
@@ -89,48 +66,34 @@ namespace StoreFrontPro
 
       private void showCollectionCubeView(CollectionModel CollectionModel)
       {
-
-         VMCollectionCube collectionCubeVM = new VMCollectionCube(CollectionModel);
+         VMCollectionCube collectionCubeVM = new VMCollectionCube(CollectionModel, cszCubeViewName);
          OperationWindow.SetNewDisplay(
-                         Name: "Overview",
-                         NewDisplay: new VCollectionCube(),
-                         DataContext: collectionCubeVM,
-                         Persist: false);
+             Name: "Overview",
+             NewDisplay: new VCollectionCube(),
+             DataContext: collectionCubeVM,
+             Persist: false);
       }
 
       private void showCollectionDeckBox(CollectionModel CollectionModel)
       {
-         VMCollectionDeckBox collectionFancyVM = new VMCollectionDeckBox(CollectionModel);
+         VMCollectionDeckBox collectionFancyVM = new VMCollectionDeckBox(CollectionModel, cszDeckboxViewName);
          OperationWindow.SetNewDisplay(
-                         Name: "Fancy",
-                         NewDisplay: new VCollectionDeckBox(),
-                         DataContext: collectionFancyVM,
-                         Persist: false);
-      }
-
-      private void notifyMultiDisplay()
-      {
-         UserControl viewMode = OperationWindow.Display;
-
-         // Determine what display mode the multidisplay is in.
-         if (viewMode.GetType() == typeof(VCollectionsOverview))
-         {
-            VMCollectionsOverview collectionsOverviewVM = OperationWindow.DisplayViewModel as VMCollectionsOverview;
-            collectionsOverviewVM.SyncWithModel();
-         }
+             Name: "Fancy",
+             NewDisplay: new VCollectionDeckBox(),
+             DataContext: collectionFancyVM,
+             Persist: false);
       }
 
       private void eDisplayNewViewOptions()
       {
-         List<StoreFrontMenuItem> lstViewOptions = OperationWindow.GetMenuItems();
          ViewOptions.Clear();
+         List<StoreFrontMenuItem> lstViewOptions = OperationWindow.GetMenuItems();
          lstViewOptions.ForEach(x => ViewOptions.Add(new MenuItem() { Header = x.MenuName, Command = x.Operation }));
       }
 
       public void eAddNewCollectionClick(string aszCollectionName)
       {
-         ServerInterface.Server.CreateCollection(aszCollectionName);
-         Model.SyncCollectionList();
+         Model.CreateCollection(aszCollectionName);
       }
 
       public void eLoadCollectionFromFile()
@@ -144,22 +107,8 @@ namespace StoreFrontPro
          if (result == true)
          {
             string szSelectedFile = openFile.FileName;
-            ServerInterface.Server.LoadCollection(szSelectedFile);
-            ServerInterface.Server.SyncServerTask(() =>
-            {
-               Model.SyncAllCollections();
-               Model.SyncCollectionList();
-            });
+            Model.LoadCollection(szSelectedFile);
          }
-      }
-
-      private void eSyncCollections()
-      {
-         ServerInterface.Server.SyncServerTask(() =>
-         {
-            Model.SyncAllCollections();
-            Model.SyncCollectionList();
-         });
       }
 
       private void eCloseCommand(object aoCanExecute)
@@ -170,7 +119,59 @@ namespace StoreFrontPro
 
       private void eDownloadSetsCommand(object aoCanExecute)
       {
-         ServerInterface.Server.ImportJSONCollection();
+         Model.LoadLatestJSON();
       }
+
+      #region IViewModel
+      public override void ModelUpdated()
+      {
+         
+      }
+      #endregion
+
+      #region IVCISupporter
+      public void DisplayEventHandler(object source, DisplayEventArgs e)
+      {
+         GetRouter().Call(source.GetType(), this, e.Key, e.Args);
+      }
+
+      public InterfaceRouter GetRouter()
+      {
+         return IRouter;
+      }
+
+      static InterfaceRouter _IRouter = null;
+      static InterfaceRouter IRouter
+      {
+         get
+         {
+            if (_IRouter == null) { BuildInterface(); }
+            return _IRouter;
+         }
+      }
+
+      static void BuildInterface()
+      {
+         _IRouter = new InterfaceRouter();
+
+         VCICollectionDeckBox CDBIS = new VCICollectionDeckBox(
+             SwitchToCube: (x) => { return (x as VMStoreFront).showCollectionCubeView; });
+         _IRouter.AddInterface(CDBIS);
+
+         VCICollectionCube CCIS = new VCICollectionCube(
+             SwitchToDeckBox: (x)=> { return (x as VMStoreFront).showCollectionDeckBox; });
+         _IRouter.AddInterface(CCIS);
+
+         VCICollectionsOverview COIS = new VCICollectionsOverview(
+             ViewCollection: (x)=> { return (x as VMStoreFront).showCollectionDeckBox; },
+             AddCollection: (x) => { return (x as VMStoreFront).eAddNewCollectionClick; },
+             LoadCollection: (x)=> { return (x as VMStoreFront).eLoadCollectionFromFile; });
+         _IRouter.AddInterface(COIS);
+
+         VCIMultiDisplay MDIS = new VCIMultiDisplay(
+             Change: (x) => { return (x as VMStoreFront).eDisplayNewViewOptions; });
+         _IRouter.AddInterface(MDIS);
+      }
+      #endregion
    }
 }

@@ -8,215 +8,345 @@ using System.Threading.Tasks;
 using StoreFrontPro.Tools;
 using System.Reflection;
 using System.Collections.Specialized;
+using StoreFrontPro.Views;
 
 namespace StoreFrontPro.Server
 {
-    public partial class CollectionModel
-    {
-        private bool _IsCollapsedCollection;
-        public bool IsCollapsedCollection
-        {
-            get { return _IsCollapsedCollection; }
-            set { m_bHardRebuild = (_IsCollapsedCollection != value); _IsCollapsedCollection = value; }
-        }
+   class CollectionDelta
+   {
+      public string Command { get; private set; }
+      public string DisplayString { get; private set; }
+      public int MaxRemoveCount { get; private set; }
+      public List<string> SelectionOptions { get; private set; }
 
-        public string CollectionName;
-        public string ID;
-        public ObservableCollection<CardModel> CollectionItems;
+      private CollectionDelta(string Command, string DisplayString, int MaxRemove, List<string> Options)
+      {
+         this.Command = Command;
+         this.DisplayString = DisplayString;
+         this.MaxRemoveCount = MaxRemove;
+         this.SelectionOptions = Options;
+      }
 
-        private bool m_bHardRebuild = false;
+      public static CollectionDelta GetDelta(string AddCard, string RemoveCardIdealID, CollectionModel Collection)
+      {
+         string szDisplay, szCmdString, szAddCardProto;
+         int iMaxDeltaCount = int.MaxValue;
+         List<string> lstAdditionOptions = null;
+         CardModel oRemoveCard = null;
+         List<CardModel> lstModels = Collection.CollectionItems.Item;
 
-        public CollectionModel(string aszID)
-        {
-            ID = aszID;
-            _IsCollapsedCollection = true;
-            CollectionItems = new ObservableCollection<CardModel>();
+         AddCard = AddCard ?? "";
+         RemoveCardIdealID = RemoveCardIdealID ?? "";
 
-            // Synchonously build this collection.
-            Sync(Async: false);
-        }
+         if( RemoveCardIdealID != "" )
+         {
+            oRemoveCard = Collection.GetCardModel(RemoveCardIdealID);
+            if( oRemoveCard == null ) { return null; }
 
-        public void CreateChildCollection(string aszNewName)
-        {
-            ServerInterface.Server.CreateCollection(aszNewName, ID);
-        }
+            iMaxDeltaCount = 0;
+            lstModels.ForEach(x => {
+               if (oRemoveCard.GetMetaTag("__hash") == x.GetMetaTag("__hash"))
+               {
+                  iMaxDeltaCount += x.Count;
+               }
+            });
+         }
 
-        public void Sync(bool Async = true, Action aCallback = null)
-        {
-            if (Async)
+         if( AddCard != "" )
+         {
+            szAddCardProto = ServerInterface.Card.GetProtoType(AddCard);
+            if( szAddCardProto == "" ) { return null; }
+
+            CardModel.GetPrototype(AddCard).AttributeOptions.TryGetValue("set", out lstAdditionOptions);
+         }
+
+         if( AddCard != "" && RemoveCardIdealID != "" )
+         {
+            szDisplay = "% " + oRemoveCard.GetIdealIdentifier();
+            szDisplay += " -> " + AddCard;
+
+            szCmdString = "% " + oRemoveCard.GetFullIdentifier();
+            szCmdString += " -> " + AddCard;
+         }
+         else if( AddCard != "" )
+         {
+            szDisplay = "+ " + AddCard;
+            szCmdString = "+ " + AddCard;
+         }
+         else if( RemoveCardIdealID != "" )
+         {
+            szDisplay = "- " + oRemoveCard.GetIdealIdentifier();
+            szCmdString = "- " + oRemoveCard.GetFullIdentifier();
+         }
+         else
+         {
+            return null;
+         }
+
+         lstAdditionOptions = lstAdditionOptions ?? new List<string>() { "" };
+         return new CollectionDelta(szCmdString, szDisplay, iMaxDeltaCount, lstAdditionOptions);
+      }
+   }
+
+   partial class CollectionModel : IModel
+   {
+      private bool _IsCollapsedCollection = true;
+      public bool IsCollapsedCollection
+      {
+         get { return _IsCollapsedCollection; }
+         set
+         {
+            m_bHardRebuild = (_IsCollapsedCollection != value);
+            _IsCollapsedCollection = value;
+         }
+      }
+
+      public List<CardModel> Collection
+      {
+         get { return CollectionItems.Item; }
+      }
+
+      public string ID;
+      public string CollectionName;
+      public BasicModel<List<CardModel>> CollectionItems;
+
+      private bool m_bHardRebuild = false;
+
+      public CollectionModel(string aszID)
+      {
+         CollectionItems = new BasicModel<List<CardModel>>(new List<CardModel>(), Sync);
+         ID = aszID;
+
+         // Synchonously build this collection.
+         CollectionItems.Sync(ASync: false);
+      }
+
+      public void CreateChildCollection(string aszNewName)
+      {
+         ServerInterface.Server.CreateCollection(aszNewName, ID);
+      }
+
+      public void SetBaselineHistory()
+      {
+
+      }
+
+      public void SaveCollection()
+      {
+         ServerInterface.Collection.SaveCollectionAS(ID);
+      }
+
+      public void SubmitBulkEdits(List<string> alstEdits)
+      {
+         ServerInterface.Collection.LoadBulkChangesAS(
+             this.ID, alstEdits, () => { Sync(false); }, false);
+      }
+
+      public List<string> SearchCollection(string aszSearch)
+      {
+          List<string> lstRetVal = new List<string>();
+          List<string> lstHoldVals = new List<string>();
+          foreach (string item in Collection.Select(x => x.GetIdealIdentifier()))
+          {
+             int iMatchIndex = item.ToLower().IndexOf(aszSearch);
+             if (iMatchIndex == 0)
+             {
+                lstRetVal.Add(item);
+             }
+             else if (iMatchIndex > 0)
+             {
+                lstHoldVals.Add(item);
+             }
+          }
+          
+          lstRetVal = lstRetVal.Concat(lstHoldVals).ToList();
+          return lstRetVal;
+      }
+
+      public CollectionDelta GetDeltaCommand(string AddCard = "", string RemoveIdealIdentifier = "")
+      {
+         return CollectionDelta.GetDelta(AddCard, RemoveIdealIdentifier, this);
+      }
+
+      public CardModel GetCardModel(string IdealIdentifier)
+      {
+         return Collection.Where(x => x.GetIdealIdentifier() == IdealIdentifier).FirstOrDefault();
+      }
+
+      private void setCollectionModels(List<string> aLstCards)
+      {
+         // Calculate differences.
+         List<string> lstHashesAndCounts = aLstCards
+             .Select(x => fastExtractHash(x, true)).ToList();
+
+         List<string> lstNewHashes = lstHashesAndCounts
+             .Select(x => x.Split(',')[1]).ToList();
+
+         List<string> lstNewCounts = lstHashesAndCounts
+             .Select(x => x.Split(',')[0] == "" ? (1).ToString() : x.Split(',')[0]).ToList();
+
+         List<CardModel> lstRemoves = new List<CardModel>();
+         if (!m_bHardRebuild)
+         {
+            foreach (CardModel cm in CollectionItems.Item)
             {
-                ServerInterface.Collection.GetCollectionMetaDataAS(
-                    ID, analyzeMetaData, true);
+               // Since count is not picked up in the hash, it must be checked for.
+               int iCount;
+               string szTargetHash = cm.GetMetaTag("__hash");
+               int iFound = lstNewHashes.IndexOf(szTargetHash);
 
-                ServerInterface.Collection.GetCollectionListAS(
-                    ID, IsCollapsedCollection,
-                    (alstCol) => { setCollectionModels(alstCol, aCallback); },
-                    true);
+               if( ( iFound != -1 ) &&
+                   ( int.TryParse(lstNewCounts[iFound], out iCount) ) &&
+                   ( iCount == cm.Count ) )
+               {
+                  // These CMs stay in the list
+                  lstNewCounts.RemoveAt(iFound);
+                  lstNewHashes.RemoveAt(iFound);
+                  aLstCards.RemoveAt(iFound);
+               }
+               else
+               {
+                  // These CMs are removed
+                  lstRemoves.Add(cm);
+               }
+            }
+         }
+         else
+         {
+            CollectionItems.Item.Clear();
+         }
+
+         // Remove the removed cards.
+         ServerInterface.Server.SyncServerTask(() =>
+         {
+            lstRemoves.ForEach(x => CollectionItems.Item.Remove(x));
+         });
+
+         // Add new cards.
+         ServerInterface.Server.GenerateCopyModelsAS(
+            Identifiers: aLstCards,
+            CollectionName: CollectionName,
+            Callback: (lst) => { lst.ForEach(x => { CollectionItems.Item.Add(x); }); },
+            UICallback: true);
+
+         ServerInterface.Server.SyncServerTask(CollectionItems.NotifyViewModel);
+         m_bHardRebuild = false;
+      }
+
+      private void analyzeMetaData(List<string> alstMeta)
+      {
+         var itemTags = new List<string>();
+         var collectionTags = new List<string>();
+         foreach (string szLine in alstMeta)
+         {
+            if (szLine.Contains(":"))
+            {
+               itemTags.Add(szLine);
             }
             else
             {
-                List<string> lstMDs   = ServerInterface.
-                                        Collection.
-                                        GetCollectionMetaData(ID);
-                analyzeMetaData(lstMDs);
-
-                List<string> lstItems = ServerInterface.
-                                        Collection.
-                                        GetCollectionList(ID, _IsCollapsedCollection);
-                setCollectionModels(lstItems);
+               collectionTags.Add(szLine);
             }
+         }
 
-        }
+         foreach(var itemTag in itemTags)
+         {
+            // TODO: Handle These.
+         }
 
-        public void SetBaselineHistory()
-        {
-            //ServerInterfaceModel.CollectionInterfaceModel.SetBaselineHistory(CollectionName);
-        }
-
-        public void SaveCollection()
-        {
-            ServerInterface.Collection.SaveCollectionAS(ID);
-        }
-
-        public void SubmitBulkEdits(List<string> alstEdits, Action aCallBack = null)
-        {
-            ServerInterface.Collection.LoadBulkChangesAS(
-                this.ID, alstEdits,
-                () => { Sync(true, aCallBack); }, false);
-        }
-
-        private void setCollectionModels(List<string> aLstCards)
-        {
-            // Calculate differences.
-            List<string> lstHashesAndCounts = aLstCards
-                .Select(x => fastExtractHash(x, true)).ToList();
-
-            List<string> lstNewHashes = lstHashesAndCounts
-                .Select(x => x.Split(',')[1]).ToList();
-
-            List<string> lstNewCounts = lstHashesAndCounts
-                .Select(x => x.Split(',')[0] == "" ? (1).ToString() : x.Split(',')[0]).ToList();
-
-            DisableEvents(CollectionItems);
-
-            List<CardModel> lstRemoves = new List<CardModel>();
-            if (!m_bHardRebuild)
+         foreach(var collectionTag in collectionTags)
+         {
+            List<string> lstSplitLine = collectionTag.Split('=').ToList();
+            if (lstSplitLine.Count > 1)
             {
-                foreach (CardModel cm in CollectionItems)
-                {
-                    // Since count is not picked up in the hash, it must be checked for.
-                    string szTargetHash = cm.GetMetaTag("__hash");
-                    int iFound = lstNewHashes.IndexOf(szTargetHash);
-                    int iCount;
-                    if (iFound != -1 &&
-                        int.TryParse(lstNewCounts[iFound], out iCount) &&
-                        iCount == cm.Count)
-                    {
-                        // These CMs stay in the list
-                        lstNewHashes.RemoveAt(iFound);
-                        aLstCards.RemoveAt(iFound);
-                    }
-                    else
-                    {
-                        // These CMs are removed
-                        lstRemoves.Add(cm);
-                    }
-                }
-
-                for (int i = 0; i < lstRemoves.Count; i++)
-                {
-                    if (i == lstRemoves.Count - 1 && lstNewHashes.Count == 0)
-                    {
-                        ServerInterface.Server.SyncServerTask(() => { EnableEvents(CollectionItems); });
-                    }
-                    CardModel removeCard = lstRemoves[i];
-                    ServerInterface.Server.SyncServerTask(() => { CollectionItems.Remove(removeCard); });
-                }
+               string szKey = lstSplitLine[0];
+               string szVal = lstSplitLine[1];
+               if (szKey == "Name")
+               {
+                  CollectionName = szVal.Trim('"');
+               }
             }
-            else
+         }
+      }
+
+      /// <summary>
+      /// WithCount is included be a count change will not be detected by the hash.
+      /// If withcount is true, there is guaranteed to be a comma in the return.
+      /// </summary>
+      /// <param name="aszIdentifier"></param>
+      /// <param name="WithCount"></param>
+      /// <returns></returns>
+      private string fastExtractHash(string aszIdentifier, bool WithCount = false)
+      {
+         string szWithCount = "";
+         int iFirstSpace = aszIdentifier.IndexOf(' ');
+         if (WithCount)
+         {
+            szWithCount = aszIdentifier.Substring(0, iFirstSpace);
+            if (szWithCount[0] == 'x')
             {
-                CollectionItems.Clear();
+               szWithCount = szWithCount.Substring(1, iFirstSpace - 1);
             }
+            szWithCount += ",";
+         }
 
-            for (int i = 0; i < lstNewHashes.Count; i++)
-            {
-                if (i == lstNewHashes.Count - 1)
-                {
-                    ServerInterface.Server.SyncServerTask(() => { EnableEvents(CollectionItems); });
-                }
-                ServerInterface.Server.GenerateCopyModel(
-                                    Identifier: aLstCards[i],
-                                    CollectionName: CollectionName,
-                                    Callback: (aoCardModel) => { CollectionItems.Add(aoCardModel); },
-                                    UICallback: true);
-            }
+         int iHashStart = aszIdentifier.IndexOf("__hash");
+         if (!(iHashStart >= 0 && iHashStart < aszIdentifier.Length)) { return ""; }
+         string remainingString = aszIdentifier.Substring(iHashStart);
 
-            m_bHardRebuild = false;
-        }
+         int iOpeningQuote = remainingString.IndexOf('\"');
+         if (!(iOpeningQuote >= 0 && iOpeningQuote < aszIdentifier.Length)) { return ""; }
 
-        private void setCollectionModels(List<string> aLstCards, Action aCallback)
-        {
-            setCollectionModels(aLstCards);
-            ServerInterface.Server.SyncServerTask(aCallback);
-        }
+         int iClosingQuote = remainingString.IndexOf("\"", iOpeningQuote + 1);
+         if (!(iClosingQuote >= 0 && iClosingQuote < aszIdentifier.Length)) { return ""; }
 
-        private void analyzeMetaData(List<string> alstMeta)
-        {
-            foreach (string szLine in alstMeta)
-            {
-                if (szLine.Contains(":"))
-                {
+         return szWithCount + remainingString.Substring(iOpeningQuote + 1, iClosingQuote - iOpeningQuote - 1).Trim();
+      }
 
-                }
-                else
-                {
-                    List<string> lstSplitLine = szLine.Split('=').ToList();
-                    if (lstSplitLine.Count > 1)
-                    {
-                        string szKey = lstSplitLine[0];
-                        string szVal = lstSplitLine[1];
-                        if (szKey == "Name")
-                        {
-                            CollectionName = szVal.Trim('"');
-                        }
-                    }
-                }
-            }
-        }
+      #region IModel
+      private List<IViewModel> m_lstViewers = new List<IViewModel>();
+      public void Register(IViewModel item)
+      {
+         m_lstViewers.Add(item);
+      }
 
-        /// <summary>
-        /// WithCount is included be a count change will not be detected by the hash.
-        /// If withcount is true, there is guaranteed to be a comma in the return.
-        /// </summary>
-        /// <param name="aszIdentifier"></param>
-        /// <param name="WithCount"></param>
-        /// <returns></returns>
-        private string fastExtractHash(string aszIdentifier, bool WithCount = false)
-        {
-            string szWithCount = "";
-            int iFirstSpace = aszIdentifier.IndexOf(' ');
-            if (WithCount)
-            {
-                szWithCount = aszIdentifier.Substring(0, iFirstSpace);
-                if (szWithCount[0] == 'x')
-                {
-                    szWithCount = szWithCount.Substring(1, iFirstSpace - 1);
-                }
-                szWithCount += ",";
-            }
+      public void UnRegister(IViewModel item)
+      {
+         m_lstViewers.Remove(item);
+      }
 
-            int iHashStart = aszIdentifier.IndexOf("__hash");
-            if (!(iHashStart >= 0 && iHashStart < aszIdentifier.Length)) { return ""; }
-            string remainingString = aszIdentifier.Substring(iHashStart);
+      public void NotifyViewModel()
+      {
+         m_lstViewers.ForEach(x => x.ModelUpdated());
+      }
 
-            int iOpeningQuote = remainingString.IndexOf('\"');
-            if (!(iOpeningQuote >= 0 && iOpeningQuote < aszIdentifier.Length)) { return ""; }
+      public void EnableNotification(bool abNotify)
+      {
+         throw new NotImplementedException();
+      }
 
-            int iClosingQuote = remainingString.IndexOf("\"", iOpeningQuote + 1);
-            if (!(iClosingQuote >= 0 && iClosingQuote < aszIdentifier.Length)) { return ""; }
+      public void DisableNotification()
+      {
+         throw new NotImplementedException();
+      }
 
-            return szWithCount + remainingString.Substring(iOpeningQuote + 1, iClosingQuote - iOpeningQuote - 1).Trim();
+      public void Sync(bool ASync = true)
+      {
+         if (ASync)
+         {
+            ServerInterface.Server.SyncServerTask(()=> { Sync(false); });
+         }
+         else
+         {
+            List<string> lstMDs = ServerInterface.Collection.GetCollectionMetaData(ID);
+            analyzeMetaData(lstMDs);
 
-        }
-    }
+            List<string> lstItems = ServerInterface.Collection.GetCollectionList(ID, IsCollapsedCollection);
+            setCollectionModels(lstItems);
+
+            NotifyViewModel();
+         }
+      }
+      #endregion
+   }
 }

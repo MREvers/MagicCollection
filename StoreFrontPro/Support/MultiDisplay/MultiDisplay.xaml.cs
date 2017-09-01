@@ -18,178 +18,189 @@ using System.Windows.Shapes;
 
 namespace StoreFrontPro.Support.MultiDisplay
 {
-    /// <summary>
-    /// Interaction logic for MultiDisplay.xaml
-    /// </summary>
-    public partial class MultiDisplay : UserControl, INotifyPropertyChanged, IViewComponent
-    {
-        #region Bindings
-        private UserControl _Display = null;
-        public UserControl Display
-        {
-            get { return _Display; }
-            private set { _Display = value; OnPropertyChanged(); }
-        }
+   /// <summary>
+   /// Interaction logic for MultiDisplay.xaml
+   /// </summary>
+   public partial class MultiDisplay : UserControl, INotifyPropertyChanged, IViewComponent
+   {
+      #region Bindings
+      private UserControl _Display = null;
+      public UserControl Display
+      {
+         get { return _Display; }
+         private set { _Display = value; OnPropertyChanged(); }
+      }
 
-        // Perhaps there is a way to assign a type here. Caller has to cast for now.
-        private object _DisplayViewModel = null; // Assumes VM never chagnes per view.
-        public object DisplayViewModel
-        {
-            get { return _DisplayViewModel; }
-            private set { _DisplayViewModel = value; }
-        }
+      // Perhaps there is a way to assign a type here. Caller has to cast for now.
+      private object _DisplayViewModel = null; // Assumes VM never chagnes per view.
+      public object DisplayViewModel
+      {
+         get { return _DisplayViewModel; }
+         private set { _DisplayViewModel = value; }
+      }
 
-        public event PropertyChangedEventHandler PropertyChanged;
+      public event PropertyChangedEventHandler PropertyChanged;
 
-        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
-        #endregion Bindings
+      protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
+      {
+         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+      }
+      #endregion Bindings
 
-        #region Fields
-        public string DisplayName = "";
+      #region Fields
+      public string DisplayName = "";
 
-        private UserControl m_oOverlay = null;
+      private UserControl m_oOverlay = null;
 
-        private Action m_fnNewDisplayCallback = null;
+      private Action m_fnNewDisplayCallback = null;
 
-        private Dictionary<string, UserControl> m_mapPersistantDisplays = new Dictionary<string, UserControl>();
-        #endregion
+      private Dictionary<string, UserControl> m_mapPersistantDisplays = new Dictionary<string, UserControl>();
+      #endregion
 
-        #region Events
-        public event DisplayEventHandler DisplayEvent;
-        #endregion
+      #region Events
+      public event DisplayEventHandler DisplayEvent;
+      #endregion
 
-        #region Public Methods
-        public MultiDisplay(Action NewDisplayCallback = null)
-        {
-            InitializeComponent();
-            m_fnNewDisplayCallback = NewDisplayCallback;
-            DataContext = this;
-        }
+      #region Public Methods
+      public MultiDisplay(Action NewDisplayCallback = null)
+      {
+         InitializeComponent();
+         m_fnNewDisplayCallback = NewDisplayCallback;
+         DataContext = this;
+      }
 
-        public void ShowOverlay(UserControl Overlay)
-        {
-            CloseOverlay();
-            if (Overlay?.DataContext is IViewComponent)
-            {
-                (Overlay.DataContext as IViewComponent).DisplayEvent += displayFireEvent;
-            }
-            m_oOverlay = Overlay;
-            displaySendToBack();
-            fireUpdateMenuItems();
-        }
+      public void ShowOverlay(UserControl Overlay)
+      {
+         CloseOverlay();
+         if (Overlay?.DataContext is IViewComponent)
+         {
+            (Overlay.DataContext as IViewComponent).DisplayEvent += displayFireEvent;
+         }
+         m_oOverlay = Overlay;
+         displaySendToBack();
+         fireUpdateMenuItems();
+      }
 
-        public void CloseOverlay()
-        {
-            displayBringToFront();
-        }
+      public void CloseOverlay()
+      {
+         displayBringToFront();
+      }
 
-        public void SetNewDisplay(string Name, UserControl NewDisplay, bool Persist = false)
-        {
-            SetNewDisplay(Name, NewDisplay, null, Persist);
-        }
+      public void SetNewDisplay(string Name, UserControl NewDisplay, bool Persist = false)
+      {
+         SetNewDisplay(Name, NewDisplay, null, Persist);
+      }
 
-        public void SetNewDisplay(string Name, UserControl NewDisplay, object DataContext, bool Persist)
-        {
-            if (Persist && Display != null)
-            {
-                m_mapPersistantDisplays.Add(DisplayName, Display);
-            }
+      public void SetNewDisplay(string Name, UserControl NewDisplay, object DataContext, bool Persist)
+      {
+         if (Persist && Display != null)
+         {
+            m_mapPersistantDisplays.Add(DisplayName, Display);
+         }
 
-            // Need to make sure there are no events hooked on the old display.
-            if (DataContext is IViewComponent)
-            {
-                IViewComponent ivDisplay = DataContext as IViewComponent;
-                ivDisplay.DisplayEvent -= displayFireEvent;
-            }
+         // Need to make sure there are no events hooked on the old display.
+         if (Display?.DataContext is IViewComponent)
+         {
+            IViewComponent ivDisplay = Display.DataContext as IViewComponent;
+            ivDisplay.DisplayEvent -= displayFireEvent;
+         }
 
-            DisplayName = Name;
-            Display = NewDisplay;
-            if (DataContext != null)
-            {
-                Display.DataContext = DataContext;
-            }
-            DisplayViewModel = Display.DataContext;
+         if (Display?.DataContext is IViewModel)
+         {
+            (Display.DataContext as IViewModel).FreeModel();
+         }
 
-            if (DataContext is IViewComponent)
-            {
-                IViewComponent ivDisplay = DataContext as IViewComponent;
-                ivDisplay.DisplayEvent += displayFireEvent;
-            }
+         DisplayName = Name;
+         Display = NewDisplay;
+         if (DataContext != null)
+         {
+            Display.DataContext = DataContext;
+         }
+         DisplayViewModel = Display.DataContext;
 
-            if (m_fnNewDisplayCallback != null)
-            {
-                m_fnNewDisplayCallback();
-            }
+         if (DataContext is IViewComponent)
+         {
+            IViewComponent ivDisplay = DataContext as IViewComponent;
+            ivDisplay.DisplayEvent += displayFireEvent;
+         }
 
-            fireUpdateMenuItems();
-        }
+         if (m_fnNewDisplayCallback != null)
+         {
+            m_fnNewDisplayCallback();
+         }
 
-        public void RecoverDisplay(string Name, bool Persist = false)
-        {
-            if (!m_mapPersistantDisplays.ContainsKey(Name)) { return; }
+         fireUpdateMenuItems();
+      }
 
-            SetNewDisplay(Name, m_mapPersistantDisplays[Name], Persist);
+      public void RecoverDisplay(string Name, bool Persist = false)
+      {
+         if (!m_mapPersistantDisplays.ContainsKey(Name)) { return; }
 
-            m_mapPersistantDisplays.Remove(Name);
-        }
+         SetNewDisplay(Name, m_mapPersistantDisplays[Name], Persist);
 
-        public List<StoreFrontMenuItem> GetMenuItems()
-        {
-            IEnumerable<StoreFrontMenuItem> lstRetVal = new List<StoreFrontMenuItem>();
-            if (Display?.DataContext is IViewComponent)
-            {
-                lstRetVal = (Display.DataContext as IViewComponent).GetMenuItems();
-            }
+         m_mapPersistantDisplays.Remove(Name);
+      }
 
-            if (m_oOverlay?.DataContext is IViewComponent)
-            {
-                lstRetVal = lstRetVal.Concat((m_oOverlay.DataContext as IViewComponent).GetMenuItems());
-            }
+      public List<StoreFrontMenuItem> GetMenuItems()
+      {
+         IEnumerable<StoreFrontMenuItem> lstRetVal = new List<StoreFrontMenuItem>();
+         if (Display?.DataContext is IViewComponent)
+         {
+            lstRetVal = (Display.DataContext as IViewComponent).GetMenuItems();
+         }
 
-            return lstRetVal.ToList();
-        }
-        #endregion
+         if (m_oOverlay?.DataContext is IViewComponent)
+         {
+            lstRetVal = lstRetVal.Concat((m_oOverlay.DataContext as IViewComponent).GetMenuItems());
+         }
 
-        #region Private Methods
-        private void displaySendToBack()
-        {
-            if (m_oOverlay != null)
-            {
-                Display.IsEnabled = false;
-                MultiDisplayPanel.Children.Add(m_oOverlay);
-                Panel.SetZIndex(m_oOverlay, 2);
-            }
-        }
+         return lstRetVal.ToList();
+      }
+      #endregion
 
-        private void displayBringToFront()
-        {
-            Display.IsEnabled = true;
-            MultiDisplayPanel.Children.Remove(m_oOverlay);
-            if (m_oOverlay?.DataContext is IViewComponent)
-            {
-                (m_oOverlay.DataContext as IViewComponent).DisplayEvent -= displayFireEvent;
-            }
-            m_oOverlay = null;
+      #region Private Methods
+      private void displaySendToBack()
+      {
+         if (m_oOverlay != null)
+         {
+            Display.IsEnabled = false;
+            MultiDisplayPanel.Children.Add(m_oOverlay);
+            Panel.SetZIndex(m_oOverlay, 2);
+         }
+      }
 
-            fireUpdateMenuItems();
-        }
+      private void displayBringToFront()
+      {
+         Display.IsEnabled = true;
+         MultiDisplayPanel.Children.Remove(m_oOverlay);
+         if (m_oOverlay?.DataContext is IViewComponent)
+         {
+            (m_oOverlay.DataContext as IViewComponent).DisplayEvent -= displayFireEvent;
+         }
 
-        private void fireUpdateMenuItems()
-        {
-            DisplayEventArgs eventArgs = new DisplayEventArgs(VCIMultiDisplay.Change);
-            displayFireEvent(this, eventArgs);
-        }
+         if (m_oOverlay?.DataContext is IViewModel)
+         {
+            (m_oOverlay.DataContext as IViewModel).FreeModel();
+         }
 
-        private void displayFireEvent(object aoSource, DisplayEventArgs aoEvent)
-        {
-            if (DisplayEvent != null)
-            {
-                DisplayEvent(Event: aoEvent, Source: aoSource);
-            }
-        }
-        #endregion
-    }
+         m_oOverlay = null;
+
+         fireUpdateMenuItems();
+      }
+
+      private void fireUpdateMenuItems()
+      {
+         DisplayEventArgs eventArgs = new DisplayEventArgs(VCIMultiDisplay.Change);
+         displayFireEvent(this, eventArgs);
+      }
+
+      private void displayFireEvent(object aoSource, DisplayEventArgs aoEvent)
+      {
+         if (DisplayEvent != null)
+         {
+            DisplayEvent(Event: aoEvent, Source: aoSource);
+         }
+      }
+      #endregion
+   }
 }

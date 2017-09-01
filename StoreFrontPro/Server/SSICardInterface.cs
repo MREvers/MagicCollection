@@ -10,13 +10,11 @@ using System.Windows.Media.Imaging;
 
 namespace StoreFrontPro.Server
 {
-   public partial class ServerInterface
+   partial class ServerInterface
    {
       public class CardIFace
       {
          public string SZ_IMAGE_CACHE_PATH = "";
-
-         private Dictionary<string, string> m_lstMemoizedCommonCardAttrs = new Dictionary<string, string>();
 
          private class ImageDownloadedEventArgs : EventArgs
          {
@@ -32,11 +30,7 @@ namespace StoreFrontPro.Server
 
          public string GetProtoType(string szCardName)
          {
-            if (!m_lstMemoizedCommonCardAttrs.ContainsKey(szCardName))
-            {
-               m_lstMemoizedCommonCardAttrs.Add(szCardName, SCI.GetCardPrototype(szCardName));
-            }
-            return m_lstMemoizedCommonCardAttrs[szCardName];
+            return SCI.GetCardPrototype(szCardName);
          }
 
          public void DownloadAndCacheImage(Action<BitmapImage> aCallback, CardModel aoCardModel)

@@ -6,44 +6,51 @@ using System.Threading.Tasks;
 
 namespace StoreFrontPro.Views.Components.RequestTextOverlay
 {
-    class VMRequestText : ViewModel<string>, IViewComponent
-    {
-        private string _DisplayText;
+   class VMRequestText : ViewModel<BasicModel<string>>, IViewComponent
+   {
+      private string _DisplayText;
 
-        public event DisplayEventHandler DisplayEvent;
+      public event DisplayEventHandler DisplayEvent;
 
-        public string DisplayText
-        {
-            get { return _DisplayText; }
-            set { _DisplayText = value; OnPropertyChanged(); }
-        }
+      public string DisplayText
+      {
+         get { return _DisplayText; }
+         set { _DisplayText = value; OnPropertyChanged(); }
+      }
 
-        public RelayCommand AcceptCommand { get; set; }
-        public RelayCommand CancelCommand { get; set; }
+      public RelayCommand AcceptCommand { get; set; }
+      public RelayCommand CancelCommand { get; set; }
 
-        public VMRequestText(string Model) : base(Model)
-        {
-            DisplayText = Model;
-            AcceptCommand = new RelayCommand(eAcceptCommand);
-            CancelCommand = new RelayCommand(eCancelCommand);
-        }
+      public VMRequestText(string Model, string RoutingName) : base(new BasicModel<string>(Model, null), RoutingName)
+      {
+         DisplayText = Model;
+         AcceptCommand = new RelayCommand(eAcceptCommand);
+         CancelCommand = new RelayCommand(eCancelCommand);
+      }
 
-        private void eAcceptCommand(object canExecute)
-        {
-            DisplayEventArgs eventArgs = new DisplayEventArgs(VCIRequestText.Accept, DisplayText);
-            DisplayEvent(this, eventArgs);
-        }
+      private void eAcceptCommand(object canExecute)
+      {
+         DisplayEventArgs eventArgs = new DisplayEventArgs(VCIRequestText.Accept, DisplayText);
+         DisplayEvent(this, eventArgs);
+      }
 
-        private void eCancelCommand(object canExecute)
-        {
-            DisplayEventArgs eventArgs = new DisplayEventArgs(VCIRequestText.Cancel);
-            DisplayEvent(this, eventArgs);
-        }
+      private void eCancelCommand(object canExecute)
+      {
+         DisplayEventArgs eventArgs = new DisplayEventArgs(VCIRequestText.Cancel);
+         DisplayEvent(this, eventArgs);
+      }
 
-        public List<StoreFrontMenuItem> GetMenuItems()
-        {
-            return null;
-            //throw new NotImplementedException();
-        }
-    }
+      public List<StoreFrontMenuItem> GetMenuItems()
+      {
+         return null;
+         //throw new NotImplementedException();
+      }
+
+      #region IViewModel
+      public override void ModelUpdated()
+      {
+         throw new NotImplementedException();
+      }
+      #endregion
+   }
 }
