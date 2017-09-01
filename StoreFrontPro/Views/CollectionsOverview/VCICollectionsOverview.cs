@@ -14,11 +14,13 @@ namespace StoreFrontPro.Views.CollectionsOverview
         public const string ViewCollection = "ViewCollection";
         public const string LoadCollection = "LoadCollection";
 
-        private Action<CollectionModel> m_ViewCollectionRelay;
-        private Action<string> m_AddCollectionRelay;
-        private Action m_LoadCollection;
+        private Func<object, Action<CollectionModel>> m_ViewCollectionRelay;
+        private Func<object, Action<string>> m_AddCollectionRelay;
+        private Func<object, Action> m_LoadCollection;
 
-        public VCICollectionsOverview(Action<CollectionModel> ViewCollection, Action<string> AddCollection, Action LoadCollection)
+        public VCICollectionsOverview( Func<object,Action<CollectionModel>> ViewCollection,
+                                       Func<object,Action<string>> AddCollection,
+                                       Func<object,Action> LoadCollection )
         {
             m_ViewCollectionRelay = ViewCollection;
             m_AddCollectionRelay = AddCollection;
@@ -30,14 +32,14 @@ namespace StoreFrontPro.Views.CollectionsOverview
             return typeof(VMCollectionsOverview);
         }
 
-        public bool TryInvoke(string Key, params object[] args)
+        public bool TryInvoke(object Caller, string Key, params object[] args)
         {
             if (Key == AddCollection)
             {
                 if (args?[0] is string)
                 {
                     string paramOne = args[0] as string;
-                    m_AddCollectionRelay?.Invoke(paramOne);
+                    m_AddCollectionRelay?.Invoke(Caller).Invoke(paramOne);
                     return true;
                 }
             }
@@ -46,13 +48,13 @@ namespace StoreFrontPro.Views.CollectionsOverview
                 if (args?[0] is CollectionModel)
                 {
                     CollectionModel paramOne = args[0] as CollectionModel;
-                    m_ViewCollectionRelay?.Invoke(paramOne);
+                    m_ViewCollectionRelay?.Invoke(Caller).Invoke(paramOne);
                     return true;
                 }
             }
             else if (Key == LoadCollection)
             {
-                m_LoadCollection?.Invoke();
+                m_LoadCollection?.Invoke(Caller).Invoke();
                 return true;
             }
 

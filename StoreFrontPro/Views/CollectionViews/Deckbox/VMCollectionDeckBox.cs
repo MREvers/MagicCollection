@@ -11,122 +11,150 @@ using System.Windows;
 
 namespace StoreFrontPro.Views.CollectionViews.Deckbox
 {
-    class VMCollectionDeckBox: ViewModel<CollectionModel>, IViewComponent, IVCISupporter
-    {
-        private MultiDisplay _OperationWindow = new MultiDisplay();
+   class VMCollectionDeckBox : ViewModel<CollectionModel>, IViewComponent, IVCISupporter
+   {
+      private const string cszCollectionEditorName = "CEN";
 
-        public MultiDisplay OperationWindow
-        {
-            get { return _OperationWindow; }
-            set { _OperationWindow = value; OnPropertyChanged(); }
-        }
+      private MultiDisplay _OperationWindow = new MultiDisplay();
 
-        public Dictionary<Type, IViewComponentInterface> SupportedInterface { get; set; } = new Dictionary<Type, IViewComponentInterface>();
+      public MultiDisplay OperationWindow
+      {
+         get { return _OperationWindow; }
+         set { _OperationWindow = value; OnPropertyChanged(); }
+      }
 
-        public event DisplayEventHandler DisplayEvent;
+      public event DisplayEventHandler DisplayEvent;
 
-        public VMCollectionDeckBox(CollectionModel Model) : base(Model)
-        {
-            VCICollectionEditor CEIS = new VCICollectionEditor(
-                Accept: eAcceptOrCancelColEditor,
-                Cancel: eAcceptOrCancelColEditor);
-            VCIRequestText RTIS = new VCIRequestText(
-                Accept: eSubCollectionAccept,
-                Cancel: eSubCollectionCancelled);
-            SupportedInterface.Add(RTIS.GetInterfaceType(), RTIS);
-            SupportedInterface.Add(CEIS.GetInterfaceType(), CEIS);
+      public VMCollectionDeckBox(CollectionModel Model, string RoutingName) : base(Model, RoutingName)
+      {
+         if (!Model.IsCollapsedCollection)
+         {
+            Model.IsCollapsedCollection = true;
+            Model.Sync();
+         }
 
-            if (!Model.IsCollapsedCollection)
-            {
-                Model.IsCollapsedCollection = true;
-                Model.Sync();
-            }
+         OperationWindow.SetNewDisplay(
+             Name: "List",
+             NewDisplay: new VFancyCollectionList(),
+             DataContext: new VMFancyCollectionList(Model.CollectionItems, "FancyColList", true),
+             Persist: false);
+         OperationWindow.DisplayEvent += DisplayEventHandler;
+      }
 
-            OperationWindow.SetNewDisplay(
-                Name: "List",
-                NewDisplay: new VFancyCollectionList(),
-                DataContext: new VMFancyCollectionList(Model.CollectionItems, true),
-                Persist: false);
-            OperationWindow.DisplayEvent += DisplayEventHandler;
+      #region Event Handlers
+      private void eDisplayCollectionEditorCommand(object canExecute)
+      {
+         VMCollectionEditor collectionsOverviewVM = new VMCollectionEditor(Model, cszCollectionEditorName);
+         OperationWindow.ShowOverlay(new VCollectionEditor() { DataContext = collectionsOverviewVM });
+      }
 
-        }
+      private void eDisplayCreateChildCollection(object canExecute)
+      {
+         VMRequestText collectionsOverviewVM = new VMRequestText("", "");
+         OperationWindow.ShowOverlay(new VRequestText() { DataContext = collectionsOverviewVM });
+      }
 
-        public void DisplayEventHandler(object source, DisplayEventArgs e)
-        {
-            if (!Application.Current.Dispatcher.CheckAccess())
-            {
-                Action aAction = new Action(() => { inDisplayEventHandler(source, e); });
-                Application.Current.Dispatcher.BeginInvoke(aAction);
-                return;
-            }
+      private void eSaveCollection(object canExecute)
+      {
+         Model.SaveCollection();
+      }
 
-            inDisplayEventHandler(source, e);
-        }
+      private void eSwitchToCubeView(object canExecute)
+      {
+         DisplayEventArgs eventArts = new DisplayEventArgs(VCICollectionDeckBox.SwitchToCube, Model);
+         DisplayEvent(this, eventArts);
+      }
 
-        public List<StoreFrontMenuItem> GetMenuItems()
-        {
-            List<StoreFrontMenuItem> lstRetVal = new List<StoreFrontMenuItem>();
+      private void eAcceptOrCancelColEditor()
+      {
+         OperationWindow.CloseOverlay();
+      }
 
-            StoreFrontMenuItem openCollectionEditor = new StoreFrontMenuItem("Edit Collection", eDisplayCollectionEditorCommand);
-            StoreFrontMenuItem saveCollection = new StoreFrontMenuItem("Save Collection", eSaveCollection);
-            StoreFrontMenuItem createChild = new StoreFrontMenuItem("Create Child Collection", eDisplayCreateChildCollection);
-            StoreFrontMenuItem switchToCube = new StoreFrontMenuItem("View as Cube", eSwitchToCubeView);
+      private void eSubCollectionAccept(string aszCollectionName)
+      {
+         Model.CreateChildCollection(aszCollectionName);
+         OperationWindow.CloseOverlay();
+      }
 
-            lstRetVal.Add(openCollectionEditor);
-            lstRetVal.Add(saveCollection);
-            lstRetVal.Add(createChild);
-            lstRetVal.Add(switchToCube);
+      private void eSubCollectionCancelled()
+      {
+         OperationWindow.CloseOverlay();
+      }
+      #endregion
 
-            return lstRetVal;
-        }
+      #region IViewComponent
+      public List<StoreFrontMenuItem> GetMenuItems()
+      {
+         List<StoreFrontMenuItem> lstRetVal = new List<StoreFrontMenuItem>();
 
-        private void inDisplayEventHandler(object source, DisplayEventArgs e)
-        {
-            if (SupportedInterface.ContainsKey(source.GetType()))
-            {
-                SupportedInterface?[source.GetType()]?.TryInvoke(e.Key, e.Args);
-            }
-        }
+         StoreFrontMenuItem openCollectionEditor = new StoreFrontMenuItem("Edit Collection", eDisplayCollectionEditorCommand);
+         StoreFrontMenuItem saveCollection = new StoreFrontMenuItem("Save Collection", eSaveCollection);
+         StoreFrontMenuItem createChild = new StoreFrontMenuItem("Create Child Collection", eDisplayCreateChildCollection);
+         StoreFrontMenuItem switchToCube = new StoreFrontMenuItem("View as Cube", eSwitchToCubeView);
 
-        private void eDisplayCollectionEditorCommand(object canExecute)
-        {
-            VMCollectionEditor collectionsOverviewVM = new VMCollectionEditor(Model);
-            OperationWindow.ShowOverlay(new VCollectionEditor() { DataContext = collectionsOverviewVM });
-        }
+         lstRetVal.Add(openCollectionEditor);
+         lstRetVal.Add(saveCollection);
+         lstRetVal.Add(createChild);
+         lstRetVal.Add(switchToCube);
 
-        private void eDisplayCreateChildCollection(object canExecute)
-        {
-            VMRequestText collectionsOverviewVM = new VMRequestText("");
-            OperationWindow.ShowOverlay(new VRequestText() { DataContext = collectionsOverviewVM });
-        }
+         return lstRetVal;
+      }
+      #endregion
 
-        private void eSaveCollection(object canExecute)
-        {
-            Model.SaveCollection();
-        }
+      #region IVCISupporter
+      public void DisplayEventHandler(object source, DisplayEventArgs e)
+      {
+         if (!Application.Current.Dispatcher.CheckAccess())
+         {
+            Action aAction = new Action(() => { inDisplayEventHandler(source, e); });
+            Application.Current.Dispatcher.BeginInvoke(aAction);
+            return;
+         }
 
-        private void eSwitchToCubeView(object canExecute)
-        {
-            DisplayEventArgs eventArts = new DisplayEventArgs(VCICollectionDeckBox.SwitchToCube, Model);
-            DisplayEvent(this, eventArts);
-        }
+         inDisplayEventHandler(source, e);
+      }
 
-        private void eAcceptOrCancelColEditor()
-        {
-            OperationWindow.CloseOverlay();
-        }
+      public void inDisplayEventHandler(object source, DisplayEventArgs e)
+      {
+         GetRouter().Call(source.GetType(), this, e.Key, e.Args);
+      }
 
-        private void eSubCollectionAccept(string aszCollectionName)
-        {
-            Model.CreateChildCollection(aszCollectionName);
-            OperationWindow.CloseOverlay();
-            DisplayEvent(this, new DisplayEventArgs(VCICollectionDeckBox.ChildCreated));
-        }
+      public InterfaceRouter GetRouter()
+      {
+         return IRouter;
+      }
 
-        private void eSubCollectionCancelled()
-        {
-            OperationWindow.CloseOverlay();
-        }
+      static InterfaceRouter _IRouter = null;
+      static InterfaceRouter IRouter
+      {
+         get
+         {
+            if (_IRouter == null) { BuildInterface(); }
+            return _IRouter;
+         }
+      }
 
-    }
+      static void BuildInterface()
+      {
+         _IRouter = new InterfaceRouter();
+
+         VCIRequestText RTIS = new VCIRequestText(
+             Accept: (x) => { return (x as VMCollectionDeckBox).eSubCollectionAccept; },
+             Cancel: (x) => { return (x as VMCollectionDeckBox).eSubCollectionCancelled; });
+         _IRouter.AddInterface(RTIS);
+
+         VCICollectionEditor CEIS = new VCICollectionEditor(
+            Accept: (x) => { return (x as VMCollectionDeckBox).eAcceptOrCancelColEditor; },
+            Cancel: (x) => { return (x as VMCollectionDeckBox).eAcceptOrCancelColEditor; });
+         _IRouter.AddInterface(CEIS);
+      }
+      #endregion
+
+      #region IViewModel
+      public override void ModelUpdated()
+      {
+
+      }
+      #endregion
+   }
 }

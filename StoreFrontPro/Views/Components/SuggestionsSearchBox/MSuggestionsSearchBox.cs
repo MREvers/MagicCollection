@@ -6,53 +6,61 @@ using System.Threading.Tasks;
 
 namespace StoreFrontPro.Views.Components.SuggestionsSearchBox
 {
-    class MSuggestionsSearchBox
-    {
-        public string ActionName;
+   class MSuggestionsSearchBox : IModel
+   {
+      private string _CurrentSearchName = "";
+      public string CurrentSearchName
+      {
+         get { return _CurrentSearchName; }
+         set { _CurrentSearchName = value;  NotifyViewModel(); }
+      }
 
-        private IEnumerable<string> m_lstCollection = null;
-        private Func<string, List<string>> m_fnSearchCollection = null;
+      public string ActionButtonName;
 
-        // IEnumerable stores a reference to the underlying data used to create the enumerable. THus
-        // changes made to that list will affect this Enumerable.
-        public MSuggestionsSearchBox(string ActionName, IEnumerable<string> Collection)
-        {
-            m_lstCollection = Collection;
-            this.ActionName = ActionName;
-        }
+      private Func<string, List<string>> m_fnSearchCollection = null;
 
-        public MSuggestionsSearchBox(string ActionName, Func<string, List<string>> SearchCollection)
-        {
-            m_fnSearchCollection = SearchCollection;
-            this.ActionName = ActionName;
-        }
+      public MSuggestionsSearchBox(string ActionName, Func<string, List<string>> SearchCollection)
+      {
+         m_fnSearchCollection = SearchCollection;
+         this.ActionButtonName = ActionName;
+      }
 
-        public List<string> GetMatchingCollectionItems(string aszMatch)
-        {
-            if (m_fnSearchCollection == null)
-            {
-                List<string> lstRetVal = new List<string>();
-                List<string> lstHoldVals = new List<string>();
-                foreach (string item in m_lstCollection)
-                {
-                    int iInd = item.ToLower().IndexOf(aszMatch);
-                    if (iInd == 0)
-                    {
-                        lstRetVal.Add(item);
-                    }
-                    else if (iInd > 0)
-                    {
-                        lstHoldVals.Add(item);
-                    }
-                }
+      public List<string> GetMatchingCollectionItems(string aszSearch)
+      {
+         return m_fnSearchCollection.Invoke(aszSearch);
+      }
 
-                lstRetVal = lstRetVal.Concat(lstHoldVals).ToList();
-                return lstRetVal;
-            }
-            else
-            {
-                return m_fnSearchCollection(aszMatch);
-            }
-        }
-    }
+      #region IModel
+      private List<IViewModel> m_lstViewers = new List<IViewModel>();
+      public void Register(IViewModel item)
+      {
+         m_lstViewers.Add(item);
+      }
+
+      public void UnRegister(IViewModel item)
+      {
+         m_lstViewers.Remove(item);
+      }
+
+      public void NotifyViewModel()
+      {
+         m_lstViewers.ForEach(x => x.ModelUpdated());
+      }
+
+      public void Sync(bool ASync = true)
+      {
+
+      }
+
+      public void EnableNotification(bool abNotify)
+      {
+         throw new NotImplementedException();
+      }
+
+      public void DisableNotification()
+      {
+         throw new NotImplementedException();
+      }
+      #endregion
+   }
 }

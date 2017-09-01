@@ -17,17 +17,23 @@ public:
 	System::String^ CreateNewCollection(System::String^ aszCollectionName, System::String^ ahszParent);
 	void SaveCollection(System::String^ aszCollectionName);
 
-    System::String^ GetImagesPath();
+   System::String^ GetImagesPath();
 	System::String^ GetCardPrototype(System::String^ ahszCardName);
 
-	System::Collections::Generic::List<System::String^>^ GetLoadedCollections();
+	System::Collections::Generic::List<System::String^>^ 
+      GetLoadedCollections();
 
-	System::Collections::Generic::List<System::String^>^ GetAllCardsStartingWith(System::String^ ahszText);
+	System::Collections::Generic::List<System::String^>^ 
+      GetAllCardsStartingWith(System::String^ ahszText);
 
-	System::Collections::Generic::List<System::String^>^ GetCollectionMetaData(System::String^ ahszCollectionName);
-	System::Collections::Generic::List<System::String^>^ GetCollectionList(System::String^ ahszCollectionName, System::Boolean ahbCollapsed);
+	System::Collections::Generic::List<System::String^>^ 
+      GetCollectionMetaData(System::String^ ahszCollectionName);
+	System::Collections::Generic::List<System::String^>^ 
+      GetCollectionList(System::String^ ahszCollectionName, System::Boolean ahbCollapsed);
 
-	void SubmitBulkChanges(System::String^ ahszCollectionName, System::Collections::Generic::List<System::String^>^ ahlstBulkChanges);
+	void SubmitBulkChanges(
+      System::String^ ahszCollectionName,
+      System::Collections::Generic::List<System::String^>^ ahlstBulkChanges);
 
 	void ImportCollection();
 private:

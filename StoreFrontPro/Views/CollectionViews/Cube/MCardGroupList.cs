@@ -9,10 +9,10 @@ using StoreFrontPro.Tools;
 
 namespace StoreFrontPro.Views.CollectionViews.Cube
 {
-   class MCardGroupList
+   class MCardGroupList: IModel
    {
-      private ObservableCollection<CardModel> _ungroupedList;
-      public ObservableCollection<CardModel> GroupedList
+      private List<CardModel> _ungroupedList;
+      public List<CardModel> GroupedList
       {
          get { return getFilteredList(_ungroupedList); }
       }
@@ -22,7 +22,7 @@ namespace StoreFrontPro.Views.CollectionViews.Cube
       private string m_szFilteringAttribute;
       private List<string> m_szAttributeSet;
 
-      public MCardGroupList(string FilteredAttribute, string ExpectedAttribute, List<string> AttributeSet, ObservableCollection<CardModel> BaseList)
+      public MCardGroupList(string FilteredAttribute, string ExpectedAttribute, List<string> AttributeSet, List<CardModel> BaseList)
       {
          _ungroupedList = BaseList;
 
@@ -37,13 +37,13 @@ namespace StoreFrontPro.Views.CollectionViews.Cube
       }
 
       // Can eventually use a strategy pattern to decide how to filter. TODO
-      private ObservableCollection<CardModel> getFilteredList(ObservableCollection<CardModel> alstList)
+      private List<CardModel> getFilteredList(List<CardModel> alstList)
       {
          return filterListOnIdentityAndCMC(alstList);
       }
 
 
-      public ObservableCollection<CardModel> filterListOnIdentityAndCMC(ObservableCollection<CardModel> alstNew)
+      public List<CardModel> filterListOnIdentityAndCMC(List<CardModel> alstNew)
       {
          List<CardModel> lstRetVal = new List<CardModel>();
 
@@ -63,7 +63,7 @@ namespace StoreFrontPro.Views.CollectionViews.Cube
             }
          }
 
-         ObservableCollection<CardModel> lstRealRetVal = new ObservableCollection<CardModel>();
+         List<CardModel> lstRealRetVal = new List<CardModel>();
          foreach (CardModel cm in lstRetVal.OrderBy(x => CMC(x)).ThenBy(x => x.GetIdealIdentifier()))
          {
             lstRealRetVal.Add(cm);
@@ -90,5 +90,37 @@ namespace StoreFrontPro.Views.CollectionViews.Cube
 
          return iCMC + iNumSpecs;
       }
+
+      #region IModel
+      public void Register(IViewModel item)
+      {
+         throw new NotImplementedException();
+      }
+
+      public void UnRegister(IViewModel item)
+      {
+
+      }
+
+      public void NotifyViewModel()
+      {
+         throw new NotImplementedException();
+      }
+
+      public void EnableNotification(bool abNotify)
+      {
+         throw new NotImplementedException();
+      }
+
+      public void DisableNotification()
+      {
+         throw new NotImplementedException();
+      }
+
+      public void Sync(bool ASync = true)
+      {
+         throw new NotImplementedException();
+      }
+      #endregion
    }
 }

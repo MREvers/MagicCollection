@@ -1,4 +1,5 @@
-﻿using System;
+﻿using StoreFrontPro.Views;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -11,13 +12,32 @@ namespace StoreFrontPro.Server
    /// S => Static
    /// SI => Server Interface
    /// </summary>
-   public partial class ServerInterface
-   {
+   partial class ServerInterface
+   { 
       public class ServerIFace
       {
-         private List<CollectionModel> m_lstCollectionModels = new List<CollectionModel>();
+         // It is expected that any object referenced in these actions
+         // survives to running time of the application.
+         private List<Action> Notifiers;
+         public List<CollectionModel> Collections;
 
-         public void LoadCollection(string aszCollectionFileName)
+         public ServerIFace()
+         {
+            Collections = new List<CollectionModel>();
+            Notifiers = new List<Action>();
+         }
+
+         public void Register(Action aAction)
+         {
+            Notifiers.Add(aAction);
+         }
+
+         private void notify()
+         {
+            Notifiers.ForEach(x => x?.Invoke());
+         }
+
+         public void LoadCollectionAS(string aszCollectionFileName)
          {
             singleton.enqueueService(() =>
             {
@@ -40,7 +60,7 @@ namespace StoreFrontPro.Server
          /// </summary>
          /// <param name="aszCollectionFileName"></param>
          /// <returns></returns>
-         public void GenerateCollectionModel(string aszCollectionName)
+         public void GenerateCollectionModelAS(string aszCollectionName)
          {
             singleton.enqueueService(() =>
             {
@@ -51,8 +71,8 @@ namespace StoreFrontPro.Server
          private void inGenerateCollectionModel(string aszCollectionID)
          {
             List<string> lstLoadedCollections = SCI.GetLoadedCollections();
-            if (lstLoadedCollections.Contains(aszCollectionID) &&
-                !m_lstCollectionModels.Select(x => x.ID).Contains(aszCollectionID))
+            if( ( lstLoadedCollections.Contains(aszCollectionID) ) &&
+                ( !Collections.Select(x => x.ID).Contains(aszCollectionID) ) )
             {
                createCollectionModel(aszCollectionID);
             }
@@ -61,25 +81,29 @@ namespace StoreFrontPro.Server
          private void createCollectionModel(string aszCollectionID)
          {
             CollectionModel newCM = new CollectionModel(aszCollectionID);
-            m_lstCollectionModels.Add(newCM);
+            Collections.Add(newCM);
+            notify();
          }
 
-         public void GenerateCopyModel(string Identifier,
-             string CollectionName,
-             Action<CardModel> Callback,
-             bool UICallback = false)
+         public void GenerateCopyModelAS( string Identifier, string CollectionName,
+                                          Action<CardModel> Callback, bool UICallback = false )
+         {
+            GenerateCopyModelsAS( new List<string>() { Identifier}, CollectionName,
+                                  (lst)=> { Callback(lst.FirstOrDefault()); }, UICallback );
+         }
+
+         public void GenerateCopyModelsAS( List<string> Identifiers, string CollectionName,
+                                           Action<List<CardModel>> Callback, bool UICallback = false )
          {
             singleton.enqueueService(() =>
             {
-               Callback(inGenerateCopyModel(Identifier, CollectionName));
+               Callback?.Invoke(Identifiers.Select((x) => { return createCopyModel(x, CollectionName); }).ToList());
             }, UICallback);
          }
 
-         private CardModel inGenerateCopyModel(string aszIdentifier, string aszCollectionName)
+         private CardModel createCopyModel(string aszIdentifier, string aszCollectionName)
          {
-            // We also need the rest identified attrs
             CardModel newCopy = new CardModel(aszIdentifier, aszCollectionName);
-
             return newCopy;
          }
 
@@ -93,7 +117,7 @@ namespace StoreFrontPro.Server
          /// </summary>
          /// <param name="CollectionName"></param>
          /// <returns></returns>
-         public void GetCollectionModel(string CollectionName, Action<CollectionModel> Callback, bool UICallback = false)
+         public void GetCollectionModelAS(string CollectionName, Action<CollectionModel> Callback, bool UICallback = false)
          {
             singleton.enqueueService(() =>
             {
@@ -103,10 +127,10 @@ namespace StoreFrontPro.Server
 
          public CollectionModel GetCollectionModel(string CollectionName)
          {
-            return m_lstCollectionModels.FirstOrDefault(x => x.CollectionName == CollectionName);
+            return Collections.FirstOrDefault(x => x.CollectionName == CollectionName);
          }
 
-         public void GetCollectionModels(Action<List<CollectionModel>> Callback, bool UICallback = false)
+         public void GetCollectionModelsAS(Action<List<CollectionModel>> Callback, bool UICallback = false)
          {
             singleton.enqueueService(() =>
             {
@@ -119,16 +143,16 @@ namespace StoreFrontPro.Server
             List<string> lstServerCollections = SCI.GetLoadedCollections();
             foreach (string szColID in lstServerCollections)
             {
-               if (!m_lstCollectionModels.Select(x => x.ID).Contains(szColID))
+               if (!Collections.Select(x => x.ID).Contains(szColID))
                {
                   createCollectionModel(szColID);
                }
             }
 
-            return m_lstCollectionModels;
+            return Collections;
          }
 
-         public void GetLoadedCollectionList(Action<List<string>> Callback, bool UICallback = false)
+         public void GetLoadedCollectionListAS(Action<List<string>> Callback, bool UICallback = false)
          {
             singleton.enqueueService(() =>
             {
@@ -141,7 +165,7 @@ namespace StoreFrontPro.Server
             return SCI.GetAllCardsStartingWith(aszStart);
          }
 
-         public void ImportJSONCollection()
+         public void ImportJSONCollectionAS()
          {
             singleton.enqueueService(() =>
             {
@@ -156,14 +180,6 @@ namespace StoreFrontPro.Server
             {
                inGenerateCollectionModel(szID);
             }
-         }
-
-         /// <summary>
-         /// Function that does nothing. May be called to initialize the singleton.
-         /// </summary>
-         public void Start()
-         {
-
          }
       }
    }

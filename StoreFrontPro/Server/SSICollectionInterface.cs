@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace StoreFrontPro.Server
 {
-    public partial class ServerInterface
+    partial class ServerInterface
     {
 
         public class CollectionIFace

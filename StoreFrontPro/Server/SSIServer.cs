@@ -9,7 +9,7 @@ using System.Windows;
 
 namespace StoreFrontPro.Server
 {
-    public partial class ServerInterface
+    partial class ServerInterface
     {
         // The static singleton is exposed via the 3 public properties Server, Card, and Collection
         // The Singleton's constructor ensures that the private static member SCI is initiated prior

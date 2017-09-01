@@ -10,7 +10,7 @@ using System.Windows;
 
 namespace StoreFrontPro.Views.CollectionViews.Cube
 {
-   class VMCardGroupDisplay : ViewModel<ObservableCollection<CardModel>>
+   class VMCardGroupDisplay : ViewModel<BasicModel<List<CardModel>>>
    {
 
       public ObservableCollection<VCardGroupList> CategoryGroups { get; set; } = new ObservableCollection<VCardGroupList>() { };
@@ -25,27 +25,17 @@ namespace StoreFrontPro.Views.CollectionViews.Cube
           "G"
       };
 
-      public VMCardGroupDisplay(ObservableCollection<CardModel> Model) : base(Model)
+      public VMCardGroupDisplay(BasicModel<List<CardModel>> Model, string RoutingName) : base(Model, RoutingName)
       {
-         SyncWithModel();
-         CollectionModel.RegisterCollectionListener(Model, (o, e) => { SyncWithModel(); });
-      }
+         Model.Register(this);
 
-      public void SyncWithModel()
-      {
-         Action actWrapper = () => { SyncWithModel(); };
-         if (!Application.Current.Dispatcher.CheckAccess())
-         {
-            Application.Current.Dispatcher.BeginInvoke(actWrapper);
-            return;
-         }
-         inSyncWithModel();
+         ModelUpdated();
       }
 
       private void inSyncWithModel()
       {
          // Get all of the grouping keys
-         List<string> lstGroupingKeys = Model
+         List<string> lstGroupingKeys = Model.Item
                                        .Select(x => getCategory(x.GetAttr("manaCost")))
                                        .Distinct()
                                        .ToList();
@@ -73,12 +63,12 @@ namespace StoreFrontPro.Views.CollectionViews.Cube
             if (oExistingDisplay == null)
             {
                MCardGroupList oCardGroupList = 
-                  new MCardGroupList("manaCost", category, m_lstPriorityGroupingKeys, Model);
+                  new MCardGroupList("manaCost", category, m_lstPriorityGroupingKeys, Model.Item);
 
                if (oCardGroupList.GroupedList.Count > 0)
                {
                   VMCardGroupList oCardGroupListVM = 
-                     new VMCardGroupList(oCardGroupList, m_lstPriorityGroupingKeys.Contains(category));
+                     new VMCardGroupList(oCardGroupList, "", m_lstPriorityGroupingKeys.Contains(category));
 
                   VCardGroupList oCardGroupListV = 
                      new VCardGroupList() { DataContext = oCardGroupListVM };
@@ -141,5 +131,18 @@ namespace StoreFrontPro.Views.CollectionViews.Cube
             }
          }
       }
+
+      #region IViewModel
+      public override void ModelUpdated()
+      {
+         Action actWrapper = () => { ModelUpdated(); };
+         if (!Application.Current.Dispatcher.CheckAccess())
+         {
+            Application.Current.Dispatcher.BeginInvoke(actWrapper);
+            return;
+         }
+         inSyncWithModel();
+      }
+      #endregion
    }
 }
