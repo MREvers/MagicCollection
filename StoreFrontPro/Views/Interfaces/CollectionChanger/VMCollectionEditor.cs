@@ -127,7 +127,7 @@ namespace StoreFrontPro.Views.Interfaces.CollectionChanger
 
       private void eAddCardEventHandler(object Source, DisplayEventArgs Event)
       {
-         CollectionDelta delta = Model.GetDeltaCommand(AddCard: AddCardText, RemoveIdealIdentifier: RemoveCardText);
+         CollectionDelta delta = Model.GetDeltaCommand(AddCard: AddCardText, RemoveIdealIdentifier: "");
          addEditorItem(delta);
          clearSearchBoxes();
       }

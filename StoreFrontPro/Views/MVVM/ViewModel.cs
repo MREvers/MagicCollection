@@ -57,7 +57,7 @@ namespace StoreFrontPro.Views
          this.RoutingName = RoutingName;
       }
 
-      public void FreeModel()
+      public virtual void FreeModel()
       {
          Model.UnRegister(this);
       }

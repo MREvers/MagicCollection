@@ -48,7 +48,7 @@ namespace StoreFrontPro.Server
          set { lock (m_oLock) { _bCardImageIsLoading = value; } }
       }
 
-      public int Count = 1; // Used if the list in a collection is "Collapsed"
+      public int Count = 1; 
       public string TargetCollection;
       public string CardName;
       public List<Tuple<string, string>> MetaTags;

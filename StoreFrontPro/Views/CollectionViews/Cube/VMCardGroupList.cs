@@ -10,6 +10,7 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
 using StoreFrontPro.Tools;
+using System.Windows;
 
 namespace StoreFrontPro.Views.CollectionViews.Cube
 {
@@ -18,7 +19,8 @@ namespace StoreFrontPro.Views.CollectionViews.Cube
       private const string cszCardImageDisplayerName = "CIDN";
 
       public string GroupName { get; set; }
-      public ObservableCollection<ListViewItem> CategoryList { get; set; } = new ObservableCollection<ListViewItem>() { };
+      public ObservableCollection<ListViewItem> CategoryList { get; set; } =
+         new ObservableCollection<ListViewItem>();
 
       private VCardImageDisplayer _ToolTipDisplay = null;
       public VCardImageDisplayer ToolTipDisplay
@@ -29,17 +31,14 @@ namespace StoreFrontPro.Views.CollectionViews.Cube
 
       public bool IsFullSize { get; set; } = false;
 
-      public VMCardGroupList(MCardGroupList Model, string RoutingName, bool IsFullSize = false) : base(Model, RoutingName)
+      public VMCardGroupList(MCardGroupList Model, string RoutingName, bool IsFullSize = false)
+         : base(Model, RoutingName)
       {
-         GroupName = Model.GroupName;
-         SyncWithModel();
+         Model.Register(this);
          this.IsFullSize = IsFullSize;
-      }
+         GroupName = Model.GroupName;
 
-      public void SyncWithModel()
-      {
-         removeAllItems();
-         Model.GroupedList.ForEach(x => addItemToCategoryList(x.GetIdealIdentifier()));
+         ModelUpdated();
       }
 
       private void addItemToCategoryList(string aszItem)
@@ -54,10 +53,7 @@ namespace StoreFrontPro.Views.CollectionViews.Cube
       private void removeAllItems()
       {
          List<ListViewItem> lstTemp = new List<ListViewItem>();
-         foreach (ListViewItem lvi in CategoryList)
-         {
-            lstTemp.Add(lvi);
-         }
+         CategoryList.ForEach(x => lstTemp.Add(x));
 
          lstTemp.ForEach(x => removeItemFromCategoryList(x));
       }
@@ -65,7 +61,6 @@ namespace StoreFrontPro.Views.CollectionViews.Cube
       private void removeItemFromCategoryList(ListViewItem aoItem)
       {
          aoItem.MouseMove -= displayToolTip;
-
          CategoryList.Remove(aoItem);
       }
 
@@ -74,28 +69,58 @@ namespace StoreFrontPro.Views.CollectionViews.Cube
          ListViewItem item = (source as ListViewItem);
          string szItemText = item.Content.ToString();
 
-         if ((ToolTipDisplay?.DataContext != null) &&
-             (szItemText == (ToolTipDisplay.DataContext as VMCardImageDisplayer).Model.GetIdealIdentifier()) &&
-             ((ToolTipDisplay.DataContext as VMCardImageDisplayer).CardImage != null))
+         if(!isToolTipDisplayed(szItemText))
          {
-            return;
+            CardModel model = getCardModel(szItemText);
+            if (model != null)
+            {
+               ViewClass displayerClass = ViewFactory.CreateCardImageViewer(model, cszCardImageDisplayerName);
+               ToolTipDisplay = (VCardImageDisplayer)displayerClass.View;
+            }
          }
+      }
 
-         CardModel model = Model.GroupedList.Where(x => x.GetIdealIdentifier() == szItemText).FirstOrDefault();
-         if (model != null)
-         {
-            VMCardImageDisplayer cardImageDisplayerVM = new VMCardImageDisplayer(model, cszCardImageDisplayerName);
-            VCardImageDisplayer cardImageDisplayerV = new VCardImageDisplayer();
-            cardImageDisplayerV.DataContext = cardImageDisplayerVM;
+      /// <summary>
+      /// Returns whether a tooltip is displayed for the input item.
+      /// </summary>
+      /// <param name="aszItem"></param>
+      /// <returns></returns>
+      private bool isToolTipDisplayed(string aszItem)
+      {
+         VMCardImageDisplayer tooltip = (ToolTipDisplay?.DataContext as VMCardImageDisplayer);
+         return ( ( tooltip != null ) &&                               // if Tooltip is already displayed
+                  ( aszItem == tooltip.Model.GetIdealIdentifier() ) && // and Tooltip is displaying the same item
+                  ( tooltip.CardImage != null ) );                     // and Tooltip is displaying an image.
+      }
 
-            ToolTipDisplay = cardImageDisplayerV;
-         }
+      private CardModel getCardModel(string aszItem)
+      {
+         return Model.GroupedList.Where(x => x.GetIdealIdentifier() == aszItem).FirstOrDefault();
       }
 
       #region IViewModel
       public override void ModelUpdated()
       {
-         throw new NotImplementedException();
+         Action actWrapper = () => { ModelUpdated(); };
+         if (!Application.Current.Dispatcher.CheckAccess())
+         {
+            Application.Current.Dispatcher.BeginInvoke(actWrapper);
+            return;
+         }
+
+         removeAllItems();
+         Model.GroupedList.ForEach(x => addItemToCategoryList(x.GetIdealIdentifier()));
+      }
+      #endregion
+
+      #region ViewModel
+      public override void FreeModel()
+      {
+         base.FreeModel();
+
+         // Since this model wraps another model, it is necessary to
+         // also release the base model.
+         Model.FreeModel();
       }
       #endregion
    }

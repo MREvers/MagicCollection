@@ -16,7 +16,8 @@ namespace StoreFrontPro.Views.Interfaces.CollectionChanger
          get { return Model.DisplayText; }
       }
 
-      public ObservableCollection<string> PossibleValues { get; set; } = new ObservableCollection<string>();
+      public ObservableCollection<string> PossibleValues { get; set; }
+         = new ObservableCollection<string>();
 
       public string Set
       {

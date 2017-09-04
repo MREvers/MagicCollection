@@ -13,7 +13,7 @@ namespace StoreFrontPro.Server
    /// SI => Server Interface
    /// </summary>
    partial class ServerInterface
-   { 
+   {
       public class ServerIFace
       {
          // It is expected that any object referenced in these actions
@@ -71,8 +71,8 @@ namespace StoreFrontPro.Server
          private void inGenerateCollectionModel(string aszCollectionID)
          {
             List<string> lstLoadedCollections = SCI.GetLoadedCollections();
-            if( ( lstLoadedCollections.Contains(aszCollectionID) ) &&
-                ( !Collections.Select(x => x.ID).Contains(aszCollectionID) ) )
+            if ((lstLoadedCollections.Contains(aszCollectionID)) &&
+                (!Collections.Select(x => x.ID).Contains(aszCollectionID)))
             {
                createCollectionModel(aszCollectionID);
             }
@@ -85,15 +85,15 @@ namespace StoreFrontPro.Server
             notify();
          }
 
-         public void GenerateCopyModelAS( string Identifier, string CollectionName,
-                                          Action<CardModel> Callback, bool UICallback = false )
+         public void GenerateCopyModelAS(string Identifier, string CollectionName,
+                                          Action<CardModel> Callback, bool UICallback = false)
          {
-            GenerateCopyModelsAS( new List<string>() { Identifier}, CollectionName,
-                                  (lst)=> { Callback(lst.FirstOrDefault()); }, UICallback );
+            GenerateCopyModelsAS(new List<string>() { Identifier }, CollectionName,
+                                  (lst) => { Callback(lst.FirstOrDefault()); }, UICallback);
          }
 
-         public void GenerateCopyModelsAS( List<string> Identifiers, string CollectionName,
-                                           Action<List<CardModel>> Callback, bool UICallback = false )
+         public void GenerateCopyModelsAS(List<string> Identifiers, string CollectionName,
+                                           Action<List<CardModel>> Callback, bool UICallback = false)
          {
             singleton.enqueueService(() =>
             {

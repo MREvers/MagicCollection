@@ -12,18 +12,11 @@ namespace StoreFrontPro.Views.CollectionViews.Cube
 {
    class VMCardGroupDisplay : ViewModel<BasicModel<List<CardModel>>>
    {
-
-      public ObservableCollection<VCardGroupList> CategoryGroups { get; set; } = new ObservableCollection<VCardGroupList>() { };
+      public ObservableCollection<VCardGroupList> CategoryGroups { get; set; } = 
+         new ObservableCollection<VCardGroupList>() { };
 
       // We can come up with a better solution in the future
-      private List<string> m_lstPriorityGroupingKeys = new List<string>()
-      {
-          "W",
-          "U",
-          "B",
-          "R",
-          "G"
-      };
+      private List<string> m_lstPriorityGroupingKeys = new List<string>() { "W", "U", "B", "R", "G" };
 
       public VMCardGroupDisplay(BasicModel<List<CardModel>> Model, string RoutingName) : base(Model, RoutingName)
       {
@@ -35,16 +28,14 @@ namespace StoreFrontPro.Views.CollectionViews.Cube
       private void inSyncWithModel()
       {
          // Get all of the grouping keys
-         List<string> lstGroupingKeys = Model.Item
-                                       .Select(x => getCategory(x.GetAttr("manaCost")))
-                                       .Distinct()
-                                       .ToList();
+         List<string> lstGroupingKeys = getCurrentGroupingKeys();
 
+         // Remove groups that no longer exist.
          List<VCardGroupList> lstRemoveGroups = new List<VCardGroupList>();
-         foreach (var group in CategoryGroups)
+         foreach( var group in CategoryGroups )
          {
-            ((VMCardGroupList)group.DataContext).SyncWithModel();
-            if (((VMCardGroupList)group.DataContext).CategoryList.Count == 0)
+            MCardGroupList groupModel = getCardGroupModelFromView(group);
+            if( groupModel.GroupedList.Count == 0 )
             {
                lstRemoveGroups.Add(group);
             }
@@ -52,41 +43,59 @@ namespace StoreFrontPro.Views.CollectionViews.Cube
 
          foreach (var rmGroup in lstRemoveGroups)
          {
+            VMCardGroupList rmGroupVM = (rmGroup.DataContext as VMCardGroupList);
+            rmGroupVM.FreeModel();
             CategoryGroups.Remove(rmGroup);
          }
 
-         foreach (string category in lstGroupingKeys)
+         // Add groups that are new.
+         foreach (string category in lstGroupingKeys.Where(x => !hasDisplay(x)))
          {
-            VCardGroupList oExistingDisplay = CategoryGroups
-                                              .Where(x => ((VMCardGroupList)(x.DataContext)).GroupName == category)
-                                              .FirstOrDefault();
-            if (oExistingDisplay == null)
+            ViewClass oCardGroupClass = ViewFactory.CreateCardGroupList("manaCost", category, m_lstPriorityGroupingKeys, Model);
+            if( oCardGroupClass != null )
             {
-               MCardGroupList oCardGroupList = 
-                  new MCardGroupList("manaCost", category, m_lstPriorityGroupingKeys, Model.Item);
-
-               if (oCardGroupList.GroupedList.Count > 0)
-               {
-                  VMCardGroupList oCardGroupListVM = 
-                     new VMCardGroupList(oCardGroupList, "", m_lstPriorityGroupingKeys.Contains(category));
-
-                  VCardGroupList oCardGroupListV = 
-                     new VCardGroupList() { DataContext = oCardGroupListVM };
-
-                  CategoryGroups.Add(oCardGroupListV);
-                  sortCategoryGroups();
-               }
+               CategoryGroups.Add((VCardGroupList)oCardGroupClass.View);
+               sortCategoryGroups();
             }
          }
+      }
+
+      /// <summary>
+      /// Returns true if this group display is already displaying the input category.
+      /// </summary>
+      /// <param name="aszCategory"></param>
+      /// <returns></returns>
+      private bool hasDisplay(string aszCategory)
+      {
+         VCardGroupList oExistingDisplay = CategoryGroups
+            .Where(x => ((VMCardGroupList)(x.DataContext)).GroupName == aszCategory)
+            .FirstOrDefault();
+         return oExistingDisplay != null;
+      }
+
+      /// <summary>
+      /// Returns the list of grouping keys currently present in the 
+      /// model.
+      /// </summary>
+      /// <returns></returns>
+      private List<string> getCurrentGroupingKeys()
+      {
+         return Model.Item.Select(x => getCategory(x.GetAttr("manaCost"))).Distinct().ToList();
       }
 
       private string getCategory(string szMan)
       {
          string szRetVal = "";
-         foreach (string priorityCategory in m_lstPriorityGroupingKeys)
+
+         foreach (string szPriorityCategory in m_lstPriorityGroupingKeys.Where(x => szMan.Contains(x)))
          {
-            szRetVal += szMan.Contains(priorityCategory) ? (szRetVal == "" ? "" : "\\") + priorityCategory : "";
+            szRetVal += szPriorityCategory + "\\";
          }
+
+         // Delete the trailing \
+         int iLastSlash = szRetVal.LastIndexOf('\\');
+         szRetVal = szRetVal.Substring(0, iLastSlash);
+
          return szRetVal;
       }
 
@@ -97,9 +106,8 @@ namespace StoreFrontPro.Views.CollectionViews.Cube
          CategoryGroups.Clear();
          foreach (string category in m_lstPriorityGroupingKeys)
          {
-            VCardGroupList lst = lstTemp
-                                 .Where(x => ((VMCardGroupList)x.DataContext).GroupName == category)
-                                 .FirstOrDefault();
+            VCardGroupList lst = lstTemp.Where(x => ((VMCardGroupList)x.DataContext).GroupName == category)
+                                        .FirstOrDefault();
             if (lst != null)
             {
                CategoryGroups.Add(lst);
@@ -130,6 +138,11 @@ namespace StoreFrontPro.Views.CollectionViews.Cube
                CategoryGroups.Insert(i, VList);
             }
          }
+      }
+
+      private MCardGroupList getCardGroupModelFromView(VCardGroupList view)
+      {
+         return ((VMCardGroupList)view?.DataContext)?.Model;
       }
 
       #region IViewModel
