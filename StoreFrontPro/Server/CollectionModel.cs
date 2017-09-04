@@ -41,23 +41,34 @@ namespace StoreFrontPro.Server
          if( RemoveCardIdealID != "" )
          {
             oRemoveCard = Collection.GetCardModel(RemoveCardIdealID);
-            if( oRemoveCard == null ) { return null; }
+            if( oRemoveCard == null )
+            {
+               RemoveCardIdealID = "";
+            }
+            else
+            {
+               iMaxDeltaCount = 0;
+               lstModels.ForEach(x => {
+                  if (oRemoveCard.GetMetaTag("__hash") == x.GetMetaTag("__hash"))
+                  {
+                     iMaxDeltaCount += x.Count;
+                  }
+               });
+            }
 
-            iMaxDeltaCount = 0;
-            lstModels.ForEach(x => {
-               if (oRemoveCard.GetMetaTag("__hash") == x.GetMetaTag("__hash"))
-               {
-                  iMaxDeltaCount += x.Count;
-               }
-            });
          }
 
          if( AddCard != "" )
          {
             szAddCardProto = ServerInterface.Card.GetProtoType(AddCard);
-            if( szAddCardProto == "" ) { return null; }
-
-            CardModel.GetPrototype(AddCard).AttributeOptions.TryGetValue("set", out lstAdditionOptions);
+            if( szAddCardProto == "" )
+            {
+               AddCard = "";
+            }
+            else
+            {
+               CardModel.GetPrototype(AddCard).AttributeOptions.TryGetValue("set", out lstAdditionOptions);
+            }
          }
 
          if( AddCard != "" && RemoveCardIdealID != "" )

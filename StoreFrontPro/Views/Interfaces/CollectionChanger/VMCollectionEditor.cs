@@ -110,26 +110,32 @@ namespace StoreFrontPro.Views.Interfaces.CollectionChanger
       {
          if (aszSourceName == cszAddSearchBox)
          {
-            eAddCardEventHandler(null, null);
+            eAddCardEventHandler();
          }
          else
          {
-            eRemoveCardEventHandler(null, null);
+            eRemoveCardEventHandler();
          }
       }
 
-      private void eRemoveCardEventHandler(object Source, DisplayEventArgs Event)
+      private void eRemoveCardEventHandler()
       {
          CollectionDelta delta = Model.GetDeltaCommand(AddCard: AddCardText, RemoveIdealIdentifier: RemoveCardText);
-         addEditorItem(delta);
          clearSearchBoxes();
+         if (delta != null)
+         {
+            addEditorItem(delta);
+         }
       }
 
-      private void eAddCardEventHandler(object Source, DisplayEventArgs Event)
+      private void eAddCardEventHandler()
       {
          CollectionDelta delta = Model.GetDeltaCommand(AddCard: AddCardText, RemoveIdealIdentifier: "");
-         addEditorItem(delta);
          clearSearchBoxes();
+         if (delta != null)
+         {
+            addEditorItem(delta);
+         }
       }
 
       private void eAcceptCommand(object canExecute)
