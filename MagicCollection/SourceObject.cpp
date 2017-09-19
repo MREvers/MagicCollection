@@ -6,7 +6,6 @@ SourceObject::SourceObject(int aiCharBufOffset)
    m_iCachedIndex = -1;
    m_iCharBufferOffset = aiCharBufOffset;
    m_iKeyValArraySize = 0;
-   m_pLstKeyVals = new unsigned short[11];
    m_iNameIndex = 0;
 }
 
@@ -45,7 +44,7 @@ SourceObject::AddAttribute(std::string aszkey, std::string value, char* aplstCha
    }
 
    m_pLstKeyVals[m_iKeyValArraySize] = iKeyValPair;
-   
+
    m_iKeyValArraySize++;
 
    return 3 + value.size();
@@ -136,18 +135,6 @@ int SourceObject::GetCacheIndex()
 void SourceObject::Cache(unsigned short aiCacheIndex)
 {
    m_iCachedIndex = aiCacheIndex;
-}
-
-void SourceObject::FinalizeSize()
-{
-   unsigned short* newList = new unsigned short[m_iKeyValArraySize];
-   for (int i = 0; i < m_iKeyValArraySize; i++)
-   {
-      newList[i] = m_pLstKeyVals[i];
-   }
-   delete[] m_pLstKeyVals;
-
-   m_pLstKeyVals = newList;
 }
 
 bool SourceObject::isNonUniqueFlag(short aiCheck)

@@ -101,7 +101,7 @@ TransactionManager::Remove(
    std::string aszIdentifyingHash,
    Address aszResidentIn)
 {
-   m_ptrCollection->removeItem(aszName, aszIdentifyingHash, aszResidentIn);
+//   m_ptrCollection->removeItem(aszName, aszIdentifyingHash, aszResidentIn);
 }
 
 void 

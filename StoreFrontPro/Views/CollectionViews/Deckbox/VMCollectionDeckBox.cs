@@ -13,7 +13,7 @@ namespace StoreFrontPro.Views.CollectionViews.Deckbox
 {
    class VMCollectionDeckBox : ViewModel<CollectionModel>, IViewComponent, IVCISupporter
    {
-      private const string cszCollectionEditorName = "CEN";
+      public const string CollectionEditor = "CE";
 
       private MultiDisplay _OperationWindow = new MultiDisplay();
 
@@ -44,7 +44,7 @@ namespace StoreFrontPro.Views.CollectionViews.Deckbox
       #region Event Handlers
       private void eDisplayCollectionEditorCommand(object canExecute)
       {
-         VMCollectionEditor collectionsOverviewVM = new VMCollectionEditor(Model, cszCollectionEditorName);
+         VMCollectionEditor collectionsOverviewVM = new VMCollectionEditor(Model, CollectionEditor);
          OperationWindow.ShowOverlay(new VCollectionEditor() { DataContext = collectionsOverviewVM });
       }
 

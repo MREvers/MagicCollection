@@ -1,5 +1,6 @@
 #include "Config.h"
 
+#include <sstream>
 /*
 const char * const CollectionObject::LstUniqueTraits[] = { "manaCost", "colors", "name", "power",
 "toughness", "loyalty", "text" };
@@ -10,6 +11,8 @@ const char * const CollectionObject::LstNonUniqueTraits[] = { "set", "multiverse
 Config* Config::ms_pConfig = nullptr;
 char* Config::MetaFileExtension = "meta";
 char* Config::HistoryFileExtension = "history";
+char* Config::TrackingTagId = "__";
+char* Config::IgnoredTagId = "_";
 char* Config::HashKey = "__hash";
 char* Config::NotFoundString = "NF";
 char* Config::CollectionDefinitionKey = ":";
@@ -37,7 +40,6 @@ Config::~Config()
 
 std::string Config::GetSourceFile()
 {
-   std::cout << ".\\Config\\" + m_szSourceFolder + "\\" + m_szSourceFile << std::endl;
    return ".\\Config\\" + m_szSourceFolder + "\\" + m_szSourceFile;
 }
 
@@ -124,7 +126,7 @@ std::vector<std::string>& Config::GetPerCollectionMetaTags()
    return m_lstPerCollectionMetaTags;
 }
 
-std::function<std::string(Tag)> Config::GetTagHelper(TagHelperType aiMode)
+const std::function<std::string(const Tag&)> Config::GetTagHelper(TagHelperType aiMode) const
 {
    if (aiMode == Key)
    {
@@ -136,6 +138,16 @@ std::function<std::string(Tag)> Config::GetTagHelper(TagHelperType aiMode)
    }
 }
 
+std::string Config::GetHexID( unsigned long aulValue )
+{
+   std::stringstream stream;
+   stream << std::setfill( '0' ) << std::setw( 3 ) << std::hex;
+   
+   stream << aulValue;
+
+   return std::string( stream.str().substr(3) );
+}
+
 bool Config::IsIdentifyingAttributes(std::string aszAttrs)
 {
    return ListHelper::List_Find(aszAttrs, m_lstIdentifyingAttributes) != -1;
@@ -143,8 +155,8 @@ bool Config::IsIdentifyingAttributes(std::string aszAttrs)
 
 bool Config::IsPairedKey(std::string aszKey)
 {
-   return ListHelper::List_Find(aszKey, m_lstPairedKeys, m_fnKeyExtractor) != -1 ||
-      ListHelper::List_Find(aszKey, m_lstPairedKeys, m_fnValueExtractor) != -1;
+   return   ListHelper::List_Find(aszKey, m_lstPairedKeys, m_fnKeyExtractor) != -1 ||
+          ListHelper::List_Find(aszKey, m_lstPairedKeys, m_fnValueExtractor) != -1;
 }
 
 bool Config::IsValidKey(std::string aszKey)
@@ -174,6 +186,7 @@ void Config::initDefaultSettings()
    m_lstStaticAttributes.push_back("manaCost");
    m_lstStaticAttributes.push_back("colors");
    m_lstStaticAttributes.push_back("name");
+   m_lstStaticAttributes.push_back("names");
    m_lstStaticAttributes.push_back("power");
    m_lstStaticAttributes.push_back("toughness");
    m_lstStaticAttributes.push_back("loyalty");

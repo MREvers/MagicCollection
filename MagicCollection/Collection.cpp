@@ -258,34 +258,33 @@ Collection::LoadChanges(vector<string> lstLines)
 vector<string> 
 Collection::GetCollectionList(MetaTagType atagType, bool aiCollapsed)
 {
-   function<string(pair<string, int>)> fnExtractor;
-   fnExtractor = [](pair<string, int> pVal)
-                   ->string { return pVal.first; };
-   vector<string> lstRetVal;
-   vector<pair<string, int>> lstSeenHashes;
-   vector<int> lstCol = getCollection();
-   vector<int>::iterator iter_Items = lstCol.begin();
-   for (; iter_Items != lstCol.end(); ++iter_Items)
-   {
-      TryGet<CollectionItem> item = m_ptrCollectionSource->
-		  GetCardPrototype(*iter_Items);
-      vector<shared_ptr<CopyItem>> lstCopies = item->
-		  GetCopiesForCollection(GetIdentifier(), All);
+   static const function<string(const pair<string, int>&)> fnExtractor 
+      = [](const pair<string, int>& pVal)->string { return pVal.first; };
 
-      vector<shared_ptr<CopyItem>>::iterator iter_Copy = lstCopies.begin();
-      for (; iter_Copy != lstCopies.end(); ++iter_Copy)
+   vector<string> lstRetVal;
+   TryGet<CollectionItem> item;
+   vector<shared_ptr<CopyItem>> lstCopies;
+   vector<pair<string, int>> lstSeenHashes;
+
+   vector<int> lstCol = getCollection();
+   for( auto iItem : lstCol )
+   {
+      item = m_ptrCollectionSource->GetCardPrototype(iItem);
+      lstCopies = item->FindCopies(GetIdentifier(), All);
+
+      for( auto copy : lstCopies )
       {
-         string szHash = (*iter_Copy)->GetHash();
+         string szHash = copy->GetHash();
          int iCounted = ListHelper::List_Find(szHash, lstSeenHashes,
                                               fnExtractor);
-         if (!aiCollapsed || (iCounted == -1))
+         if( ( !aiCollapsed ) || ( iCounted == -1 ) )
          {
-            string szRep = item->GetCardString(iter_Copy->get(), atagType, 
-                                               GetIdentifier());
+            string szRep = item->CopyToString( copy.get(), atagType, 
+                                               GetIdentifier() );
             lstRetVal.push_back(szRep);
             lstSeenHashes.push_back(make_pair(szHash, 1));
          }
-         else if (iCounted != -1)
+         else if( iCounted != -1 )
          {
             lstSeenHashes[iCounted].second++;
          }
@@ -304,7 +303,7 @@ Collection::GetCollectionList(MetaTagType atagType, bool aiCollapsed)
       lstRetVal.clear();
       lstRetVal = lstNewRetVal;
    }
-
+   
    return lstRetVal;
 }
 
@@ -334,7 +333,7 @@ Collection::addItem(
 
    item = m_ptrCollectionSource->GetCardPrototype(iCache);
 
-   cItem = item->AddCopyItem(GetIdentifier(), alstAttrs, alstMetaTags);
+   cItem = item->AddCopy(GetIdentifier(), alstAttrs, alstMetaTags).get();
    szHash = cItem->GetHash();
 
    registerItem(iCache);
@@ -352,6 +351,7 @@ Collection::addItemFrom(
    std::string aszIdentifyingHash,
    const Address& aResiAddress)
 {
+   /*
    TryGet<CollectionItem> item;
    std::shared_ptr<CopyItem> cItem;
 
@@ -359,24 +359,24 @@ Collection::addItemFrom(
    item = m_ptrCollectionSource->GetCardPrototype(iCache);
    if (!item.Good()) { return; }
 
-   cItem = item->FindCopyItem(aszIdentifyingHash, aResiAddress);
+   cItem = item->FindCopy(aszIdentifyingHash, aResiAddress);
    if (cItem.get() == nullptr) { return; }
 
    cItem->AddResident(GetIdentifier());
 
    registerItem(iCache);
+   */
 }
 
 void 
-Collection::removeItem( string aszName, 
-                        string aszIdentifyingHash, 
-                        Address aAddrResidentIn )
+Collection::removeItem( const string& aszName, 
+                        const string& aszUID )
 {
    // The copy is already verified to exist at this point
    int iCache = m_ptrCollectionSource->LoadCard(aszName);
 
    TryGet<CollectionItem> item = m_ptrCollectionSource->GetCardPrototype(iCache);
-
+   /*
    item->RemoveCopyItem(aAddrResidentIn, aszIdentifyingHash);
 
    // Remove any items from the cache that are no longer in this collection.
@@ -396,6 +396,7 @@ Collection::removeItem( string aszName,
    // Notify other collections they may need to sync since this may have been 
    //  borrowed by other collections.
    m_ptrCollectionSource->NotifyNeedToSync(GetIdentifier());
+   */
 }
 
 void 
@@ -407,7 +408,7 @@ Collection::changeItem( string aszName,
    int iCache = m_ptrCollectionSource->LoadCard(aszName);
 
    TryGet<CollectionItem> item = m_ptrCollectionSource->GetCardPrototype(iCache);
-   CopyItem* cItem = item->FindCopyItem(aszIdentifyingHash).get();
+   CopyItem* cItem = item->FindCopy(aszIdentifyingHash).Value()->get();
    if (cItem == nullptr) { return; }
 
    modifyItem(cItem, alstChanges, alstMetaChanges);
@@ -425,16 +426,18 @@ Collection::replaceItem( string aszName,
                          vector<Tag> alstIdChanges, 
                          vector<Tag> alstMetaChanges )
 {
+   /*
    int iCache = m_ptrCollectionSource->LoadCard(aszName);
    int iNewCache = m_ptrCollectionSource->LoadCard(aszNewName);
 
    TryGet<CollectionItem> item = m_ptrCollectionSource->GetCardPrototype(iCache);
    TryGet<CollectionItem> newItem = m_ptrCollectionSource->GetCardPrototype(iNewCache);
-   CopyItem* cItem = item->FindCopyItem(aszIdentifyingHash).get();
+   CopyItem* cItem = item->FindCopy(aszIdentifyingHash).get();
    if (cItem == nullptr) { return; }
 
    removeItem(item->GetName(), cItem->GetHash(), GetIdentifier());
    addItem(newItem->GetName(), alstIdChanges, alstMetaChanges);
+   */
 }
 
 void 
@@ -490,10 +493,11 @@ void Collection::loadMetaTagFile()
       if (iRealCard == -1) { continue; }
 
       TryGet<CollectionItem> item = m_ptrCollectionSource->GetCardPrototype(iRealCard);
-      string szPlainHash = item->GetHash(GetIdentifier(), sudoItem.Identifiers);
+      /*
+      string szPlainHash = item->GenerateHash(GetIdentifier(), sudoItem.Identifiers);
 
       // Gets the first matching item resident in this collection.
-      CopyItem* matchingCopy = item->FindCopyItem(szPlainHash, GetIdentifier()).get();
+      CopyItem* matchingCopy = item->FindCopy(szPlainHash, GetIdentifier()).get();
       if (matchingCopy != nullptr)
       {
          for (size_t t = 0; t < lstMetaTags.size(); t++)
@@ -503,7 +507,7 @@ void Collection::loadMetaTagFile()
 				SetMetaTag(lstMetaTags[t].first, lstMetaTags[t].second, mTagType, false);
          }
       }
-
+      */
    }
 }
 
@@ -673,6 +677,7 @@ void Collection::loadDeltaLine(string aszLine)
    int iHash = ListHelper::List_Find( string(Config::HashKey),
                                       sudoOldItem.MetaTags, 
                                       Config::Instance()->GetTagHelper() );
+   /*
    if (iHash != -1 && 
       (iCache = m_ptrCollectionSource->LoadCard(sudoOldItem.Name)) != -1)
    {
@@ -680,7 +685,7 @@ void Collection::loadDeltaLine(string aszLine)
       
       szHash = sudoOldItem.MetaTags[iHash].second;
       itemOld = m_ptrCollectionSource->GetCardPrototype(iCache);
-      cItem = itemOld->FindCopyItem(szHash).get();
+      cItem = itemOld->FindCopy(szHash).get();
 
       for (size_t i = 0; i < sudoOldItem.Count; i++)
       {
@@ -705,7 +710,7 @@ void Collection::loadDeltaLine(string aszLine)
       }
 
    }
-
+   */
 }
 
 void Collection::saveHistory()

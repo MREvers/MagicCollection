@@ -3,6 +3,15 @@
 #using <System.dll>
 #include <msclr\marshal_cppstd.h>
 #include "..\MagicCollection\StoreFrontBackEnd.h"
+
+typedef std::pair<std::string, std::string> Tag;
+
+typedef System::String String;
+typedef System::Tuple<String^, String^> HTag;
+template<typename T> using List = System::Collections::Generic::List<T>;
+
+using namespace std;
+
 // This class is how the C# client will access the native c++ code.
 // There is a native ServerIFace class that exposes members for this class.
 // This "Wraps" the native Server IFace Class.
@@ -13,38 +22,32 @@ public:
 	ServerClientInterface();
 	~ServerClientInterface();
 
-	System::String^ LoadCollection(System::String^ aszCollectionName);
-	System::String^ CreateNewCollection(System::String^ aszCollectionName, System::String^ ahszParent);
-	void SaveCollection(System::String^ aszCollectionName);
+	String^ LoadCollection(String^ aszCollectionName);
+	String^ CreateNewCollection(String^ aszCollectionName, String^ ahszParent);
+	void SaveCollection(String^ aszCollectionName);
 
-   System::String^ GetImagesPath();
-	System::String^ GetCardPrototype(System::String^ ahszCardName);
+   String^ GetSourceFilePath();
+   String^ GetImportSourceFilePath();
+   String^ GetImagesPath();
+	String^ GetCardPrototype(String^ ahszCardName);
 
-	System::Collections::Generic::List<System::String^>^ 
-      GetLoadedCollections();
+	List<String^>^ GetLoadedCollections();
 
-	System::Collections::Generic::List<System::String^>^ 
-      GetAllCardsStartingWith(System::String^ ahszText);
+	List<String^>^ GetAllCardsStartingWith(String^ ahszText);
 
-	System::Collections::Generic::List<System::String^>^ 
-      GetCollectionMetaData(System::String^ ahszCollectionName);
-	System::Collections::Generic::List<System::String^>^ 
-      GetCollectionList(System::String^ ahszCollectionName, System::Boolean ahbCollapsed);
+	List<String^>^ GetCollectionMetaData(String^ ahszCollectionName);
+	List<String^>^ GetCollectionList(String^ ahszCollectionName, System::Boolean ahbCollapsed);
 
-	void SubmitBulkChanges(
-      System::String^ ahszCollectionName,
-      System::Collections::Generic::List<System::String^>^ ahlstBulkChanges);
+	void SubmitBulkChanges(String^ ahszCollectionName, List<String^>^ ahlstBulkChanges);
 
 	void ImportCollection();
 private:
 	CStoreFrontBackEnd* m_StoreFrontBackEnd;
 
-	System::Collections::Generic::List<System::String^>^ 
-      stringVectorToList(std::vector<std::string> alstTrans);
-	std::vector<std::pair<std::string, std::string>> 
-      tupleListToVector(System::Collections::Generic::List<System::Tuple<System::String^, System::String^>^>^ hlstMetaTagsOne);
-   std::vector<std::string>
-      stringListToVector(System::Collections::Generic::List<System::String^>^ hlstChanges);
+	List<String^>^ convertStrVecToLst(std::vector<std::string> alstTrans);
+
+	vector<Tag> revertTupLstToVec(List<HTag^>^ hlstMetaTagsOne);
+   vector<string> revertStrLstToVec(List<String^>^ hlstChanges);
   
 };
 

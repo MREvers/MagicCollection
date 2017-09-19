@@ -94,7 +94,7 @@ namespace StoreFrontPro.Views.CollectionViews.Cube
 
          // Delete the trailing \
          int iLastSlash = szRetVal.LastIndexOf('\\');
-         szRetVal = szRetVal.Substring(0, iLastSlash);
+         szRetVal = szRetVal.Substring(0, iLastSlash > -1 ? iLastSlash : szRetVal.Length);
 
          return szRetVal;
       }

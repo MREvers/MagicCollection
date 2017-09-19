@@ -9,28 +9,38 @@
 #include "CollectionSource.h"
 #include "CollectionFactory.h"
 
+using namespace std;
+
 class __declspec(dllexport) CStoreFrontBackEnd
 {
 public:
    CStoreFrontBackEnd();
    ~CStoreFrontBackEnd();
 
-   void SaveCollection(std::string aszCollectionName);
-   std::string LoadCollection(std::string aszCollectionFile);
-   std::string CreateNewCollection(std::string aszCollectionName, std::string aszParent);
-   std::vector<std::string> GetLoadedCollections();
+   // Collection Manager Accessors
+   //
+   string CreateNewCollection(string aszCollectionName, string aszParent);
+   string LoadCollection(string aszCollectionFile);
+   vector<string> GetLoadedCollections();
 
-   std::vector<std::string> GetCollectionMetaData(std::string aszCollection);
-   std::vector<std::string> GetCollectionList(std::string aszCollection, int aiVisibility, bool bCollapsed);
-   std::string GetCardPrototype(std::string aszCardName);
+   // Collection Accessors
+   //
+   void SaveCollection(string aszCollectionName);
+   void SubmitBulkChanges(string aszCollection, vector<string> alstChanges);
+   vector<string> GetCollectionMetaData(string aszCollection);
+   vector<string> GetCollectionList(string aszCollection, int aiVisibility, bool bCollapsed);
 
-   std::vector<std::string> GetAllCardsStartingWith(std::string aszSearch);
+   // Source Accessors
+   //
+   vector<string> GetAllCardsStartingWith(string aszSearch);
+   string GetCardPrototype(string aszCardName);
+   void ImportCollectionSource();
 
-   std::string GetImagesPath();
-
-   void SubmitBulkChanges(std::string aszCollection, std::vector<std::string> alstChanges);
-   
-   void ImportCollection();
+   // Config accessors
+   //
+   string GetImagesPath();
+   string GetSourceFilePath();
+   string GetImportSourceFilePath();
 
 private:
    CollectionFactory* m_ColFactory; // This will be the main interaction.

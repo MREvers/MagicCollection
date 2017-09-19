@@ -14,9 +14,9 @@ namespace StoreFrontPro.Views.Interfaces.CollectionChanger
 {
    class VMCollectionEditor : ViewModel<CollectionModel>, IViewComponent, IVCISupporter
    {
-      private const string cszAddSearchBox = "ASB";
-      private const string cszRemoveSearchBox = "RSB";
-      private const string cszCollectionEditorItem = "CEI";
+      public const string AddSearchBox = "ASB";
+      public const string RemoveSearchBox = "RSB";
+      public const string CollectionEditorItem = "CEI";
 
       public ObservableCollection<VCollectionEditorItem> TextChangesList { get; set; } =
          new ObservableCollection<VCollectionEditorItem>();
@@ -50,14 +50,14 @@ namespace StoreFrontPro.Views.Interfaces.CollectionChanger
          ViewClass VCAdd = ViewFactory.CreateSuggestionSearchBox(
             SearchCollection: ServerInterface.Server.GetAllCardsStartingWith,
             ActionName: "Add Card",
-            RoutingName: cszAddSearchBox);
+            RoutingName: AddSearchBox);
          VCAdd.HookDisplayEvent(DisplayEventHandler);
          AddCardSearchBox = VCAdd.View as VSuggestionsSearchBox;
 
          ViewClass VCRemove = ViewFactory.CreateSuggestionSearchBox(
             SearchCollection: Model.SearchCollection,
             ActionName: "Remove/Replace Card",
-            RoutingName: cszRemoveSearchBox);
+            RoutingName: RemoveSearchBox);
          VCRemove.HookDisplayEvent(DisplayEventHandler);
          RemoveCardSearchBox = VCRemove.View as VSuggestionsSearchBox;
       }
@@ -65,7 +65,7 @@ namespace StoreFrontPro.Views.Interfaces.CollectionChanger
       #region Private Methods
       private void addEditorItem(CollectionDelta aCDelta)
       {
-         ViewClass VC = ViewFactory.CreateCollectionEditorItem(aCDelta, cszCollectionEditorItem);
+         ViewClass VC = ViewFactory.CreateCollectionEditorItem(aCDelta, CollectionEditorItem);
          m_lstItems.Add((MCollectionEditorItem)VC.Model);
          TextChangesList.Add((VCollectionEditorItem)VC.View);
       }
@@ -108,7 +108,7 @@ namespace StoreFrontPro.Views.Interfaces.CollectionChanger
       #region Event Handlers
       private void eSearchOKEventHandler(string aszSourceName)
       {
-         if (aszSourceName == cszAddSearchBox)
+         if (aszSourceName == AddSearchBox)
          {
             eAddCardEventHandler();
          }

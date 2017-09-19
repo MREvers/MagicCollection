@@ -9,7 +9,9 @@
         <Key>manaCost</Key>
         <Key>colors</Key>
         <Key>name</Key>
+        <Key>names</Key>
         <Key>power</Key>
+        <Key>layout</Key>
         <Key>toughness</Key>
         <Key>loyalty</Key>
         <Key>text</Key>
@@ -44,9 +46,17 @@
           <Key>clr</Key>
         </Pair>
         <Pair>
+           <Key>layout</Key>
+           <Key>lay</Key>
+        </Pair>
+        <Pair>
           <Key>name</Key>
           <Key>nam</Key>
         </Pair>
+         <Pair>
+            <Key>names</Key>
+            <Key>nms</Key>
+         </Pair>
         <Pair>
           <Key>toughness</Key>
           <Key>tuf</Key>

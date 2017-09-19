@@ -1,11 +1,10 @@
 #include "TraitItem.h"
 
-
-
-TraitItem::TraitItem(std::string aszKeyname,
-   std::vector<std::string> alstKeyVals,
-   std::vector<Tag> alstPairedTraits)
+TraitItem::TraitItem( const std::string& aszKeyname,
+                      const std::vector<std::string>& alstKeyVals, 
+                      const std::vector<Tag>& alstPairedTraits )
 {
+   Config* config = Config::Instance();
    m_szKeyName = aszKeyname;
    m_lstPossibleValues = alstKeyVals;
 
@@ -14,33 +13,31 @@ TraitItem::TraitItem(std::string aszKeyname,
       m_lstPossibleValues.push_back("");
    }
 
-   std::string szKeyCode = Config::Instance()->GetKeyCode(aszKeyname);
-   std::vector<Tag>::iterator iter_Tags = alstPairedTraits.begin();
-   for (; iter_Tags != alstPairedTraits.end(); ++iter_Tags)
+   std::string szKeyCode = config->GetKeyCode(aszKeyname);
+   std::vector<Tag>::const_iterator iter_Tags = alstPairedTraits.cbegin();
+   for (; iter_Tags != alstPairedTraits.cend(); ++iter_Tags)
    {
       if (szKeyCode == iter_Tags->first)
       {
-         m_lstPairedValues.push_back(Config::Instance()->GetFullKey(iter_Tags->first));
+         m_lstPairedValues.push_back(config->GetFullKey(iter_Tags->first));
       }
       else if (szKeyCode == iter_Tags->second)
       {
-         m_lstPairedValues.push_back(Config::Instance()->GetFullKey(iter_Tags->second));
+         m_lstPairedValues.push_back(config->GetFullKey(iter_Tags->second));
       }
    }
-   
 }
-
 
 TraitItem::~TraitItem()
 {
 }
 
-std::string TraitItem::GetKeyName()
+std::string TraitItem::GetKeyName() const
 {
    return m_szKeyName;
 }
 
-std::string TraitItem::GetDefaultValue()
+std::string TraitItem::GetDefaultValue() const
 {
    return m_lstPossibleValues[0];
 }

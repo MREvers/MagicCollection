@@ -20,11 +20,11 @@ public:
    MetaTag(Tag aTag, MetaTagType atagType);
    MetaTag(std::string aszKey, std::string aszVal, MetaTagType atagType);
 
-   std::string GetKey();
-   std::string GetVal(MetaTagType atagType = Any);
+   std::string GetKey() const;
+   std::string GetVal(MetaTagType atagType = Any) const;
    void SetVal(std::string aszVal);
 
-   bool CanView(MetaTagType atagType);
+   bool CanView(const MetaTagType& atagType) const;
 
 private:
    MetaTagType m_Type;

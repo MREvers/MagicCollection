@@ -11,12 +11,12 @@ MetaTag::MetaTag(std::string aszKey, std::string aszVal, MetaTagType atagType) :
 {
 }
 
-std::string MetaTag::GetKey()
+std::string MetaTag::GetKey() const
 {
    return m_Tag.first;
 }
 
-std::string MetaTag::GetVal(MetaTagType atagType)
+std::string MetaTag::GetVal(MetaTagType atagType) const
 {
    if (CanView(atagType))
    {
@@ -33,7 +33,7 @@ void MetaTag::SetVal(std::string aszVal)
    m_Tag.second = aszVal;
 }
 
-bool MetaTag::CanView(MetaTagType atagType)
+bool MetaTag::CanView(const MetaTagType& atagType) const
 {
    return (m_Type & atagType) != 0;
 }

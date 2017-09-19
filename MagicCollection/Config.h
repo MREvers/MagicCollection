@@ -46,20 +46,14 @@ public:
    std::vector<std::string>& GetStaticAttributes();
    std::vector<std::string>& GetPerCollectionMetaTags();
 
-   std::function<std::string(Tag)> GetTagHelper(TagHelperType aiMode = Key);
+   const std::function<std::string(const Tag&)> GetTagHelper(TagHelperType aiMode = Key) const;
+   std::string GetHexID( unsigned long aulValue );
 
    bool IsPairedKey(std::string aszKey);
    bool IsValidKey(std::string aszKey);
    bool IsStaticAttribute(std::string aszAttrs);
    bool IsIdentifyingAttributes(std::string aszAttrs);
 
-   static Config* Instance();
-
-   static char* Config::MetaFileExtension;
-   static char* Config::HistoryFileExtension;
-   static char* Config::HashKey;
-   static char* Config::NotFoundString;
-   static char* Config::CollectionDefinitionKey;
 private:
    std::vector<Tag> m_lstKeyCodeMappings;
    std::vector<Tag> m_lstPairedKeys;
@@ -76,11 +70,23 @@ private:
    std::string m_szMetaFolder;
    std::string m_szImagesFolder;
 
-   std::function<std::string(Tag)> m_fnKeyExtractor;
-   std::function<std::string(Tag)> m_fnValueExtractor;
+   std::function<std::string(const Tag&)> m_fnKeyExtractor;
+   std::function<std::string(const Tag&)> m_fnValueExtractor;
 
    void initDefaultSettings();
    void initConfigSettings(std::ifstream& asConfig);
 
+public:
+   static Config* Instance();
+
+   static char* Config::TrackingTagId;
+   static char* Config::IgnoredTagId;
+   static char* Config::MetaFileExtension;
+   static char* Config::HistoryFileExtension;
+   static char* Config::HashKey;
+   static char* Config::NotFoundString;
+   static char* Config::CollectionDefinitionKey;
+
+private:
    static Config* Config::ms_pConfig;
 };

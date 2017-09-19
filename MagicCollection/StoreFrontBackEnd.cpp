@@ -70,7 +70,7 @@ std::string CStoreFrontBackEnd::GetCardPrototype(std::string aszCardName)
    int iValidCard = m_ColSource->LoadCard(aszCardName);
    if (iValidCard != -1) 
    {
-      return m_ColSource->GetCardPrototype(iValidCard)->GetProtoTypeString();
+      return m_ColSource->GetCardPrototype(iValidCard)->GetProtoType();
    }
    else
    {
@@ -88,6 +88,16 @@ std::string CStoreFrontBackEnd::GetImagesPath()
    return Config::Instance()->GetImagesFolder();
 }
 
+string CStoreFrontBackEnd::GetSourceFilePath()
+{
+   return Config::Instance()->GetSourceFile();
+}
+
+string CStoreFrontBackEnd::GetImportSourceFilePath()
+{
+   return Config::Instance()->GetImportSourceFile();
+}
+
 void CStoreFrontBackEnd::SubmitBulkChanges(std::string aszCollection, std::vector<std::string> alstChanges)
 {
    if (m_ColFactory->CollectionExists(aszCollection))
@@ -96,8 +106,9 @@ void CStoreFrontBackEnd::SubmitBulkChanges(std::string aszCollection, std::vecto
    }
 }
 
-void CStoreFrontBackEnd::ImportCollection()
+void CStoreFrontBackEnd::ImportCollectionSource()
 {
    JSONImporter JI;
-   JI.ImportJSON(Config::Instance()->GetImportSourceFile());
+   //JI.ImportJSON(Config::Instance()->GetImportSourceFile());
+   m_ColSource->HotSwapLib(Config::Instance()->GetSourceFile());
 }

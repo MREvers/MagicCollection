@@ -139,7 +139,7 @@ int Addresser::GetHighPrimeIndex(unsigned int aiComposite)
 
 int Addresser::GetRandom()
 {
-   ms_iRandom++;
+   ms_iRandom+=rand();
    srand(time(0) - ms_iRandom);
    return rand();
 }

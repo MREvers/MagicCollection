@@ -35,6 +35,7 @@ CollectionTracker::Track()
         iter_Item++ )
    {
       TryGet<CollectionItem> item = source->GetCardPrototype(*iter_Item);
+      /*
       RealCopyList lstCList = item->
          GetCopiesForCollection(colAddress, CollectionItemType::All);
       for ( iter_Copy  = lstCList.begin(); 
@@ -45,6 +46,7 @@ CollectionTracker::Track()
          m_mapNew[*iter_Item].
             push_back(std::make_pair(*iter_Copy, CopyItem(**iter_Copy)));
       }
+      */
    }
 
 }
@@ -52,7 +54,8 @@ CollectionTracker::Track()
 CollectionDeltaClass 
 CollectionTracker::CalculateChanges()
 {
-   std::function<CopyItem*(SnapShot)> fnPtrCmper;
+   const static std::function<CopyItem*(const SnapShot&)> fnPtrCmper = 
+      [](const SnapShot& sptr)->CopyItem* { return sptr.first.get(); };
    std::map<unsigned int, CopyList> mapOld(m_mapOld);
    std::map<unsigned int, CopyList> mapNew(m_mapNew);
    std::map<unsigned int, CopyList>::iterator iter_FoundItem;
@@ -67,8 +70,6 @@ CollectionTracker::CalculateChanges()
 
    CopyList::iterator iter_CopyCurrent;
    CopyList::iterator iter_CopyOld;
-
-   fnPtrCmper = [](SnapShot sptr)->CopyItem* { return sptr.first.get(); };
 
    std::map<unsigned int, CopyList>::iterator iter_Current;
    for( iter_Current  = mapNew.begin(); 

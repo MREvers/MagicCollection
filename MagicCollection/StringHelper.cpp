@@ -61,7 +61,8 @@ std::string StringHelper::Str_Clean(const std::string& src)
    return szRetVal;
 }
 
-std::vector<std::string> StringHelper::Str_Split(std::string& aszSplit, std::string aszDelim)
+std::vector<std::string> 
+StringHelper::Str_Split(const std::string& aszSplit, const std::string& aszDelim)
 {
    if (aszSplit.size() < aszDelim.size())
    {
@@ -127,7 +128,8 @@ std::vector<std::string> StringHelper::Str_Split(std::string& aszSplit, std::str
    }
 }
 
-std::vector<std::string> StringHelper::SplitIntoLines(std::string aszString)
+std::vector<std::string> 
+StringHelper::SplitIntoLines(const std::string& aszString)
 {
    std::vector<std::string> lstLines;
    std::string szLine = "";

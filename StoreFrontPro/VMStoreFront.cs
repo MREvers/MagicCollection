@@ -19,9 +19,9 @@ namespace StoreFrontPro
 {
    class VMStoreFront : ViewModel<StoreFront>, IVCISupporter
    {
-      public const string cszCollectionOverview = "ColOverview";
-      public const string cszDeckboxViewName = "DBVM";
-      public const string cszCubeViewName = "CVN";
+      public const string CollectionOverview = "ColOverview";
+      public const string DeckboxView = "DBVM";
+      public const string CubeView = "CVN";
 
       public RelayCommand CloseCommand { get; set; }
       public RelayCommand CollectionsOverviewCommand { get; set; }
@@ -56,7 +56,7 @@ namespace StoreFrontPro
 
       private void showCollectionsOverview()
       {
-         VMCollectionsOverview collectionsOverviewVM = new VMCollectionsOverview(Model.Collections, cszCollectionOverview);
+         VMCollectionsOverview collectionsOverviewVM = new VMCollectionsOverview(Model.Collections, CollectionOverview);
          OperationWindow.SetNewDisplay(
              Name: "Overview",
              NewDisplay: new VCollectionsOverview(),
@@ -66,7 +66,7 @@ namespace StoreFrontPro
 
       private void showCollectionCubeView(CollectionModel CollectionModel)
       {
-         VMCollectionCube collectionCubeVM = new VMCollectionCube(CollectionModel, cszCubeViewName);
+         VMCollectionCube collectionCubeVM = new VMCollectionCube(CollectionModel, CubeView);
          OperationWindow.SetNewDisplay(
              Name: "Overview",
              NewDisplay: new VCollectionCube(),
@@ -76,7 +76,7 @@ namespace StoreFrontPro
 
       private void showCollectionDeckBox(CollectionModel CollectionModel)
       {
-         VMCollectionDeckBox collectionFancyVM = new VMCollectionDeckBox(CollectionModel, cszDeckboxViewName);
+         VMCollectionDeckBox collectionFancyVM = new VMCollectionDeckBox(CollectionModel, DeckboxView);
          OperationWindow.SetNewDisplay(
              Name: "Fancy",
              NewDisplay: new VCollectionDeckBox(),

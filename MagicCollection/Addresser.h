@@ -27,6 +27,7 @@ public:
 
    int GetPrimeIndex(unsigned int aiComposite);
    int GetHighPrimeIndex(unsigned int aiComposite);
+   
    int GetRandom();
 
    bool IsResidentIn( const Address& aAddress,
@@ -38,12 +39,14 @@ public:
 
    bool PitheLocation(Address& aAddress, const Address& aPitheLocation);
    bool InceptLocation(Address& aAddress, const Address& aNewLocation);
-
-   static const std::vector<int> Primes;
 private:
-   static unsigned int ms_iRandom;
-
    bool isSuperSet( unsigned int aiSuperSet, 
                     unsigned int aiSubSet );
+
+public:
+   static const std::vector<int> Primes;
+
+private: 
+   static unsigned int ms_iRandom;
 };
 

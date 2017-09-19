@@ -6,6 +6,7 @@
 #include "TraitItem.h"
 #include "StringHelper.h"
 #include "Addresser.h"
+#include "TryGet.h"
 
 enum CollectionItemType : int
 {
@@ -19,6 +20,7 @@ enum CollectionItemType : int
 class CollectionItem
 {
 public:
+   // Contains all the information required to create a copy item.
    class PseudoIdentifier
    {
    public:
@@ -35,59 +37,70 @@ public:
       std::vector<Tag> MetaTags;
    };
 
-   CollectionItem( std::string aszItemName, std::vector<Tag> alstCommon,
-                   std::vector<TraitItem> alstRestrictions );
+// Collection Item Interface
+//
+public:
+   CollectionItem( const std::string& aszItemName, 
+                   const std::vector<Tag>& alstCommon,
+                   const std::vector<TraitItem>& alstRestrictions );
    ~CollectionItem();
 
-   std::string GetName();
+   // Adds an item to the list of copies.
+   std::shared_ptr<CopyItem> AddCopy( const Address& aAddrColID,
+                                      const std::vector<Tag>& alstAttrTags,
+                                      const std::vector<Tag>& alstMetaTags );
 
-   CopyItem* AddCopyItem( const Address& aAddrColID,
-                          std::vector<Tag> alstAttrs = std::vector<Tag>(),
-                          std::vector<Tag> alstMetaTags = std::vector<Tag>() );
+   std::string GenerateHash( const Address& aAddrIdentifier,
+                             const std::vector<Tag>& alstAttrs,
+                             const std::vector<Tag>& alstMetaTags );
 
-   CopyItem* GenerateCopy( const Address& aAddrColID,
-                           std::vector<Tag> alstAttrs = std::vector<Tag>(),
-                           std::vector<Tag> alstMetaTags = std::vector<Tag>() );
+   // Deletes an item from the list of copies.
+   void DeleteCopy( const std::string& aszUniqueHash );
 
-   void RemoveCopyItem(const Address& aAddrColID, std::string aszHash);
-   void RemoveResidentFromItem(CopyItem* acItem, const Address& aAddrColID);
+   TryGet<std::shared_ptr<CopyItem>> FindCopy( const std::string& aszUniqueHash ) const;
+   std::vector<std::shared_ptr<CopyItem>> FindCopies( const Address& aCollection, CollectionItemType aSearchType ) const;
 
-   // Finds First
-   std::shared_ptr<CopyItem> FindCopyItem( std::string aszHash, 
-                                           const Address& aPairResi = Address() );
-   std::vector<std::shared_ptr<CopyItem>> 
-      FindAllCopyItems(std::string aszHash, const Address& aPairResi = Address());
-   void Erase(CopyItem* ociRemove);
-
-   std::vector<std::shared_ptr<CopyItem>> 
-      GetCopiesForCollection( const Address& aAddrCollectionIdentifier, 
-                              CollectionItemType aItemType );
-
-   std::string GetHash(const Address& aAddrIdentifier,
-      std::vector<Tag> alstAttrs = std::vector<Tag>(),
-      std::vector<Tag> alstMetaTags = std::vector<Tag>());
-
-   std::string GetCardString( CopyItem* aItem, MetaTagType aTagType = Visible, 
-                              const Address& aAddrCompareID = Address() );
-   std::string GetProtoTypeString();
-   std::vector<Tag> GetCommonTraits();
-
-   static bool ParseCardLine(std::string aszLine, PseudoIdentifier& rPIdentifier);
-   static bool ParseTagString(std::string aszDetails, std::vector<Tag>& rlstTags);
-   static std::string ToCardLine( const Address& aAddrParentID, 
-                                  std::string aszName,
-                                  std::vector<Tag> alstAttrs = std::vector<Tag>(),
-                                  std::vector<Tag> alstMetaTags = std::vector<Tag>(), 
-                                  const Address& aAddrCompareID = Address() );
+   std::string GetName() const;
+   std::string GetProtoType() const;
 
 private:
    std::string m_szName;
+   std::vector<Tag> m_lstCommonTraits;
+   std::vector<TraitItem> m_lstIdentifyingTraits;
 
    std::vector<std::shared_ptr<CopyItem>> m_lstCopies;
 
-   // We are guaranteed that identifying traits are not themselves lists.
-   // If a list is not an identifying trait. It is kept as "thing1::thing2"
-   std::vector<Tag> m_lstCommonTraits;
-   std::vector<TraitItem> m_lstIdentifyingTraits;
+// Copy Item Interface
+//
+public:
+   // Attempts to set an identifying trait on a copy item.
+   // Returns true if the value is valid.
+   bool SetIdentifyingTrait( CopyItem* aptItem,
+                             const std::string& aszTraitKey,
+                             const std::string& aszTraitValue) const;
+   void DeleteCopy( CopyItem* aptItem );
+   std::string CopyToString( CopyItem const* aptItem, 
+                             const MetaTagType& aAccessType = MetaTagType::Public,
+                             const Address& aAddrCompareID  = Address() ) const;
+   
+
+private:
+   CopyItem* createCopy( const Address& aAddrColID,
+                         const std::vector<Tag>& alstAttrs    = std::vector<Tag>(),
+                         const std::vector<Tag>& alstMetaTags = std::vector<Tag>() ) const;
+
+   void setCopyPairAttrs( CopyItem* aptItem, const std::string& aszKey, int iVal ) const;
+// Static interface
+//
+public:
+   static bool ParseCardLine( const std::string& aszLine, PseudoIdentifier& rPIdentifier );
+
+   static bool ParseTagString( const std::string& aszDetails, std::vector<Tag>& rlstTags );
+
+   static std::string ToCardLine( const Address& aAddrParentID, 
+                                  const std::string& aszName,
+                                  const std::vector<Tag>& alstAttrs    = std::vector<Tag>(),
+                                  const std::vector<Tag>& alstMetaTags = std::vector<Tag>(), 
+                                  const Address& aAddrCompareID        = Address() );
 };
 

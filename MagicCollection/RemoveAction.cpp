@@ -20,14 +20,14 @@ RemoveAction::Execute(TransactionManager* aoCol)
    TryGet<CollectionItem> refItem = refSource->GetCardPrototype(m_szName);
    if (!refItem.Good()) { return false; }
 
-   std::shared_ptr<CopyItem> refCItem;
-   refCItem = refItem->FindCopyItem(m_szIdentifyingHash, m_AddrResidentIn);
-   if (refCItem == nullptr) { return false; }
+   //std::shared_ptr<CopyItem> refCItem;
+   //refCItem = refItem->FindCopy(m_szIdentifyingHash, m_AddrResidentIn);
+   //if (refCItem == nullptr) { return false; }
 
-   m_lstMetaOfRMItem = refCItem->GetMetaTags(MetaTagType::Any);
-   m_lstTagsOfRMItem = refCItem->GetIdentifyingAttributes();
+   //m_lstMetaOfRMItem = refCItem->GetMetaTags(MetaTagType::Any);
+   //m_lstTagsOfRMItem = refCItem->GetIdentifyingAttributes();
 
-   aoCol->Remove(m_szName, m_szIdentifyingHash, m_AddrResidentIn);
+   //aoCol->Remove(m_szName, m_szIdentifyingHash, m_AddrResidentIn);
    return true;
 }
 

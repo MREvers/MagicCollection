@@ -37,7 +37,7 @@ namespace StoreFrontPro.Views.CollectionViews.Deckbox
          if (Columns != 1)
          {
             DisplayedProperties.Add(new TextBox() { Text = "x" + Model.Count, IsReadOnly = true });
-            DisplayedProperties.Add(new TextBox() { Text = Model.CardName, IsReadOnly = true });
+            DisplayedProperties.Add(new TextBox() { Text = Model.DisplayName, IsReadOnly = true });
             foreach (string szKey in LST_TEMP_IMPORTANT_ATTRS)
             {
                if (szKey == "manaCost")
@@ -55,7 +55,7 @@ namespace StoreFrontPro.Views.CollectionViews.Deckbox
          }
          else
          {
-            DisplayedProperties.Add(new TextBox() { Text = Model.CardName, IsReadOnly = true });
+            DisplayedProperties.Add(new TextBox() { Text = Model.DisplayName, IsReadOnly = true });
          }
       }
 

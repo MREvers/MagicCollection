@@ -107,9 +107,8 @@ private:
       const Address& aAddress);
 
    void removeItem(
-      std::string aszName, 
-      std::string aszIdentifyingHash, 
-      Address aszResidentIn);
+      const std::string& aszName, 
+      const std::string& aszUID);
 
    void changeItem(
       std::string aszName,  

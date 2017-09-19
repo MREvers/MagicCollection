@@ -7,35 +7,37 @@ using System.Threading.Tasks;
 
 namespace StoreFrontPro.Views.CollectionViews.Cube
 {
-    class VCICollectionCube : IViewComponentInterface
-    {
-        public const string SwitchToDeckBox = "SwitchToDeckBox";
+   class VCICollectionCube : IViewComponentInterface
+   {
+      public const string SwitchToDeckBox = "SwitchToDeckBox";
+      public const string CardGroupDisplay = "CGD";
+      public const string CollectionEditor = "CE";
 
-        private Func<object, Action<CollectionModel>> m_SwitchToDeckBoxRelay;
+      private Func<object, Action<CollectionModel>> m_SwitchToDeckBoxRelay;
 
-        public VCICollectionCube(Func<object,Action<CollectionModel>> SwitchToDeckBox)
-        {
-            m_SwitchToDeckBoxRelay = SwitchToDeckBox;
-        }
+      public VCICollectionCube(Func<object, Action<CollectionModel>> SwitchToDeckBox)
+      {
+         m_SwitchToDeckBoxRelay = SwitchToDeckBox;
+      }
 
-        public Type GetInterfaceType()
-        {
-            return typeof(VMCollectionCube);
-        }
+      public Type GetInterfaceType()
+      {
+         return typeof(VMCollectionCube);
+      }
 
-        public bool TryInvoke(object Caller, string Key, object[] args)
-        {
-            if (Key == SwitchToDeckBox)
+      public bool TryInvoke(object Caller, string Key, object[] args)
+      {
+         if (Key == SwitchToDeckBox)
+         {
+            if (args?[0] is CollectionModel)
             {
-                if (args?[0] is CollectionModel)
-                {
-                    CollectionModel paramOne = args[0] as CollectionModel;
-                    m_SwitchToDeckBoxRelay?.Invoke(Caller).Invoke(paramOne);
-                    return true;
-                }
+               CollectionModel paramOne = args[0] as CollectionModel;
+               m_SwitchToDeckBoxRelay?.Invoke(Caller).Invoke(paramOne);
+               return true;
             }
+         }
 
-            return false;
-        }
-    }
+         return false;
+      }
+   }
 }

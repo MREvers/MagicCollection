@@ -30,6 +30,7 @@ CollectionIO::GetPreprocessLines(
    std::vector<std::string>& rlstIOLines,
    std::vector<std::string>& rlstPreprocessingLines)
 {
+   /*
    std::vector<std::string> lstRetVal;
    std::vector<std::string> lstPreprocessLines;
    std::vector<std::string>::iterator iter_Lines = alstAllLines.begin();
@@ -49,9 +50,11 @@ CollectionIO::GetPreprocessLines(
 
    rlstPreprocessingLines = lstPreprocessLines;
    rlstIOLines = lstRetVal;
+   */
    return true;
 }
 
+// Captures all copyitems in rlstAdditionalItems not in rlstAlreadyCapturedItems
 bool
 CollectionIO::CaptureUnlistedItems(
    Address aAddrColID,
@@ -59,6 +62,7 @@ CollectionIO::CaptureUnlistedItems(
    std::map<int, std::list<CopyItem*>>& rlstAdditionalItems,
    std::map<int, std::list<CopyItem*>>& rlstAlreadyCapturedItems)
 {
+   /*
    // Identify already loaded cards in this collection.
    auto lstAllPossibleCacheItems = aptCollectionSource->
       GetCollectionCache(aAddrColID);
@@ -82,7 +86,7 @@ CollectionIO::CaptureUnlistedItems(
          }
       }
    }
-
+   */
    return true;
 }
 
@@ -93,6 +97,7 @@ CollectionIO::ConsolodateLocalItems(
    std::map<int, std::list<CopyItem*>>& rlstPotentialDuplicates,
    std::map<int, std::list<CopyItem*>>& rlstNonDuplicates)
 {
+   /*
    std::function<std::string(CopyItem*)> fnSimpleExtractor;
    std::vector<CopyItem*> lstSearchItems;
 
@@ -123,7 +128,7 @@ CollectionIO::ConsolodateLocalItems(
          }
       }
    }
-
+   */
    return true;
 }
 
@@ -134,6 +139,7 @@ bool CollectionIO::RejoinAsyncedLocalItems(
    std::map<int, std::list<CopyItem*>>& rlstPotentialDuplicates,
    std::map<int, std::list<CopyItem*>>& rlstNonDuplicates)
 {
+   /*
    std::function<std::string(CopyItem*)> fnChainIDExtractor;
    std::vector<CopyItem*> lstSearchItems;
 
@@ -211,6 +217,7 @@ bool CollectionIO::RejoinAsyncedLocalItems(
       }
 
    }
+   */
    return true;
 }
 
@@ -220,6 +227,7 @@ CollectionIO::ConsolodateBorrowedItems(
    CollectionSource* aptCollectionSource,
    CollectionFactory* aptCollFactory)
 {
+   /*
    TryGet<CollectionItem> itemPrototype;
    std::string szItemParent;
    std::string szItemHash;
@@ -283,7 +291,7 @@ CollectionIO::ConsolodateBorrowedItems(
          }
       }
    }
-
+   */
    return true;
 }
 
@@ -292,6 +300,7 @@ CollectionIO::ReleaseUnfoundReferences(
    Address aAddrColID,
    CollectionSource* aptCollectionSource)
 {
+   /*
    TryGet<CollectionItem> itemPrototype;
    std::vector<std::shared_ptr<CopyItem>> lstPossibleLocals;
 
@@ -368,7 +377,7 @@ CollectionIO::ReleaseUnfoundReferences(
          }
       }
    }
-
+   */
    return true;
 }
 

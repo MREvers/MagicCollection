@@ -24,20 +24,23 @@ namespace StoreFrontPro.Server
    {
       public static List<string> TEMP_LST_IMPORTANT_IDENTS = new List<string>() { "set" };
 
-      public string _CardNameLong;
+      private string _CardNameLong;
       public string CardNameLong
       {
          get
          {
-            _CardNameLong = CardName;
+            _CardNameLong = PrototypeName;
             MetaTags.ForEach(x => { _CardNameLong += x.Item1 + "=\"" + x.Item2 + "\" "; });
             return _CardNameLong;
          }
       }
 
+      public string DisplayName { get; private set; }
+      public string PrototypeName { get; private set; }
+
       public CardModelBase Prototype
       {
-         get { return GetPrototype(CardName); }
+         get { return GetPrototype(PrototypeName); }
       }
 
       private object m_oLock = new object();
@@ -50,7 +53,6 @@ namespace StoreFrontPro.Server
 
       public int Count = 1; 
       public string TargetCollection;
-      public string CardName;
       public List<Tuple<string, string>> MetaTags;
 
       // Attrs that define a copy into a card class.
@@ -107,7 +109,7 @@ namespace StoreFrontPro.Server
 
          szSupport = " [" + szSupport + "]";
 
-         return CardName + szSupport;
+         return PrototypeName + szSupport;
       }
 
       public string GetMetaTag(string aszKey)
@@ -143,6 +145,12 @@ namespace StoreFrontPro.Server
          }
 
          return "";
+      }
+
+      public string GetImagePath()
+      {
+         return Path.Combine(ServerInterface.Server.GetImagesFolderPath(), "_" + GetAttr("set"), getImageFileName());
+          //  ServerInterface.Server.GetImagesFolderPath() + "\\" + 
       }
 
       public void GetImage(Action<BitmapImage> ImageReceiver)
@@ -187,7 +195,7 @@ namespace StoreFrontPro.Server
 
          List<string> lstNameAndIDs = szIdentifier.Split('{').ToList();
          string szName = lstNameAndIDs[0].Trim();
-         CardName = szName;
+         PrototypeName = szName;
 
          string szDetails = "";
          if (lstNameAndIDs.Count > 1)
@@ -199,6 +207,26 @@ namespace StoreFrontPro.Server
          {
             IdentifyingAttributes = new List<Tuple<string, string>>();
          }
+
+         setDisplayName();
+      }
+
+      private void setDisplayName()
+      {
+         DisplayName = PrototypeName;
+
+         string szLayout = GetAttr("layout");
+         string szNames = GetAttr("names");
+         if(szLayout != "" && szLayout != "normal" && szLayout != "double-faced")
+         {
+            string[] lstNames = szNames.Split(new string[]{ "::" }, 2, StringSplitOptions.RemoveEmptyEntries);
+            DisplayName = string.Join(" // ", lstNames);
+         }
+      }
+
+      private string getImageFileName()
+      {
+         return PrototypeName + ".jpg";
       }
 
       #region IModel

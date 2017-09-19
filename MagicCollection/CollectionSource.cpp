@@ -1,21 +1,29 @@
 #include "CollectionSource.h"
+
+using namespace rapidxml;
+
 CollectionSource::CollectionSource()
 {
-   m_iAllCharBuffSize = 0;
-   m_AllCharBuff = new char[4000000];
+   resetBuffer();
 }
 
 CollectionSource::~CollectionSource()
 {
+   m_lstoCardCache.clear();
+   m_lstCardBuffer.clear();
 
+   m_iAllCharBuffSize = 0;
+   delete[] m_AllCharBuff;
 }
 
 void CollectionSource::LoadLib(std::string aszFileName)
 {
+   Config* config = Config::Instance();
+
    m_lstCardBuffer.clear();
    m_lstCardBuffer.reserve(17000);
 
-   rapidxml::xml_document<> doc;
+   xml_document<> doc;
    std::ifstream file(aszFileName);
    if (!file.good())
    {
@@ -26,61 +34,62 @@ void CollectionSource::LoadLib(std::string aszFileName)
    buffer << file.rdbuf();
    file.close();
 
-   std::cout << "Parsing Doc" << std::endl;
-   std::string content(buffer.str());
-   doc.parse<0>(&content[0]);
-   std::cout << "Parse Done" << std::endl;
+   // std::string content(buffer.str());
+   std::string* textContent = new std::string( buffer.str() );
+   doc.parse<0>(&textContent->front());
 
-   // Mechanisms
-   clock_t begin = clock();
+   xml_node<> *xmlNode_CardDatabase = doc.first_node();
 
-   rapidxml::xml_node<> *xmlNode_CardDatabase = doc.first_node();
    // With the xml example above this is the <document/> node
-   rapidxml::xml_node<> *xmlNode_Cards = xmlNode_CardDatabase->first_node("cards");
-   rapidxml::xml_node<> *xmlNode_Card = xmlNode_Cards->first_node();
-   std::string szNameKeyCode = Config::Instance()->GetKeyCode("name");
+   xml_node<>* xmlNode_Cards = xmlNode_CardDatabase->first_node("cards");
+   xml_node<>* xmlNode_Card = xmlNode_Cards->first_node();
+   std::string szNameKeyCode = config->GetKeyCode("name");
    while (xmlNode_Card != 0)
    {
-      rapidxml::xml_node<> *xmlNode_CardAttribute = xmlNode_Card->first_node();
+      xml_node<> *xmlNode_CardAttribute = xmlNode_Card->first_node();
+      xml_node<> *xmlNode_CardName = xmlNode_Card->first_node("name");
 
-      rapidxml::xml_node<> *xmlNode_CardName = xmlNode_Card->first_node("name");
+      m_lstCardBuffer.push_back(SourceObject(m_iAllCharBuffSize));
+      SourceObject* sO = &m_lstCardBuffer.back();
 
-      SourceObject* sO = new SourceObject(m_iAllCharBuffSize);
-      std::string aszName = xmlNode_CardName->value();
-      m_iAllCharBuffSize += sO->AddAttribute(szNameKeyCode, xmlNode_CardName->value(), m_AllCharBuff, m_iAllCharBuffSize);
-      m_lstCardBuffer.push_back(*sO);
-      delete sO;
-      sO = &m_lstCardBuffer[m_lstCardBuffer.size() - 1];
+      m_iAllCharBuffSize += sO->AddAttribute( szNameKeyCode, xmlNode_CardName->value(),
+                                              m_AllCharBuff, m_iAllCharBuffSize );
 
-      bool bHasAll = false;
       while (xmlNode_CardAttribute != 0)
       {
          std::string szCardKey = xmlNode_CardAttribute->name();
-         std::string keyCode = Config::Instance()->GetKeyCode(szCardKey);
+         std::string keyCode = config->GetKeyCode(szCardKey);
          if (keyCode != "" && keyCode != szNameKeyCode)
          {
-            m_iAllCharBuffSize += sO->AddAttribute(
-               keyCode,
-               xmlNode_CardAttribute->value(),
-               m_AllCharBuff,
-               m_iAllCharBuffSize);
+            m_iAllCharBuffSize += sO->AddAttribute( keyCode, xmlNode_CardAttribute->value(),
+                                                    m_AllCharBuff, m_iAllCharBuffSize );
          }
 
          xmlNode_CardAttribute = xmlNode_CardAttribute->next_sibling();
       }
 
-      sO->FinalizeSize();
       xmlNode_Card = xmlNode_Card->next_sibling();
    }
+   delete textContent;
 
    finalizeBuffer();
+}
 
-   // Mechanisms
-   clock_t end = clock();
-   double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;
-   std::cout << "Load Time: " << elapsed_secs << std::endl;
+void CollectionSource::HotSwapLib(std::string aszFileName)
+{
+   std::vector<std::string> vecHoldCards;
+   for (auto card : m_lstoCardCache)
+   {
+      vecHoldCards.push_back(card.GetName());
+   }
 
-   std::cout << "Load Done" << std::endl;
+   resetBuffer();
+   LoadLib(aszFileName);
+
+   for (auto card : vecHoldCards)
+   {
+      LoadCard(card);
+   }
 }
 
 int CollectionSource::LoadCard(std::string aszCardName)
@@ -181,8 +190,8 @@ void CollectionSource::NotifyNeedToSync(const Address& aAddrForcedSync)
 
 bool CollectionSource::IsSyncNeeded(const Address& aAddrNeedSync)
 {
-   std::function<const Address(std::pair<Address, bool>)> fnExtractor =
-      [](std::pair<Address, bool> pAddrEx)->const Address { return pAddrEx.first; };
+   std::function<Address(const std::pair<Address, bool>&)> fnExtractor =
+      [](const std::pair<Address, bool>& pAddrEx)->Address { return pAddrEx.first; };
 
    int iFound = ListHelper::List_Find(aAddrNeedSync, m_lstSync, fnExtractor);
    if (-1 != iFound)
@@ -203,10 +212,10 @@ CollectionSource::GetCollectionCache(Address aAddrColID, CollectionItemType aCol
 
    for (size_t i = 0; i < m_lstoCardCache.size(); i++)
    {
-      if (m_lstoCardCache[i].GetCopiesForCollection(aAddrColID, aColItemType).size() > 0)
+   /*   if (m_lstoCardCache[i].GetCopiesForCollection(aAddrColID, aColItemType).size() > 0)
       {
          lstRetVal.push_back(i);
-      }
+      }*/
    }
 
    return lstRetVal;
@@ -219,13 +228,13 @@ CollectionSource::GetCollection(Address aAddrColID, CollectionItemType aColItemT
 
    for (size_t i = 0; i < m_lstoCardCache.size(); i++)
    {
-      std::vector<std::shared_ptr<CopyItem>> lstCopies = m_lstoCardCache[i].GetCopiesForCollection(aAddrColID, aColItemType);
+      /*std::vector<std::shared_ptr<CopyItem>> lstCopies = m_lstoCardCache[i].GetCopiesForCollection(aAddrColID, aColItemType);
 
       std::vector<std::shared_ptr<CopyItem>>::iterator iter_Copy = lstCopies.begin();
       for (; iter_Copy != lstCopies.end(); ++iter_Copy)
       {
          lstRetVal.push_back(*iter_Copy);
-      }
+      }*/
    }
 
    return lstRetVal;
@@ -415,6 +424,16 @@ std::string CollectionSource::convertToSearchString(std::string& aszSearch)
 bool CollectionSource::isSearchCharacter(char c)
 {
    return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') || c == ' ' || c == ',';
+}
+
+void CollectionSource::resetBuffer()
+{
+   m_lstoCardCache.clear();
+   m_lstCardBuffer.clear();
+
+   m_iAllCharBuffSize = 0;
+   delete[] m_AllCharBuff;
+   m_AllCharBuff = new char[5000000];
 }
 
 void CollectionSource::finalizeBuffer()

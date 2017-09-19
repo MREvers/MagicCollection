@@ -19,19 +19,19 @@ ChangeAction::Execute(TransactionManager* aoCol)
    TryGet<CollectionItem> refItem = refSource->GetCardPrototype(m_szName);
    if (!refItem.Good()) { return false; }
 
-   std::shared_ptr<CopyItem> refCItem;
-   refCItem = refItem->FindCopyItem( m_szIdentifyingHash, 
-                                     refCollection->GetIdentifier() );
-   if (refCItem == nullptr) { return false; }
+   //std::shared_ptr<CopyItem> refCItem;
+   //refCItem = refItem->FindCopy( m_szIdentifyingHash, 
+   //                                  refCollection->GetIdentifier() );
+   //if (refCItem == nullptr) { return false; }
 
-   aoCol->Change( m_szName, m_szIdentifyingHash, 
-                  m_lstIdChanges, m_lstMetaChanges );
+   //aoCol->Change( m_szName, m_szIdentifyingHash, 
+   //               m_lstIdChanges, m_lstMetaChanges );
 
-   // After the change is made, store off the details of how 
-   // to find it again.
-   m_szUndoIdentifyingHash = refCItem->GetHash();
-   m_lstUndoMeta = refCItem->GetMetaTags(MetaTagType::Any);
-   m_lstUndoID = refCItem->GetIdentifyingAttributes();
+   //// After the change is made, store off the details of how 
+   //// to find it again.
+   //m_szUndoIdentifyingHash = refCItem->GetHash();
+   //m_lstUndoMeta = refCItem->GetMetaTags(MetaTagType::Any);
+   //m_lstUndoID = refCItem->GetIdentifyingAttributes();
 
    return true;
 }

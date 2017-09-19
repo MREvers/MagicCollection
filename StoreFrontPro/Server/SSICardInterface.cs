@@ -14,8 +14,6 @@ namespace StoreFrontPro.Server
    {
       public class CardIFace
       {
-         public string SZ_IMAGE_CACHE_PATH = "";
-
          private class ImageDownloadedEventArgs : EventArgs
          {
             public CardModel DataModel;
@@ -44,13 +42,7 @@ namespace StoreFrontPro.Server
          {
             //Download the image.
             string szMUID = aoCardModel.GetAttr("multiverseid");
-            string szSet = aoCardModel.GetAttr("set");
-            if (SZ_IMAGE_CACHE_PATH == "")
-            {
-               SZ_IMAGE_CACHE_PATH = SCI.GetImagesPath();
-            }
-            string szBasePath = SZ_IMAGE_CACHE_PATH + "/_" + szSet + "/";
-            string szFilePath = szBasePath + aoCardModel.CardName + ".jpg";
+            string szFilePath = aoCardModel.GetImagePath();
 
             // Check if we already have the image
             string szDirectoryName = Path.GetDirectoryName(szFilePath);
@@ -60,7 +52,8 @@ namespace StoreFrontPro.Server
             }
 
             // Less than 100 bytes, ignore the file.
-            if (!File.Exists(szFilePath) || (new System.IO.FileInfo(szFilePath).Length < 100))
+            if ( ( !File.Exists(szFilePath) ) ||
+                 ( new System.IO.FileInfo(szFilePath).Length < 100) )
             {
                if (File.Exists(szFilePath))
                {
@@ -78,7 +71,7 @@ namespace StoreFrontPro.Server
                   else
                   {
                      szURL = @"http://gatherer.wizards.com/Handlers/Image.ashx?name=" +
-                             aoCardModel.CardName + "&type=card";
+                             aoCardModel.Prototype + "&type=card";
                   }
 
                   // Download synchronously.

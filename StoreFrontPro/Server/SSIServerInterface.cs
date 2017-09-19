@@ -16,6 +16,24 @@ namespace StoreFrontPro.Server
    {
       public class ServerIFace
       {
+         #region Config
+         public string GetImagesFolderPath()
+         {
+            return SCI.GetImagesPath();
+         }
+
+         public string GetImportSourceFilePath()
+         {
+            return SCI.GetImportSourceFilePath();
+         }
+
+         public string GetSourceFilePath()
+         {
+            return SCI.GetSourceFilePath();
+         }
+         #endregion
+
+
          // It is expected that any object referenced in these actions
          // survives to running time of the application.
          private List<Action> Notifiers;

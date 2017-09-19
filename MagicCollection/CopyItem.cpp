@@ -1,34 +1,22 @@
 #include "CopyItem.h"
-#include "Addresser.h"
 #include <time.h>
 #include <sstream>
 #include <cstdlib>
+#include "Addresser.h"
+#include "CollectionItem.h"
 
 using namespace std;
 
-CopyItem::CopyItem(vector<TraitItem>* alstTraits, Address aAddrParentIdentifier)
+CopyItem::CopyItem( const Address& aAddrParentIdentifier )
 {
+   Config* config = Config::Instance();
    Addresser addr;
 
-   m_lstResidentIn.push_back(aAddrParentIdentifier);
-   m_plstRestrictedTraits = alstTraits;
-
-   // Use the interface that is used to load the parent from the meta file.
-   m_Address = aAddrParentIdentifier;
-
-   vector<TraitItem>::iterator iter_DefaultVals;
-
-   for (iter_DefaultVals = m_plstRestrictedTraits->begin();
-        iter_DefaultVals != m_plstRestrictedTraits->end();
-        ++iter_DefaultVals)
-   {
-      m_lstIdentifyingTags.push_back(make_pair(iter_DefaultVals->GetKeyName(),
-                                               iter_DefaultVals->GetDefaultValue()));
-   }
+   SetParent(aAddrParentIdentifier);
 
    // Set the chain ID and session here. 
    // If one is set later, it will just overwrite this...
-   setChainID(to_string(addr.GetRandom()));
+   setUID(config->GetHexID(addr.GetRandom()));
    itemChanged();
 
    m_bNeedHash = true;
@@ -40,45 +28,24 @@ CopyItem::~CopyItem()
    m_lstMetaTags.clear();
 }
 
-CopyItem::CopyItem(vector<TraitItem>* alstTraits,
-   Address aAddrParentIdentifier,
-   vector<Tag> alstAttrs,
-   vector<Tag> alstMetaTags)
-   : CopyItem(alstTraits, aAddrParentIdentifier)
+CopyItem::CopyItem( const Address& aAddrParentIdentifier, 
+                    const std::vector<Tag>& alstMetaTags )
+   : CopyItem(aAddrParentIdentifier)
 {
-   vector<Tag>::iterator iter_Attrs = alstAttrs.begin();
-   for (; iter_Attrs != alstAttrs.end(); 
-          ++iter_Attrs)
+   for ( auto attr : alstMetaTags )
    {
-      SetIdentifyingAttribute( iter_Attrs->first,
-                               iter_Attrs->second, 
-                               false );
-   }
-
-   for ( iter_Attrs = alstMetaTags.begin(); 
-         iter_Attrs != alstMetaTags.end(); 
-         ++iter_Attrs )
-   {
-      SetMetaTag( iter_Attrs->first, 
-                  iter_Attrs->second, 
-                  DetermineMetaTagType(iter_Attrs->first), 
+      SetMetaTag( attr.first, attr.second, 
+                  DetermineMetaTagType(attr.first), 
                   false );
    }
-
-   // Populate the Hash metatag for convenience.
-   GetHash();
 }
 
 string CopyItem::GetHash()
 {
-   function<string(MetaTag)> fnExtractor
-      = GetMetaTagKeyViewer();
-   int iMetaHash = ListHelper::List_Find(
-      string(Config::HashKey),
-      m_lstMetaTags,
-      fnExtractor);
+   function<string(const MetaTag&)> fnExtractor = GetMetaTagKeyViewer();
+   int iMetaHash = ListHelper::List_Find(string(Config::HashKey), m_lstMetaTags, fnExtractor);
 
-   if (iMetaHash == -1 || m_bNeedHash)
+   if ( ( iMetaHash == -1 ) || ( m_bNeedHash ) )
    {
       string szHashString = m_Address.GetFullAddress();
       vector<Tag>::iterator iter_Tags = m_lstIdentifyingTags.begin();
@@ -90,6 +57,7 @@ string CopyItem::GetHash()
          szHashString += iter_Tags->second;
       }
 
+      // Only iterate of public metatags
       vector<Tag> lstMetaList = this->GetMetaTags(Public);
       vector<Tag>::iterator iter_MetaTags = lstMetaList.begin();
       for (; iter_MetaTags != lstMetaList.end(); ++iter_MetaTags)
@@ -108,21 +76,34 @@ string CopyItem::GetHash()
    }
 }
 
-string  CopyItem::GetParent()
+std::string CopyItem::GetUID() const
+{
+   return GetMetaTag( GetUIDKey(), Hidden );
+}
+
+string CopyItem::GetParent() const
 {
    return m_Address.GetFullAddress();
 }
 
-Address CopyItem::GetAddress()
+Address CopyItem::GetAddress() const
 {
    return m_Address;
 }
 
-bool CopyItem::IsParent(Address aAddrParent)
+bool CopyItem::IsParent(const Address& aAddrParent) const
 {
    Addresser addr;
    Address aDummy;
    return addr.DoesLocationContain(aAddrParent, m_Address, aDummy);
+}
+
+void CopyItem::SetParent( const Address& aAddrTestAddress )
+{
+   string szParent = aAddrTestAddress.GetFullAddress();
+   setParent( szParent );
+   SetMetaTag( GetAddressKey(), szParent, Public );
+   itemChanged();
 }
 
 // This will detect if the adding 'resident' is a subset of the parent,
@@ -139,64 +120,90 @@ void CopyItem::RemoveResident(const Address& aAddrAddress)
    addr.PitheLocation(m_Address, aAddrAddress);
 }
 
-std::vector<Address> CopyItem::GetResidentIn()
+std::vector<Address> CopyItem::GetResidentIn() const
 {
    return m_lstResidentIn;
 }
 
-bool CopyItem::IsResidentIn(const Address& aAddrTest)
+bool CopyItem::IsResidentIn(const Address& aAddrTest) const
 {
    Addresser addr;
    Address aDummy;
    return addr.IsResidentIn(m_Address, aAddrTest, aDummy);
 }
 
+CopyItem* CopyItem::CreateCopyItem( CollectionItem const* aoConstructor,
+                                    const Address& aAddrParentIdentifier,
+                                    const std::vector<Tag>& alstIDAttrs,
+                                    const std::vector<Tag>& alstMetaTags )
+{
+   CopyItem* newCopy = new CopyItem( aAddrParentIdentifier, alstMetaTags );
+
+   for( auto IDTag : alstIDAttrs )
+   {
+      aoConstructor->SetIdentifyingTrait( newCopy, IDTag.first, IDTag.second );
+   }
+
+   return newCopy;
+}
+
 MetaTagType CopyItem::DetermineMetaTagType(string aszTagKey)
 {
    MetaTagType mTagType = Public;
-   if (aszTagKey.size() > 0 && aszTagKey[0] == '_')
+   if( ( aszTagKey.size() > 0 ) && 
+       ( aszTagKey[0] == *Config::IgnoredTagId ) )
    {
       mTagType = Ignored;
    }
-   if (mTagType == Ignored && aszTagKey.size() > 1 && aszTagKey[1] == '_')
+
+   if( ( mTagType == Ignored ) &&
+       ( aszTagKey.size() > 1 ) &&
+       ( aszTagKey[1] == *Config::TrackingTagId ) )
    {
       mTagType = Tracking;
    }
    return mTagType;
 }
 
-void 
-CopyItem::SetMetaTag(string aszKey, string aszVal,
-                     MetaTagType atagType, bool bTimeChange)
+std::string CopyItem::GetUIDKey()
 {
-   if (bTimeChange) { itemChanged(); }
-
-   function<int(MetaTag, MetaTag)> fnComparer;
-   function<string(MetaTag)> fnExtractor =
-      [](MetaTag atag1)-> string { return atag1.GetKey(); };
-
-   if (aszKey == "Address") { _setParent(aszVal); }
-
-   int iFound = ListHelper::List_Find(aszKey, m_lstMetaTags, fnExtractor);
-   if (iFound == -1)
-   {
-      fnComparer = [](MetaTag atag1, MetaTag atag2)-> 
-                       int { return atag1.GetKey().compare(atag2.GetKey()); };
-
-      MetaTag newMeta(aszKey, aszVal, atagType);
-      ListHelper::List_Insert(newMeta, m_lstMetaTags, fnComparer);
-   }
-   else if (m_lstMetaTags[iFound].CanView(atagType))
-   {
-      m_lstMetaTags[iFound].SetVal(aszVal);
-   }
-   m_bNeedHash = true;
+   return Config::TrackingTagId + std::string("UID");
 }
 
-string CopyItem::GetMetaTag(string aszKey, MetaTagType atagType)
+std::string CopyItem::GetSessionKey()
 {
-   function<string(MetaTag)> fnExtractor =
-      [](MetaTag atag)-> string { return atag.GetKey(); };
+   return Config::TrackingTagId + std::string("Session");
+}
+
+std::string CopyItem::GetHashKey()
+{
+   return Config::TrackingTagId + std::string("hash");
+}
+
+std::string CopyItem::GetAddressKey()
+{
+   return "Address";
+}
+
+void 
+CopyItem::SetMetaTag( const std::string& aszKey,
+                      const std::string& aszVal,
+                      MetaTagType atagType,
+                      bool bTimeChange )
+{
+   if( aszKey == GetAddressKey() )
+   {
+      setParent( aszVal );
+   }
+   else
+   {
+      setMetaTag( aszKey, aszVal, atagType, bTimeChange );
+   }
+}
+
+string CopyItem::GetMetaTag(const std::string& aszKey, MetaTagType atagType) const
+{
+   auto fnExtractor = GetMetaTagKeyViewer();
    int iFound = ListHelper::List_Find(aszKey, m_lstMetaTags, fnExtractor);
    if (iFound != -1)
    {
@@ -208,11 +215,11 @@ string CopyItem::GetMetaTag(string aszKey, MetaTagType atagType)
    }
 }
 
-vector<Tag> CopyItem::GetMetaTags(MetaTagType atagType)
+vector<Tag> CopyItem::GetMetaTags(MetaTagType atagType) const
 {
    vector<Tag> lstRetVal;
-   vector<MetaTag>::iterator iter_Tags = m_lstMetaTags.begin();
-   for (; iter_Tags != m_lstMetaTags.end(); ++iter_Tags)
+   vector<MetaTag>::const_iterator iter_Tags = m_lstMetaTags.cbegin();
+   for (; iter_Tags != m_lstMetaTags.cend(); ++iter_Tags)
    {
       if (iter_Tags->CanView(atagType))
       {
@@ -223,30 +230,25 @@ vector<Tag> CopyItem::GetMetaTags(MetaTagType atagType)
    return lstRetVal;
 }
 
-bool 
-CopyItem::SetIdentifyingAttribute(string aszKey, string aszValue,
-                                  bool bTimeChange)
+bool
+CopyItem::SetIdentifyingAttribute( const std::string& aszKey,
+                                   const std::string& aszValue,
+                                   bool bTimeChange )
 {
    if (bTimeChange) { itemChanged(); }
+   int iFound = ListHelper::List_Find(aszKey, m_lstIdentifyingTags,
+                                      Config::Instance()->GetTagHelper(Key));
 
-   function<string(TraitItem)> fnExtractor;
-   fnExtractor = [](TraitItem aTI)->string { return aTI.GetKeyName(); };
-
-   int iIsAttr = ListHelper::List_Find(aszKey, *m_plstRestrictedTraits, fnExtractor);
-   if (iIsAttr != -1)
+   if( iFound == -1 )
    {
-      TraitItem foundTrait = m_plstRestrictedTraits->at(iIsAttr);
-      if (foundTrait.IsAllowedValue(aszValue))
-      {
-         m_lstIdentifyingTags[iIsAttr].second = aszValue;
-         int iValueIndex = ListHelper::List_Find(aszValue, foundTrait.GetAllowedValues());
-         setPairedAttributes(aszKey, iValueIndex);
-         m_bNeedHash = true;
-         return true;
-      }
+      m_lstIdentifyingTags.push_back( std::make_pair( aszKey, aszValue ) );
+   }
+   else
+   {
+      m_lstIdentifyingTags[iFound].second = aszValue;
    }
 
-   return false;
+   return true;
 }
 
 string CopyItem::GetIdentifyingAttribute(string aszKey)
@@ -263,42 +265,23 @@ string CopyItem::GetIdentifyingAttribute(string aszKey)
    }
 }
 
-vector<Tag> CopyItem::GetIdentifyingAttributes()
+vector<Tag> CopyItem::GetIdentifyingAttributes() const
 {
-   vector<Tag> lstRetVal;
-   vector<Tag>::iterator iter_Tags;
-   for (iter_Tags = m_lstIdentifyingTags.begin(); 
-        iter_Tags != m_lstIdentifyingTags.end(); 
-        ++iter_Tags)
-   {
-      lstRetVal.push_back(make_pair(iter_Tags->first, iter_Tags->second));
-   }
-
-   return lstRetVal;
+   return m_lstIdentifyingTags;
 }
 
-function<string(MetaTag)> CopyItem::GetMetaTagValueViewer(MetaTagType atagType)
+function<string(const MetaTag&)> CopyItem::GetMetaTagValueViewer(MetaTagType atagType)
 {
-   return [atagType](MetaTag atag)->string { return atag.GetVal(atagType); };
+   const static function<string(const MetaTag& )> fnValView = 
+      [atagType](const MetaTag& atag )->string { return atag.GetVal( atagType ); };
+   return fnValView;
 }
 
-function<string(MetaTag)> CopyItem::GetMetaTagKeyViewer()
+function<string(const MetaTag&)> CopyItem::GetMetaTagKeyViewer()
 {
-   return [](MetaTag atag)->string { return atag.GetKey(); };
-}
-
-std::vector<Address*> CopyItem::getAddresses()
-{
-   std::vector<Address*> lstRetval;
-   lstRetval.push_back(&m_Address);
-
-   size_t iResis = m_lstResidentIn.size();
-   for (size_t i = 0; i < iResis; i++)
-   {
-      lstRetval.push_back(&m_lstResidentIn.at(i));
-   }
-
-   return lstRetval;
+   const static function<string( const MetaTag& )> fnKeyView = 
+      []( const MetaTag& atag )->string { return atag.GetKey(); };
+   return fnKeyView;
 }
 
 void CopyItem::itemChanged()
@@ -306,54 +289,42 @@ void CopyItem::itemChanged()
    long lChangeTime = time(nullptr);
    stringstream ss;
    ss << hex << lChangeTime ;
-   SetMetaTag("__Session", ss.str(), MetaTagType::Tracking, false);
+   SetMetaTag(GetSessionKey(), ss.str(), MetaTagType::Tracking, false);
 }
 
-void CopyItem::setChainID(string aszNewID)
+void CopyItem::setUID(string aszNewID)
 {
-   SetMetaTag("__ChainID", aszNewID, MetaTagType::Tracking);
+   SetMetaTag(GetUIDKey(), aszNewID, MetaTagType::Tracking);
 }
 
 void CopyItem::setParent(string aszNewParent)
 {
-   SetMetaTag("Address", aszNewParent, MetaTagType::Public);
+   Address newAddress( aszNewParent );
+
+   m_Address = newAddress;
 }
 
-void CopyItem::_setParent(string aszNewParent)
+void 
+CopyItem::setMetaTag( const std::string& aszKey,
+                      const std::string& aszVal,
+                      MetaTagType atagType,
+                      bool bTimeChange )
 {
-   Addresser addr;
-   Address pID(aszNewParent);
-   AddResident(pID);
-}
+   const static function<int(const MetaTag&, MetaTag&)> fnComparer = 
+      [](const MetaTag& atag1, MetaTag& atag2)-> int { return atag1.GetKey().compare(atag2.GetKey()); };
+   function<string( const MetaTag& )> fnExtractor = GetMetaTagKeyViewer();
 
-void CopyItem::setPairedAttributes(string aszKey, int iVal)
-{
-   function<string(TraitItem)> fnExtractor;
-   fnExtractor = [](TraitItem aTI)->string { return aTI.GetKeyName(); };
+   if (bTimeChange) { itemChanged(); }
 
-   vector<string> lstPartners;
-   vector<Tag> lstPairs = Config::Instance()->GetPairedKeysList();
-   for each (Tag var in lstPairs)
+   int iFound = ListHelper::List_Find(aszKey, m_lstMetaTags, fnExtractor);
+   if (iFound == -1)
    {
-      if (var.first == aszKey &&
-          ListHelper::List_Find(var.second, lstPartners) == -1)
-      {
-         lstPartners.push_back(var.second);
-      }
-      else if (var.second == aszKey &&
-               ListHelper::List_Find(var.first, lstPartners) == -1)
-      {
-         lstPartners.push_back(var.first);
-      }
+      MetaTag newMeta(aszKey, aszVal, atagType);
+      ListHelper::List_Insert(newMeta, m_lstMetaTags, fnComparer);
    }
-
-   for each (string szKey in lstPartners)
+   else if (m_lstMetaTags[iFound].CanView(atagType))
    {
-      int iIsAttr = ListHelper::List_Find(szKey, *m_plstRestrictedTraits, fnExtractor);
-      if (iIsAttr != -1)
-      {
-         TraitItem foundTrait = m_plstRestrictedTraits->at(iIsAttr);
-         m_lstIdentifyingTags[iIsAttr].second = foundTrait.GetAllowedValues().at(iVal);
-      }
+      m_lstMetaTags[iFound].SetVal(aszVal);
    }
+   m_bNeedHash = true;
 }

@@ -123,8 +123,6 @@ namespace StoreFrontPro.Views.CollectionViews.Deckbox
                }
             }
          }
-
-         DiagnosticTools.Stop("View Deckbox");
       }
 
       #region IViewModel

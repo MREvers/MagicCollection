@@ -9,42 +9,50 @@
 #include "TraitItem.h"
 #include "Addresser.h"
 
+class CollectionItem;
+
+// Each Copy Item has a Unique ID and a Class Hash ID and its last modified session date.
+// UID is a 3 digit hex number, this is also called the Chain ID.
+// Hash ID is an MD5 has of various traits.
+// Last modified session date is an integer.
 class CopyItem
 {
+private:
+   // Use static constructor to build this class.
+   CopyItem( const Address& aAddrParentIdentifier );
+   CopyItem( const Address& aAddrParentIdentifier, 
+             const std::vector<Tag>& alstMetaTags );
+
 public:
-   CopyItem(std::vector<TraitItem>* alstTraits,
-      Address aAddrParentIdentifier);
-   CopyItem(std::vector<TraitItem>* alstTraits,
-      Address aAddrParentIdentifier,
-      std::vector<Tag> alstAttrs,
-      std::vector<Tag> alstMetaTags = std::vector<Tag>());
    ~CopyItem();
 
    std::string GetHash();
+   Address GetAddress() const;
+   std::string GetUID() const;
 
-   std::string GetParent();
-   Address GetAddress();
-   bool IsParent(Address aAddrTestAddress);
+   void SetParent( const Address& aAddrTestAddress );
+   bool IsParent( const Address& aAddrTestAddress ) const;
+   std::string GetParent() const;
 
    void AddResident(const Address& aAddrAddress);
    void RemoveResident(const Address& aAddrAddress);
-   std::vector<Address> GetResidentIn();
-   bool IsResidentIn(const Address& aAddrAddress);
+   bool IsResidentIn(const Address& aAddrAddress) const;
+   std::vector<Address> GetResidentIn() const;
 
-   void SetMetaTag(std::string aszKey, std::string aszVal,
-                   MetaTagType atagType, bool bTimeChange = true);
-   std::string GetMetaTag(std::string aszKey, MetaTagType atagType);
-   std::vector<Tag> GetMetaTags(MetaTagType atagType);
+   void SetMetaTag( const std::string& aszKey,
+                    const std::string& aszVal,
+                    MetaTagType atagType,
+                    bool bTimeChange = true );
+   std::string GetMetaTag(const std::string& aszKey, MetaTagType atagType) const;
+   std::vector<Tag> GetMetaTags(MetaTagType atagType) const;
 
-   bool SetIdentifyingAttribute(std::string aszKey, std::string aszValue,
-                                bool bTimeChange = true);
+   // This expects that the input is valid. Does not verify that
+   // the value is an allowed value.
+   bool SetIdentifyingAttribute( const std::string& aszKey,
+                                 const std::string& aszValue,
+                                 bool bTimeChange = true );
    std::string GetIdentifyingAttribute(std::string aszKey);
-   std::vector<Tag> GetIdentifyingAttributes();
-
-   std::function<std::string(MetaTag)> GetMetaTagValueViewer(MetaTagType atagType);
-   std::function<std::string(MetaTag)> GetMetaTagKeyViewer();
-
-   static MetaTagType DetermineMetaTagType(std::string aszTagKey);
+   std::vector<Tag> GetIdentifyingAttributes() const;
 private:
    bool m_bNeedHash;
 
@@ -52,21 +60,31 @@ private:
    // SubAddressX's smallest prime factor is the xth prime.
    Address m_Address;
    std::vector<Address> m_lstResidentIn;
-   std::vector<Address*> getAddresses();
 
    void itemChanged();
-   void setChainID(std::string aszNewID);
+   void setUID(std::string aszNewID);
    void setParent(std::string aszNewParent);
-   void _setParent(std::string aszNewParent);
+   void setMetaTag( const std::string& aszKey,
+                    const std::string& aszVal,
+                    MetaTagType atagType,
+                    bool bTimeChange = true );
 
-   // Metatags are visible by all collections. They 'may' be used to identify the card.
-   // In general, meta-tags are attached to some physical meaning related to the card such as
-   // aquisition date, price, etc...
    std::vector<MetaTag> m_lstMetaTags;
-
-   // Note that these will correspond 1-1 to each traititem in m_plstRest...
    std::vector<Tag> m_lstIdentifyingTags;
-   std::vector<TraitItem>* m_plstRestrictedTraits;
-   void setPairedAttributes(std::string aszKey, int iVal);
+public:
+   static CopyItem* CreateCopyItem( CollectionItem const* aoConstructor,
+                                    const Address& aAddrParentIdentifier,
+                                    const std::vector<Tag>& alstIDAttrs,
+                                    const std::vector<Tag>& alstMetaTags );
+
+   static MetaTagType DetermineMetaTagType(std::string aszTagKey);
+
+   static std::string GetUIDKey();
+   static std::string GetSessionKey();
+   static std::string GetHashKey();
+   static std::string GetAddressKey();
+
+   static std::function<std::string(const MetaTag&)> GetMetaTagValueViewer(MetaTagType atagType);
+   static std::function<std::string(const MetaTag&)> GetMetaTagKeyViewer();
 };
 

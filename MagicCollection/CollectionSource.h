@@ -30,6 +30,7 @@ public:
 
    // Database Functions
    void LoadLib(std::string aszFileName);
+   void HotSwapLib(std::string aszFileName);
 
    // Return the cache location if successful, -1 otherwise.
    int LoadCard(std::string aszCardName);
@@ -68,6 +69,7 @@ private:
    std::string convertToSearchString(std::string& aszSearch);
    bool isSearchCharacter(char c);
 
+   void resetBuffer();
    void finalizeBuffer();
 
    // This buffer stores ALL characters for every card.

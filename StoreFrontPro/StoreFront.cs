@@ -15,29 +15,6 @@ using System.Xml;
 
 namespace StoreFrontPro
 {
-   class DiagnosticTools
-   {
-      class Timed
-      {
-         public string Name = "";
-         public ulong Time = 0;
-      }
-
-      static List<Timed> times = new List<Timed>();
-      static Stopwatch timer = new Stopwatch();
-      static public void Start()
-      {
-         timer.Reset();
-         timer.Start();
-      }
-
-      static public void Stop(string aszName)
-      {
-         timer.Stop();
-         times.Add(new Timed { Name = aszName, Time = (ulong)timer.ElapsedMilliseconds });
-      }
-   }
-
    /// <summary>
    /// This class controls the main window essentially.
    /// Switches sub-views and displays other windows.
@@ -69,6 +46,28 @@ namespace StoreFrontPro
 
       public void LoadLatestJSON()
       {
+         string szZipPath = ServerInterface.Server.GetImportSourceFilePath() + ".zip";
+         string szExtractPath = Path.GetDirectoryName(szZipPath);
+
+         if (Directory.Exists(szExtractPath))
+         {
+            foreach (var file in Directory.EnumerateFiles(szExtractPath))
+            {
+               File.Delete(file);
+            }
+         }
+         else
+         {
+            Directory.CreateDirectory(szExtractPath);
+         }
+
+         using (var client = new WebClient())
+         {
+            client.DownloadFile("https://mtgjson.com/json/AllSets.json.zip", szZipPath);
+         }
+
+         System.IO.Compression.ZipFile.ExtractToDirectory(szZipPath, szExtractPath);
+
          ServerInterface.Server.ImportJSONCollectionAS();
       }
 
