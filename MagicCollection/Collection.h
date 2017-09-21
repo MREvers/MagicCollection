@@ -35,31 +35,31 @@ public:
 
    void AddItem(
       std::string aszName,
-      std::vector<Tag> alstAttrs = std::vector<Tag>(),
+      std::vector<Tag> alstAttrs    = std::vector<Tag>(),
       std::vector<Tag> alstMetaTags = std::vector<Tag>(),
-      bool abCloseTransaction = true);
+      bool abCloseTransaction       = true);
 
    void AddItemFrom(
       std::string aszName,
-      std::string aszIdentifyingHash,
+      std::string aszUID,
       const Address& aAddress,
       bool abCloseTransaction = true);
 
    void RemoveItem(
       std::string aszName, 
-      std::string aszIdentifyingHash, 
+      std::string aszUID, 
       bool abCloseTransaction = true);
 
    void ChangeItem(
       std::string aszName, 
-      std::string aszIdentifyingHash, 
+      std::string aszUID, 
       std::vector<Tag> alstIdChanges, 
       std::vector<Tag> alstMetaChanges, 
       bool abCloseTransaction = true);
 
    void ReplaceItem(
       std::string aszName, 
-      std::string aszIdentifyingHash, 
+      std::string aszUID, 
       std::string aszNewName, 
       std::vector<Tag> alstIdChanges, 
       std::vector<Tag> alstMetaChanges, 
@@ -76,7 +76,7 @@ public:
 
    std::vector<std::string> GetCollectionList(
       MetaTagType atagType = Visible,
-      bool aiCollapsed = false);
+      bool aiCollapsed     = false);
 
    bool IsLoaded = false;
 
@@ -96,14 +96,14 @@ private:
 
    // These all locate by name and hash for a second 
    // time so we dont risk dangling references.
-   void addItem(
-      std::string aszName, 
-      std::vector<Tag> alstAttrs, 
-      std::vector<Tag> alstMetaTags);
+   CopyItem* addItem(
+      const std::string& aszName, 
+      const std::vector<Tag>& alstAttrs, 
+      const std::vector<Tag>& alstMetaTags);
    
    void addItemFrom(
-      std::string aszName, 
-      std::string aszIdentifyingHash,
+      const std::string& aszName, 
+      const std::string& aszUID,
       const Address& aAddress);
 
    void removeItem(
@@ -111,35 +111,36 @@ private:
       const std::string& aszUID);
 
    void changeItem(
-      std::string aszName,  
-      std::string aszIdentifyingHash, 
-      std::vector<Tag> alstChanges, 
-      std::vector<Tag> alstMetaChanges);
+      const std::string& aszName, 
+      const std::string& aszUID,
+      const std::vector<Tag>& alstChanges, 
+      const std::vector<Tag>& alstMetaChanges);
 
    void replaceItem(
-      std::string aszName, 
-      std::string aszIdentifyingHash, 
-      std::string aszNewName, 
-      std::vector<Tag> alstIdChanges, 
-      std::vector<Tag> alstMetaChanges);
+      const std::string& aszName, 
+      const std::string& aszUID,
+      const std::string& aszNewName, 
+      const std::vector<Tag>& alstChanges, 
+      const std::vector<Tag>& alstMetaChanges);
 
    void registerItem(int aiCacheIndex);
+   void unregisterItem(int aiCacheIndex);
 
    void modifyItem(
       CopyItem* aptCopy,
-      std::vector<Tag> alstChanges, 
-      std::vector<Tag> alstMetaChanges);
+      const std::vector<Tag>& alstChanges, 
+      const std::vector<Tag>& alstMetaChanges);
 
    void loadMetaTagFile();
 
-   void loadPreprocessingLines(std::vector<std::string> alstLine);
-   void loadPreprocessingLine(std::string aszLine);
+   void loadPreprocessingLines(const std::vector<std::string>& alstLine);
+   void loadPreprocessingLine(const std::string& aszLine);
 
-   void loadInterfaceLine(std::string aszLine);
+   void loadInterfaceLine(const std::string& aszLine);
 
-   void loadAdditionLine(std::string aszLine);
-   void loadRemoveLine(std::string aszLine);
-   void loadDeltaLine(std::string aszLine);
+   void loadAdditionLine(const std::string& aszLine);
+   void loadRemoveLine(const std::string& aszLine);
+   void loadDeltaLine(const std::string& aszLine);
 
    void saveHistory();
    void saveMeta();

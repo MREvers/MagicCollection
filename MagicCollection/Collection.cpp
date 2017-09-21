@@ -76,8 +76,8 @@ Collection::AddItem(string aszName,
 
 void
 Collection::AddItemFrom(
-   std::string aszName,
-   std::string aszIdentifyingHash,
+   string aszName,
+   string aszIdentifyingHash,
    const Address& aAddress,
    bool abCloseTransaction)
 {
@@ -98,7 +98,7 @@ Collection::RemoveItem(string aszName,
 {
    RemoveAction rmAction;
    rmAction.SetResi(GetIdentifier());
-   rmAction.SetHash(aszIdentifyingHash);
+   rmAction.SetUID(aszIdentifyingHash);
    rmAction.SetName(aszName);
 
    m_ptrTransactionManager->IncludeAction(rmAction);
@@ -116,7 +116,7 @@ Collection::ChangeItem(string aszName,
    ChangeAction chAction;
    chAction.SetIDs(alstChanges);
    chAction.SetMeta(alstMetaChanges);
-   chAction.SetHash(aszIdentifyingHash);
+   chAction.SetUID(aszIdentifyingHash);
    chAction.SetName(aszName);
 
    m_ptrTransactionManager->IncludeAction(chAction);
@@ -194,31 +194,36 @@ Collection::LoadCollection(
    // This must be done first.
    loadPreprocessingLines(lstPreprocessLines);
 
-   loader.CaptureUnlistedItems(GetIdentifier(),
-      m_ptrCollectionSource,
-      mapExistingItems,
-      mapNewlyAddedItems);
+   // Store off all the existing copies in mapExistingItems.
+   loader.CaptureUnlistedItems( GetIdentifier(),
+                                m_ptrCollectionSource,
+                                mapExistingItems,
+                                mapNewlyAddedItems );
 
+   // Load the collection based on the file.
    LoadChanges(lstCardLines);
    loadMetaTagFile();
 
-   loader.CaptureUnlistedItems(GetIdentifier(),
-      m_ptrCollectionSource,
-      mapNewlyAddedItems,
-      mapExistingItems);
+   // Store off all the copies that aren't in mapExistingItems.
+   // Store them in mapNewlyAddedItems.
+   loader.CaptureUnlistedItems( GetIdentifier(),
+                                m_ptrCollectionSource,
+                                mapNewlyAddedItems,
+                                mapExistingItems );
 
-   // Consolodate local items that match exactly.
-   loader.ConsolodateLocalItems(GetIdentifier(),
-      m_ptrCollectionSource,
-      mapNewlyAddedItems,
-      mapExistingItems);
+   // Consolodate local items that match exactly in the newly
+   // added and existing items.
+   loader.ConsolodateLocalItems( GetIdentifier(),
+                                 m_ptrCollectionSource,
+                                 mapNewlyAddedItems,
+                                 mapExistingItems );
 
-   loader.RejoinAsyncedLocalItems(GetIdentifier(),
-      m_ptrCollectionSource,
-      m_ptrCollectionDetails->GetTimeStamp(),
-      mapNewlyAddedItems,
-      mapExistingItems);
-
+   loader.RejoinAsyncedLocalItems( GetIdentifier(),
+                                   m_ptrCollectionSource,
+                                   m_ptrCollectionDetails->GetTimeStamp(),
+                                   mapNewlyAddedItems,
+                                   mapExistingItems );
+                                   
    // Now Verify Borrowed Cards (i.e. Parent != this) that were just
    //  loaded exist. Two things can happen in this case. 
    // If the claimed collection exists, then try to find the referenced item
@@ -226,9 +231,9 @@ Collection::LoadCollection(
    // If the claimed collection does not exist, then try to find an identical
    //  copy that may have been created by another collection and use that.
    //  If that fails, use the one created.
-   loader.ConsolodateBorrowedItems(GetIdentifier(),
-      m_ptrCollectionSource,
-      aoFactory);
+   loader.ConsolodateBorrowedItems( GetIdentifier(),
+                                    m_ptrCollectionSource,
+                                    aoFactory );
 
    // Now this collection is COMPLETELY LOADED. Since other collections can
    //  reference this collection, without this collection being loaded,
@@ -236,8 +241,8 @@ Collection::LoadCollection(
    //  collection already; if that is the case, use those copies. Additionally,
    //  check that all the copies referenced by the other collections still
    //  exist, if not, delete those copies.
-   loader.ReleaseUnfoundReferences(GetIdentifier(),
-      m_ptrCollectionSource);
+   loader.ReleaseUnfoundReferences( GetIdentifier(),
+                                    m_ptrCollectionSource );
 
    IsLoaded = (GetIdentifier().Main != "");
 
@@ -321,20 +326,19 @@ Collection::getCollection()
    return m_lstItemCacheIndexes;
 }
 
-void 
+CopyItem* 
 Collection::addItem(
-	string aszName, 
-	vector<Tag> alstAttrs, 
-	vector<Tag> alstMetaTags)
+	const string& aszName, 
+	const vector<Tag>& alstAttrs, 
+	const vector<Tag>& alstMetaTags)
 {
-   TryGet<CollectionItem> item; CopyItem* cItem; string szHash;
+   TryGet<CollectionItem> item; CopyItem* cItem;
    
    int iCache = m_ptrCollectionSource->LoadCard(aszName);
 
    item = m_ptrCollectionSource->GetCardPrototype(iCache);
 
    cItem = item->AddCopy(GetIdentifier(), alstAttrs, alstMetaTags).get();
-   szHash = cItem->GetHash();
 
    registerItem(iCache);
 
@@ -343,29 +347,29 @@ Collection::addItem(
    // There should never be other copies with that hash not in resident. 
    // They are removed at load time.
    m_ptrCollectionSource->NotifyNeedToSync(GetIdentifier());
+
+   return cItem;
 }
 
 void 
 Collection::addItemFrom(
-   std::string aszName,
-   std::string aszIdentifyingHash,
+   const string& aszName,
+   const string& aszIdentifyingHash,
    const Address& aResiAddress)
 {
-   /*
    TryGet<CollectionItem> item;
-   std::shared_ptr<CopyItem> cItem;
 
    int iCache = m_ptrCollectionSource->LoadCard(aszName);
    item = m_ptrCollectionSource->GetCardPrototype(iCache);
    if (!item.Good()) { return; }
 
-   cItem = item->FindCopy(aszIdentifyingHash, aResiAddress);
-   if (cItem.get() == nullptr) { return; }
+   auto cItem = item->FindCopy( aszIdentifyingHash );
+   if (cItem.Good()) { return; }
+   auto copy = cItem.Value()->get();
 
-   cItem->AddResident(GetIdentifier());
+   copy->AddResident(GetIdentifier());
 
    registerItem(iCache);
-   */
 }
 
 void 
@@ -376,39 +380,29 @@ Collection::removeItem( const string& aszName,
    int iCache = m_ptrCollectionSource->LoadCard(aszName);
 
    TryGet<CollectionItem> item = m_ptrCollectionSource->GetCardPrototype(iCache);
-   /*
-   item->RemoveCopyItem(aAddrResidentIn, aszIdentifyingHash);
+   
+   item->RemoveCopy( GetIdentifier(), aszUID );
 
    // Remove any items from the cache that are no longer in this collection.
-   if (item->GetCopiesForCollection(GetIdentifier(), All).size() == 0)
+   if (item->FindCopies(GetIdentifier(), All).size() == 0)
    {
-      vector<int> lstNewCacheIndexes;
-      for (size_t i = 0; i < m_lstItemCacheIndexes.size(); i++)
-      {
-         if (m_lstItemCacheIndexes[i] != iCache)
-         {
-            lstNewCacheIndexes.push_back(m_lstItemCacheIndexes[i]);
-         }
-      }
-      m_lstItemCacheIndexes = lstNewCacheIndexes;
    }
 
    // Notify other collections they may need to sync since this may have been 
    //  borrowed by other collections.
    m_ptrCollectionSource->NotifyNeedToSync(GetIdentifier());
-   */
 }
 
 void 
-Collection::changeItem( string aszName, 
-                        string aszIdentifyingHash, 
-                        vector<Tag> alstChanges, 
-                        vector<Tag> alstMetaChanges )
+Collection::changeItem( const string& aszName, 
+                        const string& aszUID, 
+                        const vector<Tag>& alstChanges, 
+                        const vector<Tag>& alstMetaChanges )
 {
    int iCache = m_ptrCollectionSource->LoadCard(aszName);
 
    TryGet<CollectionItem> item = m_ptrCollectionSource->GetCardPrototype(iCache);
-   CopyItem* cItem = item->FindCopy(aszIdentifyingHash).Value()->get();
+   CopyItem* cItem = item->FindCopy(aszUID).Value()->get();
    if (cItem == nullptr) { return; }
 
    modifyItem(cItem, alstChanges, alstMetaChanges);
@@ -420,24 +414,22 @@ Collection::changeItem( string aszName,
 
 
 void 
-Collection::replaceItem( string aszName,
-                         string aszIdentifyingHash, 
-                         string aszNewName, 
-                         vector<Tag> alstIdChanges, 
-                         vector<Tag> alstMetaChanges )
+Collection::replaceItem( const string& aszName,
+                         const string& aszUID, 
+                         const string& aszNewName, 
+                         const vector<Tag>& alstIdChanges, 
+                         const vector<Tag>& alstMetaChanges )
 {
-   /*
    int iCache = m_ptrCollectionSource->LoadCard(aszName);
    int iNewCache = m_ptrCollectionSource->LoadCard(aszNewName);
 
    TryGet<CollectionItem> item = m_ptrCollectionSource->GetCardPrototype(iCache);
    TryGet<CollectionItem> newItem = m_ptrCollectionSource->GetCardPrototype(iNewCache);
-   CopyItem* cItem = item->FindCopy(aszIdentifyingHash).get();
-   if (cItem == nullptr) { return; }
+   auto cItem = item->FindCopy(aszUID);
+   if( !cItem.Good() ) { return; }
 
-   removeItem(item->GetName(), cItem->GetHash(), GetIdentifier());
-   addItem(newItem->GetName(), alstIdChanges, alstMetaChanges);
-   */
+   removeItem(item->GetName(), aszUID);
+   addItem(newItem->GetName(), alstIdChanges, alstMetaChanges); 
 }
 
 void 
@@ -452,10 +444,25 @@ Collection::registerItem(int aiCacheIndex)
 }
 
 void 
+Collection::unregisterItem( int aiCacheIndex )
+{
+   vector<int> lstNewCacheIndexes;
+   for( auto iCache : m_lstItemCacheIndexes )
+   {
+      if (iCache != aiCacheIndex)
+      {
+         lstNewCacheIndexes.push_back(iCache);
+      }
+   }
+
+   m_lstItemCacheIndexes = lstNewCacheIndexes;
+}
+
+void 
 Collection::modifyItem(
 	CopyItem* aptCopy, 
-	vector<Tag> alstChanges, 
-	vector<Tag> alstMetaChanges)
+	const vector<Tag>& alstChanges, 
+	const vector<Tag>& alstMetaChanges)
 {
    for (size_t i = 0; i < alstChanges.size(); i++)
    {
@@ -493,34 +500,33 @@ void Collection::loadMetaTagFile()
       if (iRealCard == -1) { continue; }
 
       TryGet<CollectionItem> item = m_ptrCollectionSource->GetCardPrototype(iRealCard);
-      /*
-      string szPlainHash = item->GenerateHash(GetIdentifier(), sudoItem.Identifiers);
+      
+      string szPlainHash = item->GenerateHash(GetIdentifier(), sudoItem.Identifiers, sudoItem.MetaTags);
 
       // Gets the first matching item resident in this collection.
-      CopyItem* matchingCopy = item->FindCopy(szPlainHash, GetIdentifier()).get();
-      if (matchingCopy != nullptr)
+      auto matchingCopy = item->FindCopy(szPlainHash, Hash);
+      if (matchingCopy.Good())
       {
+         auto copy = matchingCopy.Value()->get();
          for (size_t t = 0; t < lstMetaTags.size(); t++)
          {
             MetaTagType mTagType = CopyItem::DetermineMetaTagType(lstMetaTags[t].first);
-            matchingCopy->
-				SetMetaTag(lstMetaTags[t].first, lstMetaTags[t].second, mTagType, false);
+            copy->SetMetaTag(lstMetaTags[t].first, lstMetaTags[t].second, mTagType, false);
          }
       }
-      */
    }
 }
 
-void Collection::loadPreprocessingLines(vector<string>  alstLines)
+void Collection::loadPreprocessingLines(const vector<string>&  alstLines)
 {
-   vector<string>::iterator iter_Lines = alstLines.begin();
-   for (; iter_Lines != alstLines.end(); ++iter_Lines)
+   vector<string>::const_iterator iter_Lines = alstLines.cbegin();
+   for (; iter_Lines != alstLines.cend(); ++iter_Lines)
    {
       loadPreprocessingLine(*iter_Lines);
    }
 }
 
-void Collection::loadPreprocessingLine(string aszLine)
+void Collection::loadPreprocessingLine(const string& aszLine)
 {
    string szDefKey(Config::CollectionDefinitionKey);
    if (aszLine.size() < 2) { return; }
@@ -564,7 +570,7 @@ void Collection::loadPreprocessingLine(string aszLine)
 }
 
 // May return null depending on input
-void Collection::loadInterfaceLine(string aszLine)
+void Collection::loadInterfaceLine(const string& aszLine)
 {
    if (aszLine.size() <= 2) { return; }
 
@@ -599,7 +605,7 @@ void Collection::loadInterfaceLine(string aszLine)
    }
 }
 
-void Collection::loadAdditionLine(string aszLine)
+void Collection::loadAdditionLine(const string& aszLine)
 {
    Address aParentAddress;
    string szID = "";
@@ -643,7 +649,7 @@ void Collection::loadAdditionLine(string aszLine)
 }
 
 // This needs "Card Name : { __hash="hashval" }" All other values are irrelevant.
-void Collection::loadRemoveLine(string aszLine)
+void Collection::loadRemoveLine(const string& aszLine)
 {
    CollectionItem::PseudoIdentifier sudoItem;
    CollectionItem::ParseCardLine(aszLine, sudoItem);
@@ -662,7 +668,7 @@ void Collection::loadRemoveLine(string aszLine)
       else { break; }
    }
 }
-void Collection::loadDeltaLine(string aszLine)
+void Collection::loadDeltaLine(const string& aszLine)
 {
    vector<string> lstOldNew = StringHelper::Str_Split(aszLine, "->");
 

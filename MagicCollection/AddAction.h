@@ -26,6 +26,8 @@ private:
    std::vector<Tag> m_lstIDs;
    std::vector<Tag> m_lstMetas;
 
+   std::string m_szAddedUID;
+
    std::shared_ptr<Action> getUndoAction(TransactionManager* aoCol) const override;
 };
 

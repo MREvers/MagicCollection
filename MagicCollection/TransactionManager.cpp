@@ -77,13 +77,13 @@ TransactionManager::GetSource()
    return m_ptrCollection->m_ptrCollectionSource;
 }
 
-void 
+CopyItem* 
 TransactionManager::Add(
    std::string aszName,
    std::vector<Tag> alstAttrs,
    std::vector<Tag> alstMetaTags)
 {
-   m_ptrCollection->addItem(aszName, alstAttrs, alstMetaTags);
+   return m_ptrCollection->addItem(aszName, alstAttrs, alstMetaTags);
 }
 
 void 
@@ -98,20 +98,20 @@ TransactionManager::AddFrom(
 void 
 TransactionManager::Remove(
    std::string aszName,
-   std::string aszIdentifyingHash,
+   std::string aszUID,
    Address aszResidentIn)
 {
-//   m_ptrCollection->removeItem(aszName, aszIdentifyingHash, aszResidentIn);
+   //m_ptrCollection->removeItem(aszName, aszIdentifyingHash, aszResidentIn);
 }
 
 void 
 TransactionManager::Change(
    std::string aszName,
-   std::string aszIdentifyingHash,
+   std::string aszUID,
    std::vector<Tag> alstChanges,
    std::vector<Tag> alstMetaChanges)
 {
-   m_ptrCollection->changeItem( aszName, aszIdentifyingHash,
+   m_ptrCollection->changeItem( aszName, aszUID,
                                 alstChanges, alstMetaChanges );
 }
 

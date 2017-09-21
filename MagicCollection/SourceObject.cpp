@@ -14,7 +14,11 @@ SourceObject::~SourceObject()
 }
 
 unsigned int 
-SourceObject::AddAttribute(std::string aszkey, std::string value, char* aplstCharBuf, unsigned int aiBufSize)
+SourceObject::AddAttribute(
+   const std::string& aszkey,
+   const std::string& value,
+   char* aplstCharBuf, 
+   unsigned int aiBufSize)
 {
    std::string key = aszkey;
    std::string szFixedKey = Config::Instance()->GetKeyCode(key);
@@ -103,7 +107,8 @@ SourceObject::GetAttributes(char* aiSearchBuffer)
    return lstRetVal;
 }
 
-std::map<std::string, std::vector<std::string>> SourceObject::GetNonUniqueAttributeRestrictions(char* aiSearchBuffer)
+std::map<std::string, std::vector<std::string>> 
+SourceObject::GetNonUniqueAttributeRestrictions(char* aiSearchBuffer)
 {
    std::map<std::string, std::vector<std::string>> mapNonUAttrs;
 

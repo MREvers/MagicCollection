@@ -16,22 +16,17 @@ ChangeAction::Execute(TransactionManager* aoCol)
    CollectionSource* refSource = aoCol->GetSource();
    Collection* refCollection = aoCol->GetCollection();
 
-   TryGet<CollectionItem> refItem = refSource->GetCardPrototype(m_szName);
+   auto refItem = refSource->GetCardPrototype(m_szName);
    if (!refItem.Good()) { return false; }
 
-   //std::shared_ptr<CopyItem> refCItem;
-   //refCItem = refItem->FindCopy( m_szIdentifyingHash, 
-   //                                  refCollection->GetIdentifier() );
-   //if (refCItem == nullptr) { return false; }
+   auto refCItem = refItem->FindCopy( m_szUID );
+   if (!refCItem.Good()) { return false; }
 
-   //aoCol->Change( m_szName, m_szIdentifyingHash, 
-   //               m_lstIdChanges, m_lstMetaChanges );
+   auto CItem = refCItem.Value()->get();
+   aoCol->Change( m_szName, m_szUID, m_lstIdChanges, m_lstMetaChanges );
 
-   //// After the change is made, store off the details of how 
-   //// to find it again.
-   //m_szUndoIdentifyingHash = refCItem->GetHash();
-   //m_lstUndoMeta = refCItem->GetMetaTags(MetaTagType::Any);
-   //m_lstUndoID = refCItem->GetIdentifyingAttributes();
+   m_lstUndoMeta = CItem->GetMetaTags(MetaTagType::Any);
+   m_lstUndoID = CItem->GetIdentifyingAttributes();
 
    return true;
 }
@@ -53,7 +48,7 @@ ChangeAction::GetCopy() const
 }
 
 void 
-ChangeAction::SetName(std::string aszName)
+ChangeAction::SetName(const std::string& aszName)
 {
    m_szName = aszName;
 }
@@ -65,9 +60,9 @@ ChangeAction::SetIDs(std::vector<Tag> alstIds)
 }
    
 void 
-ChangeAction::SetHash(std::string aszHash)
+ChangeAction::SetUID(const std::string& aszHash)
 {
-   m_szIdentifyingHash = aszHash;
+   m_szUID = aszHash;
 }
 
 void 
@@ -80,7 +75,7 @@ std::shared_ptr<Action>
 ChangeAction::getUndoAction(TransactionManager* aoCol) const
 {
    ChangeAction* chAction = new ChangeAction();
-   chAction->SetHash(m_szUndoIdentifyingHash);
+   chAction->SetUID(m_szUID);
    chAction->SetIDs(m_lstUndoID);
    chAction->SetMeta(m_lstUndoMeta);
    chAction->SetName(m_szName);

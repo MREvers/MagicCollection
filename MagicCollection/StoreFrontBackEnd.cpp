@@ -1,8 +1,15 @@
 #include "StoreFrontBackEnd.h"
-
+#include "AddressTest.h"
 
 CStoreFrontBackEnd::CStoreFrontBackEnd()
 {
+   bool bTest = true;
+   AddressTest at;
+   bTest |= at.InceptLocationTest();
+   bTest |= at.IsResidentInTest();
+   bTest |= at.ParseTestManySub();
+   bTest |= at.ParseTestSingle();
+   bTest |= at.PitheLocationTest();
    // No Server for now
    m_ColSource = new CollectionSource();
    m_ColSource->LoadLib(Config::Instance()->GetSourceFile());

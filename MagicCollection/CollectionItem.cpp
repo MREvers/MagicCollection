@@ -42,24 +42,44 @@ CollectionItem::~CollectionItem()
 
 shared_ptr<CopyItem>
 CollectionItem::AddCopy( const Address& aAddrColID,
-                             const vector<Tag>& alstAttrTags,
-                             const vector<Tag>& alstMetaTags )
+                         const vector<Tag>& alstAttrTags,
+                         const vector<Tag>& alstMetaTags )
 {
    CopyItem* newCopy = createCopy(aAddrColID, alstAttrTags, alstMetaTags);
    m_lstCopies.push_back(shared_ptr<CopyItem>(newCopy));
    return m_lstCopies.back();
 }
 
+bool 
+CollectionItem::RemoveCopy( const Address& aAddrColID,
+                            const std::string aszUniqueID )
+{
+   shared_ptr<CopyItem> ptCopy;
+   auto nCopy = FindCopy( aszUniqueID );
+
+   if( nCopy.Good() )
+   {
+      ptCopy = *nCopy.Value();
+      int iRefCnt = ptCopy->RemoveResident( aAddrColID );
+
+      if( iRefCnt == 0 )
+      {
+         DeleteCopy( ptCopy.get() );
+      }
+      return true;
+   }
+   return false;
+}
+
 string 
 CollectionItem::GenerateHash( const Address& aAddrIdentifier,
                               const vector<Tag>& alstAttrs,
-                              const vector<Tag>& alstMetaTags )
+                              const vector<Tag>& alstMetaTags ) const
 {
    CopyItem* hashCopy = createCopy( aAddrIdentifier, alstAttrs, alstMetaTags );
-
    string szHash = hashCopy->GetHash();
-
    delete hashCopy;
+
    return szHash;
 }
 
@@ -97,16 +117,19 @@ CollectionItem::CopyToString( CopyItem const* aptItem,
                       aAddrCompareID );
 }
 
-TryGet<shared_ptr<CopyItem>>
-CollectionItem::FindCopy( const string& aszUID ) const
+TryGetCopy<shared_ptr<CopyItem>>
+CollectionItem::FindCopy( const string& aszUID, 
+                          FindType aiType  ) const
 {
-   TryGet<shared_ptr<CopyItem>> oRetval;
-
+   TryGetCopy<shared_ptr<CopyItem>> oRetval;
+   bool match = false;
    for( auto ptCopy : m_lstCopies )
    {
-      if( ptCopy->GetUID() == aszUID )
+      match |= (aiType & UID)  > 0 && ptCopy->GetUID()  == aszUID;
+      match |= (aiType & Hash) > 0 && ptCopy->GetHash() == aszUID;
+      if( match )
       {
-         oRetval.Set( &ptCopy );
+         oRetval.Set( shared_ptr<CopyItem>(ptCopy) );
          break;
       }
    }
@@ -228,13 +251,13 @@ CollectionItem::setCopyPairAttrs( CopyItem* aptItem, const string& aszKey, int i
    vector<Tag> lstPairs = Config::Instance()->GetPairedKeysList();
    for each (Tag var in lstPairs)
    {
-      if (var.first == aszKey &&
-          ListHelper::List_Find(var.second, lstPartners) == -1)
+      if( ( var.first == aszKey ) &&
+          ( ListHelper::List_Find(var.second, lstPartners) == -1 ) )
       {
          lstPartners.push_back(var.second);
       }
-      else if (var.second == aszKey &&
-               ListHelper::List_Find(var.first, lstPartners) == -1)
+      else if( ( var.second == aszKey ) &&
+               ( ListHelper::List_Find(var.first, lstPartners) == -1 ) )
       {
          lstPartners.push_back(var.first);
       }
@@ -252,38 +275,7 @@ CollectionItem::setCopyPairAttrs( CopyItem* aptItem, const string& aszKey, int i
       }
    }
 }
-/*
-vector<shared_ptr<CopyItem>> 
-CollectionItem::GetCopiesForCollection(const Address& aAddrCollectionIdentifier,
-                                       CollectionItemType aItemType)
-{
-   vector<shared_ptr<CopyItem>> lstRetVal;
-   vector<shared_ptr<CopyItem>> ::iterator iter_Copies = m_lstCopies.begin();
 
-   for (; iter_Copies != m_lstCopies.end(); ++iter_Copies)
-   {
-      if ((aItemType & Local) > 0 &&
-          (*iter_Copies)->IsParent(aAddrCollectionIdentifier))
-      {
-         lstRetVal.push_back(*iter_Copies);
-      }
-      else if ((aItemType & Borrowed) > 0 &&
-         !(*iter_Copies)->IsParent(aAddrCollectionIdentifier) &&
-         (*iter_Copies)->IsResidentIn(aAddrCollectionIdentifier))
-      {
-         lstRetVal.push_back(*iter_Copies);
-      }
-      else if ((aItemType & Virtual) > 0 &&
-         (*iter_Copies)->GetParent() == "" &&
-         (*iter_Copies)->IsResidentIn(aAddrCollectionIdentifier))
-      {
-         lstRetVal.push_back(*iter_Copies);
-      }
-   }
-
-   return lstRetVal;
-}
-*/
 bool
 CollectionItem::ParseCardLine(const string& aszLine, PseudoIdentifier& rPIdentifier)
 {
@@ -335,10 +327,8 @@ CollectionItem::ParseCardLine(const string& aszLine, PseudoIdentifier& rPIdentif
 
    szName = "";
    unsigned int iter_size = szLine.size();
-   while (i < iter_size &&
-      ((szLine.at(i) >= 'a' && szLine.at(i) <= 'z') ||
-      (szLine.at(i) >= 'A' && szLine.at(i) <= 'Z') ||
-         (szLine.at(i) == ',' || szLine.at(i) == ' ' || szLine.at(i) == '-')))
+   char cChar;
+   while( ( i < iter_size ) && ( isNameChar(szLine.at(i)) ) )
    {
       szName = szName + szLine.at(i);
       i++;
@@ -428,12 +418,21 @@ bool CollectionItem::ParseTagString(const string& aszDetails, vector<Tag>& rlstT
    return true;
 }
 
+bool CollectionItem::isNameChar( const char& c )
+{
+   return ( ( 'a' <= c && c <= 'z' ) ||
+            ( 'A' <= c && c <= 'Z' ) ||
+            ( c == ',' ) || 
+            ( c == ' ' ) || 
+            ( c == '-' ) );
+}
+
 string 
 CollectionItem::ToCardLine( const Address& aAddrParentID,
-                                   const std::string& aszName,
-                                   const std::vector<Tag>& alstAttrs,   
-                                   const std::vector<Tag>& alstMetaTags,
-                                   const Address& aAddrCompareID )
+                            const std::string& aszName,
+                            const std::vector<Tag>& alstAttrs,   
+                            const std::vector<Tag>& alstMetaTags,
+                            const Address& aAddrCompareID )
 {
    string szLine = aszName;
    szLine += " { ";
@@ -464,9 +463,9 @@ CollectionItem::ToCardLine( const Address& aAddrParentID,
    unsigned int iDummy;
    for (; iter_keyValPairs != alstMetaTags.end(); ++iter_keyValPairs)
    {
-      if (!(aAddrCompareID.Main == "") &&
-         (iter_keyValPairs->first == "Address") &&
-         (Address(iter_keyValPairs->second) == aAddrCompareID))
+      if ( !( aAddrCompareID.Main == "" )            &&
+            ( iter_keyValPairs->first == "Address" ) &&
+            ( Address(iter_keyValPairs->second) == aAddrCompareID ) )
       {
          continue;
       }

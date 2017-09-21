@@ -18,6 +18,13 @@ public:
    static bool CompareKeyValPairList(const std::vector<std::pair<std::string, std::string>>& alstFirst,
                                      const std::vector<std::pair<std::string, std::string>>& alstSecond);
 
+   template<typename T, typename R> static
+   int List_Find(const T& aFind, R aBegin, R aEnd)
+   {
+      std::vector<T> lstFindList = std::vector<T>(aBegin, aEnd);
+      return List_Find(aFind, lstFindList);
+   }
+
    template<typename T> static
    int List_Find(const T& aFind, const std::vector<T>& alstFindList)
    {
@@ -32,6 +39,15 @@ public:
          index++;
       }
       return -1;
+   }
+
+   template<class T, class R, class Iter> static
+   int List_Find( const T& aiFind, 
+                  const Iter aBegin, const Iter aEnd, 
+                  const std::function<T(const R&)>& afuncExtractor )
+   {
+      std::vector<R> lstFind = std::vector<R>(aBegin,aEnd);
+      return List_Find(aiFind, lstFind, afuncExtractor);
    }
 
    template<class T, class R> static
@@ -53,6 +69,34 @@ public:
       return -1;
    }
 
+   template<class T, class R, class Iter> static
+   int List_Find_Non_Const( T& aiFind, 
+                            Iter aBegin, Iter aEnd, 
+                            const std::function<T(R&)>& afuncExtractor )
+   {
+      std::vector<R> lstFind = std::vector<R>(aBegin, aEnd);
+      return List_Find_Non_Const(aiFind, lstFind, afuncExtractor);
+   }
+
+   template<class T, class R> static
+   int List_Find_Non_Const( T& aiFind, 
+                            std::vector<R>& alstFindList, 
+                            const std::function<T(R&)>& afuncExtractor )
+   {
+      std::vector<R>::iterator iter_list = alstFindList.begin();
+      int index = 0;
+      for (; iter_list != alstFindList.end(); iter_list++)
+      {
+         T tRetval = afuncExtractor(*iter_list);
+         if (aiFind == tRetval)
+         {
+            return index;
+         }
+         index++;
+      }
+      return -1;
+   }
+
    template<class T> static
    void List_Insert( const T& aInsert, 
                      std::vector<T>& alstInsertList, 
@@ -62,7 +106,7 @@ public:
       for (; iter != alstInsertList.end(); ++iter)
       {
          int iCmp = afuncComparer(aInsert, *iter);
-         if (iCmp >= 0) { break; }
+         if (iCmp <= 0) { break; }
       }
 
       alstInsertList.insert(iter, aInsert);

@@ -17,8 +17,8 @@ AddAction::~AddAction()
 bool 
 AddAction::Execute(TransactionManager* aoCol)
 {
-   aoCol->Add(m_szName, m_lstIDs, m_lstMetas);
-
+   CopyItem* cItem = aoCol->Add(m_szName, m_lstIDs, m_lstMetas);
+   m_szAddedUID = cItem->GetUID();
    return true;
 }
 
@@ -46,7 +46,7 @@ AddAction::getUndoAction(TransactionManager* aoCol) const
                                      m_lstIDs, m_lstMetas );
 
    RemoveAction* rmRetVal = new RemoveAction();
-   rmRetVal->SetHash(szHashRM);
+   rmRetVal->SetUID(szHashRM);
    rmRetVal->SetResi(refCollection->GetIdentifier());
    rmRetVal->SetName(m_szName);
 

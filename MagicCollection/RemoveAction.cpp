@@ -4,7 +4,7 @@
 RemoveAction::RemoveAction()
 {
    m_szName = "";
-   m_szIdentifyingHash = "";
+   m_szUID = "";
 }
 
 
@@ -62,19 +62,19 @@ RemoveAction::GetCopy() const
 }
 
 void 
-RemoveAction::SetName(std::string aszName)
+RemoveAction::SetResi(const Address& address)
+{
+   m_Address = address;
+}
+
+void 
+RemoveAction::SetName(const std::string& aszName)
 {
    m_szName = aszName;
 }
 
 void 
-RemoveAction::SetHash(std::string aszIDHash)
+RemoveAction::SetUID(const std::string& aszUID)
 {
-   m_szIdentifyingHash = aszIDHash;
-}
-
-void 
-RemoveAction::SetResi(const Address& aAddress)
-{
-   m_AddrResidentIn = aAddress;
+   m_szUID = aszUID;
 }

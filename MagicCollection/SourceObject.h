@@ -30,8 +30,9 @@ public:
    ~SourceObject();
 
    //std::vector<std::pair<std::string, std::string>> Attribs;
-   unsigned int AddAttribute(std::string key,
-      std::string value,
+   unsigned int AddAttribute(
+      const std::string& key,
+      const std::string& value,
       char* aplstCharBuf,
       unsigned int aiBufSize);
 

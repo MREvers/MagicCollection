@@ -1,6 +1,6 @@
 #include "CollectionIO.h"
 
-
+using namespace std;
 
 CollectionIO::CollectionIO()
 {
@@ -11,14 +11,14 @@ CollectionIO::~CollectionIO()
 {
 }
 
-std::vector<std::string> CollectionIO::GetFileLines(std::string aszFileName)
+vector<string> CollectionIO::GetFileLines(string aszFileName)
 {
    // Load the collection
-   std::ifstream in(aszFileName);
-   std::stringstream buffer;
+   ifstream in(aszFileName);
+   stringstream buffer;
    buffer << in.rdbuf();
    in.close();
-   std::string contents(buffer.str());
+   string contents(buffer.str());
 
    return StringHelper::SplitIntoLines(contents);
 }
@@ -26,15 +26,16 @@ std::vector<std::string> CollectionIO::GetFileLines(std::string aszFileName)
 // Returns non-preprocessing lines.
 bool 
 CollectionIO::GetPreprocessLines(
-   std::vector<std::string> alstAllLines, 
-   std::vector<std::string>& rlstIOLines,
-   std::vector<std::string>& rlstPreprocessingLines)
+   vector<string> alstAllLines, 
+   vector<string>& rlstIOLines,
+   vector<string>& rlstPreprocessingLines)
 {
-   /*
-   std::vector<std::string> lstRetVal;
-   std::vector<std::string> lstPreprocessLines;
-   std::vector<std::string>::iterator iter_Lines = alstAllLines.begin();
-   std::string szDefKey(Config::CollectionDefinitionKey);
+   vector<string> lstRetVal;
+   vector<string> lstPreprocessLines;
+
+   string szDefKey(Config::CollectionDefinitionKey);
+
+   vector<string>::iterator iter_Lines = alstAllLines.begin();
    for (; iter_Lines != alstAllLines.end(); ++iter_Lines)
    {
       if (iter_Lines->size() > 2 &&
@@ -50,362 +51,351 @@ CollectionIO::GetPreprocessLines(
 
    rlstPreprocessingLines = lstPreprocessLines;
    rlstIOLines = lstRetVal;
-   */
+   
    return true;
 }
 
-// Captures all copyitems in rlstAdditionalItems not in rlstAlreadyCapturedItems
+// Captures all copyitems in local to the input address,
+// not in rlstAlreadyCapturedItems. Puts the captured copyitems
+// in rlstAdditionalItems.
 bool
 CollectionIO::CaptureUnlistedItems(
    Address aAddrColID,
    CollectionSource* aptCollectionSource,
-   std::map<int, std::list<CopyItem*>>& rlstAdditionalItems,
-   std::map<int, std::list<CopyItem*>>& rlstAlreadyCapturedItems)
+   map<int, list<CopyItem*>>& rlstAdditionalItems,
+   map<int, list<CopyItem*>>& rlstAlreadyCapturedItems)
 {
-   /*
    // Identify already loaded cards in this collection.
-   auto lstAllPossibleCacheItems = aptCollectionSource->
-      GetCollectionCache(aAddrColID);
-   for (size_t i = 0; i < lstAllPossibleCacheItems.size(); i++)
+   auto lstAllPossibleCacheItems = aptCollectionSource->GetCollectionCache(aAddrColID);
+   for( auto iCacheItem : lstAllPossibleCacheItems )
    {
-      TryGet<CollectionItem> itemPrototype = aptCollectionSource->
-         GetCardPrototype(lstAllPossibleCacheItems[i]);
+      // Get all the new copies for this card.
+      auto itemProto = aptCollectionSource->GetCardPrototype(iCacheItem);
+      auto lstLocals = itemProto->FindCopies(aAddrColID, Local);
 
-      auto lstPossibleLocals = itemPrototype->
-         GetCopiesForCollection(aAddrColID, CollectionItemType::Local);
-      for (size_t t = 0; t < lstPossibleLocals.size(); t++)
+      // If there could be an existing copy, verify there isn't. Otherwise just add it.
+      if( rlstAlreadyCapturedItems.find( iCacheItem ) != rlstAlreadyCapturedItems.end() )
       {
-         CopyItem* cItem = lstPossibleLocals[t].get();
-         auto lstListItems = rlstAlreadyCapturedItems[lstAllPossibleCacheItems[i]];
-         auto lstSearchItems = std::vector<CopyItem*>(lstListItems.begin(),
-                                                      lstListItems.end());
-         if (cItem->IsResidentIn(aAddrColID) &&
-            -1 == ListHelper::List_Find(cItem, lstSearchItems))
+         auto lstExistingLocal = rlstAlreadyCapturedItems.at(iCacheItem);
+         for( auto copy : lstLocals )
          {
-            rlstAdditionalItems[lstAllPossibleCacheItems[i]].push_back(cItem);
+            if( ListHelper::List_Find( copy.get(),
+                                       lstExistingLocal.begin(),
+                                       lstExistingLocal.end()    ) == -1 )
+            {
+               rlstAdditionalItems[iCacheItem].push_back(copy.get());
+            }
          }
       }
+      else
+      {
+         for( auto copy : lstLocals )
+         {
+            rlstAdditionalItems[iCacheItem].push_back(copy.get());
+         }
+      }
+
    }
-   */
+
    return true;
 }
 
+// Looks at each element in the two input lists.
+// If there are matching items among them, reduce them to 1.
 bool
 CollectionIO::ConsolodateLocalItems(
    Address aAddrColID,
    CollectionSource* aptCollectionSource,
-   std::map<int, std::list<CopyItem*>>& rlstPotentialDuplicates,
-   std::map<int, std::list<CopyItem*>>& rlstNonDuplicates)
+   map<int, list<CopyItem*>>& rlstPotentialDuplicates,
+   map<int, list<CopyItem*>>& rlstNonDuplicates)
 {
-   /*
-   std::function<std::string(CopyItem*)> fnSimpleExtractor;
-   std::vector<CopyItem*> lstSearchItems;
+   const static function<string(CopyItem*&)> fnSimpleExtractor =
+      [&](CopyItem*& item)->string { return item->GetHash(); };
+   vector<CopyItem*> lstSearchItems;
 
-   fnSimpleExtractor = [&](CopyItem* item)->std::string { return item->GetHash(); };
-
-   for each (std::pair<int, std::list<CopyItem*>> pairItem in rlstPotentialDuplicates)
+   for( auto card : rlstPotentialDuplicates )
    {
-      int iItem = pairItem.first;
-      TryGet<CollectionItem> item = aptCollectionSource->GetCardPrototype(iItem);
-      std::list<CopyItem*> lstNewItems = pairItem.second;
+      int iCard = card.first;
 
-      if (rlstNonDuplicates.find(iItem) != rlstNonDuplicates.end())
+      // Check if this card class exists in nonDups.
+      if( rlstNonDuplicates.find( card.first ) != rlstNonDuplicates.end() )
       {
-         lstSearchItems = std::vector<CopyItem*>(rlstNonDuplicates[iItem].begin(),
-                                                 rlstNonDuplicates[iItem].end());
-         for each (CopyItem* cItem in lstNewItems)
+         auto item = aptCollectionSource->GetCardPrototype( iCard );
+         auto lstNewItems = &card.second;
+
+         auto lstOldItems = &rlstNonDuplicates.at(iCard);
+         lstSearchItems = vector<CopyItem*>(lstOldItems->begin(), lstOldItems->end());
+         for( auto copy : *lstNewItems )
          {
-            int iFound = ListHelper::List_Find(cItem->GetHash(),
-                                               lstSearchItems,
-                                               fnSimpleExtractor);
-            if (-1 != iFound)
+            string szHash = copy->GetHash();
+            int iNewItemIsInOld = ListHelper::List_Find_Non_Const(
+                                                szHash, lstSearchItems,
+                                                fnSimpleExtractor);
+            if (-1 != iNewItemIsInOld)
             {
-               CopyItem* foundItem = lstSearchItems[iFound];
-               rlstNonDuplicates.at(iItem).remove(foundItem);
-               rlstPotentialDuplicates.at(iItem).remove(cItem);
-               item->Erase(cItem);
+               CopyItem* foundItem = lstSearchItems[iNewItemIsInOld];
+               lstOldItems->remove(foundItem);
+               lstNewItems->remove(copy);
+               item->DeleteCopy( foundItem );
             }
          }
       }
    }
-   */
+  
    return true;
 }
 
+// Takes a two lists of copies. If there are copies that have the
+// same UID, check which one has the later modification date.
+// Delete the one with the earlier date.
 bool CollectionIO::RejoinAsyncedLocalItems(
    Address aAddrColID,
    CollectionSource* aptCollectionSource,
    unsigned long aulNewItemTS,
-   std::map<int, std::list<CopyItem*>>& rlstPotentialDuplicates,
-   std::map<int, std::list<CopyItem*>>& rlstNonDuplicates)
+   map<int, list<CopyItem*>>& rlstPotentialDuplicates,
+   map<int, list<CopyItem*>>& rlstNonDuplicates )
 {
-   /*
-   std::function<std::string(CopyItem*)> fnChainIDExtractor;
-   std::vector<CopyItem*> lstSearchItems;
+   const static function<string( CopyItem*& )> fnChainIDExtractor =
+      [&]( CopyItem*& item )->string { return item->GetSession(); };
+   vector<CopyItem*> lstSearchItems;
 
-   fnChainIDExtractor = [&](CopyItem* item)->
-                        std::string { return item->GetMetaTag("__ChainID", Tracking); };
-
-   for each (std::pair<int, std::list<CopyItem*>> pairItem in rlstPotentialDuplicates)
+   for( auto card : rlstPotentialDuplicates )
    {
-      int iItem = pairItem.first;
-      TryGet<CollectionItem> item = aptCollectionSource->GetCardPrototype(iItem);
-      std::list<CopyItem*> lstNewItems = pairItem.second;
+      int iCard = card.first;
 
-      if (rlstNonDuplicates.find(iItem) != rlstNonDuplicates.end())
+      // Check if this card class exists in nonDups.
+      if( rlstNonDuplicates.find( card.first ) != rlstNonDuplicates.end() )
       {
-         lstSearchItems = std::vector<CopyItem*>(rlstNonDuplicates[iItem].begin(),
-                                                 rlstNonDuplicates[iItem].end());
-         for each (CopyItem* cItem in lstNewItems)
-         {
-            int iFound = ListHelper::List_Find(cItem->GetMetaTag("__ChainID", Tracking),
-                                               lstSearchItems,
-                                               fnChainIDExtractor);
-            if (-1 != iFound)
-            {
-               CopyItem* ceItem = lstSearchItems[iFound];
+         auto item = aptCollectionSource->GetCardPrototype( iCard );
+         auto lstNewItems = &card.second;
 
-               std::string szSessionNew = cItem->GetMetaTag("__Session", Tracking);
-               std::string szSessionOld = ceItem->GetMetaTag("__Session", Tracking);
+         auto lstOldItems = &rlstNonDuplicates.at( iCard );
+         lstSearchItems = vector<CopyItem*>( lstOldItems->begin(), lstOldItems->end() );
+         for( auto newCopy : *lstNewItems )
+         {
+            string szUID = newCopy->GetUID();
+            int iFound = ListHelper::List_Find_Non_Const( szUID, lstSearchItems,
+                                                          fnChainIDExtractor );
+            if( -1 != iFound )
+            {
+               CopyItem* oldCopy = lstSearchItems[iFound];
+
+               string szSessionNew = newCopy->GetSession();
+               string szSessionOld = oldCopy->GetSession();
 
                // If there is a match, check the Session to see which one is newer.
-               unsigned long lSessNew = std::stoul(szSessionNew, nullptr, 16);
-               unsigned long lSessOld = std::stoul(szSessionOld, nullptr, 16);
+               unsigned long lSessNew = stoul( szSessionNew, nullptr, 16 );
+               unsigned long lSessOld = stoul( szSessionOld, nullptr, 16 );
 
-               if (lSessNew >= lSessOld)
-               { // Use the new
-                  rlstNonDuplicates.at(iItem).remove(ceItem);
-                  item->Erase(ceItem);
+               if( lSessNew >= lSessOld )
+               { 
+                  // Use the new
+                  // Get all the residents in the old copy.
+                  // These are collections that were loaded before this
+                  // collection and referenced this card.
+                  for( auto resident : oldCopy->GetResidentIn() )
+                  {
+                     newCopy->AddResident(resident);
+                  }
+
+                  lstOldItems->remove( oldCopy );
+                  item->DeleteCopy( oldCopy );
                }
                else
-               { // Use the old
-                  rlstPotentialDuplicates.at(iItem).remove(cItem);
-                  item->Erase(cItem);
+               { 
+                  // Use the old
+                  lstNewItems->remove( newCopy );
+                  item->DeleteCopy( newCopy );
                }
             }
          }
       }
    }
 
-   // Now look for items that this collection may have removed.
-   for each (std::pair<int, std::list<CopyItem*>> pairItem in rlstNonDuplicates)
+   // There should be no cards with matching UIDs left.
+   // If there are cards still in the old list,
+   // they were either 
+   // 1. Removed,
+   // 2. Added without this collection loaded.
+   // The solution to this is to accept the old card
+   // if it has a newer time stamp than when this collection
+   // was last modified. Otherwise, delete the card.
+   //
+   // This doesn't always capture the case that should happen,
+   // Suppose B < A. B is loaded, and item 'a' is removed.
+   // Then, B is unloaded, A is loaded and some modifications
+   // are made to A; A's timestamp is now later than B. 
+   // The next time A and B are both loaded, the item will be
+   // added back to B.
+   for( auto card : rlstNonDuplicates )
    {
-      int iItem = pairItem.first;
-      TryGet<CollectionItem> item = aptCollectionSource->GetCardPrototype(iItem);
-      std::list<CopyItem*> lstExistingItems = pairItem.second;
+      // Check if this card class exists in nonDups.
+      auto item = aptCollectionSource->GetCardPrototype( card.first );
+      auto lstOldItems = &card.second;
 
-      if (rlstPotentialDuplicates.find(iItem) != rlstPotentialDuplicates.end())
+      for( auto oldCopy : *lstOldItems )
       {
-         lstSearchItems = std::vector<CopyItem*>(rlstPotentialDuplicates[iItem].begin(),
-                                                 rlstPotentialDuplicates[iItem].end());
-         for each (CopyItem* cItem in lstExistingItems)
-         {
-            std::string szSessionOld = cItem->GetMetaTag("__Session", Tracking);
+         string szSessionOld = oldCopy->GetSession();
 
-            // If there is a match, check the Session to see which one is newer.
-            unsigned long lSessOld = std::stoul(szSessionOld, nullptr, 16);
+         // If there is a match, check the Session to see which one is newer.
+         unsigned long lSessOld = stoul(szSessionOld, nullptr, 16);
 
-            if (aulNewItemTS >= lSessOld)
-            { // Use the new
-               item->RemoveResidentFromItem(cItem, aAddrColID);
-            }
-            else
-            { 
-               // Do nothing. Keep the item.
-            }
+         // aulNewItemTS is the time that the collection in loading was
+         // last modified. If this collection 
+         if( lSessOld <= aulNewItemTS )
+         { 
+            // Remove the 'old' item.
+            item->RemoveCopy( aAddrColID, oldCopy->GetUID() );
          }
       }
-
    }
-   */
+
    return true;
 }
 
+// Looks for items that this collection claims to have borrowed.
+// If the borrowed from collection exists, make sure the copy
+// still exists, and use that. If the copy no long exists, 
+// delete the copy that we are 'borrowing'. If the
+// collection doesn't exist, look to see of any other loaded
+// collections reference the copy, if so, use that reference
+// and delete the newly created borrowed copy.
 bool
 CollectionIO::ConsolodateBorrowedItems(
    Address aAddrColID,
    CollectionSource* aptCollectionSource,
    CollectionFactory* aptCollFactory)
 {
-   /*
-   TryGet<CollectionItem> itemPrototype;
-   std::string szItemParent;
-   std::string szItemHash;
-   std::vector<std::shared_ptr<CopyItem>> lstBorrowedItems;
-   std::vector<std::shared_ptr<CopyItem>> lstCItems;
-   std::function<std::string(std::shared_ptr<CopyItem>)> fnExtractor;
-
-   std::vector<int> lstCacheIndexes = aptCollectionSource->
-      GetCollectionCache(aAddrColID);
-
    // Used to filter out already used existing copies
-   fnExtractor = [aAddrColID](std::shared_ptr<CopyItem> item)->std::string
-   {
-      if (!item->IsResidentIn(aAddrColID)) { return item->GetHash(); }
-      else { return ""; }
-   };
-
-   for (size_t i = 0; i < lstCacheIndexes.size(); i++)
-   {
-      itemPrototype = aptCollectionSource->
-         GetCardPrototype(lstCacheIndexes[i]);
-      lstBorrowedItems = itemPrototype->
-         GetCopiesForCollection(aAddrColID, CollectionItemType::Borrowed);
-      for (size_t t = 0; t < lstBorrowedItems.size(); t++)
+   const static function<string(const shared_ptr<CopyItem>&)> fnExtractor
+      = [aAddrColID](const shared_ptr<CopyItem>& item)->string
       {
-         szItemParent = lstBorrowedItems[t]->GetParent();
-         szItemHash = lstBorrowedItems[t]->GetHash();
-         // The aoFactory is used to check if the collection is loaded.
-         if (aptCollFactory->CollectionExists(szItemParent)) 
+         if (!item->IsResidentIn(aAddrColID)) { return item->GetUID(); }
+         else { return ""; }
+      };
+
+   string szItemParent;
+   string szUID;
+
+   vector<int> lstCacheIndexes = aptCollectionSource->GetCollectionCache(aAddrColID);
+
+   for( auto iCard : lstCacheIndexes )
+   {
+      auto itemPrototype = aptCollectionSource->GetCardPrototype(iCard);
+
+      // Already created 'borrowed' copies will not show up here because the aAddrColID will
+      // not be referenced in a resident of another copy, unless this collection put it there.
+      // Since this collection did not put itself as a resident anywhere yet, this FindCopies
+      // will only return newly created borrowed items.
+      auto lstBorrowedItems = itemPrototype->FindCopies(aAddrColID, CollectionItemType::Borrowed);
+      for( auto borrowedCopy : lstBorrowedItems )
+      {
+         szItemParent = borrowedCopy->GetParent();
+         szUID = borrowedCopy->GetUID();
+
+         // The aoFactory is used to check if the collection that 
+         // we are borrowing from is loaded.
+         if( aptCollFactory->CollectionExists( szItemParent ) )
          {
-            // This copy is erased either way. These were added as placeholders.
-            itemPrototype->Erase(lstBorrowedItems[t].get());
+            // Erase the borrowed copy if the collection exists.
+            itemPrototype->DeleteCopy(borrowedCopy.get());
 
-            // This list will be checked for any unused
-            // copy that matches this description.
-            lstCItems = itemPrototype->
-               FindAllCopyItems(szItemHash,lstBorrowedItems[t]->GetAddress()); 
+            // LstCopies contains all the copies of the card in the collection
+            // that we borrowed from. Note this is different from below because
+            // the borrowed copy will not show up in this list.
+            auto lstCopies = itemPrototype->FindCopies( borrowedCopy->GetAddress(), 
+                                                        CollectionItemType::Local );
 
-            int iFoundAlreadyUsed = ListHelper::List_Find(szItemHash, 
-                                                          lstCItems,
-                                                          fnExtractor);
-            if (iFoundAlreadyUsed != -1)
+            // Look for a copy with a matching UID that is not already 
+            // resident in this collection.
+            int iUnused = ListHelper::List_Find( szUID, 
+                                                 lstCopies,
+                                                 fnExtractor );
+            if (iUnused != -1)
             {
-               lstCItems[iFoundAlreadyUsed]->AddResident(aAddrColID);
+               lstCopies[iUnused]->AddResident(aAddrColID);
             }
          }
-         else
-         { // Check if any other collection referenced the unverified copy.
-           // Get a list of all other cards that supposedly belong to this collection
-            lstCItems = itemPrototype->
-               GetCopiesForCollection(szItemParent, CollectionItemType::Local);
-
-            int iFoundAlreadyUsed = ListHelper::List_Find(szItemHash,
-                                                          lstCItems,
-                                                          fnExtractor);
-            if (iFoundAlreadyUsed != -1)
+         else // Collection we borrowed from is not loaded.
+         { 
+            // Check if any other collection referenced the unverified copy.
+            // Get a list of all other cards that supposedly belong to this collection
+            auto lstCopies = itemPrototype->FindCopies( borrowedCopy->GetAddress(), 
+                                                        CollectionItemType::Local );
+            
+            // Look for a copy with a matching UID that is not already 
+            // resident in this collection.
+            int iUnused = ListHelper::List_Find( szUID,
+                                                 lstCopies,
+                                                 fnExtractor );
+            if( iUnused != -1 )
             {
-               itemPrototype->Erase(lstBorrowedItems[t].get());
-               lstCItems[iFoundAlreadyUsed]->AddResident(aAddrColID);
+               itemPrototype->DeleteCopy(borrowedCopy.get());
+               lstCopies[iUnused]->AddResident(aAddrColID);
             }
          }
       }
    }
-   */
+   
    return true;
 }
 
+// This only be called when we know that all cards in the aAddrColID
+// are there rightfully, and that there are no cards that should exist
+// outside this collection if they reference this collection.
 bool
 CollectionIO::ReleaseUnfoundReferences(
    Address aAddrColID,
    CollectionSource* aptCollectionSource)
 {
-   /*
-   TryGet<CollectionItem> itemPrototype;
-   std::vector<std::shared_ptr<CopyItem>> lstPossibleLocals;
+   const static function<string( shared_ptr<CopyItem>& )> fnChainIDExtractor =
+      [&]( shared_ptr<CopyItem>& item )->string { return item->GetSession(); };
 
-   auto lstAllPossibleCacheItems = aptCollectionSource->
-      GetCollectionCache(aAddrColID);
-   for (size_t i = 0; i < lstAllPossibleCacheItems.size(); i++)
+   auto lstAllCards = aptCollectionSource->GetCollectionCache(aAddrColID);
+   for( auto iCard : lstAllCards )
    {
-      itemPrototype = aptCollectionSource->
-         GetCardPrototype(lstAllPossibleCacheItems[i]);
+      auto card = aptCollectionSource->GetCardPrototype( iCard ).Value();
 
-      // This has to iterate over ALL cards because we
-      // don't know where dangling references are.
-      // Get all copies that claim to be in this collection.
-      lstPossibleLocals = itemPrototype->
-         GetCopiesForCollection(aAddrColID, CollectionItemType::Local);
-
-      for (size_t t = 0; t < lstPossibleLocals.size(); t++)
+      // Get a list of all cards that say this collection is
+      // their location.
+      auto lstLocals = card->FindCopies( aAddrColID, Local );
+      for( auto copy : lstLocals )
       {
-         if (!lstPossibleLocals[t]->IsResidentIn(aAddrColID))
+         if( !copy->IsReferencedBy( aAddrColID ) )
          {
-            // This copy is not already resident in this collection. 
-            // That means that this copy was loaded by a non-child collection.
-            // We must check if that copy truly exists. If not, delete it.
-            std::string szItemHash = lstPossibleLocals[t]->GetHash();
-
-            // Duplicate duplicates because there might be a copy of an existing item.
-            // The second param is empty because we want ALL items with a matching hash.
-            auto lstDuplicateDuplicates = itemPrototype->FindAllCopyItems(szItemHash);
-
-            // If there is more than one, count the number that were just 
-            // added to this col, then try to find matching existing ones for each.
-            // Make sure that we account for the fact that other collections
-            // can borrow up to the amount in this col.
-            std::map<std::string, std::vector<std::shared_ptr<CopyItem>>> mapColExistingItems;
-            std::vector<std::shared_ptr<CopyItem>> lstNewlyAddedItems;
-            for (size_t q = 0; q < lstDuplicateDuplicates.size(); q++)
-            {
-               if (lstDuplicateDuplicates[q]->IsResidentIn(aAddrColID))
-               {
-                  lstNewlyAddedItems.push_back(lstDuplicateDuplicates[q]);
-               }
-               else
-               {
-                  std::string szTargetCol = lstDuplicateDuplicates[q]->GetParent();
-                  mapColExistingItems[szTargetCol].push_back(lstDuplicateDuplicates[q]);
-               }
-            }
-
-            // Now go through each collection and account for each one.
-            std::map<std::string, std::vector<std::shared_ptr<CopyItem>>>::iterator iter_existingCol;
-            for (iter_existingCol = mapColExistingItems.begin();
-                 iter_existingCol != mapColExistingItems.end();
-                 ++iter_existingCol)
-            {
-               std::vector<std::shared_ptr<CopyItem>>::iterator iter_existingColItem;
-               int q = 0;
-               for (iter_existingColItem = iter_existingCol->second.begin();
-                    ( iter_existingColItem != iter_existingCol->second.end() &&
-                      lstNewlyAddedItems.size() > q ); 
-                    ++iter_existingColItem, q++)
-               {
-                  lstNewlyAddedItems[q]->AddResident(iter_existingCol->first);
-                  itemPrototype->Erase(iter_existingColItem->get());
-               }
-
-               // Delete the items unaccounted for.
-               for (;( q >= lstNewlyAddedItems.size() &&
-                       iter_existingColItem != iter_existingCol->second.end() );
-                     ++iter_existingColItem, q++)
-               {
-                  itemPrototype->Erase(iter_existingColItem->get());
-               }
-            }
+            card->DeleteCopy( copy.get() );
          }
       }
    }
-   */
+
    return true;
 }
 
-bool CollectionIO::CollectionFileExists(std::string aszFileName)
+bool CollectionIO::CollectionFileExists(string aszFileName)
 {
-   std::string szFullFileName = GetCollectionFile(aszFileName);
-   std::ifstream f(szFullFileName.c_str());
+   string szFullFileName = GetCollectionFile(aszFileName);
+   ifstream f(szFullFileName.c_str());
    return f.good();
 }
 
-std::string CollectionIO::GetCollectionFile(std::string aszCollectionName)
+string CollectionIO::GetCollectionFile(string aszCollectionName)
 {
    return Config::Instance()->GetCollectionsDirectory() + "\\" +
       StringHelper::Str_Replace(aszCollectionName, ' ', '_') + ".txt";
 }
 
-std::string CollectionIO::GetMetaFile(std::string aszCollectionName)
+string CollectionIO::GetMetaFile(string aszCollectionName)
 {
    return Config::Instance()->GetCollectionsDirectory() + "\\" + 
       Config::Instance()->GetMetaFolderName() + "\\" +
       StringHelper::Str_Replace(aszCollectionName, ' ', '_') + "." + 
-      std::string(Config::MetaFileExtension) + ".txt";
+      string(Config::MetaFileExtension) + ".txt";
 }
 
-std::string CollectionIO::GetHistoryFile(std::string aszCollectionName)
+string CollectionIO::GetHistoryFile(string aszCollectionName)
 {
    return Config::Instance()->GetCollectionsDirectory() + "\\" +
       Config::Instance()->GetHistoryFolderName() + "\\" +
       StringHelper::Str_Replace(aszCollectionName, ' ', '_') + "." + 
-      std::string(Config::HistoryFileExtension) + ".txt";
+      string(Config::HistoryFileExtension) + ".txt";
 }

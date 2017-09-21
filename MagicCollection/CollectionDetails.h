@@ -30,6 +30,7 @@ private:
    std::string m_szFileName;
    unsigned long m_ulTimeStamp;
    unsigned int m_iChildrenCount;
+   // The address of a collection is always a location. ie. only has 1 subaddr.
    Address* m_ptrAddress;
 };
 

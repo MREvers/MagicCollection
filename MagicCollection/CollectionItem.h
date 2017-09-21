@@ -17,6 +17,12 @@ enum CollectionItemType : int
    All = 0xF
 };
 
+enum FindType : int
+{
+   UID = 0x1,
+   Hash = 0x2
+};
+
 class CollectionItem
 {
 public:
@@ -50,15 +56,20 @@ public:
                                       const std::vector<Tag>& alstAttrTags,
                                       const std::vector<Tag>& alstMetaTags );
 
+   bool RemoveCopy( const Address& aAddrColID,
+                    const std::string aszUniqueID );
+
    std::string GenerateHash( const Address& aAddrIdentifier,
                              const std::vector<Tag>& alstAttrs,
-                             const std::vector<Tag>& alstMetaTags );
+                             const std::vector<Tag>& alstMetaTags ) const;
 
    // Deletes an item from the list of copies.
    void DeleteCopy( const std::string& aszUniqueHash );
 
-   TryGet<std::shared_ptr<CopyItem>> FindCopy( const std::string& aszUniqueHash ) const;
-   std::vector<std::shared_ptr<CopyItem>> FindCopies( const Address& aCollection, CollectionItemType aSearchType ) const;
+   TryGetCopy<std::shared_ptr<CopyItem>> FindCopy( const std::string& aszUniqueHash, 
+                                                   FindType aiType = UID ) const;
+   std::vector<std::shared_ptr<CopyItem>> FindCopies( const Address& aCollection,
+                                                      CollectionItemType aSearchType ) const;
 
    std::string GetName() const;
    std::string GetProtoType() const;
@@ -90,6 +101,7 @@ private:
                          const std::vector<Tag>& alstMetaTags = std::vector<Tag>() ) const;
 
    void setCopyPairAttrs( CopyItem* aptItem, const std::string& aszKey, int iVal ) const;
+
 // Static interface
 //
 public:
@@ -102,5 +114,8 @@ public:
                                   const std::vector<Tag>& alstAttrs    = std::vector<Tag>(),
                                   const std::vector<Tag>& alstMetaTags = std::vector<Tag>(), 
                                   const Address& aAddrCompareID        = Address() );
+
+private:
+   static bool isNameChar( const char& c );
 };
 

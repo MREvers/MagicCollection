@@ -134,11 +134,6 @@ CollectionFactory::getNextChildName(std::string aszParentID)
       iID = std::stoi(lstUIandPF[1]);
    }
 
-   // To name a child from set UI-C, where C is a composite of 
-   //  primes, P_k * P_k-r1 * P_k-r2 ..., take the largest prime in
-   //  C, and find the nth following prime, where n is the number of
-   //  existing children. i.e. Take P_k if there are no children yet.
-   //  Then get C2 = P_k+n * P_k * P_k-r1 * P_k-r2 .... Then use UI -C2
    int iPrimeIndex = 0;
 
    // Find the largest prime number divisor

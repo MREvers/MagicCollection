@@ -28,6 +28,9 @@
     <Filter Include="Collection\Actions">
       <UniqueIdentifier>{f11d3764-3842-471e-bc1c-7b7cac0a26ba}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Tests">
+      <UniqueIdentifier>{8fef9b49-736c-472c-aa76-4f74eb5c551d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -138,6 +141,12 @@
     <ClCompile Include="AddFromAction.cpp">
       <Filter>Collection\Actions</Filter>
     </ClCompile>
+    <ClCompile Include="TestClass.cpp">
+      <Filter>Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="AddressTest.cpp">
+      <Filter>Tests</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="JSONImporter.h">
@@ -244,6 +253,12 @@
     </ClInclude>
     <ClInclude Include="AddFromAction.h">
       <Filter>Collection\Actions</Filter>
+    </ClInclude>
+    <ClInclude Include="TestClass.h">
+      <Filter>Tests</Filter>
+    </ClInclude>
+    <ClInclude Include="AddressTest.h">
+      <Filter>Tests</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

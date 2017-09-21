@@ -43,23 +43,18 @@ void CollectionSource::LoadLib(std::string aszFileName)
    // With the xml example above this is the <document/> node
    xml_node<>* xmlNode_Cards = xmlNode_CardDatabase->first_node("cards");
    xml_node<>* xmlNode_Card = xmlNode_Cards->first_node();
-   std::string szNameKeyCode = config->GetKeyCode("name");
    while (xmlNode_Card != 0)
    {
       xml_node<> *xmlNode_CardAttribute = xmlNode_Card->first_node();
-      xml_node<> *xmlNode_CardName = xmlNode_Card->first_node("name");
 
       m_lstCardBuffer.push_back(SourceObject(m_iAllCharBuffSize));
       SourceObject* sO = &m_lstCardBuffer.back();
-
-      m_iAllCharBuffSize += sO->AddAttribute( szNameKeyCode, xmlNode_CardName->value(),
-                                              m_AllCharBuff, m_iAllCharBuffSize );
 
       while (xmlNode_CardAttribute != 0)
       {
          std::string szCardKey = xmlNode_CardAttribute->name();
          std::string keyCode = config->GetKeyCode(szCardKey);
-         if (keyCode != "" && keyCode != szNameKeyCode)
+         if( keyCode != "" )
          {
             m_iAllCharBuffSize += sO->AddAttribute( keyCode, xmlNode_CardAttribute->value(),
                                                     m_AllCharBuff, m_iAllCharBuffSize );
@@ -212,10 +207,10 @@ CollectionSource::GetCollectionCache(Address aAddrColID, CollectionItemType aCol
 
    for (size_t i = 0; i < m_lstoCardCache.size(); i++)
    {
-   /*   if (m_lstoCardCache[i].GetCopiesForCollection(aAddrColID, aColItemType).size() > 0)
+      if (m_lstoCardCache[i].FindCopies(aAddrColID, aColItemType).size() > 0)
       {
          lstRetVal.push_back(i);
-      }*/
+      }
    }
 
    return lstRetVal;
@@ -226,21 +221,22 @@ CollectionSource::GetCollection(Address aAddrColID, CollectionItemType aColItemT
 {
    std::vector<std::shared_ptr<CopyItem>> lstRetVal;
 
-   for (size_t i = 0; i < m_lstoCardCache.size(); i++)
+   for( auto item : m_lstoCardCache )
    {
-      /*std::vector<std::shared_ptr<CopyItem>> lstCopies = m_lstoCardCache[i].GetCopiesForCollection(aAddrColID, aColItemType);
+      auto lstCopies = item.FindCopies(aAddrColID, aColItemType);
 
-      std::vector<std::shared_ptr<CopyItem>>::iterator iter_Copy = lstCopies.begin();
+      auto iter_Copy = lstCopies.begin();
       for (; iter_Copy != lstCopies.end(); ++iter_Copy)
       {
          lstRetVal.push_back(*iter_Copy);
-      }*/
+      }
    }
 
    return lstRetVal;
 }
 
-std::vector<std::string> CollectionSource::GetAllCardsStartingWith(std::string aszText)
+std::vector<std::string>
+CollectionSource::GetAllCardsStartingWith(std::string aszText)
 {
    std::vector<std::string> lstCards;
 

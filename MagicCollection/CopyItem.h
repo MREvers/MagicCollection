@@ -27,6 +27,7 @@ public:
    ~CopyItem();
 
    std::string GetHash();
+   std::string GetSession() const;
    Address GetAddress() const;
    std::string GetUID() const;
 
@@ -35,8 +36,9 @@ public:
    std::string GetParent() const;
 
    void AddResident(const Address& aAddrAddress);
-   void RemoveResident(const Address& aAddrAddress);
-   bool IsResidentIn(const Address& aAddrAddress) const;
+   int RemoveResident(const Address& aAddrAddress);
+   bool IsResidentIn( const Address& aAddrAddress ) const;
+   bool IsReferencedBy( const Address& aAddrAddress ) const;
    std::vector<Address> GetResidentIn() const;
 
    void SetMetaTag( const std::string& aszKey,

@@ -7,6 +7,7 @@ typedef std::pair<std::string, std::string> Tag;
 
 class Address;
 class Collection;
+class CopyItem;
 class CollectionSource;
 
 /* TransactionManager
@@ -30,7 +31,7 @@ public:
    Collection* GetCollection();
    CollectionSource* GetSource();
 
-   void Add(
+   CopyItem* Add(
       std::string aszName, 
       std::vector<Tag> alstAttrs, 
       std::vector<Tag> alstMetaTags);

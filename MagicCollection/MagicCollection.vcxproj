@@ -157,6 +157,7 @@
     <ClCompile Include="AddAction.cpp" />
     <ClCompile Include="AddFromAction.cpp" />
     <ClCompile Include="Addresser.cpp" />
+    <ClCompile Include="AddressTest.cpp" />
     <ClCompile Include="ChangeAction.cpp" />
     <ClCompile Include="CollectionDeltaClass.cpp" />
     <ClCompile Include="CollectionDetails.cpp" />
@@ -187,6 +188,7 @@
     <ClCompile Include="SourceObject.cpp" />
     <ClCompile Include="StoreFrontBackEnd.cpp" />
     <ClCompile Include="StringHelper.cpp" />
+    <ClCompile Include="TestClass.cpp" />
     <ClCompile Include="TraitItem.cpp" />
     <ClCompile Include="Transaction.cpp" />
     <ClCompile Include="TransactionManager.cpp" />
@@ -196,6 +198,7 @@
     <ClInclude Include="AddAction.h" />
     <ClInclude Include="AddFromAction.h" />
     <ClInclude Include="Addresser.h" />
+    <ClInclude Include="AddressTest.h" />
     <ClInclude Include="ChangeAction.h" />
     <ClInclude Include="CollectionDeltaClass.h" />
     <ClInclude Include="CollectionDetails.h" />
@@ -223,6 +226,7 @@
     <ClInclude Include="SourceObject.h" />
     <ClInclude Include="StoreFrontBackEnd.h" />
     <ClInclude Include="StringHelper.h" />
+    <ClInclude Include="TestClass.h" />
     <ClInclude Include="TraitItem.h" />
     <ClInclude Include="Transaction.h" />
     <ClInclude Include="TransactionManager.h" />
