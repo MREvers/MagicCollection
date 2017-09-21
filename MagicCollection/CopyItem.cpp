@@ -40,6 +40,7 @@ CopyItem::CopyItem( const Address& aAddrParentIdentifier,
    }
 }
 
+// Returns the hash. Hashes on parent, PUBLIC (so not the parent TAG) metatags, and the idattrs.
 string CopyItem::GetHash()
 {
    function<string(const MetaTag&)> fnExtractor = GetMetaTagKeyViewer();
@@ -103,6 +104,7 @@ bool CopyItem::IsParent(const Address& aAddrParent) const
    return m_Address.IsResidentIn(aAddrParent);
 }
 
+// Sets the parent address AND adds it to residents
 void CopyItem::SetParent( const Address& aAddrTestAddress )
 {
    string szParent = aAddrTestAddress.GetFullAddress();
@@ -126,9 +128,9 @@ void CopyItem::AddResident(const Address& aAddrAddress)
    addr.InceptLocation( m_Address, aAddrAddress );
 
    bool AddedToRef = false;
-   for( auto reference : m_lstResidentIn )
+   for( int i = 0; i < m_lstResidentIn.size(); i++ )
    {
-      AddedToRef |= addr.InceptLocation( reference, aAddrAddress );
+      AddedToRef |= addr.InceptLocation( m_lstResidentIn[i], aAddrAddress );
    }
 
    if( !AddedToRef )
@@ -187,6 +189,7 @@ bool CopyItem::IsResidentIn(const Address& aAddrTest) const
    return isResident;
 }
 
+// Returns true if any resident references the input location.
 bool CopyItem::IsReferencedBy(const Address& aAddrTest) const
 {
    Addresser addr;
@@ -209,6 +212,8 @@ CopyItem* CopyItem::CreateCopyItem( CollectionItem const* aoConstructor,
                                     const std::vector<Tag>& alstMetaTags )
 {
    CopyItem* newCopy = new CopyItem( aAddrParentIdentifier, alstMetaTags );
+
+   aoConstructor->SetIdentifyingTraitDefaults(newCopy);
 
    for( auto IDTag : alstIDAttrs )
    {
@@ -254,6 +259,18 @@ std::string CopyItem::GetHashKey()
 std::string CopyItem::GetAddressKey()
 {
    return "Address";
+}
+
+std::string 
+CopyItem::MakeIgnoredTag( const std::string aszTag )
+{
+   return Config::IgnoredTagId + aszTag;
+}
+
+std::string 
+CopyItem::MakeTrackingTag( const std::string aszTag )
+{
+   return Config::TrackingTagId + aszTag;
 }
 
 void 
@@ -395,7 +412,15 @@ CopyItem::setMetaTag( const std::string& aszKey,
    }
    else if (m_lstMetaTags[iFound].CanView(atagType))
    {
-      m_lstMetaTags[iFound].SetVal(aszVal);
+      // Delete the tag if the value is empty.
+      if( aszVal == "" )
+      {
+         m_lstMetaTags.erase(m_lstMetaTags.begin() + iFound);
+      }
+      else
+      {
+         m_lstMetaTags[iFound].SetVal(aszVal);
+      }
    }
    m_bNeedHash = true;
 }

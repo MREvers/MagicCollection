@@ -1,5 +1,6 @@
 #pragma once
 
+// Tests Address and Addresser class.
 class AddressTest
 {
 public:

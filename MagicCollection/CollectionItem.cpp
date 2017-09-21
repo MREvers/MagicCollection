@@ -218,24 +218,21 @@ CollectionItem::SetIdentifyingTrait( CopyItem* aptItem,
    setCopyPairAttrs( aptItem, aszTraitKey, iFound );
 }
 
+void 
+CollectionItem::SetIdentifyingTraitDefaults( CopyItem* aptItem ) const
+{
+   // Include default values for IDAttrs NOT specified.
+   for( auto IDAttrs : m_lstIdentifyingTraits )
+   {
+      SetIdentifyingTrait( aptItem, IDAttrs.GetKeyName(), IDAttrs.GetDefaultValue() );
+   }
+}
+
 CopyItem* 
 CollectionItem::createCopy( const Address& aAddrColID,
                             const vector<Tag>& alstAttrs,
                             const vector<Tag>& alstMetaTags ) const
 {
-   vector<Tag> lstAttrs = alstAttrs;
-   auto fnExtractor = Config::Instance()->GetTagHelper( Value );
-
-   // Include default values for IDAttrs NOT specified.
-   for( auto IDAttrs : m_lstIdentifyingTraits )
-   {
-      string szDefault = IDAttrs.GetDefaultValue();
-      if( ListHelper::List_Find( szDefault, alstAttrs, fnExtractor ) == -1 )
-      {
-         lstAttrs.push_back( make_pair(IDAttrs.GetKeyName(), szDefault) );
-      }
-   }
-
    return CopyItem::CreateCopyItem( this, aAddrColID, alstAttrs, alstMetaTags );
 }
 

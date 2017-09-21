@@ -147,6 +147,10 @@
     <ClCompile Include="AddressTest.cpp">
       <Filter>Tests</Filter>
     </ClCompile>
+    <ClCompile Include="CopyTest.cpp">
+      <Filter>Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="CollectionItemTest.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="JSONImporter.h">
@@ -260,5 +264,9 @@
     <ClInclude Include="AddressTest.h">
       <Filter>Tests</Filter>
     </ClInclude>
+    <ClInclude Include="CopyTest.h">
+      <Filter>Tests</Filter>
+    </ClInclude>
+    <ClInclude Include="CollectionItemTest.h" />
   </ItemGroup>
 </Project>

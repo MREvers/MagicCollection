@@ -38,7 +38,7 @@ public:
    bool DoesAddressIncludeLocation( const Address& aAddress,
                                     const Address& aTestLocation,
                                     Address& rAddrIn );
-
+  
    bool PitheLocation(Address& aAddress, const Address& aPitheLocation);
    bool InceptLocation(Address& aAddress, const Address& aNewLocation);
 

@@ -88,7 +88,9 @@ public:
    // Returns true if the value is valid.
    bool SetIdentifyingTrait( CopyItem* aptItem,
                              const std::string& aszTraitKey,
-                             const std::string& aszTraitValue) const;
+                             const std::string& aszTraitValue ) const;
+   void SetIdentifyingTraitDefaults( CopyItem* aptItem ) const;
+
    void DeleteCopy( CopyItem* aptItem );
    std::string CopyToString( CopyItem const* aptItem, 
                              const MetaTagType& aAccessType = MetaTagType::Public,

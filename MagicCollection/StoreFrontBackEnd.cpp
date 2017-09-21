@@ -1,15 +1,41 @@
 #include "StoreFrontBackEnd.h"
 #include "AddressTest.h"
+#include "CopyTest.h"
 
 CStoreFrontBackEnd::CStoreFrontBackEnd()
 {
    bool bTest = true;
+   CopyTest ct;
+   bTest &= ct.CreateCopy_Test();
+   bTest &= ct.SetMetaTag_Test();
+   bTest &= ct.Hash_Test();
+   bTest &= ct.SetParent_Test();
+   bTest &= ct.AddResident_InParent_AlreadyDesignated_Test();
+   bTest &= ct.AddResident_InParent_ExistingChain_NotDesignatedByParentChain_Test();
+   bTest &= ct.AddResident_InParent_NewChain_NotDesignatedByParentChain_Test();
+   bTest &= ct.AddResident_InResidentNotParent_AlreadyDesignated_Test();
+   bTest &= ct.AddResident_InResidentNotParent_ExistingChain_NotDesignated_Test();
+   bTest &= ct.AddResident_InResidentNotParent_NewChain_NotDesignated_Test();
+   bTest &= ct.ResidentIn_ChainOfParent_Test();
+   bTest &= ct.ResidentIn_NotParent_AddedResident_Test();
+   bTest &= ct.ResidentIn_NotParent_ChainOfAddedResident_Test();
+   bTest &= ct.ResidentIn_Parent_ParentIsNotResident_Test();
+   bTest &= ct.ResidentIn_Parent_ParentIsResident_Test();
+   bTest &= ct.ResidentIn_ChainOfParent_Test();
+   bTest &= ct.RemoveResident_NotParent_InChainOfResident_EntireChain_Test();
+   bTest &= ct.RemoveResident_NotParent_InChainOfResident_NotEntireChain_Test();
+   bTest &= ct.RemoveResident_NotParent_NotInChainOfResident_Test();
+   bTest &= ct.RemoveResident_Parent_InChainOfParent_EntireChain();
+   bTest &= ct.RemoveResident_Parent_InChainOfParent_NotEntireChain();
+   bTest &= ct.IsParent_Test();
+
    AddressTest at;
-   bTest |= at.InceptLocationTest();
-   bTest |= at.IsResidentInTest();
-   bTest |= at.ParseTestManySub();
-   bTest |= at.ParseTestSingle();
-   bTest |= at.PitheLocationTest();
+   bTest &= at.InceptLocationTest();
+   bTest &= at.IsResidentInTest();
+   bTest &= at.ParseTestManySub();
+   bTest &= at.ParseTestSingle();
+   bTest &= at.PitheLocationTest();
+
    // No Server for now
    m_ColSource = new CollectionSource();
    m_ColSource->LoadLib(Config::Instance()->GetSourceFile());

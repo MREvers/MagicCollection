@@ -38,7 +38,7 @@ AddressTest::ParseTestManySub()
    bResult &= parseAddr.Main == "IDTest";
    bResult &= parseAddr.SubAddresses.size() == 2 && 
               parseAddr.SubAddresses[0] == 2 &&
-              parseAddr.SubAddresses[0] == 15;
+              parseAddr.SubAddresses[1] == 15;
 
    return bResult;
 }

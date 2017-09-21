@@ -164,11 +164,13 @@
     <ClCompile Include="CollectionFactory.cpp" />
     <ClCompile Include="CollectionIO.cpp" />
     <ClCompile Include="CollectionItem.cpp" />
+    <ClCompile Include="CollectionItemTest.cpp" />
     <ClCompile Include="CollectionSource.cpp" />
     <ClCompile Include="CollectionTracker.cpp" />
     <ClCompile Include="Config.cpp" />
     <ClCompile Include="CopyItem.cpp" />
     <ClCompile Include="Collection.cpp" />
+    <ClCompile Include="CopyTest.cpp" />
     <ClCompile Include="jsoncpp.cpp" />
     <ClCompile Include="JSONImporter.cpp">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MaxSpeed</Optimization>
@@ -205,11 +207,13 @@
     <ClInclude Include="CollectionFactory.h" />
     <ClInclude Include="CollectionIO.h" />
     <ClInclude Include="CollectionItem.h" />
+    <ClInclude Include="CollectionItemTest.h" />
     <ClInclude Include="CollectionSource.h" />
     <ClInclude Include="CollectionTracker.h" />
     <ClInclude Include="Config.h" />
     <ClInclude Include="CopyItem.h" />
     <ClInclude Include="Collection.h" />
+    <ClInclude Include="CopyTest.h" />
     <ClInclude Include="JSONImporter.h" />
     <ClInclude Include="ListHelper.h" />
     <ClInclude Include="MD5.h" />

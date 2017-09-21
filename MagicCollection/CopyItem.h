@@ -85,6 +85,8 @@ public:
    static std::string GetSessionKey();
    static std::string GetHashKey();
    static std::string GetAddressKey();
+   static std::string MakeIgnoredTag(const std::string aszTag);
+   static std::string MakeTrackingTag(const std::string aszTag);
 
    static std::function<std::string(const MetaTag&)> GetMetaTagValueViewer(MetaTagType atagType);
    static std::function<std::string(const MetaTag&)> GetMetaTagKeyViewer();
