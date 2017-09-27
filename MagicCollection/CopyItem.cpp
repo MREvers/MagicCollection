@@ -137,8 +137,8 @@ void CopyItem::AddResident(const Identifier& aAddrAddress)
    bool AddedToRef = false;
    for( int i = 0; i < m_lstResidentIn.size(); i++ )
    {
-      auto address = m_lstResidentIn.at(i);
-      AddedToRef |= address.MergeIdentifier( aAddrAddress );
+      auto address = &m_lstResidentIn[i];
+      AddedToRef |= address->MergeIdentifier( aAddrAddress );
    }
 
    if( !AddedToRef )

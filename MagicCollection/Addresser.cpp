@@ -154,19 +154,16 @@ Identifier::parseIdName( const string& aszID )
    m_szMain = lstUIandPF[0];
 
    // Add the parsed subAddresses
-   m_veciSubAddresses.push_back(1);
-   if( lstUIandPF.size() == 2 )
+   lstUIandPF.push_back("1");
+   lstSubAddresses = StringHelper::Str_Split(lstUIandPF[1], string(","));
+   size_t iSAC = lstSubAddresses.size();
+   for (size_t i = 0; i < iSAC; i++)
    {
-      lstSubAddresses = StringHelper::Str_Split(lstUIandPF[1], string(","));
-      size_t iSAC = lstSubAddresses.size();
-      for (size_t i = 0; i < iSAC; i++)
+      szSubAddress = lstSubAddresses[i];
+      iSubAddress = stoi(szSubAddress, &iNumChars);
+      if (iNumChars > 0)
       {
-         szSubAddress = lstSubAddresses[i];
-         iSubAddress = stoi(szSubAddress, &iNumChars);
-         if (iNumChars > 0)
-         {
-            addSubAddress(m_veciSubAddresses, iSubAddress);
-         }
+         addSubAddress(m_veciSubAddresses, iSubAddress);
       }
    }
 }
@@ -204,15 +201,16 @@ Identifier::addSubAddress(vector<unsigned int>& avecSAs, unsigned int aiSA)
    // Add the sub address in an ordered manner.
    if( iAdded == 0 )
    {
+      int iCmp = 0;
       auto iter = avecSAs.begin();
       for(; iter != avecSAs.end(); ++iter)
       {
-         int iCmp = compareSubAddress(aiSA, *iter);
+         iCmp = compareSubAddress(aiSA, *iter);
          if (iCmp <= 0) { break; }
       }
    
-      if( ( iter  == avecSAs.begin() ) || 
-          ( *iter != aiSA            ) )
+      if( ( iter == avecSAs.begin() ) || 
+          ( iCmp != 0               ) )
       {
          avecSAs.insert(iter, aiSA);
       }
@@ -456,14 +454,15 @@ Address::ExtractIdentifier( const Identifier& aID )
 {
    if( GetMain() != aID.GetMain() ){ return false; }
 
+   bool bResult = false;
    // This tries to remove all the addresses,
    // regardless of whether they are present or not.
    for( auto iSub : aID.GetAddresses() )
    {
-      RemoveSubAddress(iSub);
+      bResult |= RemoveSubAddress(iSub) != 0;
    }
 
-   return true;
+   return bResult;
 }
 
 Location::Location()
