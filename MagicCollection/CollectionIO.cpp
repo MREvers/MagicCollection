@@ -55,12 +55,12 @@ CollectionIO::GetPreprocessLines(
    return true;
 }
 
-// Captures all copyitems in local to the input address,
+// Captures all copyitems in local to the input Location,
 // not in rlstAlreadyCapturedItems. Puts the captured copyitems
 // in rlstAdditionalItems.
 bool
 CollectionIO::CaptureUnlistedItems(
-   Address aAddrColID,
+   Location aAddrColID,
    CollectionSource* aptCollectionSource,
    map<int, list<CopyItem*>>& rlstAdditionalItems,
    map<int, list<CopyItem*>>& rlstAlreadyCapturedItems)
@@ -104,7 +104,7 @@ CollectionIO::CaptureUnlistedItems(
 // If there are matching items among them, reduce them to 1.
 bool
 CollectionIO::ConsolodateLocalItems(
-   Address aAddrColID,
+   Location aAddrColID,
    CollectionSource* aptCollectionSource,
    map<int, list<CopyItem*>>& rlstPotentialDuplicates,
    map<int, list<CopyItem*>>& rlstNonDuplicates)
@@ -149,7 +149,7 @@ CollectionIO::ConsolodateLocalItems(
 // same UID, check which one has the later modification date.
 // Delete the one with the earlier date.
 bool CollectionIO::RejoinAsyncedLocalItems(
-   Address aAddrColID,
+   Location aAddrColID,
    CollectionSource* aptCollectionSource,
    unsigned long aulNewItemTS,
    map<int, list<CopyItem*>>& rlstPotentialDuplicates,
@@ -262,7 +262,7 @@ bool CollectionIO::RejoinAsyncedLocalItems(
 // and delete the newly created borrowed copy.
 bool
 CollectionIO::ConsolodateBorrowedItems(
-   Address aAddrColID,
+   Location aAddrColID,
    CollectionSource* aptCollectionSource,
    CollectionFactory* aptCollFactory)
 {
@@ -303,7 +303,7 @@ CollectionIO::ConsolodateBorrowedItems(
             // LstCopies contains all the copies of the card in the collection
             // that we borrowed from. Note this is different from below because
             // the borrowed copy will not show up in this list.
-            auto lstCopies = itemPrototype->FindCopies( borrowedCopy->GetAddress(), 
+            auto lstCopies = itemPrototype->FindCopies( borrowedCopy->GetAddress().BaseLocation(), 
                                                         CollectionItemType::Local );
 
             // Look for a copy with a matching UID that is not already 
@@ -320,7 +320,7 @@ CollectionIO::ConsolodateBorrowedItems(
          { 
             // Check if any other collection referenced the unverified copy.
             // Get a list of all other cards that supposedly belong to this collection
-            auto lstCopies = itemPrototype->FindCopies( borrowedCopy->GetAddress(), 
+            auto lstCopies = itemPrototype->FindCopies( borrowedCopy->GetAddress().BaseLocation(), 
                                                         CollectionItemType::Local );
             
             // Look for a copy with a matching UID that is not already 
@@ -345,7 +345,7 @@ CollectionIO::ConsolodateBorrowedItems(
 // outside this collection if they reference this collection.
 bool
 CollectionIO::ReleaseUnfoundReferences(
-   Address aAddrColID,
+   Location aAddrColID,
    CollectionSource* aptCollectionSource)
 {
    const static function<string( shared_ptr<CopyItem>& )> fnChainIDExtractor =

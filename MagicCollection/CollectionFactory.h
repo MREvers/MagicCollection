@@ -15,9 +15,9 @@ public:
    ~CollectionFactory();
 
    bool CollectionExists(std::string aszCollectionName);
-   bool CollectionExists(const Address& aAddrColID);
+   bool CollectionExists(const Location& aAddrColID);
    TryGet<Collection> GetCollection(std::string aszCollectionName);
-   TryGet<Collection> GetCollection(const Address& aAddrColID);
+   TryGet<Collection> GetCollection(const Location& aAddrColID);
 
    std::string LoadCollectionFromFile(std::string aszColFile);
    std::string CreateNewCollection(std::string aszColName, std::string aszParent = "");

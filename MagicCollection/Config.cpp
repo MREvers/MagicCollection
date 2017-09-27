@@ -145,7 +145,7 @@ std::string Config::GetHexID( unsigned long aulValue )
    
    stream << aulValue;
 
-   return std::string( stream.str().substr(3) );
+   return std::string( stream.str().substr(0, 3) );
 }
 
 bool Config::IsIdentifyingAttributes(std::string aszAttrs)

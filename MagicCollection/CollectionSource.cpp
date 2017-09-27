@@ -165,9 +165,9 @@ CollectionSource::GetCardPrototype(std::string aszCardName)
    return GetCardPrototype(iCacheIndex);
 }
 
-void CollectionSource::NotifyNeedToSync(const Address& aAddrForcedSync)
+void CollectionSource::NotifyNeedToSync(const Location& aAddrForcedSync)
 {
-   std::vector<std::pair<Address, bool>>::iterator iter_SyncCols;
+   std::vector<std::pair<Location, bool>>::iterator iter_SyncCols;
    for ( iter_SyncCols = m_lstSync.begin();
          iter_SyncCols != m_lstSync.end(); 
          ++iter_SyncCols )
@@ -183,10 +183,10 @@ void CollectionSource::NotifyNeedToSync(const Address& aAddrForcedSync)
    }
 }
 
-bool CollectionSource::IsSyncNeeded(const Address& aAddrNeedSync)
+bool CollectionSource::IsSyncNeeded(const Location& aAddrNeedSync)
 {
-   std::function<Address(const std::pair<Address, bool>&)> fnExtractor =
-      [](const std::pair<Address, bool>& pAddrEx)->Address { return pAddrEx.first; };
+   std::function<Location(const std::pair<Location, bool>&)> fnExtractor =
+      [](const std::pair<Location, bool>& pAddrEx)->Location { return pAddrEx.first; };
 
    int iFound = ListHelper::List_Find(aAddrNeedSync, m_lstSync, fnExtractor);
    if (-1 != iFound)
@@ -201,7 +201,7 @@ bool CollectionSource::IsSyncNeeded(const Address& aAddrNeedSync)
 }
 
 std::vector<int>
-CollectionSource::GetCollectionCache(Address aAddrColID, CollectionItemType aColItemType)
+CollectionSource::GetCollectionCache(Location aAddrColID, CollectionItemType aColItemType)
 {
    std::vector<int> lstRetVal;
 
@@ -217,7 +217,7 @@ CollectionSource::GetCollectionCache(Address aAddrColID, CollectionItemType aCol
 }
 
 std::vector<std::shared_ptr<CopyItem>>
-CollectionSource::GetCollection(Address aAddrColID, CollectionItemType aColItemType)
+CollectionSource::GetCollection(Location aAddrColID, CollectionItemType aColItemType)
 {
    std::vector<std::shared_ptr<CopyItem>> lstRetVal;
 

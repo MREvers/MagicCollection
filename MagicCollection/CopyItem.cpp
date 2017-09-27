@@ -7,10 +7,10 @@
 
 using namespace std;
 
-CopyItem::CopyItem( const Address& aAddrParentIdentifier )
+CopyItem::CopyItem( const Identifier& aAddrParentIdentifier )
 {
-   Config* config = Config::Instance();
    Addresser addr;
+   Config* config = Config::Instance();
 
    SetParent(aAddrParentIdentifier);
 
@@ -28,7 +28,7 @@ CopyItem::~CopyItem()
    m_lstMetaTags.clear();
 }
 
-CopyItem::CopyItem( const Address& aAddrParentIdentifier, 
+CopyItem::CopyItem( const Identifier& aAddrParentIdentifier, 
                     const std::vector<Tag>& alstMetaTags )
    : CopyItem(aAddrParentIdentifier)
 {
@@ -99,19 +99,26 @@ Address CopyItem::GetAddress() const
 
 // Returns true if this copy item resides DIRECTLY within the input collection.
 // i.e. A-2 is a parent of this object if this has an address of A-6.
-bool CopyItem::IsParent(const Address& aAddrParent) const
+bool CopyItem::IsParent(const Location& aAddrParent) const
 {
-   return m_Address.IsResidentIn(aAddrParent);
+   // If the location is designated by this copies address,
+   // this copies lies within that location.
+   return aAddrParent.IsResidentIn(m_Address);
 }
 
 // Sets the parent address AND adds it to residents
-void CopyItem::SetParent( const Address& aAddrTestAddress )
+void CopyItem::SetParent( const Identifier& aAddrTestAddress )
 {
    string szParent = aAddrTestAddress.GetFullAddress();
    setParent( szParent );
    setMetaTag( GetAddressKey(), szParent, Public );
    
-   if( !IsReferencedBy( aAddrTestAddress ) )
+   int iFamily = findFamilyMember(aAddrTestAddress);
+   if( iFamily != -1 )
+   {
+      m_lstResidentIn[iFamily] = aAddrTestAddress.ToAddress();
+   }
+   else
    {
       AddResident(aAddrTestAddress);
    }
@@ -121,50 +128,43 @@ void CopyItem::SetParent( const Address& aAddrTestAddress )
 
 // This will detect if the adding 'resident' is a subset of the parent,
 // if so, it will adjust the parent address.
-void CopyItem::AddResident(const Address& aAddrAddress)
+void CopyItem::AddResident(const Identifier& aAddrAddress)
 {
-   Addresser addr;
-   // First check the main address, then try any child address
-   addr.InceptLocation( m_Address, aAddrAddress );
+   m_Address.MergeIdentifier(aAddrAddress);
 
    bool AddedToRef = false;
    for( int i = 0; i < m_lstResidentIn.size(); i++ )
    {
-      AddedToRef |= addr.InceptLocation( m_lstResidentIn[i], aAddrAddress );
+      auto address = m_lstResidentIn.at(i);
+      AddedToRef |= address.MergeIdentifier( aAddrAddress );
    }
 
    if( !AddedToRef )
    {
-      m_lstResidentIn.push_back(aAddrAddress);
+      m_lstResidentIn.push_back(aAddrAddress.ToAddress());
    }
 }
 
 // Returns the number of collection chains this copy is referenced in.
 // Main collection counts as one.
-int CopyItem::RemoveResident(const Address& aAddrAddress)
+int 
+CopyItem::RemoveResident(const Identifier& aAddrAddress)
 {
-   Addresser addr;
-   bool RemovedFromChildCol = addr.PitheLocation(m_Address, aAddrAddress);
+   m_Address.ExtractIdentifier(aAddrAddress);
 
    vector<int> lstRemoveAddrs;
    for( int i = 0; i < m_lstResidentIn.size(); i++ )
    {
-      if( addr.PitheLocation( m_lstResidentIn.at( i ), aAddrAddress ) )
+      if( m_lstResidentIn.at(i).ExtractIdentifier( aAddrAddress ) )
       {
-         if( m_lstResidentIn.at( i ).IsEmpty() )
+         if( m_lstResidentIn.at(i).IsEmpty() )
          {
-            lstRemoveAddrs.push_back(i);
+            m_lstResidentIn.erase( m_lstResidentIn.begin() + i );
          }
          break;
       }
    }
-
-   for( auto iLoc : lstRemoveAddrs )
-   {
-      m_lstResidentIn.erase( m_lstResidentIn.begin() + iLoc );
-   }
  
-
    return ( m_Address.IsEmpty() ? 0 : 1 ) + m_lstResidentIn.size();
 }
 
@@ -175,11 +175,9 @@ std::vector<Address> CopyItem::GetResidentIn() const
 
 // Returns true if this card is located in aAddrTest or if
 // it is referenced in aAddrTest.
-bool CopyItem::IsResidentIn(const Address& aAddrTest) const
+bool CopyItem::IsResidentIn(const Location& aAddrTest) const
 {
-   Addresser addr;
-   Address aDummy;
-   bool isResident = addr.DoesAddressIncludeLocation(m_Address, aAddrTest, aDummy);
+   bool isResident = aAddrTest.IsResidentIn(m_Address);
 
    if( !isResident )
    {
@@ -190,15 +188,13 @@ bool CopyItem::IsResidentIn(const Address& aAddrTest) const
 }
 
 // Returns true if any resident references the input location.
-bool CopyItem::IsReferencedBy(const Address& aAddrTest) const
+bool CopyItem::IsReferencedBy(const Location& aAddrTest) const
 {
-   Addresser addr;
-   Address aDummy;
    bool isResident = false;
 
    for( auto resident : m_lstResidentIn )
    {
-      isResident |= addr.DoesAddressIncludeLocation( resident, aAddrTest, aDummy );
+      isResident |= aAddrTest.IsResidentIn(resident);
       if( isResident ){ break; }
    }
 
@@ -207,7 +203,7 @@ bool CopyItem::IsReferencedBy(const Address& aAddrTest) const
 
 
 CopyItem* CopyItem::CreateCopyItem( CollectionItem const* aoConstructor,
-                                    const Address& aAddrParentIdentifier,
+                                    const Identifier& aAddrParentIdentifier,
                                     const std::vector<Tag>& alstIDAttrs,
                                     const std::vector<Tag>& alstMetaTags )
 {
@@ -423,4 +419,19 @@ CopyItem::setMetaTag( const std::string& aszKey,
       }
    }
    m_bNeedHash = true;
+}
+
+int
+CopyItem::findFamilyMember( const Identifier& aId ) const
+{
+   for( int i = 0; i < 0; i++ )
+   {
+      auto address = m_lstResidentIn.at(i);
+      if( address.GetMain() == aId.GetMain() )
+      {
+         return i;
+      }
+   }
+
+   return -1;
 }

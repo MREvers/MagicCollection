@@ -1,26 +1,6 @@
 #pragma once
-#include<string>
 #include<vector>
-
-class Addresser;
-class Address
-{
-public:
-   std::string Main;
-   std::vector<unsigned int> SubAddresses;
-
-   Address();
-   Address(std::string aszColAddress);
-   Address(std::string aszColBase, unsigned int aiSubAddress);
-
-   std::string GetFullAddress() const;
-   bool IsEmpty() const;
-   bool IsResidentIn( const Address& aLocation,
-                      Address& rMatchChain = Address() ) const;
-
-   bool operator==(const Address& rhs) const;
-   bool operator<(const Address& rhs) const;
-};
+#include<string>
 
 class Addresser
 {
@@ -28,33 +8,83 @@ public:
    Addresser();
    ~Addresser();
 
-   int GetPrimeIndex(unsigned int aiComposite);
-   int GetPrime(unsigned int aiComposite);
-   int GetHighPrimeIndex(unsigned int aiComposite);
-   int GetHighPrime(unsigned int aiComposite);
+   int GetPrime(unsigned int aiPrimeIndex) const;
+   int GetLowPrimeIndex(unsigned int aiComposite) const;
+   int GetLowPrime(unsigned int aiComposite) const;
+   int GetHighPrimeIndex(unsigned int aiComposite) const;
+   int GetHighPrime(unsigned int aiComposite) const;
    
    int GetRandom();
-
-   bool DoesAddressIncludeLocation( const Address& aAddress,
-                                    const Address& aTestLocation,
-                                    Address& rAddrIn );
-  
-   bool PitheLocation(Address& aAddress, const Address& aPitheLocation);
-   bool InceptLocation(Address& aAddress, const Address& aNewLocation);
-
-   void AddSubAddress( Address& aAddress, const Address& aNewLocation );
-   void AddSubAddress( Address& aAddress, unsigned int aNewSub );
-
-public:
+private:
    static const std::vector<int> Primes;
-
-private: 
    static unsigned int ms_iRandom;
-
-   static bool isSuperSet( unsigned int aiSuperSet, 
-                           unsigned int aiSubSet );
-
-   static int compareSubAddress( unsigned int aiSOne,
-                                 unsigned int aiSTwo );
 };
 
+class Address;
+class Identifier
+{
+public:
+   Identifier();
+   Identifier(const std::string& aszId);
+   ~Identifier();
+
+   virtual std::vector<unsigned int> GetAddresses() const = 0;
+
+   std::string GetMain() const;
+   std::string GetFullAddress() const;
+
+   Address ToAddress() const;
+   
+   bool operator==(const Identifier& rhs) const;
+   bool operator<(const Identifier& rhs) const;
+
+protected:
+   std::string m_szMain;
+   std::vector<unsigned int> m_veciSubAddresses;
+
+   void parseIdName(const std::string& aszID);
+   int addSubAddress(std::vector<unsigned int> avecSAs, unsigned int aiSA);
+   bool isSuperSet( unsigned int aiSuper, 
+                    unsigned int aiSub ) const;
+
+private:
+   int compareSubAddress( unsigned int aiSOne,
+                          unsigned int aiSTwo ) const;
+};
+
+class Address : public Identifier
+{
+public:
+   Address();
+   Address(const std::string& aszId);
+   ~Address();
+
+   bool IsEmpty() const;
+   std::vector<unsigned int> GetAddresses() const override;
+
+   bool AddSubAddress(unsigned int aiSub);
+   int RemoveSubAddress(unsigned int aiSub);
+   int SetSubAddress(unsigned int aiAlreadySub, unsigned int aiSub);
+   bool MergeIdentifier(const Identifier& aID);
+   bool ExtractIdentifier(const Identifier& aID);
+private:
+
+};
+
+class Location : public Identifier
+{
+public:
+   Location();
+   Location(const std::string& aszId);
+   Location(const std::string& aszMain, unsigned int aiSA);
+   ~Location();
+
+   bool IsResidentIn(const Address& aAddr) const;
+   std::vector<unsigned int> GetAddresses() const override;
+   unsigned int GetAddress() const;
+
+   Address ToAddress() const;
+
+private:
+   unsigned int m_iAddress;
+};

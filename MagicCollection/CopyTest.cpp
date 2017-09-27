@@ -21,7 +21,7 @@ CopyTest::CreateCopy_Test()
    /****************************************************/
    /*Test 1: Parent Not Overridden Until after creation*/
    /****************************************************/
-   Address testAddr("IDTest-6");
+   Location testAddr("IDTest-6");
    std::vector<Tag> vecAttrs;
    vecAttrs.push_back(make_pair("Collar", "red"));
    std::vector<Tag> vecMeta;
@@ -37,7 +37,7 @@ CopyTest::CreateCopy_Test()
    /*Test 2: Parent Overridden at creation*/
    /***************************************/
    // Perform create with "Parent" overriden in the metatags.
-   Address testAddr2("IDTest2-1");
+   Location testAddr2("IDTest2-1");
    vecMeta.push_back(make_pair(CopyItem::GetAddressKey(),testAddr2.GetFullAddress()));
    vecMeta.push_back(make_pair("test","val"));
    vecMeta.push_back(make_pair("test2","val2"));
@@ -70,7 +70,7 @@ CopyTest::SetMetaTag_Test()
    bool bResult = true;
    CollectionItem testItem = getTestCollectionItem();
 
-   Address testAddr("IDTest-6");
+   Location testAddr("IDTest-6");
    std::vector<Tag> vecAttrs;
    vecAttrs.push_back(make_pair("Collar", "red"));
    std::vector<Tag> vecMeta;
@@ -119,7 +119,7 @@ CopyTest::Hash_Test()
    bool bResult = true;
    CollectionItem testItem = getTestCollectionItem();
 
-   Address testAddr("IDTest-6");
+   Location testAddr("IDTest-6");
    std::vector<Tag> vecAttrs;
    vecAttrs.push_back(make_pair("Collar", "red"));
    std::vector<Tag> vecMeta;
@@ -154,7 +154,7 @@ CopyTest::SetParent_Test()
    bResult &= ptTestCopy->GetResidentIn().size() == 1 &&
               ptTestCopy->GetResidentIn()[0].GetFullAddress() == testAddr.GetFullAddress();
 
-   Address testAddr2("IDTest2-9");
+   Location testAddr2("IDTest2-9");
    ptTestCopy->SetParent(testAddr2);
    bResult &= ptTestCopy->GetParent()==testAddr2.GetFullAddress();
    bResult &= ptTestCopy->GetResidentIn().size() == 2 &&
@@ -169,21 +169,21 @@ CopyTest::IsParent_Test()
 {
    bool bResult = true;
    auto ptTestCopy = getTestCopy();
-   Address testAddr = ptTestCopy->GetAddress();
+   Location testAddr(ptTestCopy->GetAddress().GetFullAddress());
 
    // The parent should be the parent...
    bResult &= ptTestCopy->IsParent(testAddr);
 
    // Check if a superset of the parent is a parent
-   Address testAddr2("IDTest-2");
+   Location testAddr2("IDTest-2");
    bResult &= ptTestCopy->IsParent(testAddr2);
 
    // Check if a subset of the parent is a parent (false)
-   Address testAddr3("IDTest-18");
+   Location testAddr3("IDTest-18");
    bResult &= !ptTestCopy->IsParent(testAddr3);
 
    // Check if a subset of the parent is a parent (false)
-   Address testAddr4("TTTT-6");
+   Location testAddr4("TTTT-6");
    bResult &= !ptTestCopy->IsParent(testAddr4);
 
    return bResult;
@@ -194,7 +194,7 @@ CopyTest::ResidentIn_Parent_ParentIsResident_Test()
 {
    bool bResult = true;
    auto ptTestCopy = getTestCopy();
-   Address parentAddress = ptTestCopy->GetAddress();
+   Location parentAddress(ptTestCopy->GetAddress().GetFullAddress());
 
    // Check we are both referenced by and resident in the parent.
    bResult &= ptTestCopy->IsResidentIn(parentAddress);
@@ -207,7 +207,7 @@ CopyTest::ResidentIn_Parent_ParentIsNotResident_Test()
 {
    bool bResult = true;
    auto ptTestCopy = getTestCopy();
-   Address parentAddress = ptTestCopy->GetAddress();
+   Location parentAddress(ptTestCopy->GetAddress().GetFullAddress());
 
    // Check we are both referenced by and resident in the parent.
    bResult &= ptTestCopy->IsResidentIn(parentAddress);
@@ -221,7 +221,7 @@ CopyTest::ResidentIn_ChainOfParent_Test()
    bool bResult = true;
    auto ptTestCopy = getTestCopy();
 
-   Address chainOfParentAddress("IDTest-2");
+   Location chainOfParentAddress("IDTest-2");
    // Check we are both referenced by and resident in the parent.
    bResult &= ptTestCopy->IsResidentIn(chainOfParentAddress);
    bResult &= ptTestCopy->IsReferencedBy(chainOfParentAddress);
@@ -234,7 +234,7 @@ CopyTest::ResidentIn_NotParent_AddedResident_Test()
    bool bResult = true;
    auto ptTestCopy = getTestCopy();
 
-   Address newResident("ResTest-18");
+   Location newResident("ResTest-18");
    ptTestCopy->AddResident(newResident);
 
    bResult &= ptTestCopy->IsResidentIn(newResident);
@@ -248,10 +248,10 @@ CopyTest::ResidentIn_NotParent_ChainOfAddedResident_Test()
    bool bResult = true;
    auto ptTestCopy = getTestCopy();
 
-   Address newResident("ResTest-18");
+   Location newResident("ResTest-18");
    ptTestCopy->AddResident(newResident);
 
-   Address chainOfNewResident("ResTest-6");
+   Location chainOfNewResident("ResTest-6");
 
    bResult &= ptTestCopy->IsResidentIn(chainOfNewResident);
    bResult &= ptTestCopy->IsReferencedBy(chainOfNewResident);
@@ -266,7 +266,7 @@ CopyTest::AddResident_InParent_AlreadyDesignated_Test()
 
    int iResidentCount, iNewResidentCount;
    iResidentCount = ptTestCopy->GetResidentIn().size();
-   Address alreadyDesignatedByParent("IDTest-2");
+   Location alreadyDesignatedByParent("IDTest-2");
 
    ptTestCopy->AddResident(alreadyDesignatedByParent);
    iNewResidentCount = ptTestCopy->GetResidentIn().size();
@@ -284,7 +284,7 @@ CopyTest::AddResident_InParent_ExistingChain_NotDesignatedByParentChain_Test()
 
    int iResidentCount, iNewResidentCount;
    iResidentCount = ptTestCopy->GetResidentIn().size();
-   Address addressInParentChainNotDesignated("IDTest-18");
+   Location addressInParentChainNotDesignated("IDTest-18");
 
    ptTestCopy->AddResident(addressInParentChainNotDesignated);
    iNewResidentCount = ptTestCopy->GetResidentIn().size();
@@ -302,7 +302,7 @@ CopyTest::AddResident_InParent_NewChain_NotDesignatedByParentChain_Test()
 
    int iResidentCount, iNewResidentCount;
    iResidentCount = ptTestCopy->GetResidentIn().size();
-   Address inParentNewChain("IDTest-3");
+   Location inParentNewChain("IDTest-3");
 
    ptTestCopy->AddResident(inParentNewChain);
    iNewResidentCount = ptTestCopy->GetResidentIn().size();
@@ -318,12 +318,12 @@ CopyTest::AddResident_InResidentNotParent_AlreadyDesignated_Test()
    bool bResult = true;
    auto ptTestCopy = getTestCopy();
 
-   Address residentAddress("ResTest-9");
+   Location residentAddress("ResTest-9");
    ptTestCopy->AddResident(residentAddress);
 
    int iResidentCount, iNewResidentCount;
    iResidentCount = ptTestCopy->GetResidentIn().size();
-   Address alreadyDesignatedByResident("ResTest-3");
+   Location alreadyDesignatedByResident("ResTest-3");
 
    ptTestCopy->AddResident(alreadyDesignatedByResident);
    iNewResidentCount = ptTestCopy->GetResidentIn().size();
@@ -340,12 +340,12 @@ CopyTest::AddResident_InResidentNotParent_ExistingChain_NotDesignated_Test()
    bool bResult = true;
    auto ptTestCopy = getTestCopy();
 
-   Address residentAddress("ResTest-9");
+   Location residentAddress("ResTest-9");
    ptTestCopy->AddResident(residentAddress);
 
    int iResidentCount, iNewResidentCount;
    iResidentCount = ptTestCopy->GetResidentIn().size();
-   Address inExistingResidentChain("ResTest-27");
+   Location inExistingResidentChain("ResTest-27");
 
    ptTestCopy->AddResident(inExistingResidentChain);
    iNewResidentCount = ptTestCopy->GetResidentIn().size();
@@ -362,12 +362,12 @@ CopyTest::AddResident_InResidentNotParent_NewChain_NotDesignated_Test()
    bool bResult = true;
    auto ptTestCopy = getTestCopy();
 
-   Address residentAddress("ResTest-9");
+   Location residentAddress("ResTest-9");
    ptTestCopy->AddResident(residentAddress);
 
    int iResidentCount, iNewResidentCount;
    iResidentCount = ptTestCopy->GetResidentIn().size();
-   Address inResidentNewChain("ResTest-15");
+   Location inResidentNewChain("ResTest-15");
 
    ptTestCopy->AddResident(inResidentNewChain);
    iNewResidentCount = ptTestCopy->GetResidentIn().size();
@@ -384,12 +384,12 @@ CopyTest::RemoveResident_NotParent_InChainOfResident_NotEntireChain_Test()
    bool bResult = true;
    auto ptTestCopy = getTestCopy();
 
-   Address residentAddress("ResTest-9");
+   Location residentAddress("ResTest-9");
    ptTestCopy->AddResident(residentAddress);
 
    int iResidentCount, iNewResidentCount;
    iResidentCount = ptTestCopy->GetResidentIn().size();
-   Address inResidentNotEntireCahin("ResTest-9");
+   Location inResidentNotEntireCahin("ResTest-9");
 
    ptTestCopy->RemoveResident(inResidentNotEntireCahin);
    iNewResidentCount = ptTestCopy->GetResidentIn().size();
@@ -406,12 +406,12 @@ CopyTest::RemoveResident_NotParent_InChainOfResident_EntireChain_Test()
    bool bResult = true;
    auto ptTestCopy = getTestCopy();
 
-   Address residentAddress("ResTest-9");
+   Location residentAddress("ResTest-9");
    ptTestCopy->AddResident(residentAddress);
 
    int iResidentCount, iNewResidentCount;
    iResidentCount = ptTestCopy->GetResidentIn().size();
-   Address inResidentEntireCahin("ResTest-1");
+   Location inResidentEntireCahin("ResTest-1");
 
    ptTestCopy->RemoveResident(inResidentEntireCahin);
    iNewResidentCount = ptTestCopy->GetResidentIn().size();
@@ -427,12 +427,12 @@ CopyTest::RemoveResident_NotParent_NotInChainOfResident_Test()
    bool bResult = true;
    auto ptTestCopy = getTestCopy();
 
-   Address residentAddress("ResTest-9");
+   Location residentAddress("ResTest-9");
    ptTestCopy->AddResident(residentAddress);
 
    int iResidentCount, iNewResidentCount;
    iResidentCount = ptTestCopy->GetResidentIn().size();
-   Address notInResident("ResTest-6");
+   Location notInResident("ResTest-6");
 
    ptTestCopy->RemoveResident(notInResident);
    iNewResidentCount = ptTestCopy->GetResidentIn().size();
@@ -451,7 +451,7 @@ CopyTest::RemoveResident_Parent_InChainOfParent_NotEntireChain()
 
    int iResidentCount, iNewResidentCount;
    iResidentCount = ptTestCopy->GetResidentIn().size();
-   Address inParent("IDTest-6");
+   Location inParent("IDTest-6");
 
    ptTestCopy->RemoveResident(inParent);
    iNewResidentCount = ptTestCopy->GetResidentIn().size();
@@ -470,7 +470,7 @@ CopyTest::RemoveResident_Parent_InChainOfParent_EntireChain()
 
    int iResidentCount, iNewResidentCount;
    iResidentCount = ptTestCopy->GetResidentIn().size();
-   Address inParent("IDTest-1");
+   Location inParent("IDTest-1");
 
    ptTestCopy->RemoveResident(inParent);
    iNewResidentCount = ptTestCopy->GetResidentIn().size();
@@ -505,6 +505,6 @@ CopyTest::getTestCopy()
 
    CollectionItem testItem = getTestCollectionItem();
 
-   Address parentAddress("IDTest-6");
+   Location parentAddress("IDTest-6");
    return testItem.AddCopy(parentAddress, vecAttrs, vecMeta);
 }

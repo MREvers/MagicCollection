@@ -199,7 +199,6 @@
     <ClInclude Include="Action.h" />
     <ClInclude Include="AddAction.h" />
     <ClInclude Include="AddFromAction.h" />
-    <ClInclude Include="Addresser.h" />
     <ClInclude Include="AddressTest.h" />
     <ClInclude Include="ChangeAction.h" />
     <ClInclude Include="CollectionDeltaClass.h" />
@@ -214,6 +213,7 @@
     <ClInclude Include="CopyItem.h" />
     <ClInclude Include="Collection.h" />
     <ClInclude Include="CopyTest.h" />
+    <ClInclude Include="Addresser.h" />
     <ClInclude Include="JSONImporter.h" />
     <ClInclude Include="ListHelper.h" />
     <ClInclude Include="MD5.h" />

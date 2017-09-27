@@ -52,14 +52,14 @@ public:
    ~CollectionItem();
 
    // Adds an item to the list of copies.
-   std::shared_ptr<CopyItem> AddCopy( const Address& aAddrColID,
+   std::shared_ptr<CopyItem> AddCopy( const Location& aAddrColID,
                                       const std::vector<Tag>& alstAttrTags,
                                       const std::vector<Tag>& alstMetaTags );
 
-   bool RemoveCopy( const Address& aAddrColID,
+   bool RemoveCopy( const Location& aAddrColID,
                     const std::string aszUniqueID );
 
-   std::string GenerateHash( const Address& aAddrIdentifier,
+   std::string GenerateHash( const Identifier& aAddrIdentifier,
                              const std::vector<Tag>& alstAttrs,
                              const std::vector<Tag>& alstMetaTags ) const;
 
@@ -68,7 +68,7 @@ public:
 
    TryGetCopy<std::shared_ptr<CopyItem>> FindCopy( const std::string& aszUniqueHash, 
                                                    FindType aiType = UID ) const;
-   std::vector<std::shared_ptr<CopyItem>> FindCopies( const Address& aCollection,
+   std::vector<std::shared_ptr<CopyItem>> FindCopies( const Location& aCollection,
                                                       CollectionItemType aSearchType ) const;
 
    std::string GetName() const;
@@ -94,11 +94,11 @@ public:
    void DeleteCopy( CopyItem* aptItem );
    std::string CopyToString( CopyItem const* aptItem, 
                              const MetaTagType& aAccessType = MetaTagType::Public,
-                             const Address& aAddrCompareID  = Address() ) const;
+                             const Identifier& aAddrCompareID  = Location() ) const;
    
 
 private:
-   CopyItem* createCopy( const Address& aAddrColID,
+   CopyItem* createCopy( const Identifier& aAddrColID,
                          const std::vector<Tag>& alstAttrs    = std::vector<Tag>(),
                          const std::vector<Tag>& alstMetaTags = std::vector<Tag>() ) const;
 
@@ -111,11 +111,11 @@ public:
 
    static bool ParseTagString( const std::string& aszDetails, std::vector<Tag>& rlstTags );
 
-   static std::string ToCardLine( const Address& aAddrParentID, 
+   static std::string ToCardLine( const Identifier& aAddrParentID, 
                                   const std::string& aszName,
                                   const std::vector<Tag>& alstAttrs    = std::vector<Tag>(),
                                   const std::vector<Tag>& alstMetaTags = std::vector<Tag>(), 
-                                  const Address& aAddrCompareID        = Address() );
+                                  const Identifier& aAddrCompareID        = Location() );
 
 private:
    static bool isNameChar( const char& c );

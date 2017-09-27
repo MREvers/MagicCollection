@@ -84,9 +84,6 @@
     <ClCompile Include="Transaction.cpp">
       <Filter>Collection\DataHelpers</Filter>
     </ClCompile>
-    <ClCompile Include="Addresser.cpp">
-      <Filter>CollectionItems\DataHelpers</Filter>
-    </ClCompile>
     <ClCompile Include="TraitItem.cpp">
       <Filter>CollectionItems\DataHelpers</Filter>
     </ClCompile>
@@ -150,7 +147,12 @@
     <ClCompile Include="CopyTest.cpp">
       <Filter>Tests</Filter>
     </ClCompile>
-    <ClCompile Include="CollectionItemTest.cpp" />
+    <ClCompile Include="CollectionItemTest.cpp">
+      <Filter>Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="Addresser.cpp">
+      <Filter>CollectionItems\DataHelpers</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="JSONImporter.h">
@@ -200,9 +202,6 @@
     </ClInclude>
     <ClInclude Include="Transaction.h">
       <Filter>Collection\DataHelpers</Filter>
-    </ClInclude>
-    <ClInclude Include="Addresser.h">
-      <Filter>CollectionItems\DataHelpers</Filter>
     </ClInclude>
     <ClInclude Include="TraitItem.h">
       <Filter>CollectionItems\DataHelpers</Filter>
@@ -267,6 +266,11 @@
     <ClInclude Include="CopyTest.h">
       <Filter>Tests</Filter>
     </ClInclude>
-    <ClInclude Include="CollectionItemTest.h" />
+    <ClInclude Include="CollectionItemTest.h">
+      <Filter>Tests</Filter>
+    </ClInclude>
+    <ClInclude Include="Addresser.h">
+      <Filter>CollectionItems\DataHelpers</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

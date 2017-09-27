@@ -19,8 +19,8 @@ class CopyItem
 {
 private:
    // Use static constructor to build this class.
-   CopyItem( const Address& aAddrParentIdentifier );
-   CopyItem( const Address& aAddrParentIdentifier, 
+   CopyItem( const Identifier& aAddrParentIdentifier );
+   CopyItem( const Identifier& aAddrParentIdentifier, 
              const std::vector<Tag>& alstMetaTags );
 
 public:
@@ -31,14 +31,14 @@ public:
    Address GetAddress() const;
    std::string GetUID() const;
 
-   void SetParent( const Address& aAddrTestAddress );
-   bool IsParent( const Address& aAddrTestAddress ) const;
+   void SetParent( const Identifier& aAddrTestAddress );
+   bool IsParent( const Location& aAddrTestAddress ) const;
    std::string GetParent() const;
 
-   void AddResident(const Address& aAddrAddress);
-   int RemoveResident(const Address& aAddrAddress);
-   bool IsResidentIn( const Address& aAddrAddress ) const;
-   bool IsReferencedBy( const Address& aAddrAddress ) const;
+   void AddResident(const Identifier& aAddrAddress);
+   int RemoveResident(const Identifier& aAddrAddress);
+   bool IsResidentIn( const Location& aAddrAddress ) const;
+   bool IsReferencedBy( const Location& aAddrAddress ) const;
    std::vector<Address> GetResidentIn() const;
 
    void SetMetaTag( const std::string& aszKey,
@@ -70,12 +70,13 @@ private:
                     const std::string& aszVal,
                     MetaTagType atagType,
                     bool bTimeChange = true );
+   int findFamilyMember(const Identifier& aId) const;
 
    std::vector<MetaTag> m_lstMetaTags;
    std::vector<Tag> m_lstIdentifyingTags;
 public:
    static CopyItem* CreateCopyItem( CollectionItem const* aoConstructor,
-                                    const Address& aAddrParentIdentifier,
+                                    const Identifier& aAddrParentIdentifier,
                                     const std::vector<Tag>& alstIDAttrs,
                                     const std::vector<Tag>& alstMetaTags );
 

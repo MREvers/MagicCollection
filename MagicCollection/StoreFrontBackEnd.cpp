@@ -1,10 +1,16 @@
 #include "StoreFrontBackEnd.h"
 #include "AddressTest.h"
+#include "CollectionItemTest.h"
 #include "CopyTest.h"
 
 CStoreFrontBackEnd::CStoreFrontBackEnd()
 {
    bool bTest = true;
+   CollectionItemTest cit;
+   bTest &= cit.AddCopy_Test();
+   bTest &= cit.RemoveCopy_EntireChain_Test();
+   bTest &= cit.RemoveCopy_PartialChain_Test();
+
    CopyTest ct;
    bTest &= ct.CreateCopy_Test();
    bTest &= ct.SetMetaTag_Test();

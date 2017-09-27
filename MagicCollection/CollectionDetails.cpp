@@ -4,7 +4,7 @@
 
 CollectionDetails::CollectionDetails()
 {
-   m_ptrAddress = new Address();
+   m_ptrAddress = new Location();
 }
 
 
@@ -68,10 +68,10 @@ CollectionDetails::IncrementChildCount()
 }
 
 void 
-CollectionDetails::SetAddress(const Address& aAddress)
+CollectionDetails::SetAddress(const Location& aAddress)
 {
    delete m_ptrAddress;
-   m_ptrAddress = new Address(aAddress);
+   m_ptrAddress = new Location(aAddress);
 }
 
 void 
@@ -84,10 +84,10 @@ CollectionDetails::AssignAddress(std::string aszStringAddress)
    }
 
    delete m_ptrAddress;
-   m_ptrAddress = new Address(aszStringAddress);
+   m_ptrAddress = new Location(aszStringAddress);
 }
 
-Address* 
+Location* 
 CollectionDetails::GetAddress()
 {
    return m_ptrAddress;

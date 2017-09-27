@@ -29,7 +29,7 @@ public:
    ~Collection();
 
    std::string GetName();
-   Address  GetIdentifier();
+   Location  GetIdentifier();
    unsigned int GetChildCount();
    void ChildAdded();
 
@@ -42,7 +42,7 @@ public:
    void AddItemFrom(
       std::string aszName,
       std::string aszUID,
-      const Address& aAddress,
+      const Location& aAddress,
       bool abCloseTransaction = true);
 
    void RemoveItem(

@@ -28,7 +28,7 @@ CollectionFactory::LoadCollectionFromFile(std::string aszFileName)
 
    Collection* oCol = new Collection(Config::NotFoundString, m_ColSource, szFile);
    oCol->LoadCollection(aszFileName, this);
-   Address szFoundID = oCol->GetIdentifier();
+   Location szFoundID = oCol->GetIdentifier();
 
    if (oCol->IsLoaded && !CollectionExists(szFoundID))
    {
@@ -82,11 +82,11 @@ CollectionFactory::GetLoadedCollections()
 bool 
 CollectionFactory::CollectionExists(std::string aszCollectionName)
 {
-   return CollectionExists(Address(aszCollectionName));
+   return CollectionExists(Location(aszCollectionName));
 }
 
 bool 
-CollectionFactory::CollectionExists(const Address& aAddrColID)
+CollectionFactory::CollectionExists(const Location& aAddrColID)
 {
    return GetCollection(aAddrColID).Good();
 }
@@ -94,11 +94,11 @@ CollectionFactory::CollectionExists(const Address& aAddrColID)
 TryGet<Collection> 
 CollectionFactory::GetCollection(std::string aszCollectionName)
 {
-   return GetCollection(Address(aszCollectionName));
+   return GetCollection(Location(aszCollectionName));
 }
 
 TryGet<Collection> 
-CollectionFactory::GetCollection(const Address& aAddrColID)
+CollectionFactory::GetCollection(const Location& aAddrColID)
 {
    TryGet<Collection> oRetVal;
 
@@ -121,33 +121,12 @@ CollectionFactory::GetCollection(const Address& aAddrColID)
 std::string 
 CollectionFactory::getNextChildName(std::string aszParentID)
 {
-   int iID;
-   std::vector<std::string> lstUIandPF;
-   
-   lstUIandPF = StringHelper::Str_Split(aszParentID, std::string("-"));
-   if (lstUIandPF.size() == 1)
-   {
-      iID = 1;
-   }
-   else
-   {
-      iID = std::stoi(lstUIandPF[1]);
-   }
+   Addresser addresser;
+   unsigned int iHighPrime, iHighPrimeIndex, iCurrentSA;
 
-   int iPrimeIndex = 0;
-
-   // Find the largest prime number divisor
-   for (size_t i = Addresser::Primes.size()-1; i >= 0; i--)
-   {
-      int iPrime = Addresser::Primes[i];
-      if (iID % iPrime == 0)
-      {
-         iPrimeIndex = i;
-         break;
-      }
-   }
-
-   if (iPrimeIndex == 0) { iPrimeIndex = 1; }
+   Location currentName(aszParentID);
+   iCurrentSA = currentName.GetAddress();
+   iHighPrimeIndex = addresser.GetHighPrimeIndex(iCurrentSA);
 
    std::string szSubAddress;
    std::string szRetval = aszParentID;
@@ -155,12 +134,11 @@ CollectionFactory::getNextChildName(std::string aszParentID)
    if (oCol.Good())
    {
       int iChildren = oCol->GetChildCount();
-      iPrimeIndex += iChildren;
+      iHighPrimeIndex += iChildren;
       
-      int iChild = oCol->GetChildCount();
-
-      szSubAddress = std::to_string(iID*(Addresser::Primes[iPrimeIndex]));
-      szRetval = lstUIandPF[0] + "-" + szSubAddress;
+      iHighPrime = addresser.GetPrime(iHighPrimeIndex);
+      szSubAddress = std::to_string(iCurrentSA*iHighPrime);
+      szRetval = currentName.GetMain() + "-" + szSubAddress;
    }
 
    return szRetval;

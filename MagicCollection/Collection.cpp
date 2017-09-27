@@ -41,9 +41,9 @@ string Collection::GetName()
    return m_ptrCollectionDetails->GetName();
 }
 
-Address Collection::GetIdentifier()
+Location Collection::GetIdentifier()
 {
-   return Address(*m_ptrCollectionDetails->GetAddress());
+   return Location(*m_ptrCollectionDetails->GetAddress());
 }
 
 unsigned int 
@@ -78,7 +78,7 @@ void
 Collection::AddItemFrom(
    string aszName,
    string aszIdentifyingHash,
-   const Address& aAddress,
+   const Location& aAddress,
    bool abCloseTransaction)
 {
    AddFromAction afAction;
@@ -244,7 +244,7 @@ Collection::LoadCollection(
    loader.ReleaseUnfoundReferences( GetIdentifier(),
                                     m_ptrCollectionSource );
 
-   IsLoaded = (GetIdentifier().Main != "");
+   IsLoaded = (GetIdentifier().GetMain() != "");
 
    if (IsLoaded){ m_ptrCollectionTracker->Track(); }
 }

@@ -21,7 +21,7 @@ CollectionTracker::Track()
    std::vector<int> lstNewItems;
    RealCopyList::iterator iter_Copy;
    CollectionSource* source;
-   Address colAddress;
+   Location colAddress;
 
    m_mapOld = m_mapNew;
    m_mapNew.clear();
@@ -65,7 +65,7 @@ CollectionTracker::CalculateChanges()
    std::map<unsigned int, CopyList> mapChangedPrevState;
    std::map<unsigned int, CopyList> mapRemoved;
 
-   Address colAddress;
+   Location colAddress;
    CollectionSource* colSource;
 
    CopyList::iterator iter_CopyCurrent;

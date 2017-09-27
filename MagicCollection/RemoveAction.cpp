@@ -62,7 +62,7 @@ RemoveAction::GetCopy() const
 }
 
 void 
-RemoveAction::SetResi(const Address& address)
+RemoveAction::SetResi(const Location& address)
 {
    m_Address = address;
 }

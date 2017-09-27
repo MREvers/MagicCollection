@@ -28,27 +28,27 @@ public:
       std::vector<std::string>& rlstIOLines,
       std::vector<std::string>& rlstPreprocessingLines);
 
-   bool CaptureUnlistedItems(Address aAddrColID,
+   bool CaptureUnlistedItems(Location aAddrColID,
       CollectionSource* aptCollectionSource,
       std::map<int, std::list<CopyItem*>>& rlstAdditionalItems,
       std::map<int, std::list<CopyItem*>>& rlstAlreadyCapturedItems);
 
-   bool ConsolodateLocalItems(Address aAddrColID,
+   bool ConsolodateLocalItems(Location aAddrColID,
       CollectionSource* aptCollectionSource,
       std::map<int, std::list<CopyItem*>>& rlstPotentialDuplicates,
       std::map<int, std::list<CopyItem*>>& rlstNonDuplicates);
 
-   bool RejoinAsyncedLocalItems(Address aAddrColID,
+   bool RejoinAsyncedLocalItems(Location aAddrColID,
       CollectionSource* aptCollectionSource,
       unsigned long aulNewItemTS,
       std::map<int, std::list<CopyItem*>>& rlstPotentialDuplicates,
       std::map<int, std::list<CopyItem*>>& rlstNonDuplicates);
 
-   bool ConsolodateBorrowedItems(Address aAddrColID,
+   bool ConsolodateBorrowedItems(Location aAddrColID,
       CollectionSource* aptCollectionSource,
       CollectionFactory* aptCollFactory);
 
-   bool ReleaseUnfoundReferences(Address aAddrColID,
+   bool ReleaseUnfoundReferences(Location aAddrColID,
       CollectionSource* aptCollectionSource);
 
    bool CollectionFileExists(std::string aszFileName);

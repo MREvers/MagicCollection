@@ -41,7 +41,7 @@ CollectionItem::~CollectionItem()
 }
 
 shared_ptr<CopyItem>
-CollectionItem::AddCopy( const Address& aAddrColID,
+CollectionItem::AddCopy( const Location& aAddrColID,
                          const vector<Tag>& alstAttrTags,
                          const vector<Tag>& alstMetaTags )
 {
@@ -51,7 +51,7 @@ CollectionItem::AddCopy( const Address& aAddrColID,
 }
 
 bool 
-CollectionItem::RemoveCopy( const Address& aAddrColID,
+CollectionItem::RemoveCopy( const Location& aAddrColID,
                             const std::string aszUniqueID )
 {
    shared_ptr<CopyItem> ptCopy;
@@ -60,7 +60,7 @@ CollectionItem::RemoveCopy( const Address& aAddrColID,
    if( nCopy.Good() )
    {
       ptCopy = *nCopy.Value();
-      int iRefCnt = ptCopy->RemoveResident( aAddrColID );
+      int iRefCnt = ptCopy->RemoveResident( (const Location)aAddrColID );
 
       if( iRefCnt == 0 )
       {
@@ -72,7 +72,7 @@ CollectionItem::RemoveCopy( const Address& aAddrColID,
 }
 
 string 
-CollectionItem::GenerateHash( const Address& aAddrIdentifier,
+CollectionItem::GenerateHash( const Identifier& aAddrIdentifier,
                               const vector<Tag>& alstAttrs,
                               const vector<Tag>& alstMetaTags ) const
 {
@@ -109,7 +109,7 @@ CollectionItem::DeleteCopy(CopyItem* ociRemove)
 std::string 
 CollectionItem::CopyToString( CopyItem const* aptItem,
                               const MetaTagType& aAccessType,
-                              const Address& aAddrCompareID ) const
+                              const Identifier& aAddrCompareID ) const
 {
    return ToCardLine( aptItem->GetAddress(), GetName(),
                       aptItem->GetIdentifyingAttributes(),
@@ -138,7 +138,7 @@ CollectionItem::FindCopy( const string& aszUID,
 }
 
 std::vector<std::shared_ptr<CopyItem>> 
-CollectionItem::FindCopies( const Address& aCollection,
+CollectionItem::FindCopies( const Location& aCollection,
                             CollectionItemType aSearchType ) const
 {
    vector<shared_ptr<CopyItem>> lstRetVal;
@@ -229,7 +229,7 @@ CollectionItem::SetIdentifyingTraitDefaults( CopyItem* aptItem ) const
 }
 
 CopyItem* 
-CollectionItem::createCopy( const Address& aAddrColID,
+CollectionItem::createCopy( const Identifier& aAddrColID,
                             const vector<Tag>& alstAttrs,
                             const vector<Tag>& alstMetaTags ) const
 {
@@ -425,11 +425,11 @@ bool CollectionItem::isNameChar( const char& c )
 }
 
 string 
-CollectionItem::ToCardLine( const Address& aAddrParentID,
+CollectionItem::ToCardLine( const Identifier& aAddrParentID,
                             const std::string& aszName,
                             const std::vector<Tag>& alstAttrs,   
                             const std::vector<Tag>& alstMetaTags,
-                            const Address& aAddrCompareID )
+                            const Identifier& aAddrCompareID )
 {
    string szLine = aszName;
    szLine += " { ";
@@ -460,7 +460,7 @@ CollectionItem::ToCardLine( const Address& aAddrParentID,
    unsigned int iDummy;
    for (; iter_keyValPairs != alstMetaTags.end(); ++iter_keyValPairs)
    {
-      if ( !( aAddrCompareID.Main == "" )            &&
+      if ( !( aAddrCompareID.GetMain() == "" )            &&
             ( iter_keyValPairs->first == "Address" ) &&
             ( Address(iter_keyValPairs->second) == aAddrCompareID ) )
       {
