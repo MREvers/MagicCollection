@@ -68,6 +68,8 @@ public:
 
    TryGetCopy<std::shared_ptr<CopyItem>> FindCopy( const std::string& aszUniqueHash, 
                                                    FindType aiType = UID ) const;
+   std::vector<std::shared_ptr<CopyItem>> FindCopies( const Identifier& aCollection,
+                                                      CollectionItemType aSearchType ) const;
    std::vector<std::shared_ptr<CopyItem>> FindCopies( const Location& aCollection,
                                                       CollectionItemType aSearchType ) const;
 

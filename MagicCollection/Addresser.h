@@ -52,6 +52,7 @@ private:
                           unsigned int aiSTwo ) const;
 };
 
+class Location;
 class Address : public Identifier
 {
 public:
@@ -62,6 +63,7 @@ public:
    bool IsEmpty() const;
    std::vector<unsigned int> GetAddresses() const override;
 
+   bool ContainsLocation(const Location& aLoc, Address& rAddrIn = Address()) const;
    bool AddSubAddress(unsigned int aiSub);
    int RemoveSubAddress(unsigned int aiSub);
    int SetSubAddress(unsigned int aiAlreadySub, unsigned int aiSub);
@@ -79,7 +81,7 @@ public:
    Location(const std::string& aszMain, unsigned int aiSA);
    ~Location();
 
-   bool IsResidentIn(const Address& aAddr) const;
+   bool IsSpecifiedBy(const Address& aAddr, Address& rAddrIn = Address()) const;
    std::vector<unsigned int> GetAddresses() const override;
    unsigned int GetAddress() const;
 

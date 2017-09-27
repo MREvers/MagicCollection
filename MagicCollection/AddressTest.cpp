@@ -23,7 +23,7 @@ AddressTest::ParseTestSingle()
 
    bResult &= parseAddr.GetMain() == szTestParse;
 
-   auto vecSubAddresses = parseAddr.GetSubAddresses();
+   auto vecSubAddresses = parseAddr.GetAddresses();
    bResult &= vecSubAddresses.size() == 1 && vecSubAddresses[0] == 1;
 
    return bResult;
@@ -39,7 +39,7 @@ AddressTest::ParseTestManySub()
 
    bResult &= parseAddr.GetMain() == "IDTest";
 
-   auto vecSubAddresses = parseAddr.GetSubAddresses();
+   auto vecSubAddresses = parseAddr.GetAddresses();
    bResult &= vecSubAddresses.size() == 2 && 
               vecSubAddresses[0] == 2 &&
               vecSubAddresses[1] == 15;
@@ -53,7 +53,6 @@ AddressTest::IsResidentInTest()
    // Tests that IsResident in
    // returns the subaddress that
    // identify the location.
-   Addresser addr;
 
    bool bResult = true;
    string szParentAddress = "IDTest-3";
@@ -64,14 +63,9 @@ AddressTest::IsResidentInTest()
    Address childAddr(szChildAddress);
    Address dummy;
 
-   bResult &= addr.DoesAddressIncludeLocation(childAddr, parentLocation, dummy);
-   
-   auto vecSubAddresses = dummy.GetSubAddresses();
-   bResult &= vecSubAddresses.size() == 2 &&
-              vecSubAddresses[0] == 9 &&
-              vecSubAddresses[1] == 15;
+   bResult &= parentLocation.IsSpecifiedBy(childAddr, dummy);
 
-   bResult &= parentLocation.IsResidentIn(childAddr, dummy);
+   auto vecSubAddresses = dummy.GetAddresses();
    bResult &= vecSubAddresses.size() == 2 &&
               vecSubAddresses[0] == 9 &&
               vecSubAddresses[1] == 15;
@@ -84,8 +78,6 @@ AddressTest::PitheLocationTest()
 {
    bool bResult = true;
 
-   Addresser addr;
-
    string szLocation = "IDTest-3";
    string szAddress = "IDTest-2,9,15";
 
@@ -94,9 +86,9 @@ AddressTest::PitheLocationTest()
    Address dummy;
 
    // We expect to pull out 9 and 15.
-   bResult &= addr.PitheLocation(addressAddr, locationAddr);
+   bResult &= addressAddr.ExtractIdentifier(locationAddr);
 
-   auto vecSubAddresses = addressAddr.GetSubAddresses();
+   auto vecSubAddresses = addressAddr.GetAddresses();
    bResult &= vecSubAddresses.size() == 1 &&
               vecSubAddresses[0] == 2;
 
@@ -107,9 +99,9 @@ AddressTest::PitheLocationTest()
    addressAddr = (szAddress);
 
    // Nothing should be pulled out.
-   bResult &= !addr.PitheLocation(addressAddr, locationAddr);
+   bResult &= !addressAddr.ExtractIdentifier(locationAddr);
 
-   vecSubAddresses = addressAddr.GetSubAddresses();
+   vecSubAddresses = addressAddr.GetAddresses();
    bResult &= vecSubAddresses.size() == 3 &&
               vecSubAddresses[0] == 2 &&
               vecSubAddresses[1] == 9 &&
@@ -123,9 +115,9 @@ AddressTest::PitheLocationTest()
    locationAddr = (szLocation);
    addressAddr = (szAddress);
 
-   bResult &= addr.PitheLocation(addressAddr, locationAddr);
+   bResult &= addressAddr.ExtractIdentifier(locationAddr);
    
-   vecSubAddresses = addressAddr.GetSubAddresses();
+   vecSubAddresses = addressAddr.GetAddresses();
    bResult &= vecSubAddresses.size() == 2 &&
               vecSubAddresses[0] == 2 &&
               vecSubAddresses[1] == 3;
@@ -148,9 +140,9 @@ AddressTest::InceptLocationTest()
    Address dummy;
 
    // We expect to pull out 9 and 15.
-   bResult &= addr.InceptLocation(addressAddr, locationAddr);
+   bResult &= addressAddr.MergeIdentifier(locationAddr);
 
-   auto vecSubAddresses = addressAddr.GetSubAddresses();
+   auto vecSubAddresses = addressAddr.GetAddresses();
    bResult &= vecSubAddresses.size() == 2 &&
               vecSubAddresses[0] == 2 &&
               vecSubAddresses[1] == 9;
@@ -162,9 +154,9 @@ AddressTest::InceptLocationTest()
    addressAddr = (szAddress);
 
    // Nothing should be pulled out.
-   bResult &= addr.InceptLocation(addressAddr, locationAddr);
+   bResult &= addressAddr.MergeIdentifier(locationAddr);
 
-   vecSubAddresses = addressAddr.GetSubAddresses();
+   vecSubAddresses = addressAddr.GetAddresses();
    bResult &= vecSubAddresses.size() == 3 &&
               vecSubAddresses[0] == 2  &&
               vecSubAddresses[1] == 27 &&

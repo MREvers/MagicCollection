@@ -84,7 +84,7 @@ Collection::AddItemFrom(
    AddFromAction afAction;
    afAction.SetHash(aszIdentifyingHash);
    afAction.SetName(aszName);
-   afAction.SetResi(aAddress);
+//   afAction.SetResi(aAddress);
 
    m_ptrTransactionManager->IncludeAction(afAction);
 
@@ -633,7 +633,7 @@ void Collection::loadAdditionLine(const string& aszLine)
    {
       for (size_t i = 0; i < sudoItem.Count; i++)
       {
-         AddItemFrom(sudoItem.Name, szID, aParentAddress);
+       //  AddItemFrom(sudoItem.Name, szID, aParentAddress);
       }
    }
    // If the parent was not specified, or this was designated the parent

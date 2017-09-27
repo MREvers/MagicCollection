@@ -97,19 +97,29 @@ Identifier::~Identifier()
 vector<unsigned int> 
 Identifier::GetAddresses() const
 {
-
+   return m_veciSubAddresses;
 }
 
 string 
 Identifier::GetMain() const
 {
-
+   return m_szMain;
 }
 
 string 
 Identifier::GetFullAddress() const
 {
+   string szFullString = GetMain();
+   bool first = true;
+   for each (unsigned int subAddr in m_veciSubAddresses)
+   {
+      if (!first) { szFullString += ","; }
+      else { szFullString += "-"; }
+      szFullString += to_string(subAddr);
+      first = false;
+   }
 
+   return szFullString;
 }
 
 Address 
@@ -121,13 +131,13 @@ Identifier::ToAddress() const
 bool 
 Identifier::operator==( const Identifier& rhs ) const
 {
-
+   return GetFullAddress()==rhs.GetFullAddress();
 }
 
 bool 
 Identifier::operator<( const Identifier& rhs ) const
 {
-
+   return false;
 }
 
 void 
@@ -321,6 +331,27 @@ Address::GetAddresses() const
    return m_veciSubAddresses;
 }
 
+// Returns true if ANY of the subaddresses of this address
+// is a superset of the location.
+// There should only ever be exactly 1 subaddress in the found address.
+bool 
+Address::ContainsLocation( const Location& aLoc, Address& rAddrIn ) const
+{
+   if( GetMain() != aLoc.GetMain() ){ return false; }
+
+   bool bContains = false;
+   for( auto iSub : m_veciSubAddresses )
+   {
+      if( isSuperSet( iSub, aLoc.GetAddress() ) )
+      {
+         bContains = true;
+         rAddrIn.AddSubAddress( iSub );
+      }
+   }
+
+   return bContains;
+}
+
 bool 
 Address::AddSubAddress( unsigned int aiSub )
 {
@@ -429,19 +460,12 @@ Location::~Location()
 
 }
 
-// a.k.a. DoesAddressDesignateLocation
-// Returns true if any of the the 'address-subaddress' pairs of aAddress
-//  reside within aContainingLocation.
-// Also Returns the address points that caused this location to be included.
-// (A location is an address with only one subaddress)
-// i.e. if aAddress = "Add-2,9,15" and aTestAddress = "Add-3"
-//  then this returns true because Add-9 (and Add-15) is within Add-3.
-// Returns the Address with each subaddress that matched; in the
-//  given example, returns Add-9,15.
+// Returns true if this location is a super set of ANY of the
+// subaddresses in aAddress.
 bool 
-Location::IsResidentIn( const Address& aAddress ) const
+Location::IsSpecifiedBy( const Address& aAddress, Address& rAddrIn ) const
 {
-   Address rAddrIn(aAddress.GetMain());
+   rAddrIn = Address(aAddress.GetMain());
 
    if (aAddress.GetMain() != GetMain()) { return false; }
 

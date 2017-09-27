@@ -97,13 +97,15 @@ Address CopyItem::GetAddress() const
    return m_Address;
 }
 
-// Returns true if this copy item resides DIRECTLY within the input collection.
-// i.e. A-2 is a parent of this object if this has an address of A-6.
+// Returns true if the location is specifically within the address of this copy.
 bool CopyItem::IsParent(const Location& aAddrParent) const
 {
+   // We use 'IsSpecifiedBy' instead of 'ContainsLocation' because we don't want
+   // Copies that are in a subset of some subaddress to be automaticall included
+   // in this result.
    // If the location is designated by this copies address,
    // this copies lies within that location.
-   return aAddrParent.IsResidentIn(m_Address);
+   return aAddrParent.IsSpecifiedBy(m_Address);
 }
 
 // Sets the parent address AND adds it to residents
@@ -177,7 +179,7 @@ std::vector<Address> CopyItem::GetResidentIn() const
 // it is referenced in aAddrTest.
 bool CopyItem::IsResidentIn(const Location& aAddrTest) const
 {
-   bool isResident = aAddrTest.IsResidentIn(m_Address);
+   bool isResident = aAddrTest.IsSpecifiedBy(m_Address);
 
    if( !isResident )
    {
@@ -194,7 +196,7 @@ bool CopyItem::IsReferencedBy(const Location& aAddrTest) const
 
    for( auto resident : m_lstResidentIn )
    {
-      isResident |= aAddrTest.IsResidentIn(resident);
+      isResident |= aAddrTest.IsSpecifiedBy(resident);
       if( isResident ){ break; }
    }
 

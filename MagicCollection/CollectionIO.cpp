@@ -303,7 +303,7 @@ CollectionIO::ConsolodateBorrowedItems(
             // LstCopies contains all the copies of the card in the collection
             // that we borrowed from. Note this is different from below because
             // the borrowed copy will not show up in this list.
-            auto lstCopies = itemPrototype->FindCopies( borrowedCopy->GetAddress().BaseLocation(), 
+            auto lstCopies = itemPrototype->FindCopies( borrowedCopy->GetAddress(), 
                                                         CollectionItemType::Local );
 
             // Look for a copy with a matching UID that is not already 
@@ -320,7 +320,7 @@ CollectionIO::ConsolodateBorrowedItems(
          { 
             // Check if any other collection referenced the unverified copy.
             // Get a list of all other cards that supposedly belong to this collection
-            auto lstCopies = itemPrototype->FindCopies( borrowedCopy->GetAddress().BaseLocation(), 
+            auto lstCopies = itemPrototype->FindCopies( borrowedCopy->GetAddress(), 
                                                         CollectionItemType::Local );
             
             // Look for a copy with a matching UID that is not already 

@@ -52,7 +52,7 @@ CollectionItem::AddCopy( const Location& aAddrColID,
 
 bool 
 CollectionItem::RemoveCopy( const Location& aAddrColID,
-                            const std::string aszUniqueID )
+                            const string aszUniqueID )
 {
    shared_ptr<CopyItem> ptCopy;
    auto nCopy = FindCopy( aszUniqueID );
@@ -106,7 +106,7 @@ CollectionItem::DeleteCopy(CopyItem* ociRemove)
    }
 }
 
-std::string 
+string 
 CollectionItem::CopyToString( CopyItem const* aptItem,
                               const MetaTagType& aAccessType,
                               const Identifier& aAddrCompareID ) const
@@ -137,7 +137,36 @@ CollectionItem::FindCopy( const string& aszUID,
    return oRetval;
 }
 
-std::vector<std::shared_ptr<CopyItem>> 
+// Returns each copy
+vector<shared_ptr<CopyItem>> 
+CollectionItem::FindCopies( const Identifier& aCollection,
+                            CollectionItemType aSearchType ) const
+{
+   vector<shared_ptr<CopyItem>> copies;
+   for( auto iSub : aCollection.GetAddresses() )
+   {
+      Location location = Location(aCollection.GetMain(), iSub);
+
+      auto newCopies = FindCopies(location, aSearchType);
+      for( auto copy : newCopies )
+      {
+         bool bAlreadyHave = false;
+         for( auto alreadyCopy : copies )
+         {
+            bAlreadyHave |= copy.get() == alreadyCopy.get();
+         }
+
+         if( !bAlreadyHave )
+         {
+            copies.push_back(copy);
+         }
+      }
+   }
+
+   return copies;
+}
+
+vector<shared_ptr<CopyItem>> 
 CollectionItem::FindCopies( const Location& aCollection,
                             CollectionItemType aSearchType ) const
 {
@@ -165,6 +194,7 @@ CollectionItem::FindCopies( const Location& aCollection,
 
    return lstRetVal;
 }
+
 
 string 
 CollectionItem::GetName() const
@@ -426,9 +456,9 @@ bool CollectionItem::isNameChar( const char& c )
 
 string 
 CollectionItem::ToCardLine( const Identifier& aAddrParentID,
-                            const std::string& aszName,
-                            const std::vector<Tag>& alstAttrs,   
-                            const std::vector<Tag>& alstMetaTags,
+                            const string& aszName,
+                            const vector<Tag>& alstAttrs,   
+                            const vector<Tag>& alstMetaTags,
                             const Identifier& aAddrCompareID )
 {
    string szLine = aszName;
