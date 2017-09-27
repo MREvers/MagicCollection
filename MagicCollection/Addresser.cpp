@@ -155,15 +155,18 @@ Identifier::parseIdName( const string& aszID )
 
    // Add the parsed subAddresses
    m_veciSubAddresses.push_back(1);
-   lstSubAddresses = StringHelper::Str_Split(lstUIandPF[1], string(","));
-   size_t iSAC = lstSubAddresses.size();
-   for (size_t i = 0; i < iSAC; i++)
+   if( lstUIandPF.size() == 2 )
    {
-      szSubAddress = lstSubAddresses[i];
-      iSubAddress = stoi(szSubAddress, &iNumChars);
-      if (iNumChars > 0)
+      lstSubAddresses = StringHelper::Str_Split(lstUIandPF[1], string(","));
+      size_t iSAC = lstSubAddresses.size();
+      for (size_t i = 0; i < iSAC; i++)
       {
-         addSubAddress(m_veciSubAddresses, iSubAddress);
+         szSubAddress = lstSubAddresses[i];
+         iSubAddress = stoi(szSubAddress, &iNumChars);
+         if (iNumChars > 0)
+         {
+            addSubAddress(m_veciSubAddresses, iSubAddress);
+         }
       }
    }
 }
@@ -174,7 +177,7 @@ Identifier::parseIdName( const string& aszID )
 // 1 := Replaced Exisiting aisa
 // 2 := Inserted ordered
 int 
-Identifier::addSubAddress(vector<unsigned int> avecSAs, unsigned int aiSA)
+Identifier::addSubAddress(vector<unsigned int>& avecSAs, unsigned int aiSA)
 {
    int iAdded = 0;
 
@@ -208,12 +211,13 @@ Identifier::addSubAddress(vector<unsigned int> avecSAs, unsigned int aiSA)
          if (iCmp <= 0) { break; }
       }
    
-      if( *iter != aiSA )
+      if( ( iter  == avecSAs.begin() ) || 
+          ( *iter != aiSA            ) )
       {
          avecSAs.insert(iter, aiSA);
       }
 
-      iAdded == 2;
+      iAdded = 2;
    }
 
    return iAdded;
@@ -358,10 +362,24 @@ Address::AddSubAddress( unsigned int aiSub )
    return addSubAddress(m_veciSubAddresses, aiSub) != 0;
 }
 
+// TODO: This will completely remove all matchin addresses
+// instead of pithing the subset subaddresses.
 int 
 Address::RemoveSubAddress( unsigned int aiSub )
 {
-   return SetSubAddress(aiSub, 1);
+   Addresser addresser;
+   int iResult = 0;
+   int iSetVal = aiSub == 1 ? 0 : aiSub/addresser.GetHighPrime(aiSub);
+
+   for( auto iSub : GetAddresses() )
+   {
+      if( isSuperSet( aiSub, iSub ) )
+      {
+         SetSubAddress(iSub, iSetVal);
+         iResult = 1;
+      }
+   }
+   return iResult;
 }
 
 // Inputting aiSub = 1 will remove that item.
@@ -371,12 +389,11 @@ Address::RemoveSubAddress( unsigned int aiSub )
 // 2 := Replaced another and removed old.
 // 3 := Another already specifies, removed old.
 // 4 := Error
-// 5 := Removed
 int 
 Address::SetSubAddress(unsigned int aiAlreadySub, unsigned int aiSub)
 {
    int iResult = 0;
-   int iFound = ListHelper::List_Find(aiSub, m_veciSubAddresses);
+   int iFound = ListHelper::List_Find(aiAlreadySub, m_veciSubAddresses);
   
    if( iFound != -1 )
    {
@@ -385,6 +402,12 @@ Address::SetSubAddress(unsigned int aiAlreadySub, unsigned int aiSub)
 
       // Now we want the subaddress to be added new
       int iAdded = addSubAddress(vecAddTest, aiSub);
+      if( aiSub == 0 )
+      {
+         // Set iAdded to -1 so we can remove the value.
+         iAdded = -1;
+      }
+
       if( iAdded == 2 )
       {
          // aiSub is specified by no other SA.
@@ -406,8 +429,10 @@ Address::SetSubAddress(unsigned int aiAlreadySub, unsigned int aiSub)
          m_veciSubAddresses.erase(m_veciSubAddresses.begin() + iFound);
          iResult = 3;
       }
-
-      iResult = 4;
+      else
+      {
+         iResult = 4;
+      }
    }
 
    return iResult;
@@ -431,6 +456,8 @@ Address::ExtractIdentifier( const Identifier& aID )
 {
    if( GetMain() != aID.GetMain() ){ return false; }
 
+   // This tries to remove all the addresses,
+   // regardless of whether they are present or not.
    for( auto iSub : aID.GetAddresses() )
    {
       RemoveSubAddress(iSub);

@@ -43,7 +43,7 @@ protected:
    std::vector<unsigned int> m_veciSubAddresses;
 
    void parseIdName(const std::string& aszID);
-   int addSubAddress(std::vector<unsigned int> avecSAs, unsigned int aiSA);
+   int addSubAddress(std::vector<unsigned int>& avecSAs, unsigned int aiSA);
    bool isSuperSet( unsigned int aiSuper, 
                     unsigned int aiSub ) const;
 
