@@ -45,6 +45,7 @@ CStoreFrontBackEnd::CStoreFrontBackEnd()
 
    CollectionTest clt;
    bTest &= clt.AddItem_Test();
+   bTest &= clt.RemoveItem_Test();
 
    // No Server for now
    m_ColSource = new CollectionSource();

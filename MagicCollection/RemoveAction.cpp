@@ -20,14 +20,14 @@ RemoveAction::Execute(TransactionManager* aoCol)
    TryGet<CollectionItem> refItem = refSource->GetCardPrototype(m_szName);
    if (!refItem.Good()) { return false; }
 
-   //std::shared_ptr<CopyItem> refCItem;
-   //refCItem = refItem->FindCopy(m_szIdentifyingHash, m_AddrResidentIn);
-   //if (refCItem == nullptr) { return false; }
-
-   //m_lstMetaOfRMItem = refCItem->GetMetaTags(MetaTagType::Any);
-   //m_lstTagsOfRMItem = refCItem->GetIdentifyingAttributes();
-
-   //aoCol->Remove(m_szName, m_szIdentifyingHash, m_AddrResidentIn);
+   auto refCItem = refItem->FindCopy(m_szUID);
+   if (!refCItem.Good()) { return false; }
+   
+   auto copy = refCItem.Value()->get();
+   m_lstMetaOfRMItem = copy->GetMetaTags(MetaTagType::Any);
+   m_lstTagsOfRMItem = copy->GetIdentifyingAttributes();
+   
+   aoCol->Remove(m_szName, m_szUID);
    return true;
 }
 
@@ -61,11 +61,6 @@ RemoveAction::GetCopy() const
    return std::shared_ptr<Action>(ptCopy);
 }
 
-void 
-RemoveAction::SetResi(const Location& address)
-{
-   m_Address = address;
-}
 
 void 
 RemoveAction::SetName(const std::string& aszName)

@@ -334,6 +334,12 @@ CollectionSource::GetAllCardsStartingWith(std::string aszText)
    return lstCards;
 }
 
+void 
+CollectionSource::ClearCache()
+{
+   m_lstoCardCache.clear();
+}
+
 int CollectionSource::findInBuffer(std::string aszCardName, bool abCaseSensitive)
 {
    std::string szName;

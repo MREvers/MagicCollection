@@ -53,6 +53,7 @@ public:
 
    std::vector<std::string> GetAllCardsStartingWith(std::string aszText);
 
+   void ClearCache();
 private:
    std::vector<SourceObject> m_lstCardBuffer;
    std::vector<CollectionItem> m_lstoCardCache;

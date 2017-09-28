@@ -97,7 +97,6 @@ Collection::RemoveItem(string aszName,
 	bool abCloseTransaction)
 {
    RemoveAction rmAction;
-   rmAction.SetResi(GetIdentifier());
    rmAction.SetUID(aszIdentifyingHash);
    rmAction.SetName(aszName);
 

@@ -47,7 +47,6 @@ AddAction::getUndoAction(TransactionManager* aoCol) const
 
    RemoveAction* rmRetVal = new RemoveAction();
    rmRetVal->SetUID(szHashRM);
-   rmRetVal->SetResi(refCollection->GetIdentifier());
    rmRetVal->SetName(m_szName);
 
    return std::shared_ptr<Action>(rmRetVal);

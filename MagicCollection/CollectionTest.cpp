@@ -26,6 +26,7 @@ CollectionTest::CollectionTest()
 
 CollectionTest::~CollectionTest()
 {
+   deleteTestColSourceFile();
    Config::SetTestMode(false);
    delete m_ptColSource;
 }
@@ -34,19 +35,44 @@ CollectionTest::~CollectionTest()
 bool 
 CollectionTest::AddItem_Test()
 {
+   // Verifies that AddItem loads a card from the col Source
+   // buffer correctly.
+   bool bRetval = true;
    auto col = getTestCollection();
+   auto szCardName = *cardName(0);
+   col->AddItem(szCardName);
 
-   col->AddItem(*cardName(0));
+   auto addedItem = m_ptColSource->GetCardPrototype(szCardName);
+   auto lstCopies = addedItem->FindCopies(col->GetIdentifier(), All);
 
-   auto str = col->GetCollectionList();
+   bRetval &= lstCopies.size() == 1;
 
-   return true;
+   return bRetval;
 }
 
 bool 
 CollectionTest::RemoveItem_Test()
 {
-   return false;
+   // Verifies that AddItem loads a card from the col Source
+   // buffer correctly.
+   bool bRetval = true;
+   auto col = getTestCollection();
+   auto szCardName = *cardName(0);
+   col->AddItem(szCardName);
+
+   auto addedItem = m_ptColSource->GetCardPrototype(szCardName);
+   auto lstCopies = addedItem->FindCopies(col->GetIdentifier(), All);
+
+   int iCopies = lstCopies.size();
+   auto copy = lstCopies[0];
+
+   col->RemoveItem(szCardName, copy->GetUID());
+
+   lstCopies = addedItem->FindCopies(col->GetIdentifier(), All);
+
+   bRetval &= lstCopies.size() < iCopies;
+
+   return bRetval;
 }
 
 bool 
@@ -82,6 +108,7 @@ CollectionTest::SaveCollection_Test()
 void 
 CollectionTest::writeTestColSourceFile()
 {
+   Config* config = Config::Instance();
    rapidxml::xml_document<>* xmlCardDoc = new rapidxml::xml_document<>;
 
    rapidxml::xml_node<>* decl = xmlCardDoc->allocate_node(rapidxml::node_declaration);
@@ -90,38 +117,49 @@ CollectionTest::writeTestColSourceFile()
    xmlCardDoc->append_node(decl);
 
    // Add the outermose element.
-   rapidxml::xml_node<>* xmlNode_root = xmlCardDoc->allocate_node(rapidxml::node_element, "Card_Database");
+   rapidxml::xml_node<>* xmlNode_root = xmlCardDoc->
+      allocate_node(rapidxml::node_element, "Card_Database");
    xmlCardDoc->append_node(xmlNode_root);
 
    // Create the 'Cards' element.
-   rapidxml::xml_node<>* xmlNode_Cards = xmlCardDoc->allocate_node(rapidxml::node_element, "cards");
+   rapidxml::xml_node<>* xmlNode_Cards = xmlCardDoc->
+      allocate_node(rapidxml::node_element, "cards");
    xmlNode_root->append_node(xmlNode_Cards);
 
    // Add a test card
-   rapidxml::xml_node<>* xmlNode_Card = xmlCardDoc->allocate_node(rapidxml::node_element, "card");
+   rapidxml::xml_node<>* xmlNode_Card = xmlCardDoc->
+      allocate_node(rapidxml::node_element, "card");
    rapidxml::xml_node<>* xmlNode_attr;
 
-   xmlNode_attr= xmlCardDoc->allocate_node(rapidxml::node_element,
-                                            Config::Instance()->GetStaticAttributes()[0].c_str(), cardName(0)->c_str() );
+   xmlNode_attr= xmlCardDoc->allocate_node( rapidxml::node_element,
+                                            config->GetStaticAttributes()[0].c_str(),
+                                            cardName(0)->c_str() );
    xmlNode_Card->append_node(xmlNode_attr);
    
-   xmlNode_attr= xmlCardDoc->allocate_node(rapidxml::node_element, 
-                                            Config::Instance()->GetIdentifyingAttributes()[0].c_str(), getAttr(0)->c_str());
+   xmlNode_attr= xmlCardDoc->allocate_node( rapidxml::node_element, 
+                                            config->GetIdentifyingAttributes()[0].c_str(),
+                                            getAttr(0)->c_str() );
    xmlNode_Card->append_node(xmlNode_attr);
 
-   xmlNode_attr= xmlCardDoc->allocate_node(rapidxml::node_element, 
-                                            Config::Instance()->GetIdentifyingAttributes()[1].c_str(), getAttr(1)->c_str() );
+   xmlNode_attr= xmlCardDoc->allocate_node( rapidxml::node_element, 
+                                            config->GetIdentifyingAttributes()[1].c_str(),
+                                            getAttr(1)->c_str() );
    xmlNode_Card->append_node(xmlNode_attr);
 
-   xmlNode_attr= xmlCardDoc->allocate_node(rapidxml::node_element, 
-                                            Config::Instance()->GetIdentifyingAttributes()[2].c_str(), getAttr(2)->c_str() );
+   xmlNode_attr= xmlCardDoc->allocate_node( rapidxml::node_element, 
+                                            config->GetIdentifyingAttributes()[2].c_str(),
+                                            getAttr(2)->c_str() );
    xmlNode_Card->append_node(xmlNode_attr);
 
    xmlNode_Cards->append_node(xmlNode_Card);
 
    // Save to file
+   // Expects the config folder to already exist.
+   // Create the test folder
    auto srcFile = Config::Instance()->GetSourceFolder();
    CreateDirectory(srcFile.c_str(), NULL);
+
+   // Get the source file name.
    srcFile = Config::Instance()->GetSourceFile();
    std::fstream file_stored(srcFile.c_str(), ios::out);
    file_stored << *xmlCardDoc;
@@ -139,6 +177,7 @@ CollectionTest::deleteTestColSourceFile()
 std::shared_ptr<Collection> 
 CollectionTest::getTestCollection()
 {
+   m_ptColSource->ClearCache();
    return std::shared_ptr<Collection>(new Collection("TestCol", m_ptColSource, "TestColFile", "TestID"));
 }
 

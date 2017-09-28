@@ -16,6 +16,8 @@ AddressTest::~AddressTest()
 bool 
 AddressTest::ParseTestSingle()
 {
+   // Verifies an Id name is parsed correct and
+   // that the default subaddress is 1.
    bool bResult = true;
    string szTestParse = "IDTest";
 
@@ -32,6 +34,8 @@ AddressTest::ParseTestSingle()
 bool 
 AddressTest::ParseTestManySub()
 {
+   // Verifies that a subaddress can be parsed
+   // correctly when multiple subaddresses are present.
    bool bResult = true;
    string szTestParse = "IDTest-2,15";
 
@@ -76,6 +80,8 @@ AddressTest::IsResidentInTest()
 bool 
 AddressTest::PitheLocationTest()
 {
+   // Verifies that extracting a location from
+   // an address works.
    bool bResult = true;
 
    string szLocation = "IDTest-3";
@@ -128,6 +134,8 @@ AddressTest::PitheLocationTest()
 bool 
 AddressTest::InceptLocationTest()
 {
+   // Verifies behavior of adding a loction
+   // in an address.
    bool bResult = true;
 
    Addresser addr;
