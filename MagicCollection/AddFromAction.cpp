@@ -15,8 +15,7 @@ AddFromAction::~AddFromAction()
 bool 
 AddFromAction::Execute(TransactionManager* aoCol)
 {
-   m_ToAddress = aoCol->GetCollection()->GetIdentifier();
-   //aoCol->AddFrom(m_szName, m_szIdentifyingHash, m_FromAddress);
+   aoCol->AddFrom(m_szName, m_szIdentifyingHash, m_FromAddress);
 
    return true;
 }
@@ -24,7 +23,7 @@ AddFromAction::Execute(TransactionManager* aoCol)
 bool 
 AddFromAction::Rollback(TransactionManager* aoCol)
 {
-   //aoCol->Remove(m_szName, m_szIdentifyingHash, m_ToAddress);
+   aoCol->Remove(m_szName, m_szIdentifyingHash);
 
    return true;
 }

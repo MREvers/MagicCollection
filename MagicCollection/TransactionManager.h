@@ -2,10 +2,10 @@
 #include<vector>
 #include<string>
 #include "Transaction.h"
+#include "Addresser.h"
 
 typedef std::pair<std::string, std::string> Tag;
 
-class Address;
 class Collection;
 class CopyItem;
 class CollectionSource;
@@ -39,12 +39,11 @@ public:
    void AddFrom(
       std::string aszName,
       std::string aszIdentifyingHash,
-      const Address& aResiAddress);
+      const Identifier& aResiAddress);
    
    void Remove(
       std::string aszName, 
-      std::string aszIdentifyingHash, 
-      Address aszResidentIn);
+      std::string aszIdentifyingHash);
 
    void Change(
       std::string aszName,  

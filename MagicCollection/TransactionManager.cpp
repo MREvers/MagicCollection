@@ -90,7 +90,7 @@ void
 TransactionManager::AddFrom(
    std::string aszName,
    std::string aszIdentifyingHash,
-   const Address& aResiAddress)
+   const Identifier& aResiAddress)
 {
    m_ptrCollection->addItemFrom(aszName, aszIdentifyingHash, aResiAddress);
 }
@@ -98,10 +98,9 @@ TransactionManager::AddFrom(
 void 
 TransactionManager::Remove(
    std::string aszName,
-   std::string aszUID,
-   Address aszResidentIn)
+   std::string aszUID)
 {
-   //m_ptrCollection->removeItem(aszName, aszIdentifyingHash, aszResidentIn);
+   m_ptrCollection->removeItem(aszName, aszUID);
 }
 
 void 

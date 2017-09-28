@@ -29,7 +29,7 @@
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
-    <CharacterSet>Unicode</CharacterSet>
+    <CharacterSet>MultiByte</CharacterSet>
     <CLRSupport>false</CLRSupport>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
@@ -166,6 +166,7 @@
     <ClCompile Include="CollectionItem.cpp" />
     <ClCompile Include="CollectionItemTest.cpp" />
     <ClCompile Include="CollectionSource.cpp" />
+    <ClCompile Include="CollectionTest.cpp" />
     <ClCompile Include="CollectionTracker.cpp" />
     <ClCompile Include="Config.cpp" />
     <ClCompile Include="CopyItem.cpp" />
@@ -208,6 +209,7 @@
     <ClInclude Include="CollectionItem.h" />
     <ClInclude Include="CollectionItemTest.h" />
     <ClInclude Include="CollectionSource.h" />
+    <ClInclude Include="CollectionTest.h" />
     <ClInclude Include="CollectionTracker.h" />
     <ClInclude Include="Config.h" />
     <ClInclude Include="CopyItem.h" />

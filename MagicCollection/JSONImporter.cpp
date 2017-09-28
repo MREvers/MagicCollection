@@ -412,6 +412,7 @@ void JSONImporter::ImportJSON(std::string aszFileName)
    file_stored << *xmlCardDoc;
    file_stored.close();
    xmlCardDoc->clear();
+   delete xmlCardDoc;
 
    clock_t end = clock();
    double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;

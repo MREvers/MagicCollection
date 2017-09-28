@@ -1,5 +1,6 @@
 #include "StoreFrontBackEnd.h"
 #include "AddressTest.h"
+#include "CollectionTest.h"
 #include "CollectionItemTest.h"
 #include "CopyTest.h"
 
@@ -41,6 +42,9 @@ CStoreFrontBackEnd::CStoreFrontBackEnd()
    bTest &= at.ParseTestManySub();
    bTest &= at.ParseTestSingle();
    bTest &= at.PitheLocationTest();
+
+   CollectionTest clt;
+   bTest &= clt.AddItem_Test();
 
    // No Server for now
    m_ColSource = new CollectionSource();

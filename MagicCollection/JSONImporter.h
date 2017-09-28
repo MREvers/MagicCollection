@@ -15,9 +15,7 @@
 class CardAttributes
 {
 public:
-   CardAttributes(std::string aszName)
-   {
-   };
+   CardAttributes(std::string aszName){};
    ~CardAttributes() {};
 
    std::string Keys[35];

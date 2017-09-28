@@ -29,6 +29,7 @@ public:
 
    std::string GetImportSourceFile();
    std::string GetSourceFile();
+   std::string GetSourceFolder();
    std::string GetHistoryFolderName();
    std::string GetMetaFolderName();
    std::string GetImagesFolder();
@@ -78,6 +79,8 @@ private:
 
 public:
    static Config* Instance();
+   static void SetTestMode(bool abMode);
+   static Config TestInstance();
 
    static char* Config::TrackingTagId;
    static char* Config::IgnoredTagId;
@@ -88,5 +91,7 @@ public:
    static char* Config::CollectionDefinitionKey;
 
 private:
+   static bool ms_bTestMode;
    static Config* Config::ms_pConfig;
+   static Config* Config::ms_pTestConfig;
 };

@@ -104,7 +104,7 @@ private:
    void addItemFrom(
       const std::string& aszName, 
       const std::string& aszUID,
-      const Address& aAddress);
+      const Identifier& aAddress);
 
    void removeItem(
       const std::string& aszName, 

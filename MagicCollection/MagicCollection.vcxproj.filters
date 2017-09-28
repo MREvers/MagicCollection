@@ -153,6 +153,9 @@
     <ClCompile Include="Addresser.cpp">
       <Filter>CollectionItems\DataHelpers</Filter>
     </ClCompile>
+    <ClCompile Include="CollectionTest.cpp">
+      <Filter>Tests</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="JSONImporter.h">
@@ -271,6 +274,9 @@
     </ClInclude>
     <ClInclude Include="Addresser.h">
       <Filter>CollectionItems\DataHelpers</Filter>
+    </ClInclude>
+    <ClInclude Include="CollectionTest.h">
+      <Filter>Tests</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

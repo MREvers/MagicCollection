@@ -18,6 +18,7 @@ public:
    bool Hash_Test();
    bool SetParent_Test();
    bool IsParent_Test();
+   // Set attribute test
 
    bool ResidentIn_Parent_ParentIsResident_Test();
    bool ResidentIn_Parent_ParentIsNotResident_Test();

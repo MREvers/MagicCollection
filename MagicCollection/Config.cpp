@@ -9,6 +9,7 @@ const char * const CollectionObject::LstNonUniqueTraits[] = { "set", "multiverse
 */
 
 Config* Config::ms_pConfig = nullptr;
+Config* Config::ms_pTestConfig = nullptr;
 char* Config::MetaFileExtension = "meta";
 char* Config::HistoryFileExtension = "history";
 char* Config::TrackingTagId = "__";
@@ -16,6 +17,7 @@ char* Config::IgnoredTagId = "_";
 char* Config::HashKey = "__hash";
 char* Config::NotFoundString = "NF";
 char* Config::CollectionDefinitionKey = ":";
+bool Config::ms_bTestMode = false;
 
 Config::Config()
 {
@@ -41,6 +43,12 @@ Config::~Config()
 std::string Config::GetSourceFile()
 {
    return ".\\Config\\" + m_szSourceFolder + "\\" + m_szSourceFile;
+}
+
+std::string 
+Config::GetSourceFolder()
+{
+   return ".\\Config\\" + m_szSourceFolder;
 }
 
 std::string Config::GetImportSourceFile()
@@ -75,7 +83,7 @@ std::string Config::GetCollectionsFolderName()
 
 std::string Config::GetKeyCode(std::string aszFullKey)
 {
-   std::vector<std::pair<std::string, std::string>>::iterator iter_KeyMappings = m_lstKeyCodeMappings.begin();
+   auto iter_KeyMappings = m_lstKeyCodeMappings.begin();
    for (; iter_KeyMappings != m_lstKeyCodeMappings.end(); ++iter_KeyMappings)
    {
       if (iter_KeyMappings->first == aszFullKey)
@@ -178,7 +186,50 @@ Config* Config::Instance()
       ms_pConfig = new Config();
    }
 
+   if( ms_pTestConfig == nullptr && ms_bTestMode )
+   {
+      ms_pTestConfig = new Config(TestInstance());
+   }
+
+   if( ms_bTestMode )
+   {
+      return ms_pTestConfig;
+   }
+
    return ms_pConfig;
+}
+
+void
+Config::SetTestMode( bool abMode )
+{
+   ms_bTestMode = abMode;
+}
+
+Config 
+Config::TestInstance()
+{
+   Config cTest;
+   cTest.m_lstIdentifyingAttributes.clear();
+   cTest.m_lstKeyCodeMappings.clear();
+   cTest.m_lstPairedKeys.clear();
+   cTest.m_lstPerCollectionMetaTags.clear();
+   cTest.m_lstStaticAttributes.clear();
+   cTest.m_szSourceFolder = "Test";
+   cTest.m_szSourceFile = "TestSource.xml";
+
+   cTest.m_lstStaticAttributes.push_back("name");
+   cTest.m_lstIdentifyingAttributes.push_back("set");
+   cTest.m_lstIdentifyingAttributes.push_back("mud");
+   cTest.m_lstIdentifyingAttributes.push_back("solo");
+
+   cTest.m_lstPairedKeys.push_back(std::make_pair("set","mud"));
+
+   cTest.m_lstKeyCodeMappings.push_back(std::make_pair("name", "nam"));
+   cTest.m_lstKeyCodeMappings.push_back(std::make_pair("set", "set"));
+   cTest.m_lstKeyCodeMappings.push_back(std::make_pair("mud", "mud"));
+   cTest.m_lstKeyCodeMappings.push_back(std::make_pair("solo", "sol"));
+
+   return cTest;
 }
 
 void Config::initDefaultSettings()

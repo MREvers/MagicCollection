@@ -355,7 +355,7 @@ void
 Collection::addItemFrom(
    const string& aszName,
    const string& aszIdentifyingHash,
-   const Address& aResiAddress)
+   const Identifier& aResiAddress)
 {
    TryGet<CollectionItem> item;
 
@@ -384,8 +384,10 @@ Collection::removeItem( const string& aszName,
    item->RemoveCopy( GetIdentifier(), aszUID );
 
    // Remove any items from the cache that are no longer in this collection.
-   if (item->FindCopies(GetIdentifier(), All).size() == 0)
+   int iRemainingCopies = item->FindCopies(GetIdentifier(), All).size() ;
+   if( iRemainingCopies == 0 )
    {
+      unregisterItem(iCache);
    }
 
    // Notify other collections they may need to sync since this may have been 
