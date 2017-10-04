@@ -43,14 +43,6 @@ namespace StoreFrontPro.Server
          get { return GetPrototype(PrototypeName); }
       }
 
-      private object m_oLock = new object();
-      private bool _bCardImageIsLoading = false;
-      private bool m_bCardImageIsLoading
-      {
-         get { lock (m_oLock) { return _bCardImageIsLoading; } }
-         set { lock (m_oLock) { _bCardImageIsLoading = value; } }
-      }
-
       public int Count = 1; 
       public string TargetCollection;
       public List<Tuple<string, string>> MetaTags;
@@ -149,19 +141,14 @@ namespace StoreFrontPro.Server
 
       public string GetImagePath()
       {
-         return Path.Combine(ServerInterface.Server.GetImagesFolderPath(), "_" + GetAttr("set"), getImageFileName());
-          //  ServerInterface.Server.GetImagesFolderPath() + "\\" + 
+         return Path.Combine( ServerInterface.Server.GetImagesFolderPath(),
+                              "_" + GetAttr("set"),
+                              getImageFileName() );
       }
 
       public void GetImage(Action<BitmapImage> ImageReceiver)
       {
-         if (!m_bCardImageIsLoading)
-         {
-            m_bCardImageIsLoading = true;
-            Action<BitmapImage> actionWrapper = 
-               (image) => { m_bCardImageIsLoading = false; ImageReceiver(image); };
-            ServerInterface.Card.DownloadAndCacheImage(actionWrapper, this);
-         }
+         ServerInterface.Card.DownloadAndCacheImage(ImageReceiver, this);
       }
 
       private void parseIdentifier(string aszIdentifier)

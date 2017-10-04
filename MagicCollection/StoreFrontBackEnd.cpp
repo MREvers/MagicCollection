@@ -167,6 +167,6 @@ void CStoreFrontBackEnd::SubmitBulkChanges(std::string aszCollection, std::vecto
 void CStoreFrontBackEnd::ImportCollectionSource()
 {
    JSONImporter JI;
-   //JI.ImportJSON(Config::Instance()->GetImportSourceFile());
+   JI.ImportJSON(Config::Instance()->GetImportSourceFile());
    m_ColSource->HotSwapLib(Config::Instance()->GetSourceFile());
 }

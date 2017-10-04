@@ -14,18 +14,6 @@ namespace StoreFrontPro.Server
    {
       public class CardIFace
       {
-         private class ImageDownloadedEventArgs : EventArgs
-         {
-            public CardModel DataModel;
-            public EventArgs e;
-
-            public ImageDownloadedEventArgs(CardModel aDataModel, EventArgs ae)
-            {
-               DataModel = aDataModel;
-               e = ae;
-            }
-         }
-
          public string GetProtoType(string szCardName)
          {
             return SCI.GetCardPrototype(szCardName);
@@ -33,85 +21,7 @@ namespace StoreFrontPro.Server
 
          public void DownloadAndCacheImage(Action<BitmapImage> aCallback, CardModel aoCardModel)
          {
-            Thread downloadAndLoadImageThread = new Thread(() => { inDownloadAndCacheImage(aCallback, aoCardModel); });
-            downloadAndLoadImageThread.IsBackground = true;
-            downloadAndLoadImageThread.Start();
-         }
-
-         private void inDownloadAndCacheImage(Action<BitmapImage> aCallback, CardModel aoCardModel)
-         {
-            //Download the image.
-            string szMUID = aoCardModel.GetAttr("multiverseid");
-            string szFilePath = aoCardModel.GetImagePath();
-
-            // Check if we already have the image
-            string szDirectoryName = Path.GetDirectoryName(szFilePath);
-            if (!Directory.Exists(szDirectoryName))
-            {
-               Directory.CreateDirectory(szDirectoryName);
-            }
-
-            // Less than 100 bytes, ignore the file.
-            if ( ( !File.Exists(szFilePath) ) ||
-                 ( new System.IO.FileInfo(szFilePath).Length < 100) )
-            {
-               if (File.Exists(szFilePath))
-               {
-                  File.Delete(szFilePath);
-               }
-
-               using (WebClient client = new WebClient())
-               {
-                  string szURL;
-                  if (!string.IsNullOrEmpty(szMUID))
-                  {
-                     szURL = @"http://gatherer.wizards.com/Handlers/Image.ashx?multiverseid=" +
-                             szMUID + @"&type=card";
-                  }
-                  else
-                  {
-                     szURL = @"http://gatherer.wizards.com/Handlers/Image.ashx?name=" +
-                             aoCardModel.Prototype + "&type=card";
-                  }
-
-                  // Download synchronously.
-                  try
-                  {
-                     client.DownloadFile(new Uri(szURL, UriKind.RelativeOrAbsolute), szFilePath);
-                  }
-                  catch
-                  {
-                     // Connection issues, various things can fail here
-                     if (File.Exists(szFilePath)) { File.Delete(szFilePath); }
-                  }
-
-               }
-            }
-
-            loadImageFromFile(szFilePath, aCallback);
-         }
-
-         private void loadImageFromFile(string aszFileName, Action<BitmapImage> aCallback)
-         {
-            if (!File.Exists(aszFileName)) { return; }
-
-            try
-            {
-               BitmapImage bitmap = new BitmapImage();
-               using (FileStream stream = File.OpenRead(aszFileName))
-               {
-                  bitmap.BeginInit();
-                  bitmap.StreamSource = stream;
-                  bitmap.CacheOption = BitmapCacheOption.OnLoad;
-                  bitmap.EndInit();
-                  bitmap.Freeze();
-               }
-               aCallback(bitmap);
-            }
-            catch
-            {
-               aCallback(null);
-            }
+            ImageHandler.Handler.GetImage(aCallback, aoCardModel);
          }
       }
    }
