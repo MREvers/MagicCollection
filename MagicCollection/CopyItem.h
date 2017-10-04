@@ -17,6 +17,13 @@ class CollectionItem;
 // Last modified session date is an integer.
 class CopyItem
 {
+public:
+   enum RemoveAddressType : int
+   {
+      Individual = 0x0,
+      Family = 0x1
+   };
+
 private:
    // Use static constructor to build this class.
    CopyItem( const Identifier& aAddrParentIdentifier );
@@ -31,12 +38,15 @@ public:
    Address GetAddress() const;
    std::string GetUID() const;
 
+   bool IsVirtual() const;
+
    void SetParent( const Identifier& aAddrTestAddress );
    bool IsParent( const Location& aAddrTestAddress ) const;
    std::string GetParent() const;
 
    void AddResident(const Identifier& aAddrAddress);
-   int RemoveResident(const Identifier& aAddrAddress);
+   int RemoveResident( const Identifier& aAddrAddress,
+                       RemoveAddressType aiRemoveType = Individual );
    bool IsResidentIn( const Location& aAddrAddress ) const;
    bool IsReferencedBy( const Location& aAddrAddress ) const;
    std::vector<Address> GetResidentIn() const;

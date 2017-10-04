@@ -363,7 +363,7 @@ Collection::addItemFrom(
    if (!item.Good()) { return; }
 
    auto cItem = item->FindCopy( aszIdentifyingHash );
-   if (cItem.Good()) { return; }
+   if (!cItem.Good()) { return; }
    auto copy = cItem.Value()->get();
 
    copy->AddResident(GetIdentifier());

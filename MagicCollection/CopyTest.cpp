@@ -477,6 +477,7 @@ CopyTest::RemoveResident_Parent_InChainOfParent_EntireChain()
 
    bResult &= iNewResidentCount == iResidentCount-1;
    bResult &= ptTestCopy->GetResidentIn().size() == 0;
+   bResult &= ptTestCopy->IsVirtual();
    return bResult;
 }
 

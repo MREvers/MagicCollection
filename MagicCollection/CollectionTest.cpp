@@ -53,7 +53,9 @@ CollectionTest::AddItem_Test()
 bool 
 CollectionTest::RemoveItem_Test()
 {
-   // Verifies that AddItem loads a card from the col Source
+   // Verifies that Remove Item removes an item from the collection
+   // Verifies that when no other collections reference an item, the item
+   // is erased.
    // buffer correctly.
    bool bRetval = true;
    auto col = getTestCollection();
@@ -76,6 +78,39 @@ CollectionTest::RemoveItem_Test()
 }
 
 bool 
+CollectionTest::RemoveItem_OtherCollectionsRef_Test()
+{
+   // Verifies that when other collections reference an item, the item
+   // is not erased. Also verifies that the copy becomes virtual
+   bool bRetval = true;
+   auto col = getTestCollection();
+   auto szCardName = *cardName(0);
+
+   // Add the item to the test collection
+   col->AddItem(szCardName);
+   auto addedItem = m_ptColSource->GetCardPrototype(szCardName);
+   auto addedCopy = addedItem->FindCopies(col->GetIdentifier(), All)[0];
+
+   auto colBorrower = getTestCollection("TestID2", false);
+   colBorrower->AddItemFrom(szCardName, addedCopy->GetUID(), col->GetIdentifier());
+   
+   // Borrow from the test collection.
+   auto lstBorrowedCopies = m_ptColSource->GetCollection(colBorrower->GetIdentifier(), All);
+   auto iBorrowedCopiesBeforeRemove = lstBorrowedCopies.size();
+
+   // Now remove from the test collection
+   col->RemoveItem(szCardName, addedCopy->GetUID());
+
+   lstBorrowedCopies = m_ptColSource->GetCollection(colBorrower->GetIdentifier(), All);
+   auto iBorrowedCopiesAfter = lstBorrowedCopies.size();
+
+   bRetval &= iBorrowedCopiesAfter == iBorrowedCopiesBeforeRemove;
+   bRetval &= addedCopy->IsVirtual();
+
+   return bRetval;
+}
+
+bool 
 CollectionTest::ChangeItem_Test()
 {
    return false;
@@ -84,7 +119,26 @@ CollectionTest::ChangeItem_Test()
 bool 
 CollectionTest::AddItemFrom_Test()
 {
-   return false;
+   // Verifies that additemfrom correctly adds an existing item.
+   bool bRetval = true;
+   auto col = getTestCollection();
+   auto szCardName = *cardName(0);
+
+   // Add the item to the test collection
+   col->AddItem(szCardName);
+   auto addedItem = m_ptColSource->GetCardPrototype(szCardName);
+   auto addedCopy = addedItem->FindCopies(col->GetIdentifier(), All)[0];
+
+   auto colBorrower = getTestCollection("TestID2", false);
+   colBorrower->AddItemFrom(szCardName, addedCopy->GetUID(), col->GetIdentifier());
+   
+   auto lstBorrowedCopies = m_ptColSource->GetCollection(colBorrower->GetIdentifier(), All);
+   auto addedFromCopy = lstBorrowedCopies[0];
+
+   bRetval &= lstBorrowedCopies.size() == 1;
+   bRetval &= addedFromCopy.get() == addedCopy.get();
+
+   return bRetval;
 }
 
 bool 
@@ -175,10 +229,14 @@ CollectionTest::deleteTestColSourceFile()
 }
 
 std::shared_ptr<Collection> 
-CollectionTest::getTestCollection()
+CollectionTest::getTestCollection(string aszId, bool abClearCache)
 {
-   m_ptColSource->ClearCache();
-   return std::shared_ptr<Collection>(new Collection("TestCol", m_ptColSource, "TestColFile", "TestID"));
+   if( abClearCache )
+   {
+      m_ptColSource->ClearCache();
+   }
+
+   return std::shared_ptr<Collection>(new Collection("TestCol", m_ptColSource, "TestColFile", aszId));
 }
 
 const std::string*

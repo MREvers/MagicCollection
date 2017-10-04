@@ -88,6 +88,110 @@ CollectionItemTest::RemoveCopy_PartialChain_Test()
    return bResult;
 }
 
+bool 
+CollectionItemTest::FindCopies_All_Test()
+{
+   bool bResult = true;
+   vector<Tag> vecIDs, vecMeta;
+   auto testItem = getTestCollectionItem();
+
+   Location copyParent("IDTest-6");
+   testItem.AddCopy( copyParent, vecIDs, vecMeta );
+   testItem.AddCopy( copyParent, vecIDs, vecMeta );
+
+   int iCopies = testItem.FindCopies(copyParent, All).size();
+
+   bResult &= iCopies == 2;
+
+   return bResult;
+}
+
+bool 
+CollectionItemTest::FindCopies_Virtual_Test()
+{
+   bool bResult = true;
+   vector<Tag> vecIDs, vecMeta;
+   auto testItem = getTestCollectionItem();
+
+   Location copyParent("IDTest-6");
+   testItem.AddCopy( copyParent, vecIDs, vecMeta );
+   testItem.AddCopy( copyParent, vecIDs, vecMeta );
+
+   auto lstCopies = testItem.FindCopies(copyParent, All);
+   auto copy = lstCopies[0];
+
+   // Try to get virtual copies, there should be any.
+   int iVirtualCopies = testItem.FindCopies(copyParent, Virtual).size();
+
+   // Make the copy virtual.
+   copy->RemoveResident(copyParent, CopyItem::Family);
+
+   // Need to add this back. This will not change the parent from ""
+   copy->AddResident(copyParent);
+
+   // Now that one should be a virtual copy, there are some.
+   int iNewVirtualCopies = testItem.FindCopies(copyParent, Virtual).size();
+
+   bResult &= iVirtualCopies == 0;
+   bResult &= iNewVirtualCopies == 1;
+
+   return bResult;
+}
+
+bool 
+CollectionItemTest::FindCopies_Borrowed_Test()
+{
+   bool bResult = true;
+   vector<Tag> vecIDs, vecMeta;
+   auto testItem = getTestCollectionItem();
+
+   Location copyParent("IDTest-6");
+   Location borrowerParent("ID2-1");
+
+   // Create 1 copy that is not borrowed and borrowing parent owns.
+   testItem.AddCopy( borrowerParent, vecIDs, vecMeta );
+
+   // Create 1 copy that borrowerParent is borrowing
+   vecMeta.push_back(make_pair(CopyItem::GetAddressKey(), copyParent.GetFullAddress()));
+   testItem.AddCopy( borrowerParent, vecIDs, vecMeta );
+
+   // Try to get virtual copies, there should be any.
+   int iBorrowedCopies = testItem.FindCopies(borrowerParent, Borrowed).size();
+   int iAllCopies = testItem.FindCopies(borrowerParent, All).size();
+
+   bResult &= iBorrowedCopies == 1;
+   bResult &= iAllCopies == 2;
+
+   return bResult;
+}
+
+bool 
+CollectionItemTest::FindCopies_Local_Test()
+{
+   bool bResult = true;
+   vector<Tag> vecIDs, vecMeta;
+   auto testItem = getTestCollectionItem();
+
+   Location copyParent("IDTest-6");
+   Location borrowerParent("ID2-1");
+
+   // Create 1 copy that is not borrowed and borrowing parent owns.
+   testItem.AddCopy( borrowerParent, vecIDs, vecMeta );
+
+   // Create 1 copy that borrowerParent is borrowing
+   vecMeta.push_back(make_pair(CopyItem::GetAddressKey(), copyParent.GetFullAddress()));
+   testItem.AddCopy( borrowerParent, vecIDs, vecMeta );
+
+   // Try to get virtual copies, there should be any.
+   int iLocalInBorrowCopies = testItem.FindCopies(borrowerParent, Local).size();
+   int iLocalCopies = testItem.FindCopies(copyParent, Local).size();
+
+   bResult &= iLocalInBorrowCopies == 1;
+   bResult &= iLocalCopies == 1;
+
+   return bResult;
+}
+
 CollectionItem 
 CollectionItemTest::getTestCollectionItem()
 {

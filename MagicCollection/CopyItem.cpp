@@ -87,6 +87,12 @@ std::string CopyItem::GetUID() const
    return GetMetaTag( GetUIDKey(), Tracking );
 }
 
+bool 
+CopyItem::IsVirtual() const
+{
+   return m_Address.GetFullAddress() == "";
+}
+
 string CopyItem::GetParent() const
 {
    return m_Address.GetFullAddress();
@@ -150,14 +156,21 @@ void CopyItem::AddResident(const Identifier& aAddrAddress)
 // Returns the number of collection chains this copy is referenced in.
 // Main collection counts as one.
 int 
-CopyItem::RemoveResident(const Identifier& aAddrAddress)
+CopyItem::RemoveResident( const Identifier& aAddrAddress,
+                          RemoveAddressType aiRemoveType )
 {
-   m_Address.ExtractIdentifier(aAddrAddress);
+   Address removeAddress(aAddrAddress.GetFullAddress());
+   if( aiRemoveType == Family )
+   {
+      removeAddress = aAddrAddress.GetBase();
+   }
+
+   m_Address.ExtractIdentifier(removeAddress);
 
    vector<int> lstRemoveAddrs;
    for( int i = 0; i < m_lstResidentIn.size(); i++ )
    {
-      if( m_lstResidentIn.at(i).ExtractIdentifier( aAddrAddress ) )
+      if( m_lstResidentIn.at(i).ExtractIdentifier( removeAddress ) )
       {
          if( m_lstResidentIn.at(i).IsEmpty() )
          {
@@ -165,6 +178,12 @@ CopyItem::RemoveResident(const Identifier& aAddrAddress)
          }
          break;
       }
+   }
+
+   // If there are no residents left, this copy item becomes virtual.
+   if( m_Address.IsEmpty() )
+   {
+      m_Address = Address();
    }
  
    return ( m_Address.IsEmpty() ? 0 : 1 ) + m_lstResidentIn.size();

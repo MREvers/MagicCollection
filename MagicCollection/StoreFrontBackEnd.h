@@ -17,6 +17,10 @@ public:
    CStoreFrontBackEnd();
    ~CStoreFrontBackEnd();
 
+   // Self Test
+   //
+   bool SelfTest();
+
    // Collection Manager Accessors
    //
    string CreateNewCollection(string aszCollectionName, string aszParent);

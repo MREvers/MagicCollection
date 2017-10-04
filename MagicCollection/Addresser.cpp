@@ -123,6 +123,12 @@ Identifier::GetFullAddress() const
 }
 
 Address 
+Identifier::GetBase() const
+{
+   return Address(GetMain());
+}
+
+Address 
 Identifier::ToAddress() const
 {
    return Address(GetFullAddress());
@@ -153,7 +159,7 @@ Identifier::parseIdName( const string& aszID )
    lstUIandPF = StringHelper::Str_Split(aszID, string("-"));
    m_szMain = lstUIandPF[0];
 
-   // Add the parsed subAddresses
+   // Add the parsed subAddresses, default to 1 if none named.
    lstUIandPF.push_back("1");
    lstSubAddresses = StringHelper::Str_Split(lstUIandPF[1], string(","));
    size_t iSAC = lstSubAddresses.size();
@@ -165,6 +171,12 @@ Identifier::parseIdName( const string& aszID )
       {
          addSubAddress(m_veciSubAddresses, iSubAddress);
       }
+   }
+
+   // Remove the default if this address is empty
+   if( aszID == "" )
+   {
+       m_veciSubAddresses.clear();
    }
 }
 

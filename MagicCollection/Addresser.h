@@ -32,6 +32,7 @@ public:
 
    std::string GetMain() const;
    std::string GetFullAddress() const;
+   Address GetBase() const;
 
    Address ToAddress() const;
    

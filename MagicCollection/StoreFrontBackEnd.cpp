@@ -6,11 +6,32 @@
 
 CStoreFrontBackEnd::CStoreFrontBackEnd()
 {
+   SelfTest();
+
+   // No Server for now
+   m_ColSource = new CollectionSource();
+   m_ColSource->LoadLib(Config::Instance()->GetSourceFile());
+
+   m_ColFactory = new CollectionFactory(m_ColSource);
+}
+
+
+CStoreFrontBackEnd::~CStoreFrontBackEnd()
+{
+}
+
+bool 
+CStoreFrontBackEnd::SelfTest()
+{
    bool bTest = true;
    CollectionItemTest cit;
    bTest &= cit.AddCopy_Test();
    bTest &= cit.RemoveCopy_EntireChain_Test();
    bTest &= cit.RemoveCopy_PartialChain_Test();
+   bTest &= cit.FindCopies_All_Test();
+   bTest &= cit.FindCopies_Virtual_Test();
+   bTest &= cit.FindCopies_Borrowed_Test();
+   bTest &= cit.FindCopies_Local_Test();
 
    CopyTest ct;
    bTest &= ct.CreateCopy_Test();
@@ -46,17 +67,10 @@ CStoreFrontBackEnd::CStoreFrontBackEnd()
    CollectionTest clt;
    bTest &= clt.AddItem_Test();
    bTest &= clt.RemoveItem_Test();
+   bTest &= clt.AddItemFrom_Test();
+   bTest &= clt.RemoveItem_OtherCollectionsRef_Test();
 
-   // No Server for now
-   m_ColSource = new CollectionSource();
-   m_ColSource->LoadLib(Config::Instance()->GetSourceFile());
-
-   m_ColFactory = new CollectionFactory(m_ColSource);
-}
-
-
-CStoreFrontBackEnd::~CStoreFrontBackEnd()
-{
+   return bTest;
 }
 
 void CStoreFrontBackEnd::SaveCollection(std::string aszCollectionName)

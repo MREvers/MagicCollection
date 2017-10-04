@@ -185,7 +185,7 @@ CollectionItem::FindCopies( const Location& aCollection,
          lstRetVal.push_back(copy);
       }
       else if( ( aSearchType & Virtual )         &&
-               ( copy->GetParent() == "" )       &&
+               ( copy->IsVirtual() )             &&
                ( copy->IsResidentIn(aCollection) ) )
       {
          lstRetVal.push_back(copy);
