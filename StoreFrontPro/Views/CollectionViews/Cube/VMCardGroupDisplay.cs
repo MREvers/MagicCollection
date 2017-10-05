@@ -148,9 +148,9 @@ namespace StoreFrontPro.Views.CollectionViews.Cube
       #region IViewModel
       public override void ModelUpdated()
       {
-         Action actWrapper = () => { ModelUpdated(); };
          if (!Application.Current.Dispatcher.CheckAccess())
          {
+            Action actWrapper = () => { ModelUpdated(); };
             Application.Current.Dispatcher.BeginInvoke(actWrapper);
             return;
          }

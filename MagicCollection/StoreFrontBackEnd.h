@@ -32,7 +32,7 @@ public:
    void SaveCollection(string aszCollectionName);
    void SubmitBulkChanges(string aszCollection, vector<string> alstChanges);
    vector<string> GetCollectionMetaData(string aszCollection);
-   vector<string> GetCollectionList(string aszCollection, int aiVisibility, bool bCollapsed);
+   vector<string> GetCollectionList(string aszCollection, int aiVisibility);
 
    // Source Accessors
    //

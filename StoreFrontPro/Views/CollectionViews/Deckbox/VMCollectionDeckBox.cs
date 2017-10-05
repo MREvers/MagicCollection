@@ -27,12 +27,6 @@ namespace StoreFrontPro.Views.CollectionViews.Deckbox
 
       public VMCollectionDeckBox(CollectionModel Model, string RoutingName) : base(Model, RoutingName)
       {
-         if (!Model.IsCollapsedCollection)
-         {
-            Model.IsCollapsedCollection = true;
-            Model.Sync();
-         }
-
          OperationWindow.SetNewDisplay(
              Name: "List",
              NewDisplay: new VFancyCollectionList(),

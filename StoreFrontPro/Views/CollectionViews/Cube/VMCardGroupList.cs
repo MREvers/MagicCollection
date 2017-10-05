@@ -16,9 +16,13 @@ namespace StoreFrontPro.Views.CollectionViews.Cube
 {
    class VMCardGroupList : ViewModel<MCardGroupList>
    {
+      #region Static Names
       private const string cszCardImageDisplayerName = "CIDN";
+      #endregion
 
+      #region Data Binding
       public string GroupName { get; set; }
+
       public ObservableCollection<ListViewItem> CategoryList { get; set; } =
          new ObservableCollection<ListViewItem>();
 
@@ -28,9 +32,13 @@ namespace StoreFrontPro.Views.CollectionViews.Cube
          get { return _ToolTipDisplay; }
          set { _ToolTipDisplay = value; OnPropertyChanged(); }
       }
+      #endregion
 
+      #region Properties
       public bool IsFullSize { get; set; } = false;
+      #endregion
 
+      #region Public Functions
       public VMCardGroupList(MCardGroupList Model, string RoutingName, bool IsFullSize = false)
          : base(Model, RoutingName)
       {
@@ -40,16 +48,40 @@ namespace StoreFrontPro.Views.CollectionViews.Cube
 
          ModelUpdated();
       }
+      #endregion
 
-      private void addItemToCategoryList(string aszItem)
+      #region Private Functions
+      /// <summary>
+      /// Adds the list of models to the displayed items.
+      /// </summary>
+      /// <param name="alstModels"></param>
+      private void buildCategoryList(IEnumerable<CardModel> alstModels)
+      {
+         foreach(var model in alstModels)
+         {
+            for(int i = 0; i < model.Count; i++)
+            {
+               addItemToCategoryList(model);
+            }
+         }
+      }
+
+      /// <summary>
+      /// Adds a specific Item to the displayed items.
+      /// </summary>
+      /// <param name="aItem"></param>
+      private void addItemToCategoryList(CardModel aItem)
       {
          ListViewItem newItem = new ListViewItem();
-         newItem.Content = aszItem;
+         newItem.Content = aItem.GetIdealIdentifier();
          newItem.MouseMove += displayToolTip;
 
          CategoryList.Add(newItem);
       }
 
+      /// <summary>
+      /// Clears the displayed items.
+      /// </summary>
       private void removeAllItems()
       {
          List<ListViewItem> lstTemp = new List<ListViewItem>();
@@ -58,12 +90,21 @@ namespace StoreFrontPro.Views.CollectionViews.Cube
          lstTemp.ForEach(x => removeItemFromCategoryList(x));
       }
 
+      /// <summary>
+      /// Removes a specific Item from the displayed items.
+      /// </summary>
+      /// <param name="aoItem"></param>
       private void removeItemFromCategoryList(ListViewItem aoItem)
       {
          aoItem.MouseMove -= displayToolTip;
          CategoryList.Remove(aoItem);
       }
 
+      /// <summary>
+      /// Event handler for mouse over. Displays the tooltip for an item.
+      /// </summary>
+      /// <param name="source"></param>
+      /// <param name="e"></param>
       private void displayToolTip(object source, MouseEventArgs e)
       {
          ListViewItem item = (source as ListViewItem);
@@ -93,10 +134,16 @@ namespace StoreFrontPro.Views.CollectionViews.Cube
                   ( tooltip.CardImage != null ) );                     // and Tooltip is displaying an image.
       }
 
+      /// <summary>
+      /// Returns the cardmodel with the ideal name if able.
+      /// </summary>
+      /// <param name="aszItem"></param>
+      /// <returns></returns>
       private CardModel getCardModel(string aszItem)
       {
          return Model.GroupedList.Where(x => x.GetIdealIdentifier() == aszItem).FirstOrDefault();
       }
+      #endregion
 
       #region IViewModel
       public override void ModelUpdated()
@@ -109,7 +156,7 @@ namespace StoreFrontPro.Views.CollectionViews.Cube
          }
 
          removeAllItems();
-         Model.GroupedList.ForEach(x => addItemToCategoryList(x.GetIdealIdentifier()));
+         buildCategoryList(Model.GroupedList);
       }
       #endregion
 

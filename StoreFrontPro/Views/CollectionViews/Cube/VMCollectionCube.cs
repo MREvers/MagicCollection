@@ -26,12 +26,6 @@ namespace StoreFrontPro.Views.CollectionViews.Cube
 
       public VMCollectionCube(CollectionModel Model, string RoutingName) : base(Model, RoutingName)
       {
-         if (Model.IsCollapsedCollection)
-         {
-            Model.IsCollapsedCollection = false;
-            Model.Sync();
-         }
-
          VMCardGroupDisplay collectionCubeVM = new VMCardGroupDisplay(Model.CollectionItems, VCICollectionCube.CardGroupDisplay);
          OperationWindow.SetNewDisplay(
              Name: "CollectionView",

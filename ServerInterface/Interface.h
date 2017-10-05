@@ -36,7 +36,7 @@ public:
 	List<String^>^ GetAllCardsStartingWith(String^ ahszText);
 
 	List<String^>^ GetCollectionMetaData(String^ ahszCollectionName);
-	List<String^>^ GetCollectionList(String^ ahszCollectionName, System::Boolean ahbCollapsed);
+	List<String^>^ GetCollectionList(String^ ahszCollectionName);
 
 	void SubmitBulkChanges(String^ ahszCollectionName, List<String^>^ ahlstBulkChanges);
 

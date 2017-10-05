@@ -260,8 +260,9 @@ Collection::LoadChanges(vector<string> lstLines)
 }
 
 vector<string> 
-Collection::GetCollectionList(MetaTagType atagType, bool aiCollapsed)
+Collection::GetCollectionList(MetaTagType atagType)
 {
+   bool aiCollapsed = true;
    static const function<string(const pair<string, int>&)> fnExtractor 
       = [](const pair<string, int>& pVal)->string { return pVal.first; };
 
@@ -657,14 +658,14 @@ void Collection::loadRemoveLine(const string& aszLine)
 
    for (size_t i = 0; i < sudoItem.Count; i++)
    {
-      string szHash;
-      int iHash = ListHelper::List_Find( string(Config::HashKey), 
-                                         sudoItem.MetaTags, 
-                                         Config::Instance()->GetTagHelper());
-      if (iHash != -1)
+      string szUID;
+      int iUID = ListHelper::List_Find( CopyItem::GetUIDKey(), 
+                                        sudoItem.MetaTags, 
+                                        Config::Instance()->GetTagHelper());
+      if (iUID != -1)
       {
-         szHash = sudoItem.MetaTags[iHash].second;
-         RemoveItem(sudoItem.Name, szHash);
+         szUID = sudoItem.MetaTags[iUID].second;
+         RemoveItem(sudoItem.Name, szUID);
       }
       else { break; }
    }

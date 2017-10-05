@@ -110,11 +110,11 @@ std::vector<std::string> CStoreFrontBackEnd::GetCollectionMetaData(std::string a
 }
 
 std::vector<std::string>
-CStoreFrontBackEnd::GetCollectionList(std::string aszCollection, int aiVisibility, bool bCollapsed)
+CStoreFrontBackEnd::GetCollectionList(std::string aszCollection, int aiVisibility)
 {
    if (m_ColFactory->CollectionExists(aszCollection))
    {
-      return m_ColFactory->GetCollection(aszCollection)->GetCollectionList((MetaTagType)aiVisibility, bCollapsed);
+      return m_ColFactory->GetCollection(aszCollection)->GetCollectionList((MetaTagType)aiVisibility);
    }
    else
    {

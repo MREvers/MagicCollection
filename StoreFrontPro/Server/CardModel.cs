@@ -30,7 +30,9 @@ namespace StoreFrontPro.Server
          get
          {
             _CardNameLong = PrototypeName;
-            MetaTags.ForEach(x => { _CardNameLong += x.Item1 + "=\"" + x.Item2 + "\" "; });
+            _CardNameLong += " { ";
+            IdentifyingAttributes.ForEach(x => { _CardNameLong += x.Item1 + "=\"" + x.Item2 + "\" "; });
+            _CardNameLong += "}";
             return _CardNameLong;
          }
       }
@@ -72,11 +74,8 @@ namespace StoreFrontPro.Server
             szMetaList += MTag.Item1 + "=\"" + MTag.Item2 + "\" ";
          }
 
-         foreach (Tuple<string, string> MTag in MetaTags)
-         {
-            szMetaList += MTag.Item1 + "=\"" + MTag.Item2 + "\" ";
-         }
          szMetaList += "}";
+
          return CardNameLong + " : " + szMetaList;
       }
 

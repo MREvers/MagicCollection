@@ -91,13 +91,12 @@ ServerClientInterface::GetCollectionMetaData(String^ ahszCollectionName)
 
 // [ { card name - long, [ <tags> ] }, ... }
 List<String^>^
-ServerClientInterface::GetCollectionList(String^ ahszCollectionName, System::Boolean ahbCollapsed)
+ServerClientInterface::GetCollectionList(String^ ahszCollectionName)
 {
 	string szCollectionName = msclr::interop::marshal_as<string>(ahszCollectionName);
 	int iVisibility = 0xF;
-	bool bCollapsed = ahbCollapsed;
 
-	vector<string> lstCollection = m_StoreFrontBackEnd->GetCollectionList(szCollectionName, iVisibility, bCollapsed);
+	vector<string> lstCollection = m_StoreFrontBackEnd->GetCollectionList(szCollectionName, iVisibility);
 
 	List<String^>^ hlstCollection;
 	hlstCollection = convertStrVecToLst(lstCollection);

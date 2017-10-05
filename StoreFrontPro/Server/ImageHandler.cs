@@ -94,7 +94,7 @@ namespace StoreFrontPro.Server
             return;
          }
 
-         // Overwrite an image.
+         // Overwrite an image if we don't already have one.
          int iLRU = getLRU();
          if( iLRU >= 0 )
          {

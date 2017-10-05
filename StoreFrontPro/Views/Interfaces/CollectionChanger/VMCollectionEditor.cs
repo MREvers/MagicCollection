@@ -72,14 +72,9 @@ namespace StoreFrontPro.Views.Interfaces.CollectionChanger
 
       private List<string> getFunctionList()
       {
-         foreach (MCollectionEditorItem item in m_lstItems)
-         {
-            item.FunctionText = item.FunctionText + " { set=\"" + item.SelectedSet + "\" } ";
-         }
-
          List<string> lstOutput = m_lstItems
-             .Select(x => x.FunctionText.Substring(0, 1) + " x" + x.Amount + x.FunctionText.Substring(1))
-             .ToList();
+            .Select(x => x.FunctionText.Substring(0, 1) + " x" + x.Amount + x.FunctionText.Substring(1))
+            .ToList();
          return lstOutput;
       }
 
@@ -186,7 +181,7 @@ namespace StoreFrontPro.Views.Interfaces.CollectionChanger
 
          VCISuggestionsSearchBox VCAddIS = new VCISuggestionsSearchBox(
             OK: (x) => { return (x as VMCollectionEditor).eSearchOKEventHandler; });
-         
+
          _IRouter.AddInterface(VCAddIS);
       }
       #endregion

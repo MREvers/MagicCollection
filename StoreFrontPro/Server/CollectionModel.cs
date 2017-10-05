@@ -101,17 +101,6 @@ namespace StoreFrontPro.Server
 
    partial class CollectionModel : IModel
    {
-      private bool _IsCollapsedCollection = true;
-      public bool IsCollapsedCollection
-      {
-         get { return _IsCollapsedCollection; }
-         set
-         {
-            m_bHardRebuild = (_IsCollapsedCollection != value);
-            _IsCollapsedCollection = value;
-         }
-      }
-
       public List<CardModel> Collection
       {
          get { return CollectionItems.Item; }
@@ -352,7 +341,7 @@ namespace StoreFrontPro.Server
             List<string> lstMDs = ServerInterface.Collection.GetCollectionMetaData(ID);
             analyzeMetaData(lstMDs);
 
-            List<string> lstItems = ServerInterface.Collection.GetCollectionList(ID, IsCollapsedCollection);
+            List<string> lstItems = ServerInterface.Collection.GetCollectionList(ID);
             setCollectionModels(lstItems);
 
             NotifyViewModel();
