@@ -4,6 +4,7 @@ using namespace rapidxml;
 
 CollectionSource::CollectionSource()
 {
+   m_bIsLoaded = false;
    resetBuffer();
 }
 
@@ -27,6 +28,7 @@ void CollectionSource::LoadLib(std::string aszFileName)
    std::ifstream file(aszFileName);
    if (!file.good())
    {
+      // TODO Close collection.
       return;
    }
 
@@ -68,6 +70,7 @@ void CollectionSource::LoadLib(std::string aszFileName)
    delete textContent;
 
    finalizeBuffer();
+   m_bIsLoaded = true;
 }
 
 void CollectionSource::HotSwapLib(std::string aszFileName)
@@ -338,6 +341,12 @@ void
 CollectionSource::ClearCache()
 {
    m_lstoCardCache.clear();
+}
+
+bool
+CollectionSource::IsLoaded()
+{
+   return m_bIsLoaded;
 }
 
 int CollectionSource::findInBuffer(std::string aszCardName, bool abCaseSensitive)

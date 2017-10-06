@@ -60,6 +60,7 @@
     <Compile Include="Server\CardModelStatic.cs" />
     <Compile Include="Server\CollectionModel.cs" />
     <Compile Include="Server\ImageHandler.cs" />
+    <Compile Include="Server\IServerObserver.cs" />
     <Compile Include="Server\SSICardInterface.cs" />
     <Compile Include="Server\SSICollectionInterface.cs" />
     <Compile Include="Server\SSIServer.cs" />
@@ -71,6 +72,9 @@
     </Compile>
     <Compile Include="StoreFrontMain.xaml.cs">
       <DependentUpon>StoreFrontMain.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Support\LoadingIndicator\LoadIndicator.xaml.cs">
+      <DependentUpon>LoadIndicator.xaml</DependentUpon>
     </Compile>
     <Compile Include="Support\MultiDisplay\MultiDisplay.xaml.cs">
       <DependentUpon>MultiDisplay.xaml</DependentUpon>
@@ -185,6 +189,10 @@
   </ItemGroup>
   <ItemGroup>
     <Page Include="StoreFrontMain.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Support\LoadingIndicator\LoadIndicator.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

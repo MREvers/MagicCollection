@@ -73,6 +73,12 @@ CStoreFrontBackEnd::SelfTest()
    return bTest;
 }
 
+bool 
+CStoreFrontBackEnd::ConfigIsLoaded()
+{
+   return Config::Instance()->IsLoaded();
+}
+
 void CStoreFrontBackEnd::SaveCollection(std::string aszCollectionName)
 {
    if (m_ColFactory->CollectionExists(aszCollectionName))

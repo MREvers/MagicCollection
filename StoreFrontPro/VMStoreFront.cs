@@ -14,6 +14,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Controls;
+using StoreFrontPro.Support.LoadingIndicator;
 
 namespace StoreFrontPro
 {
@@ -54,6 +55,17 @@ namespace StoreFrontPro
          showCollectionsOverview();
       }
 
+      public void ShowLoadingIndicator()
+      {
+         OperationWindow.ShowOverlay(new LoadIndicator());
+      }
+
+      public void CloseLoadingIndicator()
+      {
+         OperationWindow.CloseOverlay();
+      }
+
+      #region Private Methods
       private void showCollectionsOverview()
       {
          VMCollectionsOverview collectionsOverviewVM = new VMCollectionsOverview(Model.Collections, CollectionOverview);
@@ -121,6 +133,7 @@ namespace StoreFrontPro
       {
          Model.LoadLatestJSON();
       }
+      #endregion
 
       #region IViewModel
       public override void ModelUpdated()

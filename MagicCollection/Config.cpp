@@ -21,6 +21,7 @@ bool Config::ms_bTestMode = false;
 
 Config::Config()
 {
+   m_bIsFileConfig = false;
    m_fnKeyExtractor = [](Tag atag)->std::string { return atag.first; };
    m_fnValueExtractor = [](Tag atag)->std::string { return atag.second; };
 
@@ -32,6 +33,7 @@ Config::Config()
    else
    {
       initConfigSettings(file);
+      m_bIsFileConfig = true;
    }
 }
 
@@ -177,6 +179,12 @@ bool Config::IsValidKey(std::string aszKey)
 bool Config::IsStaticAttribute(std::string aszAttr)
 {
    return ListHelper::List_Find(aszAttr, m_lstStaticAttributes) != -1;
+}
+
+bool 
+Config::IsLoaded()
+{
+   return m_bIsFileConfig;
 }
 
 Config* Config::Instance()

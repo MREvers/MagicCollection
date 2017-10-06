@@ -19,7 +19,7 @@ namespace StoreFrontPro
    /// This class controls the main window essentially.
    /// Switches sub-views and displays other windows.
    /// </summary>
-   class StoreFront: IModel
+   class StoreFront: IModel, IServerObserver
    {
       public const string cszStoreFrontVMName = "SFVM";
 
@@ -32,7 +32,8 @@ namespace StoreFrontPro
       #region Public Functions
       public StoreFront(Window MainWindow)
       {
-         ServerInterface.Server.Register(() => { Collections.NotifyViewModel(); });
+         ServerInterface.Server.RegisterChangeListener(() => { Collections.NotifyViewModel(); });
+         ServerInterface.ListenForDebug(this);
 
          Collections = new BasicModel<List<CollectionModel>>(ServerInterface.Server.Collections, Sync);
          StoreFrontVM = new VMStoreFront(Model: this, RoutingName: cszStoreFrontVMName);
@@ -112,6 +113,20 @@ namespace StoreFrontPro
       public void DisableNotification()
       {
          throw new NotImplementedException();
+      }
+      #endregion
+
+      #region IServerObserver
+      public void ServerMessage(string Message)
+      {
+         if( Message == ServerInterface.LoadIndication )
+         {
+            StoreFrontVM.ShowLoadingIndicator();
+         }
+         else if( Message == ServerInterface.DoneIndication)
+         {
+            StoreFrontVM.CloseLoadingIndicator();
+         }
       }
       #endregion
    }

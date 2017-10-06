@@ -18,8 +18,14 @@ bool
 AddAction::Execute(TransactionManager* aoCol)
 {
    CopyItem* cItem = aoCol->Add(m_szName, m_lstIDs, m_lstMetas);
-   m_szAddedUID = cItem->GetUID();
-   return true;
+   
+   if( cItem != nullptr )
+   {
+      m_szAddedUID = cItem->GetUID();
+      return true;
+   }
+
+   return false;
 }
 
 bool 

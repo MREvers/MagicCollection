@@ -55,6 +55,8 @@ public:
    bool IsStaticAttribute(std::string aszAttrs);
    bool IsIdentifyingAttributes(std::string aszAttrs);
 
+   bool IsLoaded();
+
 private:
    std::vector<Tag> m_lstKeyCodeMappings;
    std::vector<Tag> m_lstPairedKeys;
@@ -76,6 +78,8 @@ private:
 
    void initDefaultSettings();
    void initConfigSettings(std::ifstream& asConfig);
+
+   bool m_bIsFileConfig;
 
 public:
    static Config* Instance();

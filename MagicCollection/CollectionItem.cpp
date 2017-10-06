@@ -490,7 +490,7 @@ CollectionItem::ToCardLine( const Identifier& aAddrParentID,
    unsigned int iDummy;
    for (; iter_keyValPairs != alstMetaTags.end(); ++iter_keyValPairs)
    {
-      if ( !( aAddrCompareID.GetMain() == "" )            &&
+      if ( !( aAddrCompareID.GetMain() == "" )       &&
             ( iter_keyValPairs->first == "Address" ) &&
             ( Address(iter_keyValPairs->second) == aAddrCompareID ) )
       {

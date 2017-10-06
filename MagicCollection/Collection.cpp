@@ -332,11 +332,15 @@ Collection::addItem(
 	const vector<Tag>& alstAttrs, 
 	const vector<Tag>& alstMetaTags)
 {
-   TryGet<CollectionItem> item; CopyItem* cItem;
-   
+   CopyItem* cItem;
    int iCache = m_ptrCollectionSource->LoadCard(aszName);
+   if( iCache == -1 )
+   {
+      // TODO Could Not Load.
+      return nullptr;
+   }
 
-   item = m_ptrCollectionSource->GetCardPrototype(iCache);
+   auto item = m_ptrCollectionSource->GetCardPrototype(aszName);
 
    cItem = item->AddCopy(GetIdentifier(), alstAttrs, alstMetaTags).get();
 

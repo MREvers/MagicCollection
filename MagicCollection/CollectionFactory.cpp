@@ -20,6 +20,12 @@ CollectionFactory::LoadCollectionFromFile(std::string aszFileName)
    std::vector<std::string> lstSplitExt;
    std::string szFile;
 
+   if( !m_ColSource->IsLoaded() )
+   {
+      // TODO indicat this
+      return szRetVal;
+   }
+
    // Get the file name.
    lstSplitFile = StringHelper::Str_Split(aszFileName, "\\");
    szFile = lstSplitFile[lstSplitFile.size() - 1];
@@ -47,6 +53,11 @@ std::string
 CollectionFactory::CreateNewCollection(std::string aszColName, std::string aszParentID)
 {
    Collection* oCol;
+   if( !m_ColSource->IsLoaded() )
+   {
+      // TODO indicat this
+      return Config::NotFoundString;
+   }
 
    // The parent is required to be loaded to have it as a parent
    if (CollectionExists(aszParentID))

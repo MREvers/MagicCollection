@@ -4,6 +4,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Media.Animation;
 
 namespace StoreFrontPro.Server
 {
@@ -45,7 +48,11 @@ namespace StoreFrontPro.Server
             Notifiers = new List<Action>();
          }
 
-         public void Register(Action aAction)
+         /// <summary>
+         /// Notified whenever a collection model is created.
+         /// </summary>
+         /// <param name="aAction"></param>
+         public void RegisterChangeListener(Action aAction)
          {
             Notifiers.Add(aAction);
          }
@@ -187,8 +194,13 @@ namespace StoreFrontPro.Server
          {
             singleton.enqueueService(() =>
             {
-               SCI.ImportCollection();
-            }, false);
+               ImportJSONCollection();
+            }, false, true);
+         }
+
+         public void ImportJSONCollection()
+         {
+            SCI.ImportCollection();
          }
 
          public void CreateCollection(string aszName, string aszParent = "")

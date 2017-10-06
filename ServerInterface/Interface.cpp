@@ -116,6 +116,12 @@ void ServerClientInterface::ImportCollection()
 	m_StoreFrontBackEnd->ImportCollectionSource();
 }
 
+System::Boolean 
+ServerClientInterface::IsConfigLoaded()
+{
+   return m_StoreFrontBackEnd->ConfigIsLoaded();
+}
+
 List<String^>^
 ServerClientInterface::convertStrVecToLst(vector<string> alstTrans)
 {

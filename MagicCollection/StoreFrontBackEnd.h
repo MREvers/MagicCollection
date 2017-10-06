@@ -21,6 +21,10 @@ public:
    //
    bool SelfTest();
 
+   // Program Management
+   //
+   bool ConfigIsLoaded();
+
    // Collection Manager Accessors
    //
    string CreateNewCollection(string aszCollectionName, string aszParent);

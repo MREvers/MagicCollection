@@ -53,7 +53,6 @@ RemoveAction::getUndoAction(TransactionManager* aoCol) const
    return std::shared_ptr<Action>(adRetVal);
 }
 
-// It is the responsibility of the caller to delete this.
 std::shared_ptr<Action>
 RemoveAction::GetCopy() const
 {

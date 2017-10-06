@@ -164,6 +164,14 @@ namespace StoreFrontPro.Support.MultiDisplay
          if (m_oOverlay != null)
          {
             Display.IsEnabled = false;
+
+            if( m_oOverlay.DataContext == null )
+            {
+               m_oOverlay.DataContext = new object();
+            }
+
+            // Note that this sets the data context of the overlay
+            // to this multidisplay if it is null.
             MultiDisplayPanel.Children.Add(m_oOverlay);
             Panel.SetZIndex(m_oOverlay, 2);
          }

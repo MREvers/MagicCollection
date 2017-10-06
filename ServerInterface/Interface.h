@@ -41,6 +41,8 @@ public:
 	void SubmitBulkChanges(String^ ahszCollectionName, List<String^>^ ahlstBulkChanges);
 
 	void ImportCollection();
+
+   System::Boolean IsConfigLoaded();
 private:
 	CStoreFrontBackEnd* m_StoreFrontBackEnd;
 
