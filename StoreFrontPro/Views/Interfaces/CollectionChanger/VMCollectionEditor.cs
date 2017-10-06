@@ -72,10 +72,23 @@ namespace StoreFrontPro.Views.Interfaces.CollectionChanger
 
       private List<string> getFunctionList()
       {
-         List<string> lstOutput = m_lstItems
-            .Select(x => x.FunctionText.Substring(0, 1) + " x" + x.Amount + x.FunctionText.Substring(1))
-            .ToList();
-         return lstOutput;
+         return m_lstItems.Select(x => itemToCommand(x)).ToList();
+      }
+
+      private string itemToCommand(MCollectionEditorItem amcei)
+      {
+         string szCommandChar = amcei.FunctionText.Substring(0, 1);
+         string szCount = " x" + amcei.Amount;
+         string szId =  amcei.FunctionText.Substring(1);
+
+         // if the item is an addition, include the set.
+         // The set selection occurs after the card is decided, so this must be added here.
+         if( szCommandChar == "+" )
+         {
+            szId += " { set=\"" + amcei.SelectedSet + "\" }";
+         }
+
+         return szCommandChar + szCount + szId;
       }
 
       private List<string> getIdentifierOptions(string szCard)
