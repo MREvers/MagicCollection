@@ -14,10 +14,13 @@ namespace StoreFrontPro.Views.Interfaces.CollectionChanger
 {
    class VMCollectionEditor : ViewModel<CollectionModel>, IViewComponent, IVCISupporter
    {
+      #region Interface Names
       public const string AddSearchBox = "ASB";
       public const string RemoveSearchBox = "RSB";
       public const string CollectionEditorItem = "CEI";
+      #endregion
 
+      #region Data Binding
       public ObservableCollection<VCollectionEditorItem> TextChangesList { get; set; } =
          new ObservableCollection<VCollectionEditorItem>();
 
@@ -26,7 +29,9 @@ namespace StoreFrontPro.Views.Interfaces.CollectionChanger
 
       public RelayCommand AcceptCommand { get; set; }
       public RelayCommand CancelCommand { get; set; }
+      #endregion
 
+      #region Properties
       private List<MCollectionEditorItem> m_lstItems { get; set; }
 
       public string AddCardText
@@ -38,9 +43,13 @@ namespace StoreFrontPro.Views.Interfaces.CollectionChanger
       {
          get { return (RemoveCardSearchBox.DataContext as VMSuggestionsSearchBox).TextBoxValue; }
       }
+      #endregion
 
+      #region Events
       public event DisplayEventHandler DisplayEvent;
+      #endregion
 
+      #region Public Functions
       public VMCollectionEditor(CollectionModel Model, string RoutingName) : base(Model, RoutingName)
       {
          AcceptCommand = new RelayCommand(eAcceptCommand);
@@ -61,6 +70,7 @@ namespace StoreFrontPro.Views.Interfaces.CollectionChanger
          VCRemove.HookDisplayEvent(DisplayEventHandler);
          RemoveCardSearchBox = VCRemove.View as VSuggestionsSearchBox;
       }
+      #endregion
 
       #region Private Methods
       private void addEditorItem(CollectionDelta aCDelta)
@@ -83,7 +93,7 @@ namespace StoreFrontPro.Views.Interfaces.CollectionChanger
 
          // if the item is an addition, include the set.
          // The set selection occurs after the card is decided, so this must be added here.
-         if( szCommandChar == "+" )
+         if( szCommandChar == "+" || szCommandChar == "%")
          {
             szId += " { set=\"" + amcei.SelectedSet + "\" }";
          }

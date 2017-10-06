@@ -136,7 +136,7 @@ Collection::ReplaceItem(
    rpAction.SetIDs(alstIdChanges);
    rpAction.SetMeta(alstMetaChanges);
    rpAction.SetNewCard(aszNewName);
-   rpAction.SetHash(aszIdentifyingHash);
+   rpAction.SetUID(aszIdentifyingHash);
    rpAction.SetName(aszName);
 
    m_ptrTransactionManager->IncludeAction(rpAction);
@@ -680,20 +680,18 @@ void Collection::loadDeltaLine(const string& aszLine)
    CollectionItem::PseudoIdentifier sudoNewItem;
    CollectionItem::ParseCardLine(lstOldNew[1], sudoNewItem);
 
-   string szHash;
    int iCache;
-   int iHash = ListHelper::List_Find( string(Config::HashKey),
-                                      sudoOldItem.MetaTags, 
-                                      Config::Instance()->GetTagHelper() );
-   /*
-   if (iHash != -1 && 
+   int iUID = ListHelper::List_Find( CopyItem::GetUIDKey(),
+                                     sudoOldItem.MetaTags, 
+                                     Config::Instance()->GetTagHelper() );
+   if (iUID != -1 && 
       (iCache = m_ptrCollectionSource->LoadCard(sudoOldItem.Name)) != -1)
    {
-      string szHash; TryGet<CollectionItem> itemOld; CopyItem* cItem;
+      string szUID; TryGet<CollectionItem> itemOld; CopyItem* cItem;
       
-      szHash = sudoOldItem.MetaTags[iHash].second;
+      szUID = sudoOldItem.MetaTags[iUID].second;
       itemOld = m_ptrCollectionSource->GetCardPrototype(iCache);
-      cItem = itemOld->FindCopy(szHash).get();
+      cItem = itemOld->FindCopy(szUID)->get();
 
       for (size_t i = 0; i < sudoOldItem.Count; i++)
       {
@@ -701,7 +699,7 @@ void Collection::loadDeltaLine(const string& aszLine)
          if (sudoOldItem.Name == sudoNewItem.Name)
          {
             ChangeItem( sudoOldItem.Name,
-                        szHash, 
+                        szUID, 
                         sudoNewItem.Identifiers, 
                         sudoNewItem.MetaTags );
          }
@@ -710,7 +708,7 @@ void Collection::loadDeltaLine(const string& aszLine)
             TryGet<CollectionItem> itemNew = m_ptrCollectionSource->
                                       GetCardPrototype(iNewCache);
             ReplaceItem( sudoOldItem.Name, 
-                         szHash, 
+                         szUID, 
                          sudoNewItem.Name, 
                          sudoNewItem.Identifiers, 
                          sudoNewItem.MetaTags );
@@ -718,7 +716,6 @@ void Collection::loadDeltaLine(const string& aszLine)
       }
 
    }
-   */
 }
 
 void Collection::saveHistory()
