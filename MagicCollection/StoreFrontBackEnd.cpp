@@ -6,7 +6,7 @@
 
 CStoreFrontBackEnd::CStoreFrontBackEnd()
 {
-   SelfTest();
+   //SelfTest();
 
    // No Server for now
    m_ColSource = new CollectionSource();

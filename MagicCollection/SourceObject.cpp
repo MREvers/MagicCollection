@@ -55,9 +55,7 @@ SourceObject::AddAttribute(
 std::string 
 SourceObject::GetName(char* aiSearchBuffer)
 {
-   return std::string( aiSearchBuffer, 
-                       GetBufferOffset(),
-                       extractSize(m_pLstKeyVals[0]) );
+   return GetAttribute("name", aiSearchBuffer);
 }
 
 std::string 
