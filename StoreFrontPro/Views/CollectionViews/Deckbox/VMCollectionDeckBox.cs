@@ -16,7 +16,6 @@ namespace StoreFrontPro.Views.CollectionViews.Deckbox
       public const string CollectionEditor = "CE";
 
       private MultiDisplay _OperationWindow = new MultiDisplay();
-
       public MultiDisplay OperationWindow
       {
          get { return _OperationWindow; }

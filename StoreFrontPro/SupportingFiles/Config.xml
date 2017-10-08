@@ -31,55 +31,55 @@
       <CodeKeys>
         <Pair>
           <Key>set</Key>
-          <Key>set</Key>
+          <Key>1</Key>
         </Pair>
         <Pair>
           <Key>multiverseid</Key>
-          <Key>mid</Key>
+          <Key>2</Key>
         </Pair>
         <Pair>
           <Key>manaCost</Key>
-          <Key>man</Key>
+          <Key>3</Key>
         </Pair>
         <Pair>
           <Key>colors</Key>
-          <Key>clr</Key>
+          <Key>4</Key>
         </Pair>
         <Pair>
            <Key>layout</Key>
-           <Key>lay</Key>
+           <Key>5</Key>
         </Pair>
         <Pair>
           <Key>name</Key>
-          <Key>nam</Key>
+          <Key>6</Key>
         </Pair>
          <Pair>
             <Key>names</Key>
-            <Key>nms</Key>
+            <Key>7</Key>
          </Pair>
         <Pair>
           <Key>toughness</Key>
-          <Key>tuf</Key>
+          <Key>8</Key>
         </Pair>
         <Pair>
           <Key>loyalty</Key>
-          <Key>loy</Key>
+          <Key>9</Key>
         </Pair>
         <Pair>
           <Key>text</Key>
-          <Key>txt</Key>
+          <Key>10</Key>
         </Pair>
         <Pair>
           <Key>cmc</Key>
-          <Key>cmc</Key>
+          <Key>11</Key>
         </Pair>
         <Pair>
           <Key>colorIdentity</Key>
-          <Key>cid</Key>
+          <Key>12</Key>
         </Pair>
         <Pair>
           <Key>types</Key>
-          <Key>typ</Key>
+          <Key>13</Key>
         </Pair>
       </CodeKeys>
     </ImportDefinitions>

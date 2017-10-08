@@ -3,10 +3,17 @@
 
 SourceObject::SourceObject(int aiCharBufOffset)
 {
-   m_iCachedIndex = -1;
-   m_iCharBufferOffset = aiCharBufOffset;
-   m_iKeyValArraySize = 0;
-   m_iNameIndex = 0;
+   for( int i = 0; i < 5; i++ )
+   {
+      m_pOffAndInd[i] = 0;
+   }
+
+   for( int i = 0; i < ms_iNumKeys; i++ )
+   {
+      m_pLstKeyVals[i] = 0;
+   }
+
+   SetBufferOffset(aiCharBufOffset);
 }
 
 SourceObject::~SourceObject()
@@ -18,90 +25,77 @@ SourceObject::AddAttribute(
    const std::string& aszkey,
    const std::string& value,
    char* aplstCharBuf, 
-   unsigned int aiBufSize)
+   unsigned int aiMaxBuffSize)
 {
-   std::string key = aszkey;
-   std::string szFixedKey = Config::Instance()->GetKeyCode(key);
-   if (szFixedKey != "")
+   Config* config = Config::Instance();
+
+   // Name needs to go first
+   int iInsertion = getKeyListEnd();
+   if( aszkey == "name" )
    {
-      key = szFixedKey;
+      iInsertion = 0;
    }
 
-   unsigned short iKeyValPair = 0;
-   unsigned short iSize = value.size();
+   unsigned int iSizeIncrease = insertAttribute(value, aplstCharBuf, aiMaxBuffSize, iInsertion);
 
-   if (Config::Instance()->IsIdentifyingAttributes(Config::Instance()->GetFullKey(key)))
+   // Shift all field codes down
+   for( int i = ms_iNumKeys-2; i >= iInsertion; --i )
    {
-      iKeyValPair = 1 << 15;
+      setSize(m_pLstKeyVals[i+1], extractSize(m_pLstKeyVals[i]));
+      setFieldCode(m_pLstKeyVals[i+1], extractFieldCode(m_pLstKeyVals[i]));
    }
 
-   iKeyValPair = (iKeyValPair | iSize);
+   m_pLstKeyVals[iInsertion] = 0;
+   setSize(m_pLstKeyVals[iInsertion], value.size());
+   setFieldCode(m_pLstKeyVals[iInsertion], config->GetKeyCode(aszkey));
 
-   for (unsigned int i = 0; i < 3; i++)
-   {
-      aplstCharBuf[aiBufSize + i] = key[i];
-   }
-   
-   for (unsigned int i = 0; i < value.size(); i++)
-   {
-      aplstCharBuf[aiBufSize + i + 3] = value[i];
-   }
-
-   m_pLstKeyVals[m_iKeyValArraySize] = iKeyValPair;
-
-   m_iKeyValArraySize++;
-
-   return 3 + value.size();
+   return iSizeIncrease;
 }
 
 std::string 
 SourceObject::GetName(char* aiSearchBuffer)
 {
-   return GetAttribute("nam", aiSearchBuffer);
+   return std::string( aiSearchBuffer, 
+                       GetBufferOffset(),
+                       extractSize(m_pLstKeyVals[0]) );
 }
 
 std::string 
 SourceObject::GetAttribute(std::string aszKey, char* aiSearchBuffer)
 {
-   unsigned short iLoopBufferOffset = 0;
-   for (int i = 0; i < m_iKeyValArraySize; i++)
+   // Get the key code.
+   Config* config = Config::Instance();
+
+   int iKeyCode = config->GetKeyCode(aszKey);
+   if( iKeyCode != -1 )
    {
-      unsigned short iCurrentKVPair = m_pLstKeyVals[i];
-      unsigned short iValueSize = extractSize(iCurrentKVPair);
-      std::string szKeyCode(aiSearchBuffer + m_iCharBufferOffset + iLoopBufferOffset, 3);
-      if (szKeyCode == aszKey)
+      for( int i = 0; i < ms_iNumKeys; i++ )
       {
-         std::string szValue(aiSearchBuffer + m_iCharBufferOffset + iLoopBufferOffset + 3, iValueSize);
-         return szValue;
-      }
-      else
-      {
-         iLoopBufferOffset += 3 + iValueSize;
+         if( extractFieldCode( m_pLstKeyVals[i] ) == iKeyCode )
+         {
+            return std::string( aiSearchBuffer + GetBufferOffset() + getObjectSize(i),
+                                extractSize(m_pLstKeyVals[i]) );
+         }
       }
    }
-
-   return "";
+   
+   return Config::NotFoundString;
 }
 
 // Only returns unique attrs
 std::vector<std::pair<std::string,std::string>> 
 SourceObject::GetAttributes(char* aiSearchBuffer)
 {
+   Config* config = Config::Instance();
    std::vector<std::pair<std::string, std::string>> lstRetVal;
-
-   unsigned short iLoopBufferOffset = 0;
-   for (int i = 0; i < m_iKeyValArraySize; i++)
+   for( int i = 0; i < ms_iNumKeys; i++ )
    {
-      unsigned short iCurrentKVPair = m_pLstKeyVals[i];
-      unsigned short iValueSize = extractSize(iCurrentKVPair);
-      if (!isNonUniqueFlag(iCurrentKVPair))
+      unsigned char iFC = extractFieldCode( m_pLstKeyVals[i] );
+      std::string szKey = config->GetFullKey(iFC);
+      if( config->IsStaticAttribute( szKey ) )
       {
-         std::string szKeyCode(aiSearchBuffer + m_iCharBufferOffset + iLoopBufferOffset, 3);
-         std::string szValue(aiSearchBuffer + m_iCharBufferOffset + iLoopBufferOffset + 3, iValueSize);
-         
-         lstRetVal.push_back(std::make_pair(szKeyCode, szValue));
+         lstRetVal.push_back(std::make_pair(szKey, GetAttribute(szKey, aiSearchBuffer)));
       }
-      iLoopBufferOffset += 3 + iValueSize;
    }
 
    return lstRetVal;
@@ -111,43 +105,141 @@ std::map<std::string, std::vector<std::string>>
 SourceObject::GetNonUniqueAttributeRestrictions(char* aiSearchBuffer)
 {
    std::map<std::string, std::vector<std::string>> mapNonUAttrs;
+   Config* config = Config::Instance();
 
-   unsigned short iLoopBufferOffset = 0;
-   for (int i = 0; i < m_iKeyValArraySize; i++)
+   for( int i = 0; i < ms_iNumKeys; i++ )
    {
-      unsigned short iCurrentKVPair = m_pLstKeyVals[i];
-      unsigned short iValueSize = extractSize(iCurrentKVPair);
-      if (isNonUniqueFlag(iCurrentKVPair))
+      unsigned char iFC = extractFieldCode( m_pLstKeyVals[i] );
+      std::string szKey = config->GetFullKey(iFC);
+      if( config->IsIdentifyingAttributes( szKey ) )
       {
-         std::string szKeyCode(aiSearchBuffer + m_iCharBufferOffset + iLoopBufferOffset, 3);
-         std::string szValue(aiSearchBuffer + m_iCharBufferOffset + iLoopBufferOffset + 3, iValueSize);
-
+         std::string szValue = GetAttribute(szKey, aiSearchBuffer);
          std::vector<std::string> lstNewlst = StringHelper::Str_Split(szValue, "::");
-
-         mapNonUAttrs[szKeyCode] = lstNewlst;
+         mapNonUAttrs.insert(std::make_pair(szKey, lstNewlst));
       }
-      iLoopBufferOffset += 3 + iValueSize;
    }
 
    return mapNonUAttrs;
 }
 
-int SourceObject::GetCacheIndex()
+
+unsigned int 
+SourceObject::GetBufferOffset()
 {
-   return m_iCachedIndex;
+   return (m_pOffAndInd[0] << 16) | (m_pOffAndInd[1] << 8) | (m_pOffAndInd[2] & 0xFE);
 }
 
-void SourceObject::Cache(unsigned short aiCacheIndex)
+void
+SourceObject::SetBufferOffset( unsigned int aiOffset )
 {
-   m_iCachedIndex = aiCacheIndex;
+   unsigned char byteOne = aiOffset & 0xFF;
+   unsigned char byteTwo = (aiOffset & 0xFF00) >> 8;
+   unsigned char byteThree = (aiOffset & 0xFF0000) >> 16;
+   m_pOffAndInd[0] = byteThree;
+   m_pOffAndInd[1] = byteTwo;
+   m_pOffAndInd[2] = byteOne;
 }
 
-bool SourceObject::isNonUniqueFlag(short aiCheck)
+unsigned short 
+SourceObject::GetCacheIndex()
 {
-   return (aiCheck & (1 << 15)) != 0;
+   return ((m_pOffAndInd[3] & 0x7F) << 8) | (m_pOffAndInd[4]);
 }
 
-unsigned short SourceObject::extractSize(short aiCheck)
+void
+SourceObject::SetCacheIndex( unsigned short aiIndex )
 {
-   return (aiCheck & 0x7FFF);
+   unsigned char byteOne = aiIndex & 0xFF;
+   unsigned char byteTwo = (aiIndex & 0x7F00) >> 8;
+   m_pOffAndInd[3] = byteTwo;
+   m_pOffAndInd[4] = byteOne;
+}
+
+void 
+SourceObject::setSize( unsigned short& riSize, unsigned short aiValue ) const
+{
+   riSize = extractFieldCode(riSize) | (aiValue << 4);
+}
+
+void 
+SourceObject::setFieldCode( unsigned short& riFC, unsigned short aiValue ) const
+{
+   riFC = (extractSize(riFC) << 4) | (aiValue & 0xF);
+}
+
+// Returns the first 12 bits of a short.
+unsigned short 
+SourceObject::extractSize( unsigned short aiCheck ) const
+{
+   return aiCheck >> 4;
+}
+
+unsigned char 
+SourceObject::extractFieldCode( unsigned short aiCheck ) const
+{
+   return (aiCheck & 0xF);
+}
+
+unsigned int 
+SourceObject::insertAttribute( const std::string& value,
+                               char* aplstCharBuf, 
+                               unsigned int aiMaxBuffSize,
+                               char acLocation )
+{
+   // Get the insertion location. -1 is the end of the list.
+   unsigned int iInsertion = acLocation;
+
+   // Get all the characters that lie AFTER the field location that we want.
+   unsigned int iInsertionOffset = getObjectSize(iInsertion);
+   unsigned int iBufferOffset = GetBufferOffset() + iInsertionOffset;
+   unsigned int iPostBuffSize = getObjectSize() - iInsertionOffset;
+
+   unsigned int iAdditionalSize = value.size();
+   unsigned int iBufferOffAfterCopy = iBufferOffset + iAdditionalSize;
+
+   memcpy_s( aplstCharBuf+iBufferOffAfterCopy,
+             aiMaxBuffSize-iBufferOffAfterCopy,
+             aplstCharBuf+iBufferOffset, iPostBuffSize );
+
+   memcpy_s( aplstCharBuf+iBufferOffset,
+             aiMaxBuffSize-iBufferOffset, 
+             value.c_str(), iAdditionalSize );
+
+   return value.size();
+}
+
+unsigned int 
+SourceObject::getObjectSize(int aiTruncate) const
+{
+   unsigned int iSize = 0;
+   unsigned int iEnd = getKeyListEnd();
+
+   if( (aiTruncate != -1) && (aiTruncate < iEnd) )
+   {
+      iEnd = aiTruncate;
+   }
+
+   for( int i = 0; i < iEnd; i++ )
+   {
+      iSize += extractSize(m_pLstKeyVals[i]);
+   }
+
+   return iSize;
+}
+
+unsigned int 
+SourceObject::getKeyListEnd() const
+{
+   unsigned int iListEnd = 0;
+   for( int i = 0; i < ms_iNumKeys; i++ )
+   {
+      // Find the first empty field code.
+      if( extractFieldCode( m_pLstKeyVals[i] ) == 0 )
+      {
+         iListEnd = i;
+         break;
+      }
+   }
+
+   return iListEnd;
 }

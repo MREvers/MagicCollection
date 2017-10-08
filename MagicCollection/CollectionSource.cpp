@@ -55,11 +55,11 @@ void CollectionSource::LoadLib(std::string aszFileName)
       while (xmlNode_CardAttribute != 0)
       {
          std::string szCardKey = xmlNode_CardAttribute->name();
-         std::string keyCode = config->GetKeyCode(szCardKey);
-         if( keyCode != "" )
+         char keyCode = config->GetKeyCode(szCardKey);
+         if( keyCode != -1 )
          {
-            m_iAllCharBuffSize += sO->AddAttribute( keyCode, xmlNode_CardAttribute->value(),
-                                                    m_AllCharBuff, m_iAllCharBuffSize );
+            m_iAllCharBuffSize += sO->AddAttribute( szCardKey, xmlNode_CardAttribute->value(),
+                                                    m_AllCharBuff, ms_iMaxBufferSize );
          }
 
          xmlNode_CardAttribute = xmlNode_CardAttribute->next_sibling();
@@ -92,6 +92,7 @@ void CollectionSource::HotSwapLib(std::string aszFileName)
 
 int CollectionSource::LoadCard(std::string aszCardName)
 {
+   Config* config = Config::Instance();
    int iCacheLocation = -1;
    std::string szCardName = StringHelper::Str_Trim(aszCardName, ' ');
 
@@ -112,7 +113,7 @@ int CollectionSource::LoadCard(std::string aszCardName)
          std::vector<Tag>::iterator att_iter = lstAttrs.begin();
          for (; att_iter != lstAttrs.end(); ++att_iter)
          {
-            lstStaticAttrs.push_back(std::make_pair(Config::Instance()->GetFullKey(att_iter->first), att_iter->second));
+            lstStaticAttrs.push_back(std::make_pair(att_iter->first, att_iter->second));
          }
 
          std::map<std::string, std::vector<std::string>> 
@@ -124,14 +125,14 @@ int CollectionSource::LoadCard(std::string aszCardName)
          std::map<std::string, std::vector<std::string>>::iterator iter_UnfixedAttrs = lstUnfixedAttrs.begin();
          for (; iter_UnfixedAttrs != lstUnfixedAttrs.end(); ++iter_UnfixedAttrs)
          {
-            lstFixedAttrs[Config::Instance()->GetFullKey(iter_UnfixedAttrs->first)] = iter_UnfixedAttrs->second;
+            lstFixedAttrs[iter_UnfixedAttrs->first] = iter_UnfixedAttrs->second;
          }
 
          std::vector<TraitItem> lstIdentifyingTraits;
          std::map<std::string, std::vector<std::string>>::iterator iter_Traits = lstFixedAttrs.begin();
          for (; iter_Traits != lstFixedAttrs.end(); ++iter_Traits)
          {
-            TraitItem newTrait(iter_Traits->first, iter_Traits->second, Config::Instance()->GetPairedKeysList());
+            TraitItem newTrait(iter_Traits->first, iter_Traits->second, config->GetPairedKeysList());
             lstIdentifyingTraits.push_back(newTrait);
          }
 
@@ -139,7 +140,7 @@ int CollectionSource::LoadCard(std::string aszCardName)
 
          // Store the location of the CollectionItem in the cache
          iCacheLocation = m_lstoCardCache.size();
-         oSource->Cache(iCacheLocation);
+         oSource->SetCacheIndex(iCacheLocation);
 
          // Cache the CollectionItem
          m_lstoCardCache.push_back(oCard);
@@ -351,18 +352,6 @@ CollectionSource::IsLoaded()
 
 int CollectionSource::findInBuffer(std::string aszCardName, bool abCaseSensitive)
 {
-   std::string szName;
-   int iLength = m_lstCardBuffer.size();
-   for (size_t i = 0; i < iLength; i++)
-   {
-      szName = m_lstCardBuffer.at(i).GetName(m_AllCharBuff);
-      if (szName == aszCardName)
-      {
-         return i;
-      }
-   }
-
-   /*
    std::string szCardNameFixed = convertToSearchString(aszCardName);
    if (!abCaseSensitive)
    {
@@ -400,7 +389,7 @@ int CollectionSource::findInBuffer(std::string aszCardName, bool abCaseSensitive
       else
          iLeft = middle + 1;
    }
-   */
+   
    return -1;
 }
 
@@ -434,7 +423,7 @@ std::string CollectionSource::convertToSearchString(std::string& aszSearch)
 
 bool CollectionSource::isSearchCharacter(char c)
 {
-   return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') || c == ' ' || c == ',';
+   return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') || c == ' ';
 }
 
 void CollectionSource::resetBuffer()
@@ -444,7 +433,7 @@ void CollectionSource::resetBuffer()
 
    m_iAllCharBuffSize = 0;
    delete[] m_AllCharBuff;
-   m_AllCharBuff = new char[5000000];
+   m_AllCharBuff = new char[ms_iMaxBufferSize];
 }
 
 void CollectionSource::finalizeBuffer()

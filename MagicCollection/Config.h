@@ -37,8 +37,8 @@ public:
    std::string GetCollectionsDirectory();
    std::string GetCollectionsFolderName();
 
-   std::string GetKeyCode(std::string aszFullKey);
-   std::string GetFullKey(std::string aszKeyCode);
+   char GetKeyCode(std::string aszFullKey);
+   std::string GetFullKey(char aiKeyCode);
 
    std::string GetHash(std::string& aszHashingString);
 

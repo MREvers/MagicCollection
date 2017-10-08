@@ -83,25 +83,49 @@ std::string Config::GetCollectionsFolderName()
    return m_szCollectionsFolder;
 }
 
-std::string Config::GetKeyCode(std::string aszFullKey)
+// Returns a numerical key code
+// -1 if not found.
+char
+Config::GetKeyCode(std::string aszFullKey)
 {
+   static std::map<std::string, char> mapFastKey;
+   if( mapFastKey.find( aszFullKey ) != mapFastKey.end() )
+   {
+      return mapFastKey[aszFullKey];
+   }
+
    auto iter_KeyMappings = m_lstKeyCodeMappings.begin();
    for (; iter_KeyMappings != m_lstKeyCodeMappings.end(); ++iter_KeyMappings)
    {
       if (iter_KeyMappings->first == aszFullKey)
       {
-         return iter_KeyMappings->second;
+         char cCode = 0;
+         size_t cNumChars;
+         cCode = std::stoi(iter_KeyMappings->second, &cNumChars);
+         if( cNumChars > 0 )
+         {
+            mapFastKey.insert(std::make_pair(aszFullKey, cCode));
+            return cCode;
+         }
+         else
+         {
+            return -1;
+         }
       }
    }
 
-   return "";
+   return -1;
 }
-std::string Config::GetFullKey(std::string aszKeyCode)
+
+std::string 
+Config::GetFullKey(char aiKeyCode)
 {
    std::vector<std::pair<std::string, std::string>>::iterator iter_KeyMappings = m_lstKeyCodeMappings.begin();
    for (; iter_KeyMappings != m_lstKeyCodeMappings.end(); ++iter_KeyMappings)
    {
-      if (iter_KeyMappings->second == aszKeyCode)
+      size_t iNumChars;
+      char cCode = std::stoi(iter_KeyMappings->second, &iNumChars);
+      if( (iNumChars > 0) && (cCode == aiKeyCode) )
       {
          return iter_KeyMappings->first;
       }
@@ -232,10 +256,10 @@ Config::TestInstance()
 
    cTest.m_lstPairedKeys.push_back(std::make_pair("set","mud"));
 
-   cTest.m_lstKeyCodeMappings.push_back(std::make_pair("name", "nam"));
-   cTest.m_lstKeyCodeMappings.push_back(std::make_pair("set", "set"));
-   cTest.m_lstKeyCodeMappings.push_back(std::make_pair("mud", "mud"));
-   cTest.m_lstKeyCodeMappings.push_back(std::make_pair("solo", "sol"));
+   cTest.m_lstKeyCodeMappings.push_back(std::make_pair("name", "1"));
+   cTest.m_lstKeyCodeMappings.push_back(std::make_pair("set", "2"));
+   cTest.m_lstKeyCodeMappings.push_back(std::make_pair("mud", "3"));
+   cTest.m_lstKeyCodeMappings.push_back(std::make_pair("solo", "4"));
 
    return cTest;
 }

@@ -86,4 +86,7 @@ private:
    // Bits 11-32: Start point.
    char* m_AllCharBuff;
    unsigned int m_iAllCharBuffSize;
+
+private:
+   static const unsigned int ms_iMaxBufferSize = 5000000;
 };

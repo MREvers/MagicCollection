@@ -13,17 +13,16 @@ TraitItem::TraitItem( const std::string& aszKeyname,
       m_lstPossibleValues.push_back("");
    }
 
-   std::string szKeyCode = config->GetKeyCode(aszKeyname);
    std::vector<Tag>::const_iterator iter_Tags = alstPairedTraits.cbegin();
    for (; iter_Tags != alstPairedTraits.cend(); ++iter_Tags)
    {
-      if (szKeyCode == iter_Tags->first)
+      if (aszKeyname == iter_Tags->first)
       {
-         m_lstPairedValues.push_back(config->GetFullKey(iter_Tags->first));
+         m_lstPairedValues.push_back(iter_Tags->first);
       }
-      else if (szKeyCode == iter_Tags->second)
+      else if (aszKeyname == iter_Tags->second)
       {
-         m_lstPairedValues.push_back(config->GetFullKey(iter_Tags->second));
+         m_lstPairedValues.push_back(iter_Tags->second);
       }
    }
 }
