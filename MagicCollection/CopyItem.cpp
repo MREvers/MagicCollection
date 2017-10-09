@@ -415,8 +415,8 @@ CopyItem::setMetaTag( const std::string& aszKey,
                       MetaTagType atagType,
                       bool bTimeChange )
 {
-   const static function<int(const MetaTag&, MetaTag&)> fnComparer = 
-      [](const MetaTag& atag1, MetaTag& atag2)-> int { return atag1.GetKey().compare(atag2.GetKey()); };
+   const static function<int(const MetaTag&, const MetaTag&)> fnComparer = 
+      [](const MetaTag& atag1, const MetaTag& atag2)-> int { return atag1.GetKey().compare(atag2.GetKey()); };
    function<string( const MetaTag& )> fnExtractor = GetMetaTagKeyViewer();
 
    if (bTimeChange) { itemChanged(); }

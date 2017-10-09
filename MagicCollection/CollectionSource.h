@@ -71,22 +71,15 @@ private:
    int findInBuffer(std::string aszName, bool abCaseSensitive);
    int findInCache(std::string aszName, bool abCaseSensitive);
 
-   std::string convertToSearchString(std::string& aszSearch);
-   bool isSearchCharacter(char c);
-
    void resetBuffer();
    void finalizeBuffer();
 
-   // This buffer stores ALL characters for every card.
-   // It is a list of keyVal sequences where the KEYS are all 3 CHARS LONG.
-   // So, in order to specify a pair, you need the start point, and the length of the val.
-   // This info can be all stored in a single 4 byte int
-   // Bit 1: NonUnique trait flag
-   // Bits 2-10: Value Length
-   // Bits 11-32: Start point.
    char* m_AllCharBuff;
    unsigned int m_iAllCharBuffSize;
 
 private:
    static const unsigned int ms_iMaxBufferSize = 5000000;
+
+   static std::string convertToSearchString(const std::string& aszSearch);
+   static bool isSearchCharacter(char c);
 };

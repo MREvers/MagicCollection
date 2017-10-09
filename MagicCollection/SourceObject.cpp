@@ -53,13 +53,14 @@ SourceObject::AddAttribute(
 }
 
 std::string 
-SourceObject::GetName(char* aiSearchBuffer)
+SourceObject::GetName(const char* aiSearchBuffer) const
 {
    return GetAttribute("name", aiSearchBuffer);
 }
 
 std::string 
-SourceObject::GetAttribute(std::string aszKey, char* aiSearchBuffer)
+SourceObject::GetAttribute( const std::string& aszKey, 
+                            const char* aiSearchBuffer) const
 {
    // Get the key code.
    Config* config = Config::Instance();
@@ -122,7 +123,7 @@ SourceObject::GetNonUniqueAttributeRestrictions(char* aiSearchBuffer)
 
 
 unsigned int 
-SourceObject::GetBufferOffset()
+SourceObject::GetBufferOffset() const
 {
    return (m_pOffAndInd[0] << 16) | (m_pOffAndInd[1] << 8) | (m_pOffAndInd[2] & 0xFE);
 }
@@ -139,7 +140,7 @@ SourceObject::SetBufferOffset( unsigned int aiOffset )
 }
 
 unsigned short 
-SourceObject::GetCacheIndex()
+SourceObject::GetCacheIndex() const
 {
    return ((m_pOffAndInd[3] & 0x7F) << 8) | (m_pOffAndInd[4]);
 }

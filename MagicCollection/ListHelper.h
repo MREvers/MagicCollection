@@ -100,10 +100,10 @@ public:
    template<class T> static
    void List_Insert( const T& aInsert, 
                      std::vector<T>& alstInsertList, 
-                     const std::function<int(const T&,T&)>& afuncComparer )
+                     const std::function<int(const T&,const T&)>& afuncComparer )
    {
-      std::vector<T>::iterator iter = alstInsertList.begin();
-      for (; iter != alstInsertList.end(); ++iter)
+      std::vector<T>::const_iterator iter = alstInsertList.cbegin();
+      for (; iter != alstInsertList.cend(); ++iter)
       {
          int iCmp = afuncComparer(aInsert, *iter);
          if (iCmp <= 0) { break; }

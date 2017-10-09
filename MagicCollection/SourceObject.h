@@ -37,17 +37,18 @@ public:
       unsigned int aiMaxBuffSize);
 
    // Used in loading from source DB.
-   std::string GetName(char* aiSearchBuffer);
+   std::string GetName(const char* aiSearchBuffer) const;
 
    // Requires the 3 char keycode
-   std::string GetAttribute(std::string aszKeyCode, char* aiSearchBuffer);
+   std::string GetAttribute( const std::string& aszKeyCode,
+                             const char* aiSearchBuffer ) const;
    std::vector<std::pair<std::string, std::string>> GetAttributes(char* aiSearchBuffer);
 
    std::map<std::string, std::vector<std::string>> GetNonUniqueAttributeRestrictions(char* aiSearchBuffer);
 
-   unsigned int GetBufferOffset();
+   unsigned int GetBufferOffset() const;
    void SetBufferOffset(unsigned int aiOffset);
-   unsigned short GetCacheIndex();
+   unsigned short GetCacheIndex() const;
    void SetCacheIndex(unsigned short aiIndex);
 
 private:

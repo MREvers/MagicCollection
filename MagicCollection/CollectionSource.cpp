@@ -59,7 +59,7 @@ void CollectionSource::LoadLib(std::string aszFileName)
          if( keyCode != -1 )
          {
             m_iAllCharBuffSize += sO->AddAttribute( szCardKey, xmlNode_CardAttribute->value(),
-                                                    m_AllCharBuff, ms_iMaxBufferSize );
+                                                   m_AllCharBuff, ms_iMaxBufferSize );
          }
 
          xmlNode_CardAttribute = xmlNode_CardAttribute->next_sibling();
@@ -350,50 +350,26 @@ CollectionSource::IsLoaded()
    return m_bIsLoaded;
 }
 
-int CollectionSource::findInBuffer(std::string aszCardName, bool abCaseSensitive)
+int
+CollectionSource::findInBuffer(std::string aszCardName, bool abCaseSensitive)
 {
-   std::string szCardNameFixed = convertToSearchString(aszCardName);
-   if (!abCaseSensitive)
-   {
-      std::transform(szCardNameFixed.begin(), szCardNameFixed.end(), szCardNameFixed.begin(), ::tolower);
-   }
-
-   int iSize = m_lstCardBuffer.size();
-   int iLeft = 0;
-   int iRight = iSize;
-   if (iRight < 1)
-   {
-      return -1;
-   }
-
+   // Binary search chokes on all sorts of characters so Im just 
+   // using linear search.
    std::string szName;
-   while (iLeft <= iRight)
+   int iLength = m_lstCardBuffer.size();
+   for (size_t i = 0; i < iLength; i++)
    {
-      int middle = (iLeft + iRight) / 2;
-
-      if (middle < 0 || middle >= iSize)
+      szName = m_lstCardBuffer.at(i).GetName(m_AllCharBuff);
+      if (szName == aszCardName)
       {
-         return -1;
+         return i;
       }
-
-      szName = convertToSearchString(m_lstCardBuffer.at(middle).GetName(m_AllCharBuff));
-      if (!abCaseSensitive)
-      {
-         std::transform(szName.begin(), szName.end(), szName.begin(), ::tolower);
-      }
-
-      if (szName == szCardNameFixed)
-         return middle;
-      else if (std::strcmp(szName.c_str(), szCardNameFixed.c_str()) > 0)
-         iRight = middle - 1;
-      else
-         iLeft = middle + 1;
    }
-   
-   return -1;
 }
 
-int CollectionSource::findInCache(std::string aszName, bool abCaseSensitive)
+int
+CollectionSource::findInCache( std::string aszName,
+                               bool abCaseSensitive)
 {
    std::vector<CollectionItem>::iterator iter_ColObj = m_lstoCardCache.begin();
    int index = 0;
@@ -406,24 +382,6 @@ int CollectionSource::findInCache(std::string aszName, bool abCaseSensitive)
       index++;
    }
    return -1;
-}
-
-std::string CollectionSource::convertToSearchString(std::string& aszSearch)
-{
-   std::string szRetval = "";
-   for (size_t i = 0; i < aszSearch.size(); i++)
-   {
-      if (isSearchCharacter(aszSearch[i]))
-      {
-         szRetval += aszSearch[i];
-      }
-   }
-   return szRetval;
-}
-
-bool CollectionSource::isSearchCharacter(char c)
-{
-   return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') || c == ' ';
 }
 
 void CollectionSource::resetBuffer()
@@ -442,4 +400,26 @@ void CollectionSource::finalizeBuffer()
    memcpy(newBufferSize, m_AllCharBuff, m_iAllCharBuffSize);
    delete[] m_AllCharBuff;
    m_AllCharBuff = newBufferSize;
+}
+
+std::string 
+CollectionSource::convertToSearchString(const std::string& aszSearch)
+{
+   std::string szRetval = "";
+   for( size_t i = 0; i < aszSearch.size(); i++ )
+   {
+      if( isSearchCharacter(aszSearch[i]) )
+      {
+         szRetval += aszSearch[i];
+      }
+   }
+   return szRetval;
+}
+
+bool CollectionSource::isSearchCharacter(char c)
+{
+   return ('a' <= c && c <= 'z') || 
+          ('A' <= c && c <= 'Z') ||
+          ('0' <= c && c <= '9') || 
+          (' ' == c);
 }
