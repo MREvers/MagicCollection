@@ -14,6 +14,7 @@ namespace StoreFrontPro.Server
       #region Static Interface
       public const string LoadIndication = "Loading";
       public const string DoneIndication = "Complete";
+      public const string ServerReady = "Ready";
 
       // The static singleton is exposed via the 3 public properties Server, Card, and Collection
       // The Singleton's constructor ensures that the private static member SCI is initiated prior
@@ -55,6 +56,11 @@ namespace StoreFrontPro.Server
       public static void ListenForDebug(IServerObserver Observer)
       {
          singleton.m_lstDebugObservers.Add(Observer);
+      }
+
+      public static bool IsReady()
+      {
+         return SCI != null;
       }
 
       private static void InitServer()
@@ -103,6 +109,7 @@ namespace StoreFrontPro.Server
       /// </summary>
       private void pServices()
       {
+
          if( SCI == null )
          {
             SCI = new ServerClientInterface();
@@ -111,6 +118,8 @@ namespace StoreFrontPro.Server
             {
                MessageBox.Show("Could Not Find Config File. Please Fix.");
             }
+
+            fireDebug(ServerReady);
          }
 
          while (true)

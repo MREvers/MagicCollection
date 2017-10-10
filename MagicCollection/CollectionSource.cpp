@@ -22,7 +22,7 @@ void CollectionSource::LoadLib(std::string aszFileName)
    Config* config = Config::Instance();
 
    m_lstCardBuffer.clear();
-   m_lstCardBuffer.reserve(17000);
+   m_lstCardBuffer.reserve(25000);
 
    xml_document<> doc;
    std::ifstream file(aszFileName);
@@ -365,11 +365,12 @@ CollectionSource::findInBuffer(std::string aszCardName, bool abCaseSensitive)
          return i;
       }
    }
+   return -1;
 }
 
 int
 CollectionSource::findInCache( std::string aszName,
-                               bool abCaseSensitive)
+                               bool abCaseSensitive )
 {
    std::vector<CollectionItem>::iterator iter_ColObj = m_lstoCardCache.begin();
    int index = 0;

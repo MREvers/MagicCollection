@@ -84,7 +84,7 @@ namespace StoreFrontPro.Views.CollectionViews.Cube
          if (!string.IsNullOrEmpty(szMC))
          {
             int iSpecStart = Math.Max(szMC.IndexOf('}'), 0);
-            if (!int.TryParse(szMC.Substring(1, iSpecStart - 1), out iCMC))
+            if (!int.TryParse(szMC.Substring(1, Math.Max(iSpecStart - 1, 0)), out iCMC))
             {
                iCMC = 0;
             }

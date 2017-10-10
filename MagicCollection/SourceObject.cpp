@@ -229,7 +229,7 @@ SourceObject::getObjectSize(int aiTruncate) const
 unsigned int 
 SourceObject::getKeyListEnd() const
 {
-   unsigned int iListEnd = 0;
+   unsigned int iListEnd = ms_iNumKeys;
    for( int i = 0; i < ms_iNumKeys; i++ )
    {
       // Find the first empty field code.

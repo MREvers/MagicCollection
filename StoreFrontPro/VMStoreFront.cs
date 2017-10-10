@@ -20,9 +20,19 @@ namespace StoreFrontPro
 {
    class VMStoreFront : ViewModel<StoreFront>, IVCISupporter
    {
+      #region Static Names
       public const string CollectionOverview = "ColOverview";
       public const string DeckboxView = "DBVM";
       public const string CubeView = "CVN";
+      #endregion
+
+      #region Bindings
+      private bool _MenuEnabled = true;
+      public bool MenuEnabled
+      {
+         get { return _MenuEnabled; }
+         set { _MenuEnabled = value; OnPropertyChanged(); }
+      }
 
       public RelayCommand CloseCommand { get; set; }
       public RelayCommand CollectionsOverviewCommand { get; set; }
@@ -40,7 +50,9 @@ namespace StoreFrontPro
          get { return _OperationWindow; }
          set { _OperationWindow = value; OnPropertyChanged(); }
       }
+      #endregion
 
+      #region Public Functions
       public VMStoreFront(StoreFront Model, string RoutingName) : base(Model, RoutingName)
       {
          Model.Register(this);
@@ -57,13 +69,16 @@ namespace StoreFrontPro
 
       public void ShowLoadingIndicator()
       {
+         MenuEnabled = false;
          OperationWindow.ShowOverlay(new LoadIndicator());
       }
 
       public void CloseLoadingIndicator()
       {
+         MenuEnabled = true;
          OperationWindow.CloseOverlay();
       }
+      #endregion
 
       #region Private Methods
       private void showCollectionsOverview()

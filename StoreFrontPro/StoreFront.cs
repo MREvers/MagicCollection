@@ -35,8 +35,14 @@ namespace StoreFrontPro
          ServerInterface.Server.RegisterChangeListener(() => { Collections.NotifyViewModel(); });
          ServerInterface.ListenForDebug(this);
 
+         // The server must be loaded before the view.
+         // We can access server fields because those are instantiated synchronously.
          Collections = new BasicModel<List<CollectionModel>>(ServerInterface.Server.Collections, Sync);
          StoreFrontVM = new VMStoreFront(Model: this, RoutingName: cszStoreFrontVMName);
+
+         // The loading indicator is closed when a "ServerReady" Message is received.
+         StoreFrontVM.ShowLoadingIndicator();
+
          m_ucMainWindow = MainWindow;
       }
 
@@ -119,11 +125,22 @@ namespace StoreFrontPro
       #region IServerObserver
       public void ServerMessage(string Message)
       {
+         if (!Application.Current.Dispatcher.CheckAccess())
+         {
+            Action wrapperDispatch = () => { ServerMessage(Message); };
+            Application.Current.Dispatcher.BeginInvoke(wrapperDispatch);
+            return;
+         }
+
          if( Message == ServerInterface.LoadIndication )
          {
             StoreFrontVM.ShowLoadingIndicator();
          }
-         else if( Message == ServerInterface.DoneIndication)
+         else if( Message == ServerInterface.DoneIndication )
+         {
+            StoreFrontVM.CloseLoadingIndicator();
+         }
+         else if( Message == ServerInterface.ServerReady )
          {
             StoreFrontVM.CloseLoadingIndicator();
          }

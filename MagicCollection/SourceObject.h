@@ -52,7 +52,7 @@ public:
    void SetCacheIndex(unsigned short aiIndex);
 
 private:
-   static const unsigned char ms_iNumKeys = 11;
+   static const unsigned char ms_iNumKeys = 13;
    unsigned short m_pLstKeyVals[ms_iNumKeys];
 
    // Stores the buffer offset in the first 23 bits and the
