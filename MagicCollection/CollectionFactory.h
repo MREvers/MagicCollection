@@ -29,5 +29,6 @@ private:
    CollectionSource* m_ColSource;
 
    std::string getNextChildName(std::string aszParentID);
+   void notifyFamily(std::string aszFamilyName);
 };
 

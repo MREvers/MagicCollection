@@ -340,6 +340,23 @@ CollectionIO::ConsolodateBorrowedItems(
    return true;
 }
 
+bool 
+CollectionIO::RegisterRemainingInList( std::vector<int>& alstRegistry,
+                              std::map<int, std::list<CopyItem*>>& amapNewItems )
+{
+   for( auto item : amapNewItems )
+   {
+      int iItem = item.first;
+      int iFound = ListHelper::List_Find(iItem, alstRegistry);
+      if( iFound == -1 )
+      {
+         alstRegistry.push_back(iItem);
+      }
+   }
+
+   return true;
+}
+
 // This only be called when we know that all cards in the aAddrColID
 // are there rightfully, and that there are no cards that should exist
 // outside this collection if they reference this collection.

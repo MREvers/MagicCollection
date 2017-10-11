@@ -154,3 +154,9 @@ CollectionFactory::getNextChildName(std::string aszParentID)
 
    return szRetval;
 }
+
+void 
+CollectionFactory::notifyFamily( std::string aszFamilyName )
+{
+
+}

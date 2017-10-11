@@ -48,6 +48,9 @@ public:
       CollectionSource* aptCollectionSource,
       CollectionFactory* aptCollFactory);
 
+   bool RegisterRemainingInList( std::vector<int>& alstRegistry, 
+                                 std::map<int, std::list<CopyItem*>>& amapNewItems );
+
    bool ReleaseUnfoundReferences(Location aAddrColID,
       CollectionSource* aptCollectionSource);
 

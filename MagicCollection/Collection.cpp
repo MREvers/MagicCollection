@@ -217,6 +217,8 @@ Collection::LoadCollection(
                                  mapNewlyAddedItems,
                                  mapExistingItems );
 
+   // If we have two identical copies with unlike session dates,
+   // use the later ones.
    loader.RejoinAsyncedLocalItems( GetIdentifier(),
                                    m_ptrCollectionSource,
                                    m_ptrCollectionDetails->GetTimeStamp(),
@@ -233,6 +235,10 @@ Collection::LoadCollection(
    loader.ConsolodateBorrowedItems( GetIdentifier(),
                                     m_ptrCollectionSource,
                                     aoFactory );
+
+   // Make sure the remaining items are registered.
+   loader.RegisterRemainingInList( m_lstItemCacheIndexes,
+                                   mapExistingItems );
 
    // Now this collection is COMPLETELY LOADED. Since other collections can
    //  reference this collection, without this collection being loaded,

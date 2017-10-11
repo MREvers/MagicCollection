@@ -21,7 +21,12 @@ namespace StoreFrontPro.Views.CollectionViews.Cube
       #endregion
 
       #region Data Binding
-      public string GroupName { get; set; }
+      private string _GroupName = "";
+      public string GroupName
+      {
+         get { return _GroupName + " (" + CategoryList.Count + ")"; }
+         set { _GroupName = value; OnPropertyChanged(); }
+      }
 
       public ObservableCollection<ListViewItem> CategoryList { get; set; } =
          new ObservableCollection<ListViewItem>();

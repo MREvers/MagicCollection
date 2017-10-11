@@ -14,6 +14,8 @@ namespace StoreFrontPro.Views.CollectionViews.Cube
    /// </summary>
    class MCardGroupList : IModel, IViewModel
    {
+      static string DefaultAttribute = "Colorless";
+
       private List<CardModel> _ungroupedList;
       public List<CardModel> GroupedList
       {
@@ -33,7 +35,7 @@ namespace StoreFrontPro.Views.CollectionViews.Cube
          BaseList.Register(this);
          BaseModel = BaseList;
          ExpectedAttributes = ExpectedAttribute.Split('\\').ToList();
-         GroupName = ExpectedAttribute;
+         GroupName = ExpectedAttribute == "" ? DefaultAttribute : ExpectedAttribute;
 
          m_szFilteringAttribute = FilteredAttribute;
          m_szAttributeSet = AttributeSet;
