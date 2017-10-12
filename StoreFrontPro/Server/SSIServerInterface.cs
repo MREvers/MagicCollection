@@ -76,6 +76,17 @@ namespace StoreFrontPro.Server
             if (szColID != "NF")
             {
                inGenerateCollectionModel(szColID);
+
+               // Notify each existing collection to update.
+               foreach( var collection in getCollectionModels() )
+               {
+                  if( collection.ID != szColID )
+                  {
+                     // This is "ASYNC" because we want the sync to occur "Synchronously"
+                     // on the services thread.
+                     collection.Sync(true);
+                  }
+               }
             }
          }
 

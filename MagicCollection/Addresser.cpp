@@ -141,6 +141,12 @@ Identifier::operator==( const Identifier& rhs ) const
 }
 
 bool 
+Identifier::operator!=( const Identifier& rhs ) const
+{
+   return !(*this == rhs);
+}
+
+bool 
 Identifier::operator<( const Identifier& rhs ) const
 {
    return false;
@@ -484,7 +490,14 @@ Location::Location()
 
 Location::Location(const string& aszId) : Identifier(aszId)
 {
-   m_iAddress = m_veciSubAddresses.at(0);
+   if( m_veciSubAddresses.size() > 0 )
+   {
+      m_iAddress = m_veciSubAddresses.at(0);
+   }
+   else
+   {
+      m_iAddress = 1;
+   }
 }
 
 Location::Location( const string& aszMain, unsigned int aiSA )

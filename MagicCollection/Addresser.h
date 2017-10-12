@@ -37,6 +37,7 @@ public:
    Address ToAddress() const;
    
    bool operator==(const Identifier& rhs) const;
+   bool operator!=(const Identifier& rhs) const;
    bool operator<(const Identifier& rhs) const;
 
 protected:

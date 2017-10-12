@@ -14,6 +14,9 @@ public:
    void SetFileName(std::string aszFileName);
    std::string GetFileName();
 
+   void SetFile(std::string aszFile);
+   std::string GetFile();
+
    void SetTimeStamp(unsigned long aulTimeStamp);
    unsigned long GetTimeStamp();
 
@@ -27,6 +30,7 @@ public:
 
 private:
    std::string m_szName;
+   std::string m_szFile;
    std::string m_szFileName;
    unsigned long m_ulTimeStamp;
    unsigned int m_iChildrenCount;

@@ -35,9 +35,9 @@ CollectionTracker::Track()
         iter_Item++ )
    {
       TryGet<CollectionItem> item = source->GetCardPrototype(*iter_Item);
-      /*
+      
       RealCopyList lstCList = item->
-         GetCopiesForCollection(colAddress, CollectionItemType::All);
+         FindCopies(colAddress, CollectionItemType::All);
       for ( iter_Copy  = lstCList.begin(); 
             iter_Copy != lstCList.end();
             iter_Copy++ )
@@ -46,7 +46,7 @@ CollectionTracker::Track()
          m_mapNew[*iter_Item].
             push_back(std::make_pair(*iter_Copy, CopyItem(**iter_Copy)));
       }
-      */
+      
    }
 
 }

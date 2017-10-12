@@ -1,6 +1,6 @@
 #include "CollectionDetails.h"
 
-
+#include "StringHelper.h"
 
 CollectionDetails::CollectionDetails()
 {
@@ -31,10 +31,30 @@ CollectionDetails::SetFileName(std::string aszFileName)
    m_szFileName = aszFileName;
 }
 
+// Returns the name of the file to save to.
 std::string 
 CollectionDetails::GetFileName()
 {
    return m_szFileName;
+}
+
+void 
+CollectionDetails::SetFile( std::string aszFile )
+{
+   m_szFile = aszFile;
+
+   // Get the file name.
+   auto lstSplitFile = StringHelper::Str_Split(aszFile, "\\");
+   auto szFile = lstSplitFile[lstSplitFile.size() - 1];
+   auto lstSplitExt = StringHelper::Str_Split(szFile, ".");
+   szFile = lstSplitExt[0];
+
+   SetFileName(szFile);
+}
+std::string 
+CollectionDetails::GetFile()
+{
+   return m_szFile;
 }
 
 void 

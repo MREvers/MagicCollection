@@ -12,13 +12,31 @@ CollectionFactory::~CollectionFactory()
 {
 }
 
+void 
+CollectionFactory::SaveCollection( std::string aszCollectionName ) const
+{
+   auto collection = GetCollection(aszCollectionName);
+   if( collection.Good() )
+   {
+      // Save each member of this family.
+      Location oColLocation = collection->GetIdentifier();
+      for( auto lCol : m_lstCollections )
+      {
+         Address olColLocation = lCol->GetIdentifier().ToAddress();
+         if( olColLocation.ContainsLocation( oColLocation ) )
+         {
+            lCol->SaveCollection();
+         }
+      }
+   }
+}
+
 std::string 
 CollectionFactory::LoadCollectionFromFile(std::string aszFileName)
 {
    std::string szRetVal = Config::NotFoundString;
    std::vector<std::string> lstSplitFile;
    std::vector<std::string> lstSplitExt;
-   std::string szFile;
 
    if( !m_ColSource->IsLoaded() )
    {
@@ -26,13 +44,7 @@ CollectionFactory::LoadCollectionFromFile(std::string aszFileName)
       return szRetVal;
    }
 
-   // Get the file name.
-   lstSplitFile = StringHelper::Str_Split(aszFileName, "\\");
-   szFile = lstSplitFile[lstSplitFile.size() - 1];
-   lstSplitExt = StringHelper::Str_Split(szFile, ".");
-   szFile = lstSplitExt[0];
-
-   Collection* oCol = new Collection(Config::NotFoundString, m_ColSource, szFile);
+   Collection* oCol = new Collection(Config::NotFoundString, m_ColSource);
    oCol->LoadCollection(aszFileName, this);
    Location szFoundID = oCol->GetIdentifier();
 
@@ -40,6 +52,8 @@ CollectionFactory::LoadCollectionFromFile(std::string aszFileName)
    {
       m_lstCollections.push_back(std::shared_ptr<Collection>(oCol));
       szRetVal = szFoundID.GetFullAddress();
+
+      m_ColSource->NotifyNeedToSync(szFoundID);
    }
    else
    {
@@ -62,13 +76,13 @@ CollectionFactory::CreateNewCollection(std::string aszColName, std::string aszPa
    // The parent is required to be loaded to have it as a parent
    if (CollectionExists(aszParentID))
    {
-      oCol = new Collection(aszColName, m_ColSource,
-                            aszColName, getNextChildName(aszParentID));
+      oCol = new Collection( aszColName, m_ColSource,
+                             getNextChildName(aszParentID) );
       GetCollection(aszParentID)->ChildAdded();
    }
    else
    {
-      oCol = new Collection(aszColName, m_ColSource, aszColName);
+      oCol = new Collection(aszColName, m_ColSource);
    }
 
    m_lstCollections.push_back(std::shared_ptr<Collection>(oCol));
@@ -103,19 +117,19 @@ CollectionFactory::CollectionExists(const Location& aAddrColID)
 }
 
 TryGet<Collection> 
-CollectionFactory::GetCollection(std::string aszCollectionName)
+CollectionFactory::GetCollection(std::string aszCollectionName) const
 {
    return GetCollection(Location(aszCollectionName));
 }
 
 TryGet<Collection> 
-CollectionFactory::GetCollection(const Location& aAddrColID)
+CollectionFactory::GetCollection(const Location& aAddrColID) const
 {
    TryGet<Collection> oRetVal;
 
-   std::vector<std::shared_ptr<Collection>>::iterator iter_cols;
-   for ( iter_cols  = m_lstCollections.begin();
-         iter_cols != m_lstCollections.end(); 
+   std::vector<std::shared_ptr<Collection>>::const_iterator iter_cols;
+   for ( iter_cols  = m_lstCollections.cbegin();
+         iter_cols != m_lstCollections.cend(); 
          ++iter_cols)
    {
       Collection* curr_Col = iter_cols->get();
@@ -130,7 +144,7 @@ CollectionFactory::GetCollection(const Location& aAddrColID)
 }
 
 std::string 
-CollectionFactory::getNextChildName(std::string aszParentID)
+CollectionFactory::getNextChildName(std::string aszParentID) const
 {
    Addresser addresser;
    unsigned int iHighPrime, iHighPrimeIndex, iCurrentSA;
@@ -153,10 +167,4 @@ CollectionFactory::getNextChildName(std::string aszParentID)
    }
 
    return szRetval;
-}
-
-void 
-CollectionFactory::notifyFamily( std::string aszFamilyName )
-{
-
 }

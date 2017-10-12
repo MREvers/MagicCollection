@@ -236,7 +236,7 @@ CollectionTest::getTestCollection(string aszId, bool abClearCache)
       m_ptColSource->ClearCache();
    }
 
-   return std::shared_ptr<Collection>(new Collection("TestCol", m_ptColSource, "TestColFile", aszId));
+   return std::shared_ptr<Collection>(new Collection("TestCol", m_ptColSource, aszId));
 }
 
 const std::string*

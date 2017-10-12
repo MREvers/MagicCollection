@@ -41,6 +41,7 @@ namespace StoreFrontPro.Views.CollectionViews.Cube
 
       #region Properties
       public bool IsFullSize { get; set; } = false;
+      public string Group { get { return _GroupName; } }
       #endregion
 
       #region Public Functions

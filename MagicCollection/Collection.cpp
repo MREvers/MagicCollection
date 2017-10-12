@@ -11,7 +11,6 @@ using namespace std;
 // An ID will be given to the collection if there is a parent.
 Collection::Collection(string aszName, 
 	CollectionSource* aoSource,
-	string aszFileCollection, 
 	string aszID)
 {
    m_ptrCollectionTracker = new CollectionTracker(this);
@@ -19,7 +18,7 @@ Collection::Collection(string aszName,
    m_ptrTransactionManager = new TransactionManager(this);
 
    m_ptrCollectionDetails->SetName(aszName);
-   m_ptrCollectionDetails->SetFileName(aszFileCollection);
+   m_ptrCollectionDetails->SetFileName(aszName);
    m_ptrCollectionDetails->SetChildrenCount(0);
    m_ptrCollectionDetails->AssignAddress(aszID);
 
@@ -251,7 +250,11 @@ Collection::LoadCollection(
 
    IsLoaded = (GetIdentifier().GetMain() != "");
 
-   if (IsLoaded){ m_ptrCollectionTracker->Track(); }
+   if (IsLoaded)
+   {
+      m_ptrCollectionDetails->SetFile(aszFileName);
+      m_ptrCollectionTracker->Track(); 
+   }
 }
 
 // Returns all the copies impacted by this function.
@@ -804,9 +807,8 @@ void Collection::saveCollection()
    tm otm;
    localtime_s(&otm, &time);
 
-   CollectionIO ioHelper;
    ofstream oColFile;
-   oColFile.open(ioHelper.GetCollectionFile(m_ptrCollectionDetails->GetFileName()));
+   oColFile.open(m_ptrCollectionDetails->GetFile());
 
    oColFile << Config::CollectionDefinitionKey
 	        << " Name=\"" << m_ptrCollectionDetails->GetName() << "\"" << endl;

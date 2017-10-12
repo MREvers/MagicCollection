@@ -169,14 +169,17 @@ CollectionSource::GetCardPrototype(std::string aszCardName)
    return GetCardPrototype(iCacheIndex);
 }
 
-void CollectionSource::NotifyNeedToSync(const Location& aAddrForcedSync)
+// Notifies all collections other than the input collection that they
+// need to sync.
+void 
+CollectionSource::NotifyNeedToSync(const Location& aAddrForcedSync)
 {
    std::vector<std::pair<Location, bool>>::iterator iter_SyncCols;
    for ( iter_SyncCols = m_lstSync.begin();
          iter_SyncCols != m_lstSync.end(); 
          ++iter_SyncCols )
    {
-      if (!(iter_SyncCols->first == aAddrForcedSync))
+      if( iter_SyncCols->first != aAddrForcedSync )
       {
          iter_SyncCols->second = true;
       }

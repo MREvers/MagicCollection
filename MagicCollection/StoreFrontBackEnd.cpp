@@ -81,10 +81,7 @@ CStoreFrontBackEnd::ConfigIsLoaded()
 
 void CStoreFrontBackEnd::SaveCollection(std::string aszCollectionName)
 {
-   if (m_ColFactory->CollectionExists(aszCollectionName))
-   {
-      m_ColFactory->GetCollection(aszCollectionName)->SaveCollection();
-   }
+   m_ColFactory->SaveCollection(aszCollectionName);
 }
 
 std::string CStoreFrontBackEnd::LoadCollection(std::string aszCollectionFile)

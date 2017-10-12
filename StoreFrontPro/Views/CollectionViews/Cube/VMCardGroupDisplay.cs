@@ -68,7 +68,7 @@ namespace StoreFrontPro.Views.CollectionViews.Cube
       private bool hasDisplay(string aszCategory)
       {
          VCardGroupList oExistingDisplay = CategoryGroups
-            .Where(x => ((VMCardGroupList)(x.DataContext)).GroupName == aszCategory)
+            .Where(x => ((VMCardGroupList)(x.DataContext)).Group == aszCategory)
             .FirstOrDefault();
          return oExistingDisplay != null;
       }

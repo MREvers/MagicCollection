@@ -24,7 +24,6 @@ public:
    Collection(
       std::string aszName,
       CollectionSource* aoSource,
-      std::string aszFileCollection,
       std::string aszID = "");
    ~Collection();
 

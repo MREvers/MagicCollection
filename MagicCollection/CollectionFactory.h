@@ -16,9 +16,10 @@ public:
 
    bool CollectionExists(std::string aszCollectionName);
    bool CollectionExists(const Location& aAddrColID);
-   TryGet<Collection> GetCollection(std::string aszCollectionName);
-   TryGet<Collection> GetCollection(const Location& aAddrColID);
+   TryGet<Collection> GetCollection(std::string aszCollectionName) const;
+   TryGet<Collection> GetCollection(const Location& aAddrColID) const;
 
+   void SaveCollection(std::string aszCollectionName) const;
    std::string LoadCollectionFromFile(std::string aszColFile);
    std::string CreateNewCollection(std::string aszColName, std::string aszParent = "");
 
@@ -28,7 +29,6 @@ private:
    std::vector<std::shared_ptr<Collection>> m_lstCollections;
    CollectionSource* m_ColSource;
 
-   std::string getNextChildName(std::string aszParentID);
-   void notifyFamily(std::string aszFamilyName);
+   std::string getNextChildName(std::string aszParentID) const;
 };
 
