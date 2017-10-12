@@ -30,6 +30,7 @@ public:
    std::string GetImportSourceFile();
    std::string GetSourceFile();
    std::string GetSourceFolder();
+   std::string GetOverheadFolerName();
    std::string GetHistoryFolderName();
    std::string GetMetaFolderName();
    std::string GetImagesFolder();
@@ -72,6 +73,7 @@ private:
    std::string m_szHistoryFolder;
    std::string m_szMetaFolder;
    std::string m_szImagesFolder;
+   std::string m_szOverheadFolder;
 
    std::function<std::string(const Tag&)> m_fnKeyExtractor;
    std::function<std::string(const Tag&)> m_fnValueExtractor;
@@ -90,6 +92,7 @@ public:
    static char* Config::IgnoredTagId;
    static char* Config::MetaFileExtension;
    static char* Config::HistoryFileExtension;
+   static char* Config::OverheadFileExtension;
    static char* Config::HashKey;
    static char* Config::NotFoundString;
    static char* Config::CollectionDefinitionKey;

@@ -24,9 +24,8 @@ public:
    ~CollectionIO();
 
    std::vector<std::string> GetFileLines(std::string aszFileName);
-   bool GetPreprocessLines(std::vector<std::string> alstAllLines,
-      std::vector<std::string>& rlstIOLines,
-      std::vector<std::string>& rlstPreprocessingLines);
+   bool GetNameAndCollectionLines(std::vector<std::string> alstAllLines,
+      std::string& rszName, std::vector<std::string>& rlstPreprocessingLines);
 
    bool CaptureUnlistedItems(Location aAddrColID,
       CollectionSource* aptCollectionSource,
@@ -58,5 +57,6 @@ public:
    std::string GetCollectionFile(std::string aszCollectionName);
    std::string GetMetaFile(std::string aszCollectionName);
    std::string GetHistoryFile(std::string aszCollectionName);
+   std::string GetOverheadFile(std::string aszCollectionName);
 };
 

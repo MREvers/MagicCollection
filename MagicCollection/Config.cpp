@@ -12,6 +12,7 @@ Config* Config::ms_pConfig = nullptr;
 Config* Config::ms_pTestConfig = nullptr;
 char* Config::MetaFileExtension = "meta";
 char* Config::HistoryFileExtension = "history";
+char* Config::OverheadFileExtension = "data";
 char* Config::TrackingTagId = "__";
 char* Config::IgnoredTagId = "_";
 char* Config::HashKey = "__hash";
@@ -58,7 +59,14 @@ std::string Config::GetImportSourceFile()
    return ".\\Config\\" + m_szSourceFolder + "\\" + m_szImportSource;
 }
 
-std::string Config::GetHistoryFolderName()
+std::string 
+Config::GetOverheadFolerName()
+{
+   return m_szOverheadFolder;
+}
+
+std::string 
+Config::GetHistoryFolderName()
 {
    return m_szHistoryFolder;
 }
@@ -302,6 +310,7 @@ void Config::initDefaultSettings()
    m_szCollectionsFolder = "Collections";
    m_szHistoryFolder = "Data";
    m_szMetaFolder = "Data";
+   m_szOverheadFolder = "Data";
 }
 
 void Config::initConfigSettings(std::ifstream& asConfig)
@@ -401,6 +410,9 @@ void Config::initConfigSettings(std::ifstream& asConfig)
 
    xmlNode_Node = xmlNode_Collections->first_node("HistoryFolder");
    m_szHistoryFolder = xmlNode_Node->value();
+
+   xmlNode_Node = xmlNode_Collections->first_node("OverheadFolder");
+   m_szOverheadFolder = xmlNode_Node->value();
 
    xmlNode_Node = xmlNode_Collections->first_node("MetaFolder");
    m_szMetaFolder = xmlNode_Node->value();

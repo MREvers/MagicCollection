@@ -23,35 +23,30 @@ vector<string> CollectionIO::GetFileLines(string aszFileName)
    return StringHelper::SplitIntoLines(contents);
 }
 
-// Returns non-preprocessing lines.
+// Returns the name of a collection and all the lines in it.
 bool 
-CollectionIO::GetPreprocessLines(
-   vector<string> alstAllLines, 
-   vector<string>& rlstIOLines,
-   vector<string>& rlstPreprocessingLines)
+CollectionIO::GetNameAndCollectionLines(
+      vector<string>  alstAllLines, 
+      string&         rlstIOLines,
+      vector<string>& rlstPreprocessingLines)
 {
-   vector<string> lstRetVal;
-   vector<string> lstPreprocessLines;
-
-   string szDefKey(Config::CollectionDefinitionKey);
-
+   // There must be one line with quotations. (Exactly One)
+   // This is the name. All others will be interpreted as cards or thrown away.
    vector<string>::iterator iter_Lines = alstAllLines.begin();
    for (; iter_Lines != alstAllLines.end(); ++iter_Lines)
    {
-      if (iter_Lines->size() > 2 &&
-          iter_Lines->substr(0, szDefKey.size()) == szDefKey)
+      int iOne = iter_Lines->find_first_of('\"');
+      int iTwo =  iter_Lines->find_last_of('\"');
+      if( iOne != iTwo && iOne == 0 )
       {
-         lstPreprocessLines.push_back(*iter_Lines);
+         rlstIOLines = iter_Lines->substr(iOne+1, iTwo-iOne-1);
       }
       else
       {
-         lstRetVal.push_back(*iter_Lines);
+         rlstPreprocessingLines.push_back(*iter_Lines);
       }
    }
 
-   rlstPreprocessingLines = lstPreprocessLines;
-   rlstIOLines = lstRetVal;
-   
    return true;
 }
 
@@ -403,16 +398,28 @@ string CollectionIO::GetCollectionFile(string aszCollectionName)
 
 string CollectionIO::GetMetaFile(string aszCollectionName)
 {
-   return Config::Instance()->GetCollectionsDirectory() + "\\" + 
-      Config::Instance()->GetMetaFolderName() + "\\" +
+   Config* config = Config::Instance();
+   return config->GetCollectionsDirectory() + "\\" + 
+      config->GetMetaFolderName() + "\\" +
       StringHelper::Str_Replace(aszCollectionName, ' ', '_') + "." + 
       string(Config::MetaFileExtension) + ".txt";
 }
 
 string CollectionIO::GetHistoryFile(string aszCollectionName)
 {
-   return Config::Instance()->GetCollectionsDirectory() + "\\" +
-      Config::Instance()->GetHistoryFolderName() + "\\" +
+   Config* config = Config::Instance();
+   return config->GetCollectionsDirectory() + "\\" +
+      config->GetHistoryFolderName() + "\\" +
       StringHelper::Str_Replace(aszCollectionName, ' ', '_') + "." + 
       string(Config::HistoryFileExtension) + ".txt";
+}
+
+std::string 
+CollectionIO::GetOverheadFile( std::string aszCollectionName )
+{
+   Config* config = Config::Instance();
+   return config->GetCollectionsDirectory() + "\\" +
+      config->GetHistoryFolderName() + "\\" +
+      StringHelper::Str_Replace(aszCollectionName, ' ', '_') + "." + 
+      string(Config::OverheadFileExtension) + ".txt";
 }

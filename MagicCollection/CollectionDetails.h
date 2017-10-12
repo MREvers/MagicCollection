@@ -17,7 +17,7 @@ public:
    void SetFile(std::string aszFile);
    std::string GetFile();
 
-   void SetTimeStamp(unsigned long aulTimeStamp);
+   void SetTimeStamp(unsigned long aulTimeStamp = 0);
    unsigned long GetTimeStamp();
 
    void SetChildrenCount(unsigned int auiChildCount);

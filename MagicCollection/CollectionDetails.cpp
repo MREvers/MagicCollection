@@ -1,5 +1,6 @@
 #include "CollectionDetails.h"
 
+#include <ctime>
 #include "StringHelper.h"
 
 CollectionDetails::CollectionDetails()
@@ -60,6 +61,13 @@ CollectionDetails::GetFile()
 void 
 CollectionDetails::SetTimeStamp(unsigned long aulTimeStamp)
 {
+   if( aulTimeStamp == 0 )
+   {
+      time_t timer;
+      time(&timer);
+      aulTimeStamp = timer;
+   }
+
    m_ulTimeStamp = aulTimeStamp;
 }
 

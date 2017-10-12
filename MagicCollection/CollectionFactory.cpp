@@ -78,7 +78,9 @@ CollectionFactory::CreateNewCollection(std::string aszColName, std::string aszPa
    {
       oCol = new Collection( aszColName, m_ColSource,
                              getNextChildName(aszParentID) );
-      GetCollection(aszParentID)->ChildAdded();
+      auto parent = GetCollection(aszParentID);
+      parent->ChildAdded();
+      parent->SaveCollection();
    }
    else
    {

@@ -131,8 +131,8 @@ private:
 
    void loadMetaTagFile();
 
-   void loadPreprocessingLines(const std::vector<std::string>& alstLine);
-   void loadPreprocessingLine(const std::string& aszLine);
+   void loadOverheadFile();
+   void loadOverheadLine(const std::string& aszLine);
 
    void loadInterfaceLine(const std::string& aszLine);
 
@@ -142,6 +142,7 @@ private:
 
    void saveHistory();
    void saveMeta();
+   void saveOverhead();
    void saveCollection();
 };
 

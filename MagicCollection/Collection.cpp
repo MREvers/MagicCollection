@@ -166,6 +166,10 @@ Collection::GetMetaData()
 void  
 Collection::SaveCollection()
 {
+   m_ptrCollectionDetails->SetTimeStamp();
+
+   saveOverhead();
+
    saveHistory();
 
    saveMeta();
@@ -178,7 +182,7 @@ Collection::LoadCollection(
 	string aszFileName, 
 	CollectionFactory* aoFactory)
 {
-   vector<string> lstPreprocessLines;
+   string szName;
    vector<string> lstCardLines;
    map<int, list<CopyItem*>> mapNewlyAddedItems;
    map<int, list<CopyItem*>> mapExistingItems;
@@ -187,10 +191,11 @@ Collection::LoadCollection(
 
    lstFileLines = loader.GetFileLines(aszFileName);
 
-   loader.GetPreprocessLines(lstFileLines, lstCardLines, lstPreprocessLines);
+   loader.GetNameAndCollectionLines(lstFileLines, szName, lstCardLines);
+   m_ptrCollectionDetails->SetName(szName);
 
    // This must be done first.
-   loadPreprocessingLines(lstPreprocessLines);
+   loadOverheadFile();
 
    // Store off all the existing copies in mapExistingItems.
    loader.CaptureUnlistedItems( GetIdentifier(),
@@ -532,16 +537,21 @@ void Collection::loadMetaTagFile()
    }
 }
 
-void Collection::loadPreprocessingLines(const vector<string>&  alstLines)
+void Collection::loadOverheadFile()
 {
-   vector<string>::const_iterator iter_Lines = alstLines.cbegin();
-   for (; iter_Lines != alstLines.cend(); ++iter_Lines)
+   // This should only be called during initial loading.
+   CollectionIO ioHelper;
+   string szFileName = ioHelper.GetOverheadFile(m_ptrCollectionDetails->GetFileName());
+   vector<string> lstCollectionLines = ioHelper.GetFileLines(szFileName);
+
+   auto iter_Lines = lstCollectionLines.cbegin();
+   for (; iter_Lines != lstCollectionLines.cend(); ++iter_Lines)
    {
-      loadPreprocessingLine(*iter_Lines);
+      loadOverheadLine(*iter_Lines);
    }
 }
 
-void Collection::loadPreprocessingLine(const string& aszLine)
+void Collection::loadOverheadLine(const string& aszLine)
 {
    string szDefKey(Config::CollectionDefinitionKey);
    if (aszLine.size() < 2) { return; }
@@ -799,19 +809,16 @@ void Collection::saveMeta()
    oMetaFile.close();
 }
 
-void Collection::saveCollection()
+void 
+Collection::saveOverhead()
 {
-   vector<string> lstLines = GetCollectionList(None);
-
-   time_t time = m_ptrCollectionDetails->GetTimeStamp();
-   tm otm;
-   localtime_s(&otm, &time);
-
    ofstream oColFile;
-   oColFile.open(m_ptrCollectionDetails->GetFile());
+   CollectionIO ioHelper;
+   oColFile.open(ioHelper.GetOverheadFile(m_ptrCollectionDetails->GetFileName()));
 
-   oColFile << Config::CollectionDefinitionKey
-	        << " Name=\"" << m_ptrCollectionDetails->GetName() << "\"" << endl;
+   tm otm;
+   time_t time = m_ptrCollectionDetails->GetTimeStamp();
+   localtime_s(&otm, &time);
 
    oColFile << Config::CollectionDefinitionKey
 	        << " ID=\"" << GetIdentifier().GetFullAddress() << "\"" << endl;
@@ -821,6 +828,18 @@ void Collection::saveCollection()
 
    oColFile << Config::CollectionDefinitionKey 
 	        << " Session=\"" << put_time(&otm, "%F_%T") << "\"" << endl;
+
+   oColFile.close();
+}
+
+void Collection::saveCollection()
+{
+   vector<string> lstLines = GetCollectionList(None);
+
+   ofstream oColFile;
+   oColFile.open(m_ptrCollectionDetails->GetFile());
+
+   oColFile << "\"" << m_ptrCollectionDetails->GetName() << "\"" << endl;
 
    vector<string>::iterator iter_Line = lstLines.begin();
    for (; iter_Line != lstLines.end(); ++iter_Line)
