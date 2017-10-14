@@ -18,7 +18,7 @@ Collection::Collection(string aszName,
    m_ptrTransactionManager = new TransactionManager(this);
 
    m_ptrCollectionDetails->SetName(aszName);
-   m_ptrCollectionDetails->SetFileName(aszName);
+   m_ptrCollectionDetails->SetFileName(aszName, true);
    m_ptrCollectionDetails->SetChildrenCount(0);
    m_ptrCollectionDetails->AssignAddress(aszID);
 
@@ -259,6 +259,11 @@ Collection::LoadCollection(
    {
       m_ptrCollectionDetails->SetFile(aszFileName);
       m_ptrCollectionTracker->Track(); 
+
+      if( szName == "" )
+      {
+         m_ptrCollectionDetails->SetName(aszFileName);
+      }
    }
 }
 

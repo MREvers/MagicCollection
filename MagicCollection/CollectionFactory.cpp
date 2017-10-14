@@ -161,7 +161,7 @@ CollectionFactory::getNextChildName(std::string aszParentID) const
    if (oCol.Good())
    {
       int iChildren = oCol->GetChildCount();
-      iHighPrimeIndex += iChildren;
+      iHighPrimeIndex += iChildren + 1;
       
       iHighPrime = addresser.GetPrime(iHighPrimeIndex);
       szSubAddress = std::to_string(iCurrentSA*iHighPrime);

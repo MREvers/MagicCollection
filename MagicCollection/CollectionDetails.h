@@ -11,7 +11,8 @@ public:
    void SetName(std::string aszName);
    std::string GetName();
 
-   void SetFileName(std::string aszFileName);
+   void SetFileName( std::string aszFileName, 
+                     bool abDefaultLocation = false );
    std::string GetFileName();
 
    void SetFile(std::string aszFile);

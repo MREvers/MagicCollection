@@ -1,6 +1,7 @@
 #include "CollectionDetails.h"
 
 #include <ctime>
+#include "Config.h"
 #include "StringHelper.h"
 
 CollectionDetails::CollectionDetails()
@@ -27,9 +28,14 @@ CollectionDetails::GetName()
 }
 
 void 
-CollectionDetails::SetFileName(std::string aszFileName)
+CollectionDetails::SetFileName(std::string aszFileName, bool abDefaultLocation)
 {
    m_szFileName = aszFileName;
+   
+   if( abDefaultLocation )
+   {
+      SetFile(Config::Instance()->GetCollectionsDirectory() + "\\\\" + m_szFileName + ".txt");
+   }
 }
 
 // Returns the name of the file to save to.
