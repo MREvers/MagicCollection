@@ -83,6 +83,8 @@
     <Compile Include="Support\MultiDisplay\VCIMultiDisplay.cs" />
     <Compile Include="Support\SortingList\SortingList.cs" />
     <Compile Include="Tools\Extensions.cs" />
+    <Compile Include="Views\CollectionViews\Deckbox\VCIFancyCollectionItem.cs" />
+    <Compile Include="Views\CollectionViews\Deckbox\VCIFancyCollectionList.cs" />
     <Compile Include="Views\Components\CardImageDock\MCardImageDock.cs" />
     <Compile Include="Views\Components\CardImageDock\VCardImageDock.xaml.cs">
       <DependentUpon>VCardImageDock.xaml</DependentUpon>

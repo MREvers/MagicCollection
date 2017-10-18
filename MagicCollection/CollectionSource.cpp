@@ -58,7 +58,6 @@ void CollectionSource::LoadLib(std::string aszFileName)
          char keyCode = config->GetKeyCode(szCardKey);
          if( keyCode != -1 )
          {
-
             m_iAllCharBuffSize += sO->AddAttribute( szCardKey, xmlNode_CardAttribute->value(),
                                                     m_AllCharBuff, ms_iMaxBufferSize );
          }

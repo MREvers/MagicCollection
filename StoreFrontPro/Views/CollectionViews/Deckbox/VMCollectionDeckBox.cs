@@ -1,6 +1,7 @@
 ﻿using StoreFrontPro.Server;
 using StoreFrontPro.Support.MultiDisplay;
 using StoreFrontPro.Views.Components.RequestTextOverlay;
+using StoreFrontPro.Views.Components.VCardImageDock;
 using StoreFrontPro.Views.Interfaces.CollectionChanger;
 using System;
 using System.Collections.Generic;
@@ -27,6 +28,7 @@ namespace StoreFrontPro.Views.CollectionViews.Deckbox
          set { _OperationWindow = value; OnPropertyChanged(); }
       }
 
+      private MCardImageDock Dock;
       private UserControl _CollectionDock;
       public UserControl CollectionDock
       {
@@ -47,10 +49,16 @@ namespace StoreFrontPro.Views.CollectionViews.Deckbox
          OperationWindow.DisplayEvent += DisplayEventHandler;
 
          ViewClass itemDock = ViewFactory.CreateItemDock(ItemDock);
-         CollectionDock = itemDock.View;
+         Dock = (MCardImageDock)itemDock.Model;
+         CollectionDock = (VCardImageDock)itemDock.View;
       }
 
       #region Event Handlers
+      private void eItemClicked(CardModel model)
+      {
+         Dock.SetDisplayImage(model);
+      }
+
       private void eDisplayCollectionEditorCommand(object canExecute)
       {
          VMCollectionEditor collectionsOverviewVM = new VMCollectionEditor(Model, CollectionEditor);
@@ -156,6 +164,10 @@ namespace StoreFrontPro.Views.CollectionViews.Deckbox
             Accept: (x) => { return (x as VMCollectionDeckBox).eAcceptOrCancelColEditor; },
             Cancel: (x) => { return (x as VMCollectionDeckBox).eAcceptOrCancelColEditor; });
          _IRouter.AddInterface(CEIS);
+
+         VCIFancyCollectionList FCIS = new VCIFancyCollectionList(
+            Clicked: (x) => { return (x as VMCollectionDeckBox).eItemClicked; });
+         _IRouter.AddInterface(FCIS);
       }
       #endregion
 

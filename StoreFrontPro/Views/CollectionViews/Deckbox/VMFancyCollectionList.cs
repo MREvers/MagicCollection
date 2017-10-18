@@ -12,12 +12,13 @@ using System.Windows;
 
 namespace StoreFrontPro.Views.CollectionViews.Deckbox
 {
-   class VMFancyCollectionList : ViewModel<BasicModel<List<CardModel>>>
+   class VMFancyCollectionList : ViewModel<BasicModel<List<CardModel>>>, IViewComponent, IVCISupporter
    {
       public ObservableCollection<VFancyCollectionItem> Cards { get; set; } = 
          new ObservableCollection<VFancyCollectionItem>();
 
       private bool _CollapsedView = false;
+
       private bool CollapsedView
       {
          get
@@ -49,7 +50,7 @@ namespace StoreFrontPro.Views.CollectionViews.Deckbox
             return;
          }
 
-         Cards.Clear();
+         clearCards();
          List<CardModel> lstCMs = Model.Item.ToList();
          Dictionary<string, List<CardModel>> mapCardTypeGroup = new Dictionary<string, List<CardModel>>();
 
@@ -68,16 +69,79 @@ namespace StoreFrontPro.Views.CollectionViews.Deckbox
 
             foreach( var model in group.GroupList )
             {
-               listItem = ViewFactory.CreateFancyCollectionItem(model, 3, "");
-               Cards.Add((VFancyCollectionItem)listItem.View);
+               addCard(model);
             }
          }
+      }
+
+      private void addCard(CardModel model)
+      {
+         ViewClass listItem = ViewFactory.CreateFancyCollectionItem(model, 3, "");
+         ((VMFancyCollectionItem)listItem.ViewModel).DisplayEvent += DisplayEventHandler;
+         Cards.Add((VFancyCollectionItem)listItem.View);
+      }
+
+      private void clearCards()
+      {
+         foreach( var display in Cards )
+         {
+             ((VMFancyCollectionItem)display.DataContext).DisplayEvent -= DisplayEventHandler;
+         }
+
+         Cards.Clear();
+      }
+
+      private void eChildClicked(CardModel model)
+      {
+         DisplayEventArgs eventArgs = new DisplayEventArgs(VCIFancyCollectionItem.Clicked, model);
+         DisplayEvent?.Invoke(this, eventArgs);
       }
 
       #region IViewModel
       public override void ModelUpdated()
       {
          SyncWithModel();
+      }
+      #endregion
+
+      #region IVCISupporter
+      public void DisplayEventHandler(object source, DisplayEventArgs e)
+      {
+         GetRouter().Call(source.GetType(), this, e.Key, e.Args);
+      }
+
+      public InterfaceRouter GetRouter()
+      {
+         return IRouter;
+      }
+
+      static InterfaceRouter _IRouter = null;
+      static InterfaceRouter IRouter
+      {
+         get
+         {
+            if (_IRouter == null) { BuildInterface(); }
+            return _IRouter;
+         }
+      }
+
+      static void BuildInterface()
+      {
+         _IRouter = new InterfaceRouter();
+
+         VCIFancyCollectionItem RTIS = new VCIFancyCollectionItem(
+             Clicked: (x) => { return (x as VMFancyCollectionList).eChildClicked; });
+         _IRouter.AddInterface(RTIS);
+      }
+      #endregion
+
+      #region IViewComponent
+      public event DisplayEventHandler DisplayEvent;
+
+      
+      public List<StoreFrontMenuItem> GetMenuItems()
+      {
+         throw new NotImplementedException();
       }
       #endregion
    }

@@ -12,7 +12,7 @@ using System.Windows.Media;
 
 namespace StoreFrontPro.Views.CollectionViews.Deckbox
 {
-   class VMFancyCollectionItem : ViewModel<CardModel>
+   class VMFancyCollectionItem : ViewModel<CardModel>, IViewComponent
    {
       public List<string> LST_TEMP_IMPORTANT_ATTRS = new List<string>()
         {
@@ -29,7 +29,7 @@ namespace StoreFrontPro.Views.CollectionViews.Deckbox
          : base(Model, RoutingName)
       {
          this.Columns = Columns;
-
+         MouseOver = new RelayCommand(eClicked);
          SyncWithModel();
       }
 
@@ -61,6 +61,21 @@ namespace StoreFrontPro.Views.CollectionViews.Deckbox
             DisplayedProperties.Add(new TextBox() { Text = Model.DisplayName, IsReadOnly = true });
          }
       }
+
+      private void eClicked(object canExecute)
+      {
+         DisplayEventArgs eventArgs = new DisplayEventArgs(VCIFancyCollectionItem.Clicked, Model);
+         DisplayEvent?.Invoke(this, eventArgs);
+      }
+
+      #region IViewComponent
+      public event DisplayEventHandler DisplayEvent;
+
+      public List<StoreFrontMenuItem> GetMenuItems()
+      {
+         throw new NotImplementedException();
+      }
+      #endregion
 
       #region IViewModel
       public override void ModelUpdated()
