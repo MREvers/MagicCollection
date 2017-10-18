@@ -6,6 +6,6 @@
              xmlns:local="clr-namespace:StoreFrontPro.Views.CollectionViews.Deckbox"
              mc:Ignorable="d" 
              d:DesignHeight="24" d:DesignWidth="300">
-    <Grid x:Name="MainGrid" MouseDown="MainGrid_MouseDown">
+    <Grid x:Name="MainGrid" PreviewMouseLeftButtonDown="MainGrid_MouseDown">
     </Grid>
 </UserControl>
