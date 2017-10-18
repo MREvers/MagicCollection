@@ -82,6 +82,11 @@
     </Compile>
     <Compile Include="Support\MultiDisplay\VCIMultiDisplay.cs" />
     <Compile Include="Tools\Extensions.cs" />
+    <Compile Include="Views\Components\CardImageDock\MCardImageDock.cs" />
+    <Compile Include="Views\Components\CardImageDock\VCardImageDock.xaml.cs">
+      <DependentUpon>VCardImageDock.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Components\CardImageDock\VMCardImageDock.cs" />
     <Compile Include="Views\MVVM\BasicModel.cs" />
     <Compile Include="Views\CollectionsOverview\VCICollectionsOverview.cs" />
     <Compile Include="Views\CollectionsOverview\VCollectionsOverview.xaml.cs">
@@ -230,6 +235,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\Components\CardImageDisplayer\VCardImageDisplayer.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Components\CardImageDock\VCardImageDock.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

@@ -1,6 +1,7 @@
 ﻿using StoreFrontPro.Server;
 using StoreFrontPro.Views.CollectionViews.Cube;
 using StoreFrontPro.Views.Components.CardImageDisplayer;
+using StoreFrontPro.Views.Components.VCardImageDock;
 using StoreFrontPro.Views.Components.SuggestionsSearchBox;
 using StoreFrontPro.Views.Interfaces.CollectionChanger;
 using System;
@@ -60,6 +61,15 @@ namespace StoreFrontPro.Views
          VCardImageDisplayer cardImageDisplayerV = new VCardImageDisplayer() { DataContext = cardImageDisplayerVM };
 
          return new ViewClass(Model, cardImageDisplayerVM, cardImageDisplayerV);
+      }
+
+      public static ViewClass CreateItemDock(string RoutingName)
+      {
+         MCardImageDock cardImageDockM = new MCardImageDock();
+         VMCardImageDock cardImageDockVM = new VMCardImageDock(cardImageDockM, RoutingName);
+         VCardImageDock cardImageDockV = new VCardImageDock() { DataContext = cardImageDockVM };
+
+         return new ViewClass(cardImageDockM, cardImageDockVM, cardImageDockV);
       }
    }
 }

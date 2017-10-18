@@ -8,19 +8,32 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Controls;
 
 namespace StoreFrontPro.Views.CollectionViews.Deckbox
 {
    class VMCollectionDeckBox : ViewModel<CollectionModel>, IViewComponent, IVCISupporter
    {
+      #region Names
       public const string CollectionEditor = "CE";
+      public const string ItemDock = "ITD";
+      #endregion
 
+      #region Bindings
       private MultiDisplay _OperationWindow = new MultiDisplay();
       public MultiDisplay OperationWindow
       {
          get { return _OperationWindow; }
          set { _OperationWindow = value; OnPropertyChanged(); }
       }
+
+      private UserControl _CollectionDock;
+      public UserControl CollectionDock
+      {
+         get { return _CollectionDock; }
+         set { _CollectionDock = value; OnPropertyChanged(); }
+      }
+      #endregion
 
       public event DisplayEventHandler DisplayEvent;
 
@@ -32,6 +45,9 @@ namespace StoreFrontPro.Views.CollectionViews.Deckbox
              DataContext: new VMFancyCollectionList(Model.CollectionItems, "FancyColList", true),
              Persist: false);
          OperationWindow.DisplayEvent += DisplayEventHandler;
+
+         ViewClass itemDock = ViewFactory.CreateItemDock(ItemDock);
+         CollectionDock = itemDock.View;
       }
 
       #region Event Handlers

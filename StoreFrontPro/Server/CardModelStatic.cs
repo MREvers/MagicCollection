@@ -6,23 +6,28 @@ using System.Threading.Tasks;
 
 namespace StoreFrontPro.Server
 {
-   public class CardModelBase
+   class CardModelBase
    {
+      public string Name;
       public Dictionary<string, string> CommonAttributes;
       public Dictionary<string, List<string>> AttributeOptions;
 
       public CardModelBase(string CardName)
       {
+         Name = CardName;
          CommonAttributes = new Dictionary<string, string>();
          AttributeOptions = new Dictionary<string, List<string>>();
 
-         string Prototype = ServerInterface.Card.GetProtoType(CardName);
+         string Prototype = ServerInterface.Card.GetProtoType(Name);
 
          var attributePairs = CardModel.ParseTagList(Prototype);
 
          foreach (var Tag in attributePairs)
          {
-            CommonAttributes.Add(Tag.Item1, Tag.Item2);
+            if( Tag.Item1.ToLower() != "name" )
+            {
+               CommonAttributes.Add(Tag.Item1, Tag.Item2);
+            }
          }
 
          var optionedAttributes = new List<string>();
@@ -33,7 +38,7 @@ namespace StoreFrontPro.Server
             // '*' indicates that the value is restricted key.
             if (Value.Contains("*"))
             {
-               optionedAttributes.Add(Key);
+               optionedAttributes.Add(Key.Trim(' ').Trim('*'));
             }
          }
 
@@ -50,6 +55,17 @@ namespace StoreFrontPro.Server
 
             CommonAttributes.Remove(Key);
          }
+      }
+
+      public CardModel GetDefault()
+      {
+         List<Tuple<string,string>> lstAttrs = new List<Tuple<string, string>>();
+
+         foreach( var pair in AttributeOptions )
+         {
+            lstAttrs.Add(new Tuple<string, string>(pair.Key, pair.Value.First().ToString()));
+         }
+         return new CardModel(Name + " " + CardModel.ToTagList(lstAttrs), "");
       }
    }
 
@@ -71,20 +87,46 @@ namespace StoreFrontPro.Server
       public static List<Tuple<string, string>> ParseTagList(string szTags)
       {
          string szRetval = szTags.Trim(' ', '{', '}', ' ');
-         List<string> lstTuples = szRetval.Split(' ').ToList();
+         List<string> lstTuples = szRetval.Split('=').ToList();
+         
          List<Tuple<string, string>> lstRealTuples = new List<Tuple<string, string>>();
-         foreach (string tup in lstTuples)
+         if( lstTuples.Count > 0 )
          {
-            List<string> lstKeyAndVal = tup.Split('=').ToList();
-            if (lstKeyAndVal.Count == 2)
+            string szName = lstTuples[0];
+            string szVal;
+            for( int i = 1; i < lstTuples.Count-1; i++ )
             {
-               string szKey = lstKeyAndVal[0].Trim(' ');
-               string szVal = lstKeyAndVal[1].Trim(' ', '\"');
-               lstRealTuples.Add(new Tuple<string, string>(szKey, szVal));
+               var keyStr = lstTuples[i].Split(new char[] { '"' }, StringSplitOptions.RemoveEmptyEntries);
+               if( keyStr.Count() > 0 )
+               {
+                  szVal = keyStr[0];
+                  lstRealTuples.Add(new Tuple<string, string>(szName.Trim(' ').Trim('*'), szVal.Trim(' ').Trim('"')));
+               }
+
+               if( keyStr.Count() == 2 )
+               {
+                  szName = keyStr[1];
+               }
             }
+            szVal = lstTuples.Last();
+            lstRealTuples.Add(new Tuple<string, string>(szName.Trim(' ').Trim('*'), szVal.Trim(' ').Trim('"')));
          }
 
          return lstRealTuples;
+      }
+
+      public static string ToTagList(List<Tuple<string, string>> alstTagList)
+      {
+         string szRetval = "{ ";
+
+         foreach(var pair in alstTagList)
+         {
+            szRetval += pair.Item1 + "=\"" + pair.Item2 + "\" ";
+         }
+
+         szRetval += "}";
+
+         return szRetval;
       }
    }
 }

@@ -139,7 +139,8 @@ std::string CStoreFrontBackEnd::GetCardPrototype(std::string aszCardName)
    }
 }
 
-std::vector<std::string> CStoreFrontBackEnd::GetAllCardsStartingWith(std::string aszSearch)
+std::vector<std::string> 
+CStoreFrontBackEnd::GetAllCardsStartingWith(std::string aszSearch)
 {
    return m_ColSource->GetAllCardsStartingWith(aszSearch);
 }

@@ -36,7 +36,6 @@ namespace StoreFrontPro.Server
          }
          #endregion
 
-
          // It is expected that any object referenced in these actions
          // survives to running time of the application.
          private List<Action> Notifiers;
@@ -124,8 +123,10 @@ namespace StoreFrontPro.Server
          public void GenerateCopyModelAS(string Identifier, string CollectionName,
                                           Action<CardModel> Callback, bool UICallback = false)
          {
-            GenerateCopyModelsAS(new List<string>() { Identifier }, CollectionName,
-                                  (lst) => { Callback(lst.FirstOrDefault()); }, UICallback);
+            singleton.enqueueService(() =>
+            {
+               Callback?.Invoke(GenerateCopyModel(Identifier, CollectionName));
+            }, UICallback);
          }
 
          public void GenerateCopyModelsAS(List<string> Identifiers, string CollectionName,
@@ -133,14 +134,25 @@ namespace StoreFrontPro.Server
          {
             singleton.enqueueService(() =>
             {
-               Callback?.Invoke(Identifiers.Select((x) => { return createCopyModel(x, CollectionName); }).ToList());
+               Callback?.Invoke(GenerateCopyModels(Identifiers, CollectionName));
             }, UICallback);
          }
 
-         private CardModel createCopyModel(string aszIdentifier, string aszCollectionName)
+         public List<CardModel> GenerateCopyModels(List<string> Identifiers, string CollectionName)
+         {
+            return Identifiers.Select((x) => { return GenerateCopyModel(x, CollectionName); }).ToList();
+         }
+
+         public CardModel GenerateCopyModel(string aszIdentifier, string aszCollectionName)
          {
             CardModel newCopy = new CardModel(aszIdentifier, aszCollectionName);
             return newCopy;
+         }
+
+         public CardModel GenerateCopyModelFromName(string aszName, string aszCollectionName)
+         {
+            string szPrototype = ServerInterface.Card.GetProtoType(aszName);
+            return GenerateCopyModel(szPrototype, aszCollectionName);
          }
 
          public void SyncServerTask(Action aCallback, bool UICallback = false)
