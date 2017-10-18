@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using StoreFrontPro.Views.CollectionViews.Deckbox;
 
 namespace StoreFrontPro.Views
 {
@@ -53,6 +54,14 @@ namespace StoreFrontPro.Views
          }
 
          return null;
+      }
+
+      public static ViewClass CreateFancyCollectionItem(CardModel Model, int Columns, string RoutingName)
+      {
+         VMFancyCollectionItem fancyCollectionItemVM = new VMFancyCollectionItem(Model, RoutingName, Columns);
+         VFancyCollectionItem fancyCollectionItemV = new VFancyCollectionItem() { DataContext = fancyCollectionItemVM };
+
+         return new ViewClass(Model, fancyCollectionItemVM, fancyCollectionItemV);
       }
 
       public static ViewClass CreateCardImageViewer(CardModel Model, string RoutingName)

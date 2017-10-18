@@ -125,7 +125,7 @@ SourceObject::GetNonUniqueAttributeRestrictions(char* aiSearchBuffer)
 unsigned int 
 SourceObject::GetBufferOffset() const
 {
-   return (m_pOffAndInd[0] << 16) | (m_pOffAndInd[1] << 8) | (m_pOffAndInd[2] & 0xFE);
+   return (m_pOffAndInd[0] << 16) | (m_pOffAndInd[1] << 8) | (m_pOffAndInd[2] & 0xFF);
 }
 
 void

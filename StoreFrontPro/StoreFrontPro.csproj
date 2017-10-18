@@ -81,6 +81,7 @@
       <DependentUpon>MultiDisplay.xaml</DependentUpon>
     </Compile>
     <Compile Include="Support\MultiDisplay\VCIMultiDisplay.cs" />
+    <Compile Include="Support\SortingList\SortingList.cs" />
     <Compile Include="Tools\Extensions.cs" />
     <Compile Include="Views\Components\CardImageDock\MCardImageDock.cs" />
     <Compile Include="Views\Components\CardImageDock\VCardImageDock.xaml.cs">

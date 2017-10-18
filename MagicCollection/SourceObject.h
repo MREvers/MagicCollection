@@ -87,9 +87,9 @@ private:
    // Always put name as the first value. (Shift others if needed)
    // Elmininates nameindex; saves 8 bits
    //
-   // Need 38 bits for cache index and buffer offset. Buffer offset is 23 bits
+   // Need 38 bits for cache index and buffer offset. Buffer offset is 24 bits
    // cache index is 15 bits.
-   // Use an array of 5 chars to create 40 bits. First 23 bits are buffer offset,
+   // Use an array of 5 chars to create 40 bits. First 24 bits are buffer offset,
    // last 15 are char index.
    // Saves 8 Bits
    //

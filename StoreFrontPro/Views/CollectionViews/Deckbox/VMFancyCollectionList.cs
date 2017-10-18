@@ -1,4 +1,5 @@
 ﻿using StoreFrontPro.Server;
+using StoreFrontPro.Support.SortingList;
 using StoreFrontPro.Tools;
 using System;
 using System.Collections.Generic;
@@ -26,7 +27,8 @@ namespace StoreFrontPro.Views.CollectionViews.Deckbox
       }
 
       public VMFancyCollectionList(BasicModel<List<CardModel>> Model, string RoutingName,
-                                   bool CollapsedView = false) : base(Model, RoutingName)
+                                   bool CollapsedView = false)
+         : base(Model, RoutingName)
       {
          _CollapsedView = CollapsedView;
          SyncWithModel();
@@ -51,76 +53,23 @@ namespace StoreFrontPro.Views.CollectionViews.Deckbox
          List<CardModel> lstCMs = Model.Item.ToList();
          Dictionary<string, List<CardModel>> mapCardTypeGroup = new Dictionary<string, List<CardModel>>();
 
-         VFancyCollectionItem fancyCollectionItemV;
-         VMFancyCollectionItem fancyCollectionItemVM;
+         SortingList grouping = new SortingList(Model);
+         grouping.SortOn("types", "Creature", "Land");
+         grouping.SortOn("cmc");
+         grouping.SortOnFeature = true;
 
-         foreach (CardModel cm in Model.Item)
+         foreach( var group in grouping.GetGroups() )
          {
-            string szTypeGroup = cm.GetAttr("types");
-            szTypeGroup = szTypeGroup.Contains("Creature") ? "Creature" : szTypeGroup;
-            if (!mapCardTypeGroup.ContainsKey(szTypeGroup))
+            if( group.GroupList.Count() == 0 ) { continue; }
+
+            CardModel modelGroupHeader = new CardModel(group.Grouping, "");
+            ViewClass listItem = ViewFactory.CreateFancyCollectionItem(modelGroupHeader, 1, "");
+            Cards.Add((VFancyCollectionItem)listItem.View);
+
+            foreach( var model in group.GroupList )
             {
-               mapCardTypeGroup.Add(szTypeGroup, new List<CardModel>() { cm });
-            }
-            else
-            {
-               mapCardTypeGroup[szTypeGroup].Add(cm);
-            }
-         }
-
-         // Land, Creature, Non Creature.
-         if (mapCardTypeGroup.ContainsKey("Land"))
-         {
-            fancyCollectionItemV = new VFancyCollectionItem();
-            fancyCollectionItemVM = new VMFancyCollectionItem(new CardModel("Land", ""), "", 1);
-            fancyCollectionItemV.DataContext = fancyCollectionItemVM;
-            Cards.Add(fancyCollectionItemV);
-
-            foreach (CardModel cm in mapCardTypeGroup["Land"])
-            {
-               fancyCollectionItemV = new VFancyCollectionItem();
-               fancyCollectionItemVM = new VMFancyCollectionItem(cm, "");
-               fancyCollectionItemV.DataContext = fancyCollectionItemVM;
-               Cards.Add(fancyCollectionItemV);
-            }
-
-            mapCardTypeGroup.Remove("Land");
-         }
-
-         if (mapCardTypeGroup.ContainsKey("Creature"))
-         {
-            fancyCollectionItemV = new VFancyCollectionItem();
-            fancyCollectionItemVM = new VMFancyCollectionItem(new CardModel("Creature", ""), "", 1);
-            fancyCollectionItemV.DataContext = fancyCollectionItemVM;
-            Cards.Add(fancyCollectionItemV);
-
-            foreach (CardModel cm in mapCardTypeGroup["Creature"])
-            {
-               fancyCollectionItemV = new VFancyCollectionItem();
-               fancyCollectionItemVM = new VMFancyCollectionItem(cm, "");
-               fancyCollectionItemV.DataContext = fancyCollectionItemVM;
-               Cards.Add(fancyCollectionItemV);
-            }
-
-            mapCardTypeGroup.Remove("Creature");
-         }
-
-         if (mapCardTypeGroup.Keys.Count > 0)
-         {
-            fancyCollectionItemV = new VFancyCollectionItem();
-            fancyCollectionItemVM = new VMFancyCollectionItem(new CardModel("Other", ""), "", 1);
-            fancyCollectionItemV.DataContext = fancyCollectionItemVM;
-            Cards.Add(fancyCollectionItemV);
-
-            foreach (string szKey in mapCardTypeGroup.Keys)
-            {
-               foreach (CardModel cm in mapCardTypeGroup[szKey])
-               {
-                  fancyCollectionItemV = new VFancyCollectionItem();
-                  fancyCollectionItemVM = new VMFancyCollectionItem(cm, "");
-                  fancyCollectionItemV.DataContext = fancyCollectionItemVM;
-                  Cards.Add(fancyCollectionItemV);
-               }
+               listItem = ViewFactory.CreateFancyCollectionItem(model, 3, "");
+               Cards.Add((VFancyCollectionItem)listItem.View);
             }
          }
       }

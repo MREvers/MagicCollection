@@ -103,6 +103,18 @@ namespace StoreFrontPro.Server
          return PrototypeName + szSupport;
       }
 
+      /// <summary>
+      /// Returns a metatag with the key first, then if there
+      /// is an attr, but no meta, then return the attr.
+      /// </summary>
+      /// <param name="aszKey"></param>
+      /// <returns></returns>
+      public string GetFeature(string aszKey)
+      {
+         string szRetval = GetMetaTag(aszKey);
+         return szRetval == "" ? GetAttr(aszKey) : szRetval;
+      }
+
       public string GetMetaTag(string aszKey)
       {
          string szRetVal = "";
