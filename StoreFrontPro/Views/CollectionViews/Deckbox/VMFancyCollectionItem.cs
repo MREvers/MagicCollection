@@ -23,13 +23,15 @@ namespace StoreFrontPro.Views.CollectionViews.Deckbox
       public int Columns { get; set; } = 3;
 
       public RelayCommand MouseOver { get; set; }
-      public ObservableCollection<UIElement> DisplayedProperties { get; set; } = new ObservableCollection<UIElement>();
+      public ObservableCollection<UIElement> DisplayedProperties { get; set; } =
+         new ObservableCollection<UIElement>();
 
       public VMFancyCollectionItem(CardModel Model, string RoutingName, int Columns = 3) 
          : base(Model, RoutingName)
       {
          this.Columns = Columns;
          MouseOver = new RelayCommand(eClicked);
+         Model.Register(this);
          SyncWithModel();
       }
 
@@ -80,7 +82,7 @@ namespace StoreFrontPro.Views.CollectionViews.Deckbox
       #region IViewModel
       public override void ModelUpdated()
       {
-         throw new NotImplementedException();
+         SyncWithModel();
       }
       #endregion
    }

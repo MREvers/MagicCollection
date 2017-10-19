@@ -12,7 +12,7 @@
             <ColumnDefinition Width="5*"/>
         </Grid.ColumnDefinitions>
         <!-- When there are other things at the highest level that are VM tied, this is the binding needed. -->
-       <ContentPresenter 
+       <ContentPresenter
                 Grid.Column="0" 
                 Content="{Binding CollectionDock}"/>
       <ContentPresenter 

@@ -38,6 +38,10 @@ public:
    vector<string> GetCollectionMetaData(string aszCollection);
    vector<string> GetCollectionList(string aszCollection, int aiVisibility);
 
+   // Card Accessors
+   //
+   void SetAttribute(string aszCardName, string aszUID, string aszKey, string aszVal);
+
    // Source Accessors
    //
    vector<string> GetAllCardsStartingWith(string aszSearch);
@@ -46,6 +50,7 @@ public:
 
    // Config accessors
    //
+   vector<pair<string, string>> GetPairedAttributes();
    string GetImagesPath();
    string GetSourceFilePath();
    string GetImportSourceFilePath();

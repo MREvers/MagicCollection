@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace StoreFrontPro.Views.Components.VCardImageDock
 {
-   class MCardImageDock : IModel
+   class MCardImageDock : IViewModel, IModel
    {
       public CardModel ModelDisplay { get; private set; }
 
@@ -18,7 +18,12 @@ namespace StoreFrontPro.Views.Components.VCardImageDock
 
       public void SetDisplayImage(CardModel oModel)
       {
+         if( ModelDisplay != null )
+         {
+            ModelDisplay.UnRegister(this);
+         }
          ModelDisplay = oModel;
+         ModelDisplay.Register(this);
          NotifyViewModel();
       }
 
@@ -54,5 +59,19 @@ namespace StoreFrontPro.Views.Components.VCardImageDock
          throw new NotImplementedException();
       }
       #endregion
+
+      #region IViewModel
+      
+      public void ModelUpdated()
+      {
+         NotifyViewModel();
+      }
+
+      public void FreeModel()
+      {
+         throw new NotImplementedException();
+      }
+      #endregion
+
    }
 }

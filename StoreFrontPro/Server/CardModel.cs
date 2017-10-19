@@ -58,11 +58,9 @@ namespace StoreFrontPro.Server
          parseIdentifier(aszIdentifier);
       }
 
-      public void SubmitFeatureChangesToServer(
-          List<Tuple<string, string>> alstNewMeta,
-          List<Tuple<string, string>> alstNewAttrs)
+      public void SetAttr(string aszKey, string aszVal)
       {
-
+         ServerInterface.Card.SetAttribute(PrototypeName, GetMetaTag("UID"))
       }
 
       public string GetFullIdentifier()
@@ -228,34 +226,61 @@ namespace StoreFrontPro.Server
       }
 
       #region IModel
+      private List<WeakReference<IViewModel>> viewModels = new List<WeakReference<IViewModel>>();
+      public void NotifyViewModel()
+      {
+         viewModels.ForEach(x => 
+         {
+            IViewModel model;
+            if(x.TryGetTarget(out model))
+            {
+               model.ModelUpdated();
+            }
+         });
+      }
+
       public void Register(IViewModel item)
       {
-         throw new NotImplementedException();
+         viewModels.Add(new WeakReference<IViewModel>(item));
       }
 
       public void UnRegister(IViewModel item)
       {
+         // Find the model that corresponds.
+         var lstRemoves = new List<WeakReference<IViewModel>>();
+         foreach(var model in viewModels)
+         {
+            IViewModel test;
+            if(model.TryGetTarget(out test))
+            {
+               if( test == item )
+               {
+                  lstRemoves.Add(model);
+               }
+            }
+         }
 
-      }
-
-      public void NotifyViewModel()
-      {
-         throw new NotImplementedException();
-      }
-
-      public void EnableNotification(bool abNotify)
-      {
-         throw new NotImplementedException();
-      }
-
-      public void DisableNotification()
-      {
-         throw new NotImplementedException();
+         foreach( var model in lstRemoves )
+         {
+            viewModels.Remove(model);
+         }
       }
 
       public void Sync(bool ASync = true)
       {
-         throw new NotImplementedException();
+         syncAction?.Invoke(ASync);
+         if (notify) { NotifyViewModel(); }
+      }
+
+      public void EnableNotification(bool abNotify = false)
+      {
+         notify = true;
+         if (abNotify) { NotifyViewModel(); }
+      }
+
+      public void DisableNotification()
+      {
+         notify = false;
       }
       #endregion
    }

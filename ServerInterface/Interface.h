@@ -22,31 +22,45 @@ public:
 	ServerClientInterface();
 	~ServerClientInterface();
 
+   // Program Management
+   //
+   System::Boolean IsConfigLoaded();
+
+   // Collection Manager Accessors
+   //
 	String^ LoadCollection(String^ aszCollectionName);
 	String^ CreateNewCollection(String^ aszCollectionName, String^ ahszParent);
-	void SaveCollection(String^ aszCollectionName);
+	List<String^>^ GetLoadedCollections();
 
+   // Collection Accessors
+   //
+	void SaveCollection(String^ aszCollectionName);
+	List<String^>^ GetCollectionMetaData(String^ ahszCollectionName);
+	List<String^>^ GetCollectionList(String^ ahszCollectionName);
+	void SubmitBulkChanges(String^ ahszCollectionName, List<String^>^ ahlstBulkChanges);
+
+   // Card Accessors
+   //
+   void SetAttribute(String^ ahszCardName, String^ ahszUID, String^ ahszKey, String^ ahszVal);
+
+   // Source Accessors
+   //
+	List<String^>^ GetAllCardsStartingWith(String^ ahszText);
+	String^ GetCardPrototype(String^ ahszCardName);
+	void ImportCollection();
+
+   // Config accessors
+   //
    String^ GetSourceFilePath();
    String^ GetImportSourceFilePath();
    String^ GetImagesPath();
-	String^ GetCardPrototype(String^ ahszCardName);
+   List<HTag^>^ GetPairedAttributes();
 
-	List<String^>^ GetLoadedCollections();
-
-	List<String^>^ GetAllCardsStartingWith(String^ ahszText);
-
-	List<String^>^ GetCollectionMetaData(String^ ahszCollectionName);
-	List<String^>^ GetCollectionList(String^ ahszCollectionName);
-
-	void SubmitBulkChanges(String^ ahszCollectionName, List<String^>^ ahlstBulkChanges);
-
-	void ImportCollection();
-
-   System::Boolean IsConfigLoaded();
 private:
 	CStoreFrontBackEnd* m_StoreFrontBackEnd;
 
-	List<String^>^ convertStrVecToLst(std::vector<std::string> alstTrans);
+	List<String^>^ convertStrVecToLst(vector<string> alstTrans);
+   List<HTag^>^ convertTupVecToLst(vector<Tag> alstTups);
 
 	vector<Tag> revertTupLstToVec(List<HTag^>^ hlstMetaTagsOne);
    vector<string> revertStrLstToVec(List<String^>^ hlstChanges);

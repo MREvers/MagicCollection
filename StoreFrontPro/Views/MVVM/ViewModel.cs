@@ -48,8 +48,8 @@ namespace StoreFrontPro.Views
       abstract public void ModelUpdated();
 
       // This MAY be exposed via a prettier property with the appropriate type in child classes.
-      public T Model { get; private set; }
-      public string RoutingName { get; private set; }
+      public T Model { get; protected set; }
+      public string RoutingName { get; protected set; }
 
       public ViewModel(T Model, string RoutingName)
       {

@@ -4,9 +4,13 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:StoreFrontPro.Views.Components.VCardImageDock"
-             mc:Ignorable="d" 
-             d:DesignHeight="300" d:DesignWidth="300">
-    <Grid>
-      <ContentPresenter Content="{Binding OperationWindow}"/>
+             mc:Ignorable="d" >
+    <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+      <Grid.RowDefinitions>
+         <RowDefinition/>
+         <RowDefinition Height="*" />
+      </Grid.RowDefinitions>
+      <ContentPresenter Grid.Row="0" Content="{Binding ImageWindow}"/>
+      <ContentPresenter Grid.Row="1" Content="{Binding DockWindow}"/>
    </Grid>
 </UserControl>

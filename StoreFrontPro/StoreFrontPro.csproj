@@ -90,6 +90,16 @@
       <DependentUpon>VCardImageDock.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Components\CardImageDock\VMCardImageDock.cs" />
+    <Compile Include="Views\Interfaces\CardInterface\MAttributeEditorItem.cs" />
+    <Compile Include="Views\Interfaces\CardInterface\VAttributeEditorItem.xaml.cs">
+      <DependentUpon>VAttributeEditorItem.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Interfaces\CardInterface\VCardChanger.xaml.cs">
+      <DependentUpon>VCardChanger.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Interfaces\CardInterface\VCIAttributeEditorItem.cs" />
+    <Compile Include="Views\Interfaces\CardInterface\VMAttributeEditorItem.cs" />
+    <Compile Include="Views\Interfaces\CardInterface\VMCardChanger.cs" />
     <Compile Include="Views\MVVM\BasicModel.cs" />
     <Compile Include="Views\CollectionsOverview\VCICollectionsOverview.cs" />
     <Compile Include="Views\CollectionsOverview\VCollectionsOverview.xaml.cs">
@@ -262,6 +272,14 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\Components\VCCollectionsMenuList.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Interfaces\CardInterface\VAttributeEditorItem.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Interfaces\CardInterface\VCardChanger.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

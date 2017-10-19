@@ -126,7 +126,22 @@ CStoreFrontBackEnd::GetCollectionList(std::string aszCollection, int aiVisibilit
    }
 }
 
-std::string CStoreFrontBackEnd::GetCardPrototype(std::string aszCardName)
+void 
+CStoreFrontBackEnd::SetAttribute(string aszCardName, string aszUID, string aszKey, string aszVal )
+{
+   auto item = m_ColSource->GetCardPrototype(aszCardName);
+   if( item.Good() )
+   {
+      auto copy = item->FindCopy(aszUID);
+      if( copy.Good() )
+      {
+         item->SetIdentifyingTrait(copy.Value()->get(), aszKey, aszVal );
+      }
+   }
+}
+
+std::string 
+CStoreFrontBackEnd::GetCardPrototype(std::string aszCardName)
 {
    int iValidCard = m_ColSource->LoadCard(aszCardName);
    if (iValidCard != -1) 
@@ -143,6 +158,12 @@ std::vector<std::string>
 CStoreFrontBackEnd::GetAllCardsStartingWith(std::string aszSearch)
 {
    return m_ColSource->GetAllCardsStartingWith(aszSearch);
+}
+
+vector<pair<string, string>> 
+CStoreFrontBackEnd::GetPairedAttributes()
+{
+   return Config::Instance()->GetPairedKeysList();
 }
 
 std::string CStoreFrontBackEnd::GetImagesPath()

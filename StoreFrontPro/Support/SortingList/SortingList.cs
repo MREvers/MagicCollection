@@ -73,12 +73,7 @@ namespace StoreFrontPro.Support.SortingList
          {
             foreach( var key in dictGroups.Keys )
             {
-               dictGroups[key].Sort((x,y)=> 
-               {
-                  string szx = getValue(x, m_lstSortList[1]);
-                  string szy = getValue(y, m_lstSortList[1]);
-                  return szx.CompareTo(szy);
-               });
+               dictGroups[key].Sort(getComparer(false));
 
                lstGroups.Add(new Group(key, dictGroups[key]));
             }
@@ -118,6 +113,23 @@ namespace StoreFrontPro.Support.SortingList
          }
 
          return szRetval;
+      }
+
+      private Comparison<CardModel> getComparer(bool numeric)
+      {
+         if( !numeric )
+         {
+            return (x,y)=> 
+               {
+                  string szx = getValue(x, m_lstSortList[1]);
+                  string szy = getValue(y, m_lstSortList[1]);
+                  return szx.CompareTo(szy);
+               };
+         }
+         else
+         {
+            return null;
+         }
       }
    }
 }

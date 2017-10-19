@@ -23,6 +23,16 @@ namespace StoreFrontPro.Server
          {
             ImageHandler.Handler.GetImage(aCallback, aoCardModel);
          }
+
+         public List<Tuple<string,string>> GetPairedAttributes()
+         {
+            return SCI.GetPairedAttributes();
+         }
+
+         public void SetAttribute(string aszCardName, string aszUID, string aszKey, string aszVal)
+         {
+            SCI.SetAttribute(aszCardName, aszUID, aszKey, aszVal);
+         }
       }
    }
 }

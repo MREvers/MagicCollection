@@ -1,6 +1,7 @@
 ﻿using StoreFrontPro.Server;
 using StoreFrontPro.Support.MultiDisplay;
 using StoreFrontPro.Views.Components.CardImageDisplayer;
+using StoreFrontPro.Views.Interfaces.CardInterface;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,14 +15,25 @@ namespace StoreFrontPro.Views.Components.VCardImageDock
    {
       #region Names
       public const string ImageDisplayName = "IMGD";
+      public const string DockDisplayName = "DOCK";
       #endregion
 
       #region Bindings
-      private MultiDisplay _OperationWindow = new MultiDisplay();
-      public MultiDisplay OperationWindow
+      private bool _CardChangerEnabled = true;
+      public bool CardChangerEnabled
       {
-         get { return _OperationWindow; }
-         set { _OperationWindow = value; OnPropertyChanged(); }
+         get { return _CardChangerEnabled; }
+         set { _CardChangerEnabled = value; OnPropertyChanged(); }
+      }
+
+      private VMCardChanger _DockWindow;
+      public VCardChanger DockWindow { get; set; }
+
+      private MultiDisplay _ImageWindow = new MultiDisplay();
+      public MultiDisplay ImageWindow
+      {
+         get { return _ImageWindow; }
+         set { _ImageWindow = value; OnPropertyChanged(); }
       }
       #endregion
 
@@ -29,7 +41,11 @@ namespace StoreFrontPro.Views.Components.VCardImageDock
          : base(Model, RoutingName)
       {
          Model.Register(this);
-         SetDisplay("Nantuko Husk");
+
+         _DockWindow = new VMCardChanger(Model.ModelDisplay, DockDisplayName);
+         DockWindow = new VCardChanger() { DataContext = _DockWindow };
+
+         SetDisplay("");
       }
 
       /// <summary>
@@ -51,15 +67,20 @@ namespace StoreFrontPro.Views.Components.VCardImageDock
          SetDisplay(oTempModel);
       }
 
+      /// <summary>
+      /// The MCardImageDock Model received events from the parent. This is where its passed int.
+      /// </summary>
       public override void ModelUpdated()
       {
          ViewClass ImageDisplayer = ViewFactory.CreateCardImageViewer(
             Model: Model.ModelDisplay, 
             RoutingName: ImageDisplayName);
 
-         OperationWindow.SetNewDisplay(
+         ImageWindow.SetNewDisplay(
             Name: ImageDisplayName,
             NewDisplay: ImageDisplayer.View );
+
+         _DockWindow.SetEditting(Model.ModelDisplay);
       }
    }
 }

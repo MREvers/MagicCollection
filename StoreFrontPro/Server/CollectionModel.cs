@@ -304,30 +304,57 @@ namespace StoreFrontPro.Server
       }
 
       #region IModel
-      private List<IViewModel> m_lstViewers = new List<IViewModel>();
+      private bool notify = true;
+      private List<WeakReference<IViewModel>> viewModels = new List<WeakReference<IViewModel>>();
+      public void NotifyViewModel()
+      {
+         if( !notify ) { return; }
+         viewModels.ForEach(x => 
+         {
+            IViewModel model;
+            if(x.TryGetTarget(out model))
+            {
+               model.ModelUpdated();
+            }
+         });
+      }
+
       public void Register(IViewModel item)
       {
-         m_lstViewers.Add(item);
+         viewModels.Add(new WeakReference<IViewModel>(item));
       }
 
       public void UnRegister(IViewModel item)
       {
-         m_lstViewers.Remove(item);
+         // Find the model that corresponds.
+         var lstRemoves = new List<WeakReference<IViewModel>>();
+         foreach(var model in viewModels)
+         {
+            IViewModel test;
+            if(model.TryGetTarget(out test))
+            {
+               if( test == item )
+               {
+                  lstRemoves.Add(model);
+               }
+            }
+         }
+
+         foreach( var model in lstRemoves )
+         {
+            viewModels.Remove(model);
+         }
       }
 
-      public void NotifyViewModel()
+      public void EnableNotification(bool abNotify = false)
       {
-         m_lstViewers.ForEach(x => x.ModelUpdated());
-      }
-
-      public void EnableNotification(bool abNotify)
-      {
-         throw new NotImplementedException();
+         notify = true;
+         if (abNotify) { NotifyViewModel(); }
       }
 
       public void DisableNotification()
       {
-         throw new NotImplementedException();
+         notify = false;
       }
 
       public void Sync(bool ASync = true)

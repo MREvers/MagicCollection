@@ -10,6 +10,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using StoreFrontPro.Views.CollectionViews.Deckbox;
+using StoreFrontPro.Views.Interfaces.CardInterface;
 
 namespace StoreFrontPro.Views
 {
@@ -79,6 +80,15 @@ namespace StoreFrontPro.Views
          VCardImageDock cardImageDockV = new VCardImageDock() { DataContext = cardImageDockVM };
 
          return new ViewClass(cardImageDockM, cardImageDockVM, cardImageDockV);
+      }
+
+      public static ViewClass CreateAttributeEditorItem(string TraitName, List<string> Options, string RoutingName)
+      {
+         MAttributeEditorItem attributeEditorItemM = new MAttributeEditorItem(TraitName, Options);
+         VMAttributeEditorItem attributeEditorItemVM = new VMAttributeEditorItem(attributeEditorItemM, RoutingName);
+         VAttributeEditorItem attributeEditorItemV = new VAttributeEditorItem() { DataContext = attributeEditorItemVM };
+         
+         return new ViewClass(attributeEditorItemM, attributeEditorItemVM, attributeEditorItemV);
       }
    }
 }

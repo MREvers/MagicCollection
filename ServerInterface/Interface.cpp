@@ -46,7 +46,14 @@ ServerClientInterface::GetImagesPath()
 	return gcnew String(m_StoreFrontBackEnd->GetImagesPath().c_str());
 }
 
-String^ ServerClientInterface::GetCardPrototype(String^ ahszCardName)
+List<HTag^>^ 
+ServerClientInterface::GetPairedAttributes()
+{
+   return convertTupVecToLst(m_StoreFrontBackEnd->GetPairedAttributes());
+ }
+
+String^ 
+ServerClientInterface::GetCardPrototype(String^ ahszCardName)
 {
 	string szCardName = msclr::interop::marshal_as<string>(ahszCardName);
 	return gcnew String(m_StoreFrontBackEnd->GetCardPrototype(szCardName).c_str());
@@ -111,6 +118,16 @@ void ServerClientInterface::SubmitBulkChanges(String^ ahszCollectionName, List<S
 	m_StoreFrontBackEnd->SubmitBulkChanges(szCollection, lstChanges);
 }
 
+void ServerClientInterface::SetAttribute( String^ ahszCardName, String^ ahszUID, String^ ahszKey, String^ ahszVal )
+{
+   string szCardName = msclr::interop::marshal_as<string>(ahszCardName);
+   string szUID = msclr::interop::marshal_as<string>(ahszUID);
+   string szKey = msclr::interop::marshal_as<string>(ahszKey);
+   string szVal = msclr::interop::marshal_as<string>(ahszVal);
+
+   m_StoreFrontBackEnd->SetAttribute(szCardName, szUID, szKey, szVal);
+}
+
 void ServerClientInterface::ImportCollection()
 {
 	m_StoreFrontBackEnd->ImportCollectionSource();
@@ -133,6 +150,20 @@ ServerClientInterface::convertStrVecToLst(vector<string> alstTrans)
 	}
 
 	return hlstRetVal;
+}
+
+List<HTag^>^ 
+ServerClientInterface::convertTupVecToLst( vector<pair<string, string>> alstTups )
+{
+   List<HTag^>^ hlstRetVal = gcnew List<HTag^>();
+   for( auto pair : alstTups )
+   {
+      String^ hszOne = gcnew String(pair.first.c_str());
+      String^ hszTwo = gcnew String(pair.second.c_str());
+      hlstRetVal->Add(gcnew System::Tuple<String^, String^>(hszOne, hszTwo));
+   }
+
+   return hlstRetVal;
 }
 
 vector<Tag> 

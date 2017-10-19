@@ -4,24 +4,41 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace StoreFrontPro.Views
+namespace StoreFrontPro.Views.Interfaces.CardInterface
 {
-   class BasicModel<T>: IModel, IDisposable
+   class MAttributeEditorItem : IModel
    {
-      public T Item;
-      private Action<bool> syncAction;
-      private bool notify;
+      public List<string> Options { get; private set; }
 
-      public BasicModel(T aItem, Action<bool> aSyncAction)
+      // These fields should only be modified coming from the UI
+      // Programmitically, use the setters.
+      public string _Name;
+      public string Name
       {
-         Item = aItem;
-         syncAction = aSyncAction;
+         get { return _Name; }
+         set { _Name = value; NotifyViewModel(); }
+      }
+
+      private string _SelectedOption;
+      public string SelectedOption
+      {
+         get { return _SelectedOption; }
+         set { _SelectedOption = value; NotifyViewModel(); }
+      }
+      
+      public MAttributeEditorItem(string TraitName, List<string> Options)
+      {
+         Name = TraitName;
+         this.Options = Options;
+         SelectedOption = Options[0];
       }
 
       #region IModel
+      private bool m_bNotify = true;
       private List<WeakReference<IViewModel>> viewModels = new List<WeakReference<IViewModel>>();
       public void NotifyViewModel()
       {
+         if( !m_bNotify ) { return; }
          viewModels.ForEach(x => 
          {
             IViewModel model;
@@ -61,30 +78,17 @@ namespace StoreFrontPro.Views
 
       public void Sync(bool ASync = true)
       {
-         syncAction?.Invoke(ASync);
-         if (notify) { NotifyViewModel(); }
       }
 
-      public void EnableNotification(bool abNotify = false)
+      public void EnableNotification(bool abNotify = true)
       {
-         notify = true;
-         if (abNotify) { NotifyViewModel(); }
+         m_bNotify = abNotify;
       }
 
       public void DisableNotification()
       {
-         notify = false;
+         m_bNotify = false;
       }
       #endregion
-
-      public void Dispose()
-      {
-         viewModels.Clear();
-      }
-
-      public static implicit operator T (BasicModel<T> Model)
-      {
-         return Model.Item;
-      }
    }
 }
