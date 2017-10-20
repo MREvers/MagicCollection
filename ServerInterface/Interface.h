@@ -36,12 +36,13 @@ public:
    //
 	void SaveCollection(String^ aszCollectionName);
 	List<String^>^ GetCollectionMetaData(String^ ahszCollectionName);
-	List<String^>^ GetCollectionList(String^ ahszCollectionName);
+	List<String^>^ GetCollectionList(String^ ahszCollectionName, System::Int32 ahiVisibility);
 	void SubmitBulkChanges(String^ ahszCollectionName, List<String^>^ ahlstBulkChanges);
 
    // Card Accessors
    //
    void SetAttribute(String^ ahszCardName, String^ ahszUID, String^ ahszKey, String^ ahszVal);
+   List<HTag^>^ GetMetaTags(String^ ahszCardName, String^ ahszUID);
 
    // Source Accessors
    //
@@ -60,7 +61,7 @@ private:
 	CStoreFrontBackEnd* m_StoreFrontBackEnd;
 
 	List<String^>^ convertStrVecToLst(vector<string> alstTrans);
-   List<HTag^>^ convertTupVecToLst(vector<Tag> alstTups);
+   List<HTag^>^ convertTagVecToLst(vector<Tag> alstTups);
 
 	vector<Tag> revertTupLstToVec(List<HTag^>^ hlstMetaTagsOne);
    vector<string> revertStrLstToVec(List<String^>^ hlstChanges);

@@ -33,6 +33,11 @@ namespace StoreFrontPro.Server
          {
             SCI.SetAttribute(aszCardName, aszUID, aszKey, aszVal);
          }
+
+         public List<Tuple<string,string>> GetMetaTags(string aszCardName, string aszUID)
+         {
+            return SCI.GetMetaTags(aszCardName, aszUID);
+         }
       }
    }
 }

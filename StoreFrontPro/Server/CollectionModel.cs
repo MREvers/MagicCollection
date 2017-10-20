@@ -175,6 +175,16 @@ namespace StoreFrontPro.Server
 
       private void setCollectionModels(List<string> aLstCards)
       {
+         var lstUIDs = fastExtractUIDs(aLstCards);
+      }
+      /*
+      /// <summary>
+      /// The list of cards come in like,
+      /// Long Name : { uid1, uid2 }
+      /// </summary>
+      /// <param name="aLstCards"></param>
+      private void setCollectionModels(List<string> aLstCards)
+      {
          // Calculate differences.
          List<string> lstHashesAndCounts = aLstCards
              .Select(x => fastExtractHash(x, true)).ToList();
@@ -232,7 +242,7 @@ namespace StoreFrontPro.Server
          ServerInterface.Server.SyncServerTask(CollectionItems.NotifyViewModel);
          m_bHardRebuild = false;
       }
-
+      */
       private void analyzeMetaData(List<string> alstMeta)
       {
          var itemTags = new List<string>();
@@ -301,6 +311,19 @@ namespace StoreFrontPro.Server
          if (!(iClosingQuote >= 0 && iClosingQuote < aszIdentifier.Length)) { return ""; }
 
          return szWithCount + remainingString.Substring(iOpeningQuote + 1, iClosingQuote - iOpeningQuote - 1).Trim();
+      }
+
+      private List<string> fastExtractUID(string aszCard)
+      {
+         List<string> lstCard = aszCard.Split(':').ToList();
+         if( lstCard.Count > 1 )
+         {
+            string szUIDs = lstCard[1];
+            List<Tuple<string,string>> lstParseUIDs = CardModel.ParseTagList(szUIDs);
+            return lstParseUIDs.Select(x => x.Item2).ToList();
+         }
+
+         return new List<string>();
       }
 
       #region IModel

@@ -49,7 +49,7 @@ ServerClientInterface::GetImagesPath()
 List<HTag^>^ 
 ServerClientInterface::GetPairedAttributes()
 {
-   return convertTupVecToLst(m_StoreFrontBackEnd->GetPairedAttributes());
+   return convertTagVecToLst(m_StoreFrontBackEnd->GetPairedAttributes());
  }
 
 String^ 
@@ -98,10 +98,11 @@ ServerClientInterface::GetCollectionMetaData(String^ ahszCollectionName)
 
 // [ { card name - long, [ <tags> ] }, ... }
 List<String^>^
-ServerClientInterface::GetCollectionList(String^ ahszCollectionName)
+ServerClientInterface::GetCollectionList(String^ ahszCollectionName, System::Int32 ahiVisibility)
 {
 	string szCollectionName = msclr::interop::marshal_as<string>(ahszCollectionName);
-	int iVisibility = 0xF;
+	// int iVisibility = 0xF; // Everything
+   int iVisibility = ahiVisibility;
 
 	vector<string> lstCollection = m_StoreFrontBackEnd->GetCollectionList(szCollectionName, iVisibility);
 
@@ -126,6 +127,15 @@ void ServerClientInterface::SetAttribute( String^ ahszCardName, String^ ahszUID,
    string szVal = msclr::interop::marshal_as<string>(ahszVal);
 
    m_StoreFrontBackEnd->SetAttribute(szCardName, szUID, szKey, szVal);
+}
+
+List<HTag^> ^
+ServerClientInterface::GetMetaTags( String^ ahszCardName, String^ ahszUID )
+{
+   string szCardName = msclr::interop::marshal_as<string>(ahszCardName);
+   string szUID = msclr::interop::marshal_as<string>(ahszUID);
+
+   return convertTagVecToLst(m_StoreFrontBackEnd->GetMetaTags(szCardName, szUID));
 }
 
 void ServerClientInterface::ImportCollection()
@@ -153,7 +163,7 @@ ServerClientInterface::convertStrVecToLst(vector<string> alstTrans)
 }
 
 List<HTag^>^ 
-ServerClientInterface::convertTupVecToLst( vector<pair<string, string>> alstTups )
+ServerClientInterface::convertTagVecToLst( vector<pair<string, string>> alstTups )
 {
    List<HTag^>^ hlstRetVal = gcnew List<HTag^>();
    for( auto pair : alstTups )

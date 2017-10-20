@@ -117,7 +117,14 @@ CStoreFrontBackEnd::GetCollectionList(std::string aszCollection, int aiVisibilit
 {
    if (m_ColFactory->CollectionExists(aszCollection))
    {
-      return m_ColFactory->GetCollection(aszCollection)->GetCollectionList((MetaTagType)aiVisibility);
+      if( aiVisibility < 0 )
+      {
+         return m_ColFactory->GetCollection(aszCollection)->GetShortList();
+      }
+      else
+      {
+         return m_ColFactory->GetCollection(aszCollection)->GetCollectionList((MetaTagType)aiVisibility);
+      }
    }
    else
    {
@@ -138,6 +145,23 @@ CStoreFrontBackEnd::SetAttribute(string aszCardName, string aszUID, string aszKe
          item->SetIdentifyingTrait(copy.Value()->get(), aszKey, aszVal );
       }
    }
+}
+
+vector<pair<string,string>> 
+CStoreFrontBackEnd::GetMetaTags( string aszCardName, string aszUID )
+{
+   vector<pair<string,string>> vecRetval;
+   auto item = m_ColSource->GetCardPrototype(aszCardName);
+   if( item.Good() )
+   {
+      auto copy = item->FindCopy(aszUID);
+      if( copy.Good() )
+      {
+         vecRetval = copy->get()->GetMetaTags();
+      }
+   }
+
+   return vecRetval;
 }
 
 std::string 

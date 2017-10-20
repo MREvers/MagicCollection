@@ -279,9 +279,9 @@ Collection::LoadChanges(vector<string> lstLines)
 }
 
 vector<string> 
-Collection::GetCollectionList(MetaTagType atagType)
+Collection::GetCollectionList(MetaTagType atagType, bool abCollapsed)
 {
-   bool aiCollapsed = true;
+   bool aiCollapsed = abCollapsed;
    static const function<string(const pair<string, int>&)> fnExtractor 
       = [](const pair<string, int>& pVal)->string { return pVal.first; };
 
@@ -329,6 +329,64 @@ Collection::GetCollectionList(MetaTagType atagType)
    }
    
    return lstRetVal;
+}
+
+
+// Returns each item in this collection with a list of its UIDs.
+std::vector<std::string> 
+Collection::GetShortList()
+{
+   static const function<string(const pair<string, vector<string>>&)> fnExtractor 
+      = [](const pair<string, vector<string>>& pVal)->string { return pVal.first; };
+
+   vector<string> lstRetVal;
+   TryGet<CollectionItem> item;
+   vector<shared_ptr<CopyItem>> lstCopies;
+   vector<pair<string, vector<string>>> lstSeenHashes;
+
+   vector<int> lstCol = getCollection();
+   for( auto iItem : lstCol )
+   {
+      item = m_ptrCollectionSource->GetCardPrototype(iItem);
+      lstCopies = item->FindCopies(GetIdentifier(), All);
+
+      for( auto copy : lstCopies )
+      {
+         string szHash = copy->GetHash();
+         int iCounted = ListHelper::List_Find(szHash, lstSeenHashes,
+                                              fnExtractor);
+         if( iCounted == -1 )
+         {
+            string szRep = item->CopyToString( copy.get(), None, 
+                                               GetIdentifier() );
+            lstRetVal.push_back(szRep);
+            lstSeenHashes.push_back(make_pair(szHash, vector<string>(1, copy->GetUID())));
+         }
+         else if( iCounted != -1 )
+         {
+            lstSeenHashes[iCounted].second.push_back(copy->GetUID());
+         }
+      }
+   }
+
+   vector<string> lstNewRetVal;
+   for (size_t i = 0; i < lstRetVal.size(); i++)
+   {
+      int iCounted = lstSeenHashes[i].second.size();
+      string szNewLine = "x" + to_string(iCounted) + " " + lstRetVal[i];
+
+      szNewLine += " : { ";
+      for( auto szUID : lstSeenHashes[i].second )
+      {
+         szNewLine += CopyItem::GetUIDKey() + "=\"" + szUID + "\" ";
+      }
+      szNewLine += "}";
+
+      lstNewRetVal.push_back(szNewLine);
+   }
+
+   lstRetVal.clear();
+   lstRetVal = lstNewRetVal;
 }
 
 vector<int> 
@@ -796,7 +854,7 @@ void Collection::saveHistory()
 
 void Collection::saveMeta()
 {
-   vector<string> lstMetaLines = GetCollectionList(Persistent);
+   vector<string> lstMetaLines = GetCollectionList(Persistent, false);
 
    CollectionIO ioHelper;
    ofstream oMetaFile;

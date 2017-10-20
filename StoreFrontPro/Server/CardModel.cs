@@ -47,24 +47,38 @@ namespace StoreFrontPro.Server
 
       public int Count = 1; 
       public string TargetCollection;
-      public List<Tuple<string, string>> MetaTags;
+      public List<string> UIDs;
 
       // Attrs that define a copy into a card class.
       public List<Tuple<string, string>> IdentifyingAttributes; 
 
+      /// <summary>
+      /// Expects the identifier to be of the form
+      /// CardNameLong : uidlist
+      /// </summary>
+      /// <param name="aszIdentifier"></param>
+      /// <param name="aszParent"></param>
       public CardModel(string aszIdentifier, string aszParent)
       {
          TargetCollection = aszParent;
          parseIdentifier(aszIdentifier);
       }
 
-      public void SetAttr(string aszKey, string aszVal)
+      public void SetAttr(string aszKey, string aszVal, string aszUID = "")
       {
-         ServerInterface.Card.SetAttribute(PrototypeName, GetMetaTag("UID"))
+         string szUID = UIDOrDefault(aszUID);
+
+         if( szUID != "" )
+         {
+            ServerInterface.Card.SetAttribute(PrototypeName, aszUID, aszKey, aszVal);
+         }
       }
 
-      public string GetFullIdentifier()
+      public string GetFullIdentifier(string aszUID = "")
       {
+         string szUID = UIDOrDefault(aszUID);
+         var MetaTags = ServerInterface.Card.GetMetaTags(PrototypeName, szUID);
+
          string szMetaList = "{ ";
 
          foreach (Tuple<string, string> MTag in MetaTags)
@@ -107,14 +121,19 @@ namespace StoreFrontPro.Server
       /// </summary>
       /// <param name="aszKey"></param>
       /// <returns></returns>
-      public string GetFeature(string aszKey)
+      public string GetFeature(string aszKey, string aszUID = "")
       {
-         string szRetval = GetMetaTag(aszKey);
+         string szUID = UIDOrDefault(aszUID);
+         string szRetval = GetMetaTag(aszKey, szUID);
          return szRetval == "" ? GetAttr(aszKey) : szRetval;
       }
 
-      public string GetMetaTag(string aszKey)
+      public string GetMetaTag(string aszKey, string aszUID = "")
       {
+         string szUID = UIDOrDefault(aszUID);
+         if( szUID == "" ) { return ""; }
+         var MetaTags = ServerInterface.Card.GetMetaTags(PrototypeName, szUID);
+
          string szRetVal = "";
          foreach (var KeyVal in MetaTags)
          {
@@ -178,6 +197,48 @@ namespace StoreFrontPro.Server
             szIdentifier = lstIdentifierAndTags[0].Trim();
          }
 
+         string szUIDs = "";
+         List<Tuple<string,string>> lstUIDs = new List<Tuple<string, string>>();
+         if (lstIdentifierAndTags.Count > 1)
+         {
+            szUIDs = lstIdentifierAndTags[1].Trim();
+            lstUIDs = ParseTagList(szUIDs);
+         }
+
+         // Store the UIDs.
+         this.UIDs = lstUIDs.Select(x => x.Item2).ToList();
+      }
+
+      private string UIDOrDefault(string aszUID)
+      {
+         string szUID = aszUID;
+         if( szUID == "" && UIDs.Count > 0)
+         {
+            szUID = UIDs[0];
+         }
+
+         return szUID;
+      }
+
+      /*
+      private void parseIdentifier(string aszIdentifier)
+      {
+         List<string> lstIdentifierAndTags = aszIdentifier.Split(':').ToList();
+
+         string szIdentifier;
+         if (aszIdentifier.Trim().Substring(0, 1) == "x")
+         {
+            string szCount = lstIdentifierAndTags[0].Substring(1, 1);
+            int.TryParse(szCount, out this.Count);
+
+            szIdentifier = lstIdentifierAndTags[0].Trim().Substring(2).Trim();
+         }
+         else
+         {
+            this.Count = 1;
+            szIdentifier = lstIdentifierAndTags[0].Trim();
+         }
+
          string szMeta = "";
          if (lstIdentifierAndTags.Count > 1)
          {
@@ -206,6 +267,7 @@ namespace StoreFrontPro.Server
 
          setDisplayName();
       }
+      */
 
       private void setDisplayName()
       {
@@ -226,9 +288,11 @@ namespace StoreFrontPro.Server
       }
 
       #region IModel
+      private bool m_bNotify = true;
       private List<WeakReference<IViewModel>> viewModels = new List<WeakReference<IViewModel>>();
       public void NotifyViewModel()
       {
+         if( !m_bNotify ) { return; }
          viewModels.ForEach(x => 
          {
             IViewModel model;
@@ -268,19 +332,19 @@ namespace StoreFrontPro.Server
 
       public void Sync(bool ASync = true)
       {
-         syncAction?.Invoke(ASync);
-         if (notify) { NotifyViewModel(); }
+         //syncAction?.Invoke(ASync);
+         //if (m_bNotify) { NotifyViewModel(); }
       }
 
       public void EnableNotification(bool abNotify = false)
       {
-         notify = true;
-         if (abNotify) { NotifyViewModel(); }
+        // m_bNotify = true;
+         //if (abNotify) { NotifyViewModel(); }
       }
 
       public void DisableNotification()
       {
-         notify = false;
+       //  m_bNotify = false;
       }
       #endregion
    }

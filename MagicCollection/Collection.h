@@ -74,7 +74,9 @@ public:
    void LoadChanges(std::vector<std::string> aszLines);
 
    std::vector<std::string> GetCollectionList(
-      MetaTagType atagType = Visible);
+      MetaTagType atagType = Visible,
+      bool abCollapsed = true);
+   std::vector<std::string> GetShortList();
 
    bool IsLoaded = false;
 
