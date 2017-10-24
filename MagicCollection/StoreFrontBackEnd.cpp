@@ -181,6 +181,22 @@ CStoreFrontBackEnd::GetIdentifyingAttributes( string aszCardName, string aszUID 
    return vecRetval;
 }
 
+string 
+CStoreFrontBackEnd::GetCardString( string aszCardname, string aszUID )
+{
+   auto item = m_ColSource->GetCardPrototype(aszCardname);
+   if( item.Good() )
+   {
+      auto copy = item->FindCopy(aszUID);
+      if( copy.Good() )
+      {
+         return item->CopyToString(copy->get(), Any);
+      }
+   }
+
+   return "";
+}
+
 std::string 
 CStoreFrontBackEnd::GetCardPrototype(std::string aszCardName)
 {

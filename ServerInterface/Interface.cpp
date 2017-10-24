@@ -149,6 +149,15 @@ ServerClientInterface::GetIdentifyingAttributes( String^ ahszCardName, String^ a
    return convertTagVecToLst(m_StoreFrontBackEnd->GetIdentifyingAttributes(szCardName, szUID));
 }
 
+String^ 
+ServerClientInterface::GetCardString( String^ ahszCardName, String^ ahszUID )
+{
+   string szCardName = msclr::interop::marshal_as<string>(ahszCardName);
+   string szUID = msclr::interop::marshal_as<string>(ahszUID);
+   String^ hszCard = gcnew String(m_StoreFrontBackEnd->GetCardString(szCardName, szUID).c_str());
+   return hszCard;
+}
+
 void
 ServerClientInterface::ImportCollection()
 {

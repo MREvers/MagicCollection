@@ -7,11 +7,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 using static StoreFrontPro.Server.ServerInterface;
 
 namespace StoreFrontPro.Views.Components.VCardImageDock
 {
-   class VMCardImageDock : ViewModel<MCardImageDock>
+   class VMCardImageDock : ViewModel<MCardImageDock>, IVCISupporter
    {
       #region Names
       public const string ImageDisplayName = "IMGD";
@@ -43,6 +44,7 @@ namespace StoreFrontPro.Views.Components.VCardImageDock
          Model.Register(this);
 
          _DockWindow = new VMCardChanger(Model.ModelDisplay, DockDisplayName);
+         _DockWindow.DisplayEvent += DisplayEventHandler;
          DockWindow = new VCardChanger() { DataContext = _DockWindow };
 
          SetDisplay("");
@@ -67,6 +69,16 @@ namespace StoreFrontPro.Views.Components.VCardImageDock
          SetDisplay(oTempModel);
       }
 
+      public void PreviewCard()
+      {
+         SetDisplay(Model.ModelDisplay);
+      }
+
+      public void SubmitCard()
+      {
+
+      }
+
       /// <summary>
       /// The MCardImageDock Model received events from the parent. This is where its passed int.
       /// </summary>
@@ -82,5 +94,50 @@ namespace StoreFrontPro.Views.Components.VCardImageDock
 
          _DockWindow.SetEditting(Model.ModelDisplay);
       }
+
+      #region IVCISupporter
+      public void DisplayEventHandler(object source, DisplayEventArgs e)
+      {
+         if (!Application.Current.Dispatcher.CheckAccess())
+         {
+            Action aAction = new Action(() => { inDisplayEventHandler(source, e); });
+            Application.Current.Dispatcher.BeginInvoke(aAction);
+            return;
+         }
+
+         inDisplayEventHandler(source, e);
+      }
+
+      public void inDisplayEventHandler(object source, DisplayEventArgs e)
+      {
+         GetRouter().Call(source.GetType(), this, e.Key, e.Args);
+      }
+
+      public InterfaceRouter GetRouter()
+      {
+         return IRouter;
+      }
+
+      static InterfaceRouter _IRouter = null;
+      static InterfaceRouter IRouter
+      {
+         get
+         {
+            if (_IRouter == null) { BuildInterface(); }
+            return _IRouter;
+         }
+      }
+
+      static void BuildInterface()
+      {
+         _IRouter = new InterfaceRouter();
+
+         VCICardChanger CCIS = new VCICardChanger(
+            Preview: (x) => { return (x as VMCardImageDock).PreviewCard; },
+            Submit: (x) => { return (x as VMCardImageDock).SubmitCard; });
+         _IRouter.AddInterface(CCIS);
+
+      }
+      #endregion
    }
 }

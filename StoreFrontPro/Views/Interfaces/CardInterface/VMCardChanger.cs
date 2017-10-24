@@ -27,6 +27,13 @@ namespace StoreFrontPro.Views.Interfaces.CardInterface
 
       public void SetEditting(CardModel Model)
       {
+         if( (this.Model != null) && 
+             (this.Model.PrototypeName != Model.PrototypeName) )
+         {
+            // Undo any preview changes.
+            this.Model.Sync(false);
+         }
+
          this.Model = Model;
          setIdentifyingTraitViews();
       }
@@ -68,6 +75,11 @@ namespace StoreFrontPro.Views.Interfaces.CardInterface
       }
 
       #region Event Handlers
+      /// <summary>
+      /// Expects aszRouting to be the attribute name.
+      /// </summary>
+      /// <param name="aszRouting"></param>
+      /// <param name="aszNewVal"></param>
       private void identifierChanged(string aszRouting, string aszNewVal)
       {
          CardModelBase oProto = CardModel.GetPrototype(Model.PrototypeName);
@@ -75,6 +87,9 @@ namespace StoreFrontPro.Views.Interfaces.CardInterface
          // Find the index of the newly selected value.
          var lstOptions = oProto.AttributeOptions[aszRouting];
          int index = lstOptions.FindIndex(a => a == aszNewVal);
+         
+         // UPDATE THIS WHEN SELECTING UID. TODO
+         Model.PreviewAttr(aszRouting, aszNewVal);
 
          // Update any paired traits
          foreach( var pairedTrait in ServerInterface.Card.GetPairedAttributes() )
@@ -100,15 +115,28 @@ namespace StoreFrontPro.Views.Interfaces.CardInterface
                {
                   otherPairItem.Model.DisableNotification();
                   otherPairItem.Set = otherPairItem.Model.Options[index];
+                  Model.PreviewAttr(otherPairItem.Model.Name, otherPairItem.Set);
                   otherPairItem.Model.EnableNotification();
                }
             }
          }
 
+        firePreview();
       }
       #endregion
 
+      #region Private Methods
+      public void firePreview()
+      {
+         DisplayEventArgs eArgs = new DisplayEventArgs(VCICardChanger.PreviewChange);
+         DisplayEvent?.Invoke(this, eArgs);
+      }
+
+      #endregion
+
       #region IViewComponent
+      public event DisplayEventHandler DisplayEvent;
+
       public void DisplayEventHandler(object source, DisplayEventArgs e)
       {
          GetRouter().Call(source.GetType(), this, e.Key, e.Args);
@@ -121,8 +149,6 @@ namespace StoreFrontPro.Views.Interfaces.CardInterface
       #endregion
 
       #region IVCISupporter
-      public event DisplayEventHandler DisplayEvent;
-
       public InterfaceRouter GetRouter()
       {
          return IRouter;

@@ -56,6 +56,32 @@ namespace StoreFrontPro.Server
          parseIdentifier(aszIdentifier);
       }
 
+      /// <summary>
+      /// Used to modify the client side values. Changes the 
+      /// Identifying attribute on the clientside.
+      /// </summary>
+      /// <param name="aszKey"></param>
+      /// <param name="aszVal"></param>
+      public void PreviewAttr(string aszKey, string aszVal)
+      {
+         var attr = IdentifyingAttributes.FirstOrDefault(x => x.Item1 == aszKey);
+         if( attr != null )
+         {
+            var attrVal = attr.Item2;
+            IdentifyingAttributes.Remove(attr);
+
+            IdentifyingAttributes.Add( new Tuple<string, string>(aszKey, aszVal) );
+         }
+      }
+
+      /// <summary>
+      /// Sets the attribute on the server side.
+      /// Caller should verify that cardmodel is the same
+      /// after calling. This may require the creation of a new CM.
+      /// </summary>
+      /// <param name="aszKey"></param>
+      /// <param name="aszVal"></param>
+      /// <param name="aszUID"></param>
       public void SetAttr(string aszKey, string aszVal, string aszUID = "")
       {
          string szUID = validateUID(aszUID);
@@ -66,6 +92,12 @@ namespace StoreFrontPro.Server
          }
       }
 
+      /// <summary>
+      /// Returns the full identifier.
+      /// CardNameLong : MetaTags.
+      /// </summary>
+      /// <param name="aszUID"></param>
+      /// <returns></returns>
       public string GetFullIdentifier(string aszUID = "")
       {
          string szUID = validateUID(aszUID);
@@ -83,6 +115,10 @@ namespace StoreFrontPro.Server
          return CardNameLong + " : " + szMetaList;
       }
 
+      /// <summary>
+      /// Returns the ideal identifier.
+      /// </summary>
+      /// <returns></returns>
       public string GetIdealIdentifier()
       {
          List<string> LstImpList = TEMP_LST_IMPORTANT_IDENTS;
@@ -205,6 +241,7 @@ namespace StoreFrontPro.Server
       /// <param name="aszIdentifier"></param>
       private void parseIdentifier(string aszIdentifier)
       {
+         if(aszIdentifier.Length == 0) { return; }
          List<string> lstIdentifierAndTags = aszIdentifier.Split(':').ToList();
 
          string szIdentifier;
@@ -342,10 +379,10 @@ namespace StoreFrontPro.Server
          }
       }
 
-      public void Sync(bool ASync = true)
+      public void Sync(bool abNotify = false)
       {
-         //syncAction?.Invoke(ASync);
-         //if (m_bNotify) { NotifyViewModel(); }
+         IdentifyingAttributes = ServerInterface.Card.GetIdentifyingAttributes(PrototypeName, validateUID(""));
+         if (m_bNotify && abNotify) { NotifyViewModel(); }
       }
 
       public void EnableNotification(bool abNotify = false)

@@ -98,6 +98,7 @@
       <DependentUpon>VCardChanger.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Interfaces\CardInterface\VCIAttributeEditorItem.cs" />
+    <Compile Include="Views\Interfaces\CardInterface\VCICardChanger.cs" />
     <Compile Include="Views\Interfaces\CardInterface\VMAttributeEditorItem.cs" />
     <Compile Include="Views\Interfaces\CardInterface\VMCardChanger.cs" />
     <Compile Include="Views\MVVM\BasicModel.cs" />

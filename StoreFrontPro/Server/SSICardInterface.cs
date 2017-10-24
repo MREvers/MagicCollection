@@ -44,6 +44,11 @@ namespace StoreFrontPro.Server
             return SCI.GetIdentifyingAttributes(aszCardName, aszUID);
          }
 
+         public string GetCardString(string aszCardname, string aszUID)
+         {
+            return SCI.GetCardString(aszCardname, aszUID);
+         }
+
       }
    }
 }
