@@ -43,6 +43,7 @@ public:
    //
    void SetAttribute(String^ ahszCardName, String^ ahszUID, String^ ahszKey, String^ ahszVal);
    List<HTag^>^ GetMetaTags(String^ ahszCardName, String^ ahszUID);
+   List<HTag^>^ GetIdentifyingAttributes(String^ ahszCardName, String^ ahszUID);
 
    // Source Accessors
    //

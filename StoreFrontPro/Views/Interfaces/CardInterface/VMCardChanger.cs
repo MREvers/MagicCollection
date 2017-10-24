@@ -105,7 +105,6 @@ namespace StoreFrontPro.Views.Interfaces.CardInterface
             }
          }
 
-         Model.Set
       }
       #endregion
 

@@ -73,7 +73,8 @@ ServerClientInterface::GetLoadedCollections()
 	return hlstRetval;
 }
 
-List<String^>^ ServerClientInterface::GetAllCardsStartingWith(String^ ahszText)
+List<String^>^ 
+ServerClientInterface::GetAllCardsStartingWith(String^ ahszText)
 {
 	string szText = msclr::interop::marshal_as<string>(ahszText);
 	vector<string> lstCardList = m_StoreFrontBackEnd->GetAllCardsStartingWith(szText);
@@ -119,7 +120,8 @@ void ServerClientInterface::SubmitBulkChanges(String^ ahszCollectionName, List<S
 	m_StoreFrontBackEnd->SubmitBulkChanges(szCollection, lstChanges);
 }
 
-void ServerClientInterface::SetAttribute( String^ ahszCardName, String^ ahszUID, String^ ahszKey, String^ ahszVal )
+void 
+ServerClientInterface::SetAttribute( String^ ahszCardName, String^ ahszUID, String^ ahszKey, String^ ahszVal )
 {
    string szCardName = msclr::interop::marshal_as<string>(ahszCardName);
    string szUID = msclr::interop::marshal_as<string>(ahszUID);
@@ -138,7 +140,17 @@ ServerClientInterface::GetMetaTags( String^ ahszCardName, String^ ahszUID )
    return convertTagVecToLst(m_StoreFrontBackEnd->GetMetaTags(szCardName, szUID));
 }
 
-void ServerClientInterface::ImportCollection()
+List<HTag^>^ 
+ServerClientInterface::GetIdentifyingAttributes( String^ ahszCardName, String^ ahszUID )
+{
+   string szCardName = msclr::interop::marshal_as<string>(ahszCardName);
+   string szUID = msclr::interop::marshal_as<string>(ahszUID);
+
+   return convertTagVecToLst(m_StoreFrontBackEnd->GetIdentifyingAttributes(szCardName, szUID));
+}
+
+void
+ServerClientInterface::ImportCollection()
 {
 	m_StoreFrontBackEnd->ImportCollectionSource();
 }

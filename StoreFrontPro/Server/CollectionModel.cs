@@ -110,8 +110,6 @@ namespace StoreFrontPro.Server
       public string CollectionName;
       public BasicModel<List<CardModel>> CollectionItems;
 
-      private bool m_bHardRebuild = false;
-
       public CollectionModel(string aszID)
       {
          CollectionItems = new BasicModel<List<CardModel>>(new List<CardModel>(), Sync);
@@ -175,7 +173,76 @@ namespace StoreFrontPro.Server
 
       private void setCollectionModels(List<string> aLstCards)
       {
-         var lstUIDs = fastExtractUIDs(aLstCards);
+         var lstNewCards = new List<string>();
+         var lstRemoveCards = new List<CardModel>();
+         var lstUsedCards = new List<CardModel>();
+         foreach( string szInspectCard in aLstCards )
+         {
+            var pairNameUIDs = fastExtractUIDs(szInspectCard);
+            var szName = pairNameUIDs.Item1;
+            var lstUIDs = pairNameUIDs.Item2;
+
+            if( szName == "" ) { continue; }
+
+            // Try to find a matching card model.
+            var model = Collection.FirstOrDefault(x => x.PrototypeName == szName);
+
+            // Record which uids no long exist. Forget about
+            // Uids that exist.
+            var lstRemoveUIDs = new List<string>();
+            if( model != null )
+            {
+               foreach(var uid in model.UIDs)
+               {
+                  if( lstUIDs.Contains(uid) )
+                  {
+                     lstUIDs.Remove(uid);
+                  }
+                  else
+                  {
+                     lstRemoveUIDs.Add(uid);
+                  }
+               }
+
+               // Remove the no long existent UIDs
+               foreach(var uid in lstRemoveUIDs )
+               {
+                  model.UIDs.Remove(uid);
+               }
+               
+               // Add the new UIDs
+               foreach(var uid in lstUIDs )
+               {
+                  model.UIDs.Add(uid);
+               }
+
+               lstUsedCards.Add(model);
+            }
+            // The existing model couldn't be found. We need to create one.
+            else
+            {
+               lstNewCards.Add(szInspectCard);
+            }
+         }
+         
+         // Anything not in lstUsedCards need to be removed.
+         lstRemoveCards = Collection.Where(x => !lstUsedCards.Contains(x)).ToList();
+
+         // Now we have new cards and used cards. Send those to the view.
+                  // Remove the removed cards.
+         ServerInterface.Server.SyncServerTask(() =>
+         {
+            lstRemoveCards.ForEach(x => CollectionItems.Item.Remove(x));
+         });
+
+         // Add new cards.
+         ServerInterface.Server.GenerateCopyModelsAS(
+            Identifiers: lstNewCards,
+            CollectionName: CollectionName,
+            Callback: (lst) => { lst.ForEach(x => { CollectionItems.Item.Add(x); }); },
+            UICallback: true);
+
+         ServerInterface.Server.SyncServerTask(CollectionItems.NotifyViewModel);
       }
       /*
       /// <summary>
@@ -313,17 +380,35 @@ namespace StoreFrontPro.Server
          return szWithCount + remainingString.Substring(iOpeningQuote + 1, iClosingQuote - iOpeningQuote - 1).Trim();
       }
 
-      private List<string> fastExtractUID(string aszCard)
+      /// <summary>
+      /// Returns a list of UIDs from the passed in card.
+      /// </summary>
+      /// <param name="aszCard"></param>
+      /// <returns></returns>
+      private Tuple<string, List<string>> fastExtractUIDs(string aszCard)
       {
          List<string> lstCard = aszCard.Split(':').ToList();
          if( lstCard.Count > 1 )
          {
             string szUIDs = lstCard[1];
             List<Tuple<string,string>> lstParseUIDs = CardModel.ParseTagList(szUIDs);
-            return lstParseUIDs.Select(x => x.Item2).ToList();
+            var lstUIDs = lstParseUIDs.Select(x => x.Item2).ToList();
+            
+            string szName;
+            int iNameEnd = lstCard[0].IndexOf('{');
+            if( iNameEnd > 0 )
+            {
+               szName = lstCard[0].Substring(0, iNameEnd).Trim();
+            }
+            else
+            {
+               szName = lstCard[0];
+            }
+
+            return new Tuple<string, List<string>>(szName, lstUIDs);
          }
 
-         return new List<string>();
+         return new Tuple<string, List<string>>("", new List<string>());
       }
 
       #region IModel

@@ -387,6 +387,8 @@ Collection::GetShortList()
 
    lstRetVal.clear();
    lstRetVal = lstNewRetVal;
+
+   return lstRetVal;
 }
 
 vector<int> 

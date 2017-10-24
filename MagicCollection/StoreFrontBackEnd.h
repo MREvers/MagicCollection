@@ -42,6 +42,7 @@ public:
    //
    void SetAttribute(string aszCardName, string aszUID, string aszKey, string aszVal);
    vector<pair<string,string>> GetMetaTags(string aszCardName, string aszUID);
+   vector<pair<string,string>> GetIdentifyingAttributes(string aszCardName, string aszUID);
 
    // Source Accessors
    //

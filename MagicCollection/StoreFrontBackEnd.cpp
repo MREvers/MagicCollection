@@ -157,7 +157,24 @@ CStoreFrontBackEnd::GetMetaTags( string aszCardName, string aszUID )
       auto copy = item->FindCopy(aszUID);
       if( copy.Good() )
       {
-         vecRetval = copy->get()->GetMetaTags();
+         vecRetval = copy->get()->GetMetaTags(MetaTagType::Any);
+      }
+   }
+
+   return vecRetval;
+}
+
+vector<pair<string, string>> 
+CStoreFrontBackEnd::GetIdentifyingAttributes( string aszCardName, string aszUID )
+{
+   vector<pair<string,string>> vecRetval;
+   auto item = m_ColSource->GetCardPrototype(aszCardName);
+   if( item.Good() )
+   {
+      auto copy = item->FindCopy(aszUID);
+      if( copy.Good() )
+      {
+         vecRetval = copy->get()->GetIdentifyingAttributes();
       }
    }
 

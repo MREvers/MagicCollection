@@ -24,21 +24,13 @@ namespace StoreFrontPro.Server
    {
       public static List<string> TEMP_LST_IMPORTANT_IDENTS = new List<string>() { "set" };
 
-      private string _CardNameLong;
-      public string CardNameLong
-      {
-         get
-         {
-            _CardNameLong = PrototypeName;
-            _CardNameLong += " { ";
-            IdentifyingAttributes.ForEach(x => { _CardNameLong += x.Item1 + "=\"" + x.Item2 + "\" "; });
-            _CardNameLong += "}";
-            return _CardNameLong;
-         }
-      }
-
       public string DisplayName { get; private set; }
       public string PrototypeName { get; private set; }
+
+      public string CardNameLong
+      {
+         get { return getLongName(); }
+      }
 
       public CardModelBase Prototype
       {
@@ -66,7 +58,7 @@ namespace StoreFrontPro.Server
 
       public void SetAttr(string aszKey, string aszVal, string aszUID = "")
       {
-         string szUID = UIDOrDefault(aszUID);
+         string szUID = validateUID(aszUID);
 
          if( szUID != "" )
          {
@@ -76,7 +68,7 @@ namespace StoreFrontPro.Server
 
       public string GetFullIdentifier(string aszUID = "")
       {
-         string szUID = UIDOrDefault(aszUID);
+         string szUID = validateUID(aszUID);
          var MetaTags = ServerInterface.Card.GetMetaTags(PrototypeName, szUID);
 
          string szMetaList = "{ ";
@@ -123,14 +115,21 @@ namespace StoreFrontPro.Server
       /// <returns></returns>
       public string GetFeature(string aszKey, string aszUID = "")
       {
-         string szUID = UIDOrDefault(aszUID);
+         string szUID = validateUID(aszUID);
          string szRetval = GetMetaTag(aszKey, szUID);
          return szRetval == "" ? GetAttr(aszKey) : szRetval;
       }
 
+      /// <summary>
+      /// Gets the metatag of the specified key.
+      /// Defaults to the UID if present, otherwise returns "".
+      /// </summary>
+      /// <param name="aszKey"></param>
+      /// <param name="aszUID"></param>
+      /// <returns></returns>
       public string GetMetaTag(string aszKey, string aszUID = "")
       {
-         string szUID = UIDOrDefault(aszUID);
+         string szUID = validateUID(aszUID);
          if( szUID == "" ) { return ""; }
          var MetaTags = ServerInterface.Card.GetMetaTags(PrototypeName, szUID);
 
@@ -146,6 +145,14 @@ namespace StoreFrontPro.Server
          return szRetVal;
       }
 
+      /// <summary>
+      /// Returns the attribute of this card if able.
+      /// These are stored on the card model because the server
+      /// groups cards based on these. If these are different, then
+      /// they appear on different models.
+      /// </summary>
+      /// <param name="aszKey"></param>
+      /// <returns></returns>
       public string GetAttr(string aszKey)
       {
          foreach (var tup in IdentifyingAttributes)
@@ -167,6 +174,10 @@ namespace StoreFrontPro.Server
          return "";
       }
 
+      /// <summary>
+      /// Returns the image path of this card.
+      /// </summary>
+      /// <returns></returns>
       public string GetImagePath()
       {
          return Path.Combine( ServerInterface.Server.GetImagesFolderPath(),
@@ -174,11 +185,24 @@ namespace StoreFrontPro.Server
                               getImageFileName() );
       }
 
+      /// <summary>
+      /// Sends the bitmap image associated with this model to the callback.
+      /// </summary>
+      /// <param name="ImageReceiver"></param>
       public void GetImage(Action<BitmapImage> ImageReceiver)
       {
          ServerInterface.Card.DownloadAndCacheImage(ImageReceiver, this);
       }
 
+      /// <summary>
+      /// Parses the 
+      /// 1. Name
+      /// 2. Identifying Attributes
+      /// 3. UIDs
+      /// Stores each of them in a member variable.
+      /// Sets the display name of this model.
+      /// </summary>
+      /// <param name="aszIdentifier"></param>
       private void parseIdentifier(string aszIdentifier)
       {
          List<string> lstIdentifierAndTags = aszIdentifier.Split(':').ToList();
@@ -195,59 +219,6 @@ namespace StoreFrontPro.Server
          {
             this.Count = 1;
             szIdentifier = lstIdentifierAndTags[0].Trim();
-         }
-
-         string szUIDs = "";
-         List<Tuple<string,string>> lstUIDs = new List<Tuple<string, string>>();
-         if (lstIdentifierAndTags.Count > 1)
-         {
-            szUIDs = lstIdentifierAndTags[1].Trim();
-            lstUIDs = ParseTagList(szUIDs);
-         }
-
-         // Store the UIDs.
-         this.UIDs = lstUIDs.Select(x => x.Item2).ToList();
-      }
-
-      private string UIDOrDefault(string aszUID)
-      {
-         string szUID = aszUID;
-         if( szUID == "" && UIDs.Count > 0)
-         {
-            szUID = UIDs[0];
-         }
-
-         return szUID;
-      }
-
-      /*
-      private void parseIdentifier(string aszIdentifier)
-      {
-         List<string> lstIdentifierAndTags = aszIdentifier.Split(':').ToList();
-
-         string szIdentifier;
-         if (aszIdentifier.Trim().Substring(0, 1) == "x")
-         {
-            string szCount = lstIdentifierAndTags[0].Substring(1, 1);
-            int.TryParse(szCount, out this.Count);
-
-            szIdentifier = lstIdentifierAndTags[0].Trim().Substring(2).Trim();
-         }
-         else
-         {
-            this.Count = 1;
-            szIdentifier = lstIdentifierAndTags[0].Trim();
-         }
-
-         string szMeta = "";
-         if (lstIdentifierAndTags.Count > 1)
-         {
-            szMeta = lstIdentifierAndTags[1].Trim();
-            MetaTags = ParseTagList(szMeta);
-         }
-         else
-         {
-            MetaTags = new List<Tuple<string, string>>();
          }
 
          List<string> lstNameAndIDs = szIdentifier.Split('{').ToList();
@@ -265,10 +236,42 @@ namespace StoreFrontPro.Server
             IdentifyingAttributes = new List<Tuple<string, string>>();
          }
 
+         string szUIDs = "";
+         List<Tuple<string,string>> lstUIDs = new List<Tuple<string, string>>();
+         if (lstIdentifierAndTags.Count > 1)
+         {
+            szUIDs = lstIdentifierAndTags[1].Trim();
+            lstUIDs = ParseTagList(szUIDs);
+         }
+
+         // Store the UIDs.
+         this.UIDs = lstUIDs.Select(x => x.Item2).ToList();
+
          setDisplayName();
       }
-      */
 
+      /// <summary>
+      /// Returns the UID if it is a non-empty UID.
+      /// Otherwise, returns the first UID of this model.
+      /// </summary>
+      /// <param name="aszUID"></param>
+      /// <returns></returns>
+      private string validateUID(string aszUID)
+      {
+         string szUID = aszUID;
+         if( szUID == "" && UIDs.Count > 0)
+         {
+            szUID = UIDs[0];
+         }
+
+         return szUID;
+      }
+
+      /// <summary>
+      /// Performs modifications on the display name.
+      /// Defaults to prototype name. If card layout is not normal,
+      /// further processing may include any flip/split names.
+      /// </summary>
       private void setDisplayName()
       {
          DisplayName = PrototypeName;
@@ -280,6 +283,15 @@ namespace StoreFrontPro.Server
             string[] lstNames = szNames.Split(new string[]{ "::" }, 2, StringSplitOptions.RemoveEmptyEntries);
             DisplayName = string.Join(" // ", lstNames);
          }
+      }
+
+      private string getLongName()
+      {
+         string szCardNameLong = PrototypeName;
+         szCardNameLong += " { ";
+         IdentifyingAttributes.ForEach(x => { szCardNameLong += x.Item1 + "=\"" + x.Item2 + "\" "; });
+         szCardNameLong += "}";
+         return szCardNameLong;
       }
 
       private string getImageFileName()

@@ -61,13 +61,13 @@ namespace StoreFrontPro.Server
          {
             singleton.enqueueService(() =>
             {
-               aCallback(SCI.GetCollectionList(aszColID));
+               aCallback(SCI.GetCollectionList(aszColID, -1));
             }, UICallback);
          }
 
          public List<string> GetCollectionList(string aszColID)
          {
-            return SCI.GetCollectionList(aszColID);
+            return SCI.GetCollectionList(aszColID, -1);
          }
       }
 
