@@ -88,7 +88,7 @@ namespace StoreFrontPro.Server
 
          if( szUID != "" )
          {
-            ServerInterface.Card.SetAttribute(PrototypeName, aszUID, aszKey, aszVal);
+            ServerInterface.Card.SetAttribute(PrototypeName, szUID, aszKey, aszVal);
          }
       }
 

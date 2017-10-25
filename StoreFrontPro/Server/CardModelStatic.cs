@@ -128,5 +128,43 @@ namespace StoreFrontPro.Server
 
          return szRetval;
       }
+
+      /// <summary>
+      /// Currently Unused
+      /// </summary>
+      /// <param name="TestModel"></param>
+      /// <param name="PrototypeName"></param>
+      /// <param name="LstIDs"></param>
+      /// <returns></returns>
+      public static bool IsRightID(CardModel TestModel, string PrototypeName, List<Tuple<string,string>> LstIDs)
+      {
+         bool bRetVal = PrototypeName == TestModel.PrototypeName;
+         if( !bRetVal ) { return bRetVal; }
+
+         var lstTuples = TestModel.IdentifyingAttributes.ToList();
+
+         var lstRemoves = new List<Tuple<string,string>>();
+         foreach(var id in lstTuples)
+         {
+            foreach(var testId in LstIDs)
+            {
+               if( (testId.Item1 == id.Item1) && 
+                   (testId.Item2 == id.Item2) )
+               {
+                  lstRemoves.Add(id);
+                  break;
+               }
+            }
+         }
+
+         foreach( var remId in lstRemoves )
+         {
+            lstTuples.Remove(remId);
+         }
+
+         bRetVal &= lstTuples.Count == 0;
+
+         return bRetVal;
+      }
    }
 }

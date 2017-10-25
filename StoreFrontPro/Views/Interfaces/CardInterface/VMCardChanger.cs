@@ -13,11 +13,17 @@ namespace StoreFrontPro.Views.Interfaces.CardInterface
       #region Bindings
       public ObservableCollection<VAttributeEditorItem> IdentifyingAttributes { get; set; }
          = new ObservableCollection<VAttributeEditorItem>();
+
+      public RelayCommand SaveCommand { get; set; }
+      public RelayCommand CancelCommand { get; set; }
       #endregion
 
+      #region Public Methods
       public VMCardChanger(CardModel Model, string RoutingName)
          : base(Model, RoutingName)
       {
+         SaveCommand = new RelayCommand(eSaveChanges);
+         CancelCommand = new RelayCommand(eCancelChanges);
       }
 
       public override void ModelUpdated()
@@ -37,7 +43,9 @@ namespace StoreFrontPro.Views.Interfaces.CardInterface
          this.Model = Model;
          setIdentifyingTraitViews();
       }
+      #endregion
 
+      #region Private Methods
       private void setIdentifyingTraitViews()
       {
          clearIdentifyingTraits();
@@ -73,8 +81,31 @@ namespace StoreFrontPro.Views.Interfaces.CardInterface
       {
          return (VMAttributeEditorItem) item.DataContext;
       }
+      #endregion
 
       #region Event Handlers
+      /// <summary>
+      /// This relies on the fact that the model represents
+      /// a possible state of the card. i.e. paired traits are
+      /// matched properly.
+      /// </summary>
+      private void eSaveChanges(object canExecute)
+      {
+         foreach(var trait in Model.IdentifyingAttributes)
+         {
+            Model.SetAttr(trait.Item1, trait.Item2);
+         }
+         
+         // Notify the that the server has been contacted.
+         fireSave();
+      }
+
+      private void eCancelChanges(object canExecute)
+      {
+         this.Model.Sync(false);
+         firePreview();
+      }
+
       /// <summary>
       /// Expects aszRouting to be the attribute name.
       /// </summary>
@@ -108,8 +139,7 @@ namespace StoreFrontPro.Views.Interfaces.CardInterface
             {
                var otherPairItem = editorItem(
                   IdentifyingAttributes.FirstOrDefault
-                  (x => editorItem(x).AttributeName == szSearch 
-                  ));
+                  (x => editorItem(x).AttributeName == szSearch));
 
                if( otherPairItem != null )
                {
@@ -123,24 +153,31 @@ namespace StoreFrontPro.Views.Interfaces.CardInterface
 
         firePreview();
       }
+
+
       #endregion
 
       #region Private Methods
+      /// <summary>
+      /// Tells the owner of this object that the model has a change,
+      /// and that it should acknowledge those changes. e.g. by displaying
+      /// a new image of the object.
+      /// </summary>
       public void firePreview()
       {
          DisplayEventArgs eArgs = new DisplayEventArgs(VCICardChanger.PreviewChange);
          DisplayEvent?.Invoke(this, eArgs);
       }
 
+      public void fireSave()
+      {
+         DisplayEventArgs eArgs = new DisplayEventArgs(VCICardChanger.SubmitChange);
+         DisplayEvent?.Invoke(this, eArgs);
+      }
       #endregion
 
       #region IViewComponent
       public event DisplayEventHandler DisplayEvent;
-
-      public void DisplayEventHandler(object source, DisplayEventArgs e)
-      {
-         GetRouter().Call(source.GetType(), this, e.Key, e.Args);
-      }
 
       public List<StoreFrontMenuItem> GetMenuItems()
       {
@@ -149,6 +186,11 @@ namespace StoreFrontPro.Views.Interfaces.CardInterface
       #endregion
 
       #region IVCISupporter
+      public void DisplayEventHandler(object source, DisplayEventArgs e)
+      {
+         GetRouter().Call(source.GetType(), this, e.Key, e.Args);
+      }
+
       public InterfaceRouter GetRouter()
       {
          return IRouter;

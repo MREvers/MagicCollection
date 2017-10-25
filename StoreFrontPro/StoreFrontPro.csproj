@@ -89,6 +89,7 @@
     <Compile Include="Views\Components\CardImageDock\VCardImageDock.xaml.cs">
       <DependentUpon>VCardImageDock.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\Components\CardImageDock\VCICardImageDock.cs" />
     <Compile Include="Views\Components\CardImageDock\VMCardImageDock.cs" />
     <Compile Include="Views\Interfaces\CardInterface\MAttributeEditorItem.cs" />
     <Compile Include="Views\Interfaces\CardInterface\VAttributeEditorItem.xaml.cs">

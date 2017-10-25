@@ -1,6 +1,7 @@
 ﻿using StoreFrontPro.Server;
 using StoreFrontPro.Support.MultiDisplay;
 using StoreFrontPro.Views.Components.CardImageDisplayer;
+using StoreFrontPro.Views.Components.CardImageDock;
 using StoreFrontPro.Views.Interfaces.CardInterface;
 using System;
 using System.Collections.Generic;
@@ -12,7 +13,7 @@ using static StoreFrontPro.Server.ServerInterface;
 
 namespace StoreFrontPro.Views.Components.VCardImageDock
 {
-   class VMCardImageDock : ViewModel<MCardImageDock>, IVCISupporter
+   class VMCardImageDock : ViewModel<MCardImageDock>, IVCISupporter, IViewComponent
    {
       #region Names
       public const string ImageDisplayName = "IMGD";
@@ -69,14 +70,22 @@ namespace StoreFrontPro.Views.Components.VCardImageDock
          SetDisplay(oTempModel);
       }
 
+      /// <summary>
+      /// Changes the image displayed to match that of the model.
+      /// This sets the model's display image, which, in turn,
+      /// will call this class's ModelUpdated function.
+      /// </summary>
       public void PreviewCard()
       {
          SetDisplay(Model.ModelDisplay);
       }
 
+      /// <summary>
+      /// Notify the owner of this class that the server state has changed.
+      /// </summary>
       public void SubmitCard()
       {
-
+         fireServerChanged();
       }
 
       /// <summary>
@@ -94,6 +103,23 @@ namespace StoreFrontPro.Views.Components.VCardImageDock
 
          _DockWindow.SetEditting(Model.ModelDisplay);
       }
+
+      #region Private Methods
+      private void fireServerChanged()
+      {
+         DisplayEventArgs eArgs = new DisplayEventArgs(VCICardImageDock.SubmitChange);
+         DisplayEvent?.Invoke(this, eArgs);
+      }
+      #endregion
+
+      #region IViewComponent
+      public event DisplayEventHandler DisplayEvent;
+
+      public List<StoreFrontMenuItem> GetMenuItems()
+      {
+         throw new NotImplementedException();
+      }
+      #endregion
 
       #region IVCISupporter
       public void DisplayEventHandler(object source, DisplayEventArgs e)

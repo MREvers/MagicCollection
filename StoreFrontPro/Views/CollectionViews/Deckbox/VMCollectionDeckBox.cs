@@ -1,5 +1,6 @@
 ﻿using StoreFrontPro.Server;
 using StoreFrontPro.Support.MultiDisplay;
+using StoreFrontPro.Views.Components.CardImageDock;
 using StoreFrontPro.Views.Components.RequestTextOverlay;
 using StoreFrontPro.Views.Components.VCardImageDock;
 using StoreFrontPro.Views.Interfaces.CollectionChanger;
@@ -49,6 +50,7 @@ namespace StoreFrontPro.Views.CollectionViews.Deckbox
          OperationWindow.DisplayEvent += DisplayEventHandler;
 
          ViewClass itemDock = ViewFactory.CreateItemDock(ItemDock);
+         ((VMCardImageDock)itemDock.ViewModel).DisplayEvent += DisplayEventHandler;
          Dock = (MCardImageDock)itemDock.Model;
          CollectionDock = (VCardImageDock)itemDock.View;
       }
@@ -96,6 +98,11 @@ namespace StoreFrontPro.Views.CollectionViews.Deckbox
       private void eSubCollectionCancelled()
       {
          OperationWindow.CloseOverlay();
+      }
+
+      private void eCollectionModified()
+      {
+         Model.Sync(ASync: false);
       }
       #endregion
 
@@ -168,6 +175,10 @@ namespace StoreFrontPro.Views.CollectionViews.Deckbox
          VCIFancyCollectionList FCIS = new VCIFancyCollectionList(
             Clicked: (x) => { return (x as VMCollectionDeckBox).eItemClicked; });
          _IRouter.AddInterface(FCIS);
+
+         VCICardImageDock CIDIS = new VCICardImageDock(
+            ServerChange: (x) => { return (x as VMCollectionDeckBox).eCollectionModified; });
+         _IRouter.AddInterface(CIDIS);
       }
       #endregion
 
