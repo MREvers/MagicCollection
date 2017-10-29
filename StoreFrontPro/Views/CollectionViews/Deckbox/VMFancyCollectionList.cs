@@ -72,6 +72,8 @@ namespace StoreFrontPro.Views.CollectionViews.Deckbox
                addCard(model);
             }
          }
+
+         eListChanged();
       }
 
       private void addCard(CardModel model)
@@ -93,7 +95,13 @@ namespace StoreFrontPro.Views.CollectionViews.Deckbox
 
       private void eChildClicked(CardModel model)
       {
-         DisplayEventArgs eventArgs = new DisplayEventArgs(VCIFancyCollectionItem.Clicked, model);
+         DisplayEventArgs eventArgs = new DisplayEventArgs(VCIFancyCollectionList.ChildClicked, model);
+         DisplayEvent?.Invoke(this, eventArgs);
+      }
+
+      private void eListChanged()
+      {
+         DisplayEventArgs eventArgs = new DisplayEventArgs(VCIFancyCollectionList.ListChanged);
          DisplayEvent?.Invoke(this, eventArgs);
       }
 

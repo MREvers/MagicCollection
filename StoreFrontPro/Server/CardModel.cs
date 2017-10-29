@@ -37,7 +37,11 @@ namespace StoreFrontPro.Server
          get { return GetPrototype(PrototypeName); }
       }
 
-      public int Count = 1; 
+      public int Count
+      {
+         get { return UIDs.Count; }
+      } 
+
       public string TargetCollection;
       public List<string> UIDs;
 
@@ -243,18 +247,14 @@ namespace StoreFrontPro.Server
       {
          if(aszIdentifier.Length == 0) { return; }
          List<string> lstIdentifierAndTags = aszIdentifier.Split(':').ToList();
-
+         
          string szIdentifier;
          if (aszIdentifier.Trim().Substring(0, 1) == "x")
          {
-            string szCount = lstIdentifierAndTags[0].Substring(1, 1);
-            int.TryParse(szCount, out this.Count);
-
             szIdentifier = lstIdentifierAndTags[0].Trim().Substring(2).Trim();
          }
          else
          {
-            this.Count = 1;
             szIdentifier = lstIdentifierAndTags[0].Trim();
          }
 

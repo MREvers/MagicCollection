@@ -10,12 +10,16 @@ namespace StoreFrontPro.Views.CollectionViews.Deckbox
    class VCIFancyCollectionList: IViewComponentInterface
    {
       public const string ChildClicked = "Clicked";
+      public const string ListChanged = "Change";
 
       private Func<object, Action<CardModel>> m_Clicked;
+      private Func<object, Action> m_ListChanged;
 
-      public VCIFancyCollectionList(Func<object, Action<CardModel>> Clicked)
+      public VCIFancyCollectionList(Func<object, Action<CardModel>> Clicked,
+                                    Func<object, Action> ListUpdated)
       {
          m_Clicked = Clicked;
+         m_ListChanged = ListUpdated;
       }
 
       public Type GetInterfaceType()
@@ -33,6 +37,11 @@ namespace StoreFrontPro.Views.CollectionViews.Deckbox
                m_Clicked?.Invoke(Caller).Invoke(paramOne);
                return true;
             }
+         }
+         else if( Key == ListChanged )
+         {
+            m_ListChanged?.Invoke(Caller).Invoke();
+            return true;
          }
 
          return false;

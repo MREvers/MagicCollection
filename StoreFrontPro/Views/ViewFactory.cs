@@ -11,6 +11,7 @@ using System.Text;
 using System.Threading.Tasks;
 using StoreFrontPro.Views.CollectionViews.Deckbox;
 using StoreFrontPro.Views.Interfaces.CardInterface;
+using StoreFrontPro.Views.Components.CopySelector;
 
 namespace StoreFrontPro.Views
 {
@@ -89,6 +90,23 @@ namespace StoreFrontPro.Views
          VAttributeEditorItem attributeEditorItemV = new VAttributeEditorItem() { DataContext = attributeEditorItemVM };
          
          return new ViewClass(attributeEditorItemM, attributeEditorItemVM, attributeEditorItemV);
+      }
+
+      public static ViewClass CreateCopySelector(CardModel Model, string RoutingName)
+      {
+         VMCopySelector selectorVM = new VMCopySelector(Model, RoutingName);
+         VCopySelector selectorV = new VCopySelector() { DataContext = selectorVM };
+
+         return new ViewClass(Model, selectorVM, selectorV);
+      }
+
+      public static ViewClass CreateCopySelectorCopyItem(string Name, string RoutingName)
+      {
+         BasicModel<string> copyM = new BasicModel<string>(Name, null);
+         VMCopy copyVM = new VMCopy(copyM, RoutingName);
+         VCopy copyV =new VCopy() { DataContext = copyVM };
+
+         return new ViewClass(copyM, copyVM, copyV);
       }
    }
 }

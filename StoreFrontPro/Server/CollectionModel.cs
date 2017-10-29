@@ -27,6 +27,14 @@ namespace StoreFrontPro.Server
          this.SelectionOptions = Options;
       }
 
+      /// <summary>
+      /// Constructs the Collection Delta with the given parameters.
+      /// TODO: Ask to specify which UID to remove.
+      /// </summary>
+      /// <param name="AddCard"></param>
+      /// <param name="RemoveCardIdealID"></param>
+      /// <param name="Collection"></param>
+      /// <returns></returns>
       public static CollectionDelta GetDelta(string AddCard, string RemoveCardIdealID, CollectionModel Collection)
       {
          string szDisplay, szCmdString, szAddCardProto;
@@ -185,46 +193,66 @@ namespace StoreFrontPro.Server
             if( szName == "" ) { continue; }
 
             // Try to find a matching card model.
-            var model = Collection.FirstOrDefault(x => x.PrototypeName == szName);
+            var models = Collection.Where(x => x.PrototypeName == szName);
 
             // Record which uids no long exist. Forget about
             // Uids that exist.
-            var lstRemoveUIDs = new List<string>();
-            if( model != null )
+            
+            bool bFoundModel = false;
+            foreach(var copy in models)
             {
-               foreach(var uid in model.UIDs)
+               // If any of the UIDs in this model match
+               // the any UID in the list, then this model
+               // represents this line.
+               bool bIsModel = false;
+               foreach(var uid in copy.UIDs)
                {
                   if( lstUIDs.Contains(uid) )
                   {
-                     lstUIDs.Remove(uid);
+                     bIsModel = true;
+                     break;
                   }
-                  else
+               }
+
+               if( bIsModel )
+               {
+                  var lstRemoveUIDs = new List<string>();
+                  foreach(var uid in copy.UIDs)
                   {
-                     lstRemoveUIDs.Add(uid);
+                     if( !lstUIDs.Contains(uid) )
+                     {
+                        lstRemoveUIDs.Add(uid);
+                     }
+                     else
+                     {
+                        lstUIDs.Remove(uid);
+                     }
                   }
-               }
 
-               // Remove the no long existent UIDs
-               foreach(var uid in lstRemoveUIDs )
-               {
-                  model.UIDs.Remove(uid);
-               }
-               
-               // Add the new UIDs
-               foreach(var uid in lstUIDs )
-               {
-                  model.UIDs.Add(uid);
-               }
+                  // Remove the no long existent UIDs
+                  foreach(var UID in lstRemoveUIDs)
+                  {
+                     copy.UIDs.Remove(UID);
+                  }
 
-               lstUsedCards.Add(model);
+                  // Add the new UIDs
+                  foreach(var newUID in lstUIDs)
+                  {
+                     copy.UIDs.Add(newUID);
+                  }
+
+                  lstUsedCards.Add(copy);
+
+                  bFoundModel = true;
+                  break;
+               }
             }
-            // The existing model couldn't be found. We need to create one.
-            else
+
+            if( !bFoundModel )
             {
                lstNewCards.Add(szInspectCard);
             }
          }
-         
          // Anything not in lstUsedCards need to be removed.
          lstRemoveCards = Collection.Where(x => !lstUsedCards.Contains(x)).ToList();
 
@@ -403,6 +431,19 @@ namespace StoreFrontPro.Server
             else
             {
                szName = lstCard[0];
+            }
+
+            //If there is a number leading the name, remove it.
+            int iCount;
+            int iIndexX = szName.IndexOf('x');
+            int iIndexS = szName.IndexOf(' ');
+            if( iIndexX < iIndexS )
+            {
+               string szTryName = szName.Substring(iIndexX+1, iIndexS-iIndexX-1);
+               if( int.TryParse(szTryName, out iCount) )
+               {
+                  szName = szName.Substring(iIndexS+1);
+               }
             }
 
             return new Tuple<string, List<string>>(szName, lstUIDs);

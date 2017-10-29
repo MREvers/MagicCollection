@@ -7,8 +7,8 @@
              mc:Ignorable="d" >
     <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
       <Grid.RowDefinitions>
-         <RowDefinition/>
-         <RowDefinition Height="*" />
+         <RowDefinition Height="*"/>
+         <RowDefinition Height="160"/>
       </Grid.RowDefinitions>
       <ContentPresenter Grid.Row="0" Content="{Binding ImageWindow}"/>
       <ContentPresenter Grid.Row="1" Content="{Binding DockWindow}"/>

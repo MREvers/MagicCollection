@@ -52,12 +52,20 @@ namespace StoreFrontPro.Views.Components.VCardImageDock
       }
 
       /// <summary>
+      /// Returns the UIDs that are currently being editted.
+      /// </summary>
+      public List<string> GetEdittingUIDs()
+      {
+         return _DockWindow.GetEdittingUIDs();
+      }
+
+      /// <summary>
       /// Corresponds to an actual model. Allows modification of model.
       /// </summary>
       /// <param name="Model"></param>
       public void SetDisplay(CardModel Model)
       {
-         this.Model.SetDisplayImage(Model);
+         this.Model.SetDisplay(Model);
       }
 
       /// <summary>
@@ -66,8 +74,7 @@ namespace StoreFrontPro.Views.Components.VCardImageDock
       /// <param name="aszItemName"></param>
       public void SetDisplay(string aszItemName)
       {
-         CardModel oTempModel = CardModel.GetPrototype(aszItemName).GetDefault();
-         SetDisplay(oTempModel);
+         this.Model.SetDisplay(aszItemName);
       }
 
       /// <summary>
@@ -85,6 +92,7 @@ namespace StoreFrontPro.Views.Components.VCardImageDock
       /// </summary>
       public void SubmitCard()
       {
+         PreviewCard();
          fireServerChanged();
       }
 

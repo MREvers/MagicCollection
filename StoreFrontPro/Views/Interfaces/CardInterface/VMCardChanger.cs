@@ -1,4 +1,5 @@
 ﻿using StoreFrontPro.Server;
+using StoreFrontPro.Views.Components.CopySelector;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -14,6 +15,12 @@ namespace StoreFrontPro.Views.Interfaces.CardInterface
       public ObservableCollection<VAttributeEditorItem> IdentifyingAttributes { get; set; }
          = new ObservableCollection<VAttributeEditorItem>();
 
+      private VMCopySelector _CopySelector
+      {
+         get { return (VMCopySelector) CopySelector.DataContext; }
+      }
+      public VCopySelector CopySelector { get; set; }
+
       public RelayCommand SaveCommand { get; set; }
       public RelayCommand CancelCommand { get; set; }
       #endregion
@@ -24,6 +31,9 @@ namespace StoreFrontPro.Views.Interfaces.CardInterface
       {
          SaveCommand = new RelayCommand(eSaveChanges);
          CancelCommand = new RelayCommand(eCancelChanges);
+
+         ViewClass copySelector = ViewFactory.CreateCopySelector(Model, RoutingName);
+         CopySelector = (VCopySelector) copySelector.View;
       }
 
       public override void ModelUpdated()
@@ -31,21 +41,30 @@ namespace StoreFrontPro.Views.Interfaces.CardInterface
          throw new NotImplementedException();
       }
 
+      public List<string> GetEdittingUIDs()
+      {
+         return _CopySelector.GetSelectedCopyList().Select(x => x.Specifier).ToList();
+      }
+
       public void SetEditting(CardModel Model)
       {
+         bool bPersistSelection = true;
          if( (this.Model != null) && 
              (this.Model.PrototypeName != Model.PrototypeName) )
          {
             // Undo any preview changes.
             this.Model.Sync(false);
+            bPersistSelection = false;
          }
 
          this.Model = Model;
+         _CopySelector.SetEditting(Model, bPersistSelection);
          setIdentifyingTraitViews();
       }
       #endregion
 
       #region Private Methods
+
       private void setIdentifyingTraitViews()
       {
          clearIdentifyingTraits();
@@ -91,9 +110,12 @@ namespace StoreFrontPro.Views.Interfaces.CardInterface
       /// </summary>
       private void eSaveChanges(object canExecute)
       {
-         foreach(var trait in Model.IdentifyingAttributes)
+         foreach( var copy in _CopySelector.GetSelectedCopyList() )
          {
-            Model.SetAttr(trait.Item1, trait.Item2);
+            foreach(var trait in Model.IdentifyingAttributes)
+            {
+               Model.SetAttr(trait.Item1, trait.Item2, copy.Specifier);
+            }
          }
          
          // Notify the that the server has been contacted.
@@ -111,7 +133,7 @@ namespace StoreFrontPro.Views.Interfaces.CardInterface
       /// </summary>
       /// <param name="aszRouting"></param>
       /// <param name="aszNewVal"></param>
-      private void identifierChanged(string aszRouting, string aszNewVal)
+      private void eIdentifierChanged(string aszRouting, string aszNewVal)
       {
          CardModelBase oProto = CardModel.GetPrototype(Model.PrototypeName);
 
@@ -212,7 +234,7 @@ namespace StoreFrontPro.Views.Interfaces.CardInterface
 
          // TODO: the routing is important here because there is more than one.
          VCIAttributeEditorItem VCAddIS = new VCIAttributeEditorItem(
-            SelectionChanged: (x) => { return (x as VMCardChanger).identifierChanged; });
+            SelectionChanged: (x) => { return (x as VMCardChanger).eIdentifierChanged; });
 
          _IRouter.AddInterface(VCAddIS);
       }

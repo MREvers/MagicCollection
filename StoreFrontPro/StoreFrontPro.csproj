@@ -91,6 +91,14 @@
     </Compile>
     <Compile Include="Views\Components\CardImageDock\VCICardImageDock.cs" />
     <Compile Include="Views\Components\CardImageDock\VMCardImageDock.cs" />
+    <Compile Include="Views\Components\CopySelector\VCopy.xaml.cs">
+      <DependentUpon>VCopy.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Components\CopySelector\VCopySelector.xaml.cs">
+      <DependentUpon>VCopySelector.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Components\CopySelector\VMCopy.cs" />
+    <Compile Include="Views\Components\CopySelector\VMCopySelector.cs" />
     <Compile Include="Views\Interfaces\CardInterface\MAttributeEditorItem.cs" />
     <Compile Include="Views\Interfaces\CardInterface\VAttributeEditorItem.xaml.cs">
       <DependentUpon>VAttributeEditorItem.xaml</DependentUpon>
@@ -254,6 +262,14 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\Components\CardImageDock\VCardImageDock.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Components\CopySelector\VCopy.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Components\CopySelector\VCopySelector.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

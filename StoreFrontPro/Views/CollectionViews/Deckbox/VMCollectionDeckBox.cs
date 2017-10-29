@@ -29,7 +29,7 @@ namespace StoreFrontPro.Views.CollectionViews.Deckbox
          set { _OperationWindow = value; OnPropertyChanged(); }
       }
 
-      private MCardImageDock Dock;
+      private VMCardImageDock Dock;
       private UserControl _CollectionDock;
       public UserControl CollectionDock
       {
@@ -42,6 +42,8 @@ namespace StoreFrontPro.Views.CollectionViews.Deckbox
 
       public VMCollectionDeckBox(CollectionModel Model, string RoutingName) : base(Model, RoutingName)
       {
+         // The collection list update automatically from the collection editor.
+         // If the list is changed via some other method, we need to sync.
          OperationWindow.SetNewDisplay(
              Name: "List",
              NewDisplay: new VFancyCollectionList(),
@@ -51,14 +53,14 @@ namespace StoreFrontPro.Views.CollectionViews.Deckbox
 
          ViewClass itemDock = ViewFactory.CreateItemDock(ItemDock);
          ((VMCardImageDock)itemDock.ViewModel).DisplayEvent += DisplayEventHandler;
-         Dock = (MCardImageDock)itemDock.Model;
+         Dock = (VMCardImageDock)itemDock.ViewModel;
          CollectionDock = (VCardImageDock)itemDock.View;
       }
 
       #region Event Handlers
       private void eItemClicked(CardModel model)
       {
-         Dock.SetDisplayImage(model);
+         Dock.SetDisplay(model);
       }
 
       private void eDisplayCollectionEditorCommand(object canExecute)
@@ -100,9 +102,50 @@ namespace StoreFrontPro.Views.CollectionViews.Deckbox
          OperationWindow.CloseOverlay();
       }
 
+      /// <summary>
+      /// This should be called when changes have been made to the server,
+      /// but the list has not syncronized yet
+      /// </summary>
       private void eCollectionModified()
       {
          Model.Sync(ASync: false);
+      }
+
+      private void eListSynced()
+      {
+         // Check if the model we were viewing, still exists
+         // For whatever reason, this is always returning false.
+         // I need to make sure that the collectionItems arent'
+         // being recreated entirely each sync (cuz that would cause this)
+         // and also need to make sure that the comparison is accurate.
+         if( Model.CollectionItems.Item.Contains(Dock.Model.ModelDisplay) )
+         {
+            // Notify the dock that the model may have changed.
+            Dock.Model.ModelUpdated();
+         }
+         else
+         {
+            // Check to see if the viewing item's active UIDs is contained
+            // in some other Model.
+            List<string> lstUIDs = Dock.GetEdittingUIDs();
+            CardModel matchingModel = null;
+            if(lstUIDs.Count > 0)
+            {
+                matchingModel = Model
+                  .CollectionItems.Item
+                  .Where(x => x.UIDs.Contains(lstUIDs[0]))
+                  .FirstOrDefault();
+            }
+
+            if( matchingModel == null )
+            {
+               Dock.Model.SetDisplay("");
+            }
+            else
+            {
+               Dock.Model.SetDisplay(matchingModel);
+            }
+         }
       }
       #endregion
 
@@ -173,7 +216,8 @@ namespace StoreFrontPro.Views.CollectionViews.Deckbox
          _IRouter.AddInterface(CEIS);
 
          VCIFancyCollectionList FCIS = new VCIFancyCollectionList(
-            Clicked: (x) => { return (x as VMCollectionDeckBox).eItemClicked; });
+            Clicked: (x) => { return (x as VMCollectionDeckBox).eItemClicked; },
+            ListUpdated: (x) => { return (x as VMCollectionDeckBox).eListSynced; });
          _IRouter.AddInterface(FCIS);
 
          VCICardImageDock CIDIS = new VCICardImageDock(

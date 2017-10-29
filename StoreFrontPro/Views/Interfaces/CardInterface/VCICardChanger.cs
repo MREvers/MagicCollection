@@ -38,6 +38,7 @@ namespace StoreFrontPro.Views.Interfaces.CardInterface
          {
             m_SubmitRelay?.Invoke(Caller).Invoke();
             return true;
+            
          }
 
          return false;

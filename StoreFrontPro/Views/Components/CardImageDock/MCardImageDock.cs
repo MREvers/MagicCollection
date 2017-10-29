@@ -16,7 +16,13 @@ namespace StoreFrontPro.Views.Components.VCardImageDock
 
       }
 
-      public void SetDisplayImage(CardModel oModel)
+      public void SetDisplay(string aszItemName)
+      {
+         CardModel oTempModel = CardModel.GetPrototype(aszItemName).GetDefault();
+         SetDisplay(oTempModel);
+      }
+
+      public void SetDisplay(CardModel oModel)
       {
          if( ModelDisplay != null )
          {
