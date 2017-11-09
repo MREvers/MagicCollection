@@ -68,6 +68,9 @@ public:
 
    void SaveCollection();
 
+   bool InitializeCollection();
+   bool InitializeCollection( std::string aszFileName,
+                              std::vector<std::string>& rlstInitializeLines );
    void LoadCollection(
       std::string aszFileName, 
       CollectionFactory* aoFactory);
@@ -133,8 +136,9 @@ private:
 
    void loadMetaTagFile();
 
-   void loadOverheadFile();
-   void loadOverheadLine(const std::string& aszLine);
+   void loadOverheadFile( std::vector<std::string>& rlstUnprocessedLines );
+   bool loadOverheadLine(const std::string& aszLine);
+   void loadCollectionDataLine(const std::string& aszData);
 
    void loadInterfaceLine(const std::string& aszLine);
 

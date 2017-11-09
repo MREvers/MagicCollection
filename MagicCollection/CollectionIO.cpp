@@ -11,16 +11,23 @@ CollectionIO::~CollectionIO()
 {
 }
 
-vector<string> CollectionIO::GetFileLines(string aszFileName)
+bool CollectionIO::GetFileLines( string aszFileName,
+                                 vector<string>& rlstFileLines )
 {
    // Load the collection
    ifstream in(aszFileName);
+   if( !in.good() )
+   {
+      return false;
+   }
+
    stringstream buffer;
    buffer << in.rdbuf();
    in.close();
    string contents(buffer.str());
 
-   return StringHelper::SplitIntoLines(contents);
+   rlstFileLines = StringHelper::SplitIntoLines(contents);
+   return true;
 }
 
 // Returns the name of a collection and all the lines in it.

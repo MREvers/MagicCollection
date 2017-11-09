@@ -177,25 +177,57 @@ Collection::SaveCollection()
    saveCollection();
 }
 
-void 
-Collection::LoadCollection(
-	string aszFileName, 
-	CollectionFactory* aoFactory)
+bool 
+Collection::InitializeCollection()
 {
-   string szName;
-   vector<string> lstCardLines;
+   m_ptrCollectionDetails->SetInitialized(true);
+   return true;
+}
+
+// Loads the data file of the collection.
+bool 
+Collection::InitializeCollection( string aszFileName,
+                                  vector<string>& rlstInitializeLines )
+{
+   if( !m_ptrCollectionDetails->IsInitialized() )
+   {
+      vector<string> lstCardLines;
+      vector<string> lstFileLines;
+      CollectionIO loader;
+      string szName;
+
+      if( !loader.GetFileLines( aszFileName, lstFileLines ) )
+      {
+         return false;
+      }
+
+      loader.GetNameAndCollectionLines(lstFileLines, szName, lstCardLines);
+      m_ptrCollectionDetails->SetName(szName);
+
+      loadOverheadFile( rlstInitializeLines );
+      m_ptrCollectionDetails->SetInitialized(true);
+   }
+
+   return true;
+}
+
+void 
+Collection::LoadCollection( string aszFileName, 
+	                         CollectionFactory* aoFactory )
+{
    map<int, list<CopyItem*>> mapNewlyAddedItems;
    map<int, list<CopyItem*>> mapExistingItems;
+   vector<string> lstDummyList;
    vector<string> lstFileLines;
+   vector<string> lstCardLines;
    CollectionIO loader;
+   string szName;
 
-   lstFileLines = loader.GetFileLines(aszFileName);
+   // Loads the name, etc. if necessary. Usually this is already done by now.
+   InitializeCollection( aszFileName, lstDummyList );
 
-   loader.GetNameAndCollectionLines(lstFileLines, szName, lstCardLines);
-   m_ptrCollectionDetails->SetName(szName);
-
-   // This must be done first.
-   loadOverheadFile();
+   loader.GetFileLines( aszFileName, lstFileLines );
+   loader.GetNameAndCollectionLines( lstFileLines, szName, lstCardLines );
 
    // Store off all the existing copies in mapExistingItems.
    loader.CaptureUnlistedItems( GetIdentifier(),
@@ -255,12 +287,12 @@ Collection::LoadCollection(
 
    IsLoaded = (GetIdentifier().GetMain() != "");
 
-   if (IsLoaded)
+   if( IsLoaded )
    {
       m_ptrCollectionDetails->SetFile(aszFileName);
       m_ptrCollectionTracker->Track(); 
 
-      if( szName == "" )
+      if( GetName() == "" )
       {
          m_ptrCollectionDetails->SetName(aszFileName);
       }
@@ -563,12 +595,17 @@ Collection::modifyItem(
    }
 }
 
+// This should only be called during initial loading.
 void Collection::loadMetaTagFile()
 {
-   // This should only be called during initial loading.
+   string szFileName;
+   string szPlainHash;
    CollectionIO ioHelper;
-   string szFileName = ioHelper.GetMetaFile(m_ptrCollectionDetails->GetFileName());
-   vector<string> lstMetaLines = ioHelper.GetFileLines(szFileName);
+   vector<string> lstMetaLines;
+   TryGet<CollectionItem> item;
+
+   szFileName = ioHelper.GetMetaFile(m_ptrCollectionDetails->GetFileName());
+   ioHelper.GetFileLines(szFileName, lstMetaLines);
 
    for (size_t i = 0; i < lstMetaLines.size(); i++)
    {
@@ -584,45 +621,72 @@ void Collection::loadMetaTagFile()
       int iRealCard = m_ptrCollectionSource->LoadCard(sudoItem.Name);
       if (iRealCard == -1) { continue; }
 
-      TryGet<CollectionItem> item = m_ptrCollectionSource->GetCardPrototype(iRealCard);
+      item = m_ptrCollectionSource->GetCardPrototype(iRealCard);
       
-      string szPlainHash = item->GenerateHash(GetIdentifier(), sudoItem.Identifiers, sudoItem.MetaTags);
+      szPlainHash = item->GenerateHash( GetIdentifier(),
+                                        sudoItem.Identifiers,
+                                        sudoItem.MetaTags );
 
       // Gets the first matching item resident in this collection.
       auto matchingCopy = item->FindCopy(szPlainHash, Hash);
       if (matchingCopy.Good())
       {
+         MetaTagType mTagType;
          auto copy = matchingCopy.Value()->get();
          for (size_t t = 0; t < lstMetaTags.size(); t++)
          {
-            MetaTagType mTagType = CopyItem::DetermineMetaTagType(lstMetaTags[t].first);
-            copy->SetMetaTag(lstMetaTags[t].first, lstMetaTags[t].second, mTagType, false);
+            mTagType = CopyItem::DetermineMetaTagType(lstMetaTags[t].first);
+            copy->SetMetaTag( lstMetaTags[t].first, 
+                              lstMetaTags[t].second,
+                              mTagType, false);
          }
       }
    }
 }
 
-void Collection::loadOverheadFile()
+void Collection::loadOverheadFile( vector<string>& rlstUnprocessedLines )
 {
    // This should only be called during initial loading.
+   string szFileName;
    CollectionIO ioHelper;
-   string szFileName = ioHelper.GetOverheadFile(m_ptrCollectionDetails->GetFileName());
-   vector<string> lstCollectionLines = ioHelper.GetFileLines(szFileName);
+   vector<string> lstCollectionLines;
+
+   szFileName = ioHelper.GetOverheadFile(m_ptrCollectionDetails->GetFileName());
+   ioHelper.GetFileLines(szFileName, lstCollectionLines);
 
    auto iter_Lines = lstCollectionLines.cbegin();
    for (; iter_Lines != lstCollectionLines.cend(); ++iter_Lines)
    {
-      loadOverheadLine(*iter_Lines);
+      if( !loadOverheadLine( *iter_Lines ) )
+      {
+         // Record that the line could not be processed.
+         rlstUnprocessedLines.push_back(*iter_Lines);
+      }
    }
 }
 
-void Collection::loadOverheadLine(const string& aszLine)
+// Returns true if the line could be processed by the collections
+bool Collection::loadOverheadLine(const string& aszLine)
 {
    string szDefKey(Config::CollectionDefinitionKey);
-   if (aszLine.size() < 2) { return; }
-   if (aszLine.substr(0, szDefKey.size()) != szDefKey) { return; }
+   if (aszLine.size() < 2) { return true; }
+   if (aszLine.substr(0, szDefKey.size()) != szDefKey) 
+   {
+      // The line is a data line.
+      loadCollectionDataLine(aszLine);
+      return true;
+   }
+   else
+   {
+      return false;
+   }
+}
 
-   string szBaseLine = aszLine.substr(2);
+// Expects the input to be of the form : Key = "Value"
+void 
+Collection::loadCollectionDataLine( const std::string& aszData )
+{
+   string szBaseLine = aszData.substr(2);
    vector<string> lstSplitLine = StringHelper::Str_Split(szBaseLine, "=");
 
    if (lstSplitLine.size() != 2) { return; }
@@ -660,7 +724,8 @@ void Collection::loadOverheadLine(const string& aszLine)
 }
 
 // May return null depending on input
-void Collection::loadInterfaceLine(const string& aszLine)
+void 
+Collection::loadInterfaceLine(const string& aszLine)
 {
    if (aszLine.size() <= 2) { return; }
 

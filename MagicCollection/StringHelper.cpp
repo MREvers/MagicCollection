@@ -60,6 +60,60 @@ std::string StringHelper::Str_Clean(const std::string& src)
 
    return szRetVal;
 }
+ 
+std::vector<std::string> 
+StringHelper::Str_CmdLineParse( const std::string& srz )
+{
+   std::vector<std::string>  lstRetval;
+   int iFirstQuote = srz.find_first_of('\"');
+   if( iFirstQuote == -1 )
+   {
+      auto lstSplit = Str_Split( srz, " " );
+      for( auto parm : lstSplit )
+      {
+         lstRetval.push_back(parm);
+      }
+   }
+   else
+   {
+      std::string szThis = srz.substr(0, iFirstQuote);
+      if( iFirstQuote > 0 )
+      {
+         szThis = Str_Trim( szThis, ' ' );
+         auto lstSplit = Str_Split( szThis, " " );
+         for( auto parm : lstSplit )
+         {
+            if( parm.size() > 0 )
+            {
+               lstRetval.push_back(parm);
+            }
+         }
+      }
+
+      if( iFirstQuote + 1 < srz.size() )
+      {
+         std::string szNext = srz.substr(iFirstQuote+1);
+         int iSecondQuote = szNext.find_first_of('\"');
+         if( iSecondQuote == -1 )
+         {
+            iSecondQuote = szNext.size() - 1;
+         }
+         lstRetval.push_back( szNext.substr(0, iSecondQuote) );
+
+         if( iSecondQuote != szNext.size() - 1 )
+         {
+            std::string szNextParse = szNext.substr(iSecondQuote+1);
+            auto lstNextParse = Str_CmdLineParse(szNextParse);
+            for( auto parm : lstNextParse )
+            {
+               lstRetval.push_back(parm);
+            }
+         }
+      }
+   }
+
+   return lstRetval;
+}
 
 std::vector<std::string> 
 StringHelper::Str_Split(const std::string& aszSplit, const std::string& aszDelim)

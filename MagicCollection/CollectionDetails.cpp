@@ -102,6 +102,18 @@ CollectionDetails::IncrementChildCount()
 }
 
 void 
+CollectionDetails::SetInitialized( bool abInits )
+{
+   m_bInitialized = abInits;
+}
+
+bool 
+CollectionDetails::IsInitialized()
+{
+   return m_bInitialized;
+}
+
+void 
 CollectionDetails::SetAddress(const Location& aAddress)
 {
    delete m_ptrAddress;
