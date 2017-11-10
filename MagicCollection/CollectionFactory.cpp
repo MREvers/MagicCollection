@@ -44,6 +44,14 @@ CollectionFactory::LoadCollectionFromFile(string aszFileName)
    bool bInitialized;
    bool bKeepCol = false;
 
+   // If this collection is already in the process of loading.
+   // This is to allow for users to say that one collection loads another
+   // and vice versa.
+   if( m_setInLoading.find( aszFileName ) != m_setInLoading.end() )
+   {
+	   return szRetVal;
+   }
+
    if( !m_ColSource->IsLoaded() )
    {
       // TODO indicate this
@@ -55,7 +63,7 @@ CollectionFactory::LoadCollectionFromFile(string aszFileName)
    bInitialized = oCol->InitializeCollection(aszFileName, lstActionLines);
    auto szFoundID = oCol->GetIdentifier();
 
-   // Load the collection.
+   // Only load the collection if it doesn't already exist.
    if( !CollectionExists(szFoundID) && bInitialized )
    {
       // Stop circular loading.
@@ -100,6 +108,8 @@ CollectionFactory::LoadCollectionFromFile(string aszFileName)
       delete oCol;
       szRetVal = Config::NotFoundString;
    }
+
+   m_setInLoading.erase(aszFileName);
 
    return szRetVal;
 }
@@ -217,6 +227,8 @@ CollectionFactory::processAction( const string& aszAction,
       }
       performAction( szCmd, szParms );
    }
+
+   return bProcess;
 }
 
 // Command must be at least 4 characters long
@@ -226,7 +238,7 @@ CollectionFactory::performAction( const string& aszActionCmd,
                                   const string& aszParms )
 {
    // Split on " first
-   vector<string> lstParms;
+   vector<string> lstParms = StringHelper::Str_CmdLineParse(aszParms);
 
    // Load <CollectionFile>
    if( aszActionCmd == "Load" )
@@ -234,7 +246,7 @@ CollectionFactory::performAction( const string& aszActionCmd,
       if( lstParms.size() == 1 )
       {
          string szParmOne = lstParms[0];
-         LoadCollectionFromFile(aszParms);
+         LoadCollectionFromFile(szParmOne);
          return true;
       }
    }

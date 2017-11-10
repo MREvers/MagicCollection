@@ -201,6 +201,8 @@ Collection::InitializeCollection( string aszFileName,
          return false;
       }
 
+	  m_ptrCollectionDetails->SetFile(aszFileName);
+
       loader.GetNameAndCollectionLines(lstFileLines, szName, lstCardLines);
       m_ptrCollectionDetails->SetName(szName);
 
@@ -289,7 +291,6 @@ Collection::LoadCollection( string aszFileName,
 
    if( IsLoaded )
    {
-      m_ptrCollectionDetails->SetFile(aszFileName);
       m_ptrCollectionTracker->Track(); 
 
       if( GetName() == "" )
@@ -666,11 +667,12 @@ void Collection::loadOverheadFile( vector<string>& rlstUnprocessedLines )
 }
 
 // Returns true if the line could be processed by the collections
+// Only returns true for data lines.
 bool Collection::loadOverheadLine(const string& aszLine)
 {
    string szDefKey(Config::CollectionDefinitionKey);
    if (aszLine.size() < 2) { return true; }
-   if (aszLine.substr(0, szDefKey.size()) != szDefKey) 
+   if (aszLine.substr(0, szDefKey.size()) == szDefKey) 
    {
       // The line is a data line.
       loadCollectionDataLine(aszLine);
