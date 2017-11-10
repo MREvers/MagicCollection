@@ -201,12 +201,14 @@ Collection::InitializeCollection( string aszFileName,
          return false;
       }
 
-	  m_ptrCollectionDetails->SetFile(aszFileName);
+	   m_ptrCollectionDetails->SetFile(aszFileName);
 
       loader.GetNameAndCollectionLines(lstFileLines, szName, lstCardLines);
       m_ptrCollectionDetails->SetName(szName);
 
       loadOverheadFile( rlstInitializeLines );
+      m_ptrCollectionDetails->SetProcessLines( rlstInitializeLines );
+
       m_ptrCollectionDetails->SetInitialized(true);
    }
 
@@ -658,9 +660,10 @@ void Collection::loadOverheadFile( vector<string>& rlstUnprocessedLines )
    auto iter_Lines = lstCollectionLines.cbegin();
    for (; iter_Lines != lstCollectionLines.cend(); ++iter_Lines)
    {
+      // If the line is not an overhead data line, then it is a process
+      // line.
       if( !loadOverheadLine( *iter_Lines ) )
       {
-         // Record that the line could not be processed.
          rlstUnprocessedLines.push_back(*iter_Lines);
       }
    }
@@ -738,7 +741,7 @@ Collection::loadInterfaceLine(const string& aszLine)
    if (szLoadDirective == "-") // REMOVE
    {
       szTrimmedLine = szTrimmedLine.substr(1);
-      // Of the form
+      // Of the form ([] meaning optional)
       // Sylvan Card Name [{ set="val" color="val2" } ][: { metatag1="val" metatag2="val2" }]
       loadRemoveLine(szTrimmedLine);
    }
@@ -764,12 +767,16 @@ Collection::loadInterfaceLine(const string& aszLine)
 
 void Collection::loadAdditionLine(const string& aszLine)
 {
-   Address aParentAddress;
    string szID = "";
+   string szLine = aszLine;
+   Address aParentAddress;
    CollectionItem::PseudoIdentifier sudoItem;
    bool bThisIsParent = true;
 
-   CollectionItem::ParseCardLine(aszLine, sudoItem);
+   // Convert the line to the official form if needed.
+   expandAdditionLine( szLine );
+
+   CollectionItem::ParseCardLine(szLine, sudoItem);
 
    int iFoundAddress = ListHelper::List_Find( string("Parent"),
                                               sudoItem.MetaTags,
@@ -873,7 +880,78 @@ void Collection::loadDeltaLine(const string& aszLine)
    }
 }
 
-void Collection::saveHistory()
+// Modifies the string to the long hand version if it is a shorthand,
+// otherwise, this does nothing.
+// Takes the form Name [id]
+// Can also take the form Name [id1=val1,id2=val2]
+// Can also take the form Name [val1,val2]
+void 
+Collection::expandAdditionLine( string& rszLine )
+{
+   string szKey;
+   string szDetails;
+
+	int iDetEnd = rszLine.find_first_of( ']' );
+	if( iDetEnd == rszLine.size() - 1 )
+	{
+		int iDetStart = rszLine.find_first_of('[');
+		string szName = rszLine.substr(0, iDetStart);
+		string szId = rszLine.substr(iDetStart+1, rszLine.size() - iDetStart - 2);
+	   auto card = m_ptrCollectionSource->GetCardPrototype(szName);
+
+      auto vecVals = StringHelper::Str_Split(szId, ",");
+
+      // Find the key for each unpair value.
+      for( auto szPair : vecVals )
+      {
+         bool bGoodVal = false;
+
+		   // Check if the dets are solo.
+		   bool bNeedMatch = szId.find_first_of('=') < 0;
+		   if( bNeedMatch )
+		   {
+			   if( card.Good() )
+			   {
+				   bGoodVal = card->MatchIdentifyingTrait(szPair, szKey);
+			   }
+         
+            if( bGoodVal )
+            {
+               szPair = szKey + "=" + szPair;
+            }
+		   }
+      }
+
+      // Now we have to put quotes around each of the "values"
+      for( auto szPair : vecVals )
+      {
+         auto vecSplitPair = StringHelper::Str_Split(szPair, "=");
+         if( vecSplitPair.size() == 2 )
+         {
+            string szKeyVal = vecSplitPair[0];
+            string szValVal = vecSplitPair[1];
+
+            // Make sure we dont double down on "
+            szValVal = StringHelper::Str_Trim(szValVal, '"');
+            szPair = szKeyVal + "=\"" + szValVal + "\"";
+         }
+      }
+
+		// Wrap szID with { }
+      szDetails = "{ ";
+      for( auto szPair : vecVals )
+      {
+         szDetails += szPair;
+         szDetails += " ";
+      }
+	   szDetails = "}";
+
+      rszLine = szName + " " + szDetails;
+	}
+}
+
+void 
+Collection::saveHistory()
 {
    m_ptrCollectionTracker->Track();
    CollectionDeltaClass cdc = m_ptrCollectionTracker->CalculateChanges();
@@ -923,10 +1001,11 @@ void Collection::saveHistory()
 
 void Collection::saveMeta()
 {
+   ofstream oMetaFile;
+   CollectionIO ioHelper;
+
    vector<string> lstMetaLines = GetCollectionList(Persistent, false);
 
-   CollectionIO ioHelper;
-   ofstream oMetaFile;
    oMetaFile.open(ioHelper.GetMetaFile(m_ptrCollectionDetails->GetFileName()));
 
    vector<string>::iterator iter_MetaLine = lstMetaLines.begin();
@@ -960,6 +1039,11 @@ Collection::saveOverhead()
 
    oColFile << Config::CollectionDefinitionKey 
 	        << " Session=\"" << put_time(&otm, "%F_%T") << "\"" << endl;
+
+   for( auto szLine : m_ptrCollectionDetails->GetProcessLines() )
+   {
+      oColFile << szLine << endl;
+   }
 
    oColFile.close();
 }

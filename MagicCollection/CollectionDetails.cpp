@@ -114,6 +114,18 @@ CollectionDetails::IsInitialized()
 }
 
 void 
+CollectionDetails::SetProcessLines( const std::vector<std::string>& alstProcesslines )
+{
+   m_vecProcessLines = alstProcesslines;
+}
+
+std::vector<std::string> 
+CollectionDetails::GetProcessLines()
+{
+   return m_vecProcessLines;
+}
+
+void 
 CollectionDetails::SetAddress(const Location& aAddress)
 {
    delete m_ptrAddress;

@@ -146,6 +146,9 @@ private:
    void loadRemoveLine(const std::string& aszLine);
    void loadDeltaLine(const std::string& aszLine);
 
+   void expandAdditionLine( std::string& aszLine );
+   void collapseCardLine(  )
+
    void saveHistory();
    void saveMeta();
    void saveOverhead();

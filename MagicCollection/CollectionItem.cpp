@@ -227,6 +227,25 @@ CollectionItem::GetProtoType() const
    return CollectionItem::ToCardLine(Address(), "", lstAllCommonTraits);
 }
 
+// Returns the first trait key that has the input value
+bool 
+CollectionItem::MatchIdentifyingTrait( const std::string& aszValue, 
+                                       std::string rszKey )
+{
+   for( auto trait : m_lstIdentifyingTraits )
+   {
+      auto values = trait.GetAllowedValues();
+      int iFoundVal = ListHelper::List_Find(aszValue, values);
+      if( iFoundVal != -1 )
+      {
+         rszKey = trait.GetKeyName();
+         return true;
+      }
+   }
+
+   return false;
+}
+
 bool 
 CollectionItem::SetIdentifyingTrait( CopyItem* aptItem,
                                      const string& aszTraitKey,
@@ -248,6 +267,7 @@ CollectionItem::SetIdentifyingTrait( CopyItem* aptItem,
    setCopyPairAttrs( aptItem, aszTraitKey, iFound );
 }
 
+// Sets all the ident traits to their defaults.
 void 
 CollectionItem::SetIdentifyingTraitDefaults( CopyItem* aptItem ) const
 {

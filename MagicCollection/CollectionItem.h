@@ -86,6 +86,9 @@ private:
 // Copy Item Interface
 //
 public:
+
+   bool MatchIdentifyingTrait( const std::string& aszValue, std::string rszKey );
+
    // Attempts to set an identifying trait on a copy item.
    // Returns true if the value is valid.
    bool SetIdentifyingTrait( CopyItem* aptItem,
