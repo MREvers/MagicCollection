@@ -78,7 +78,8 @@ public:
 
    std::vector<std::string> GetCollectionList(
       MetaTagType atagType = Visible,
-      bool abCollapsed = true);
+      bool abCollapsed = true,
+      CopyItem::HashType ahashType = CopyItem::HashType::Default);
    std::vector<std::string> GetShortList();
 
    bool IsLoaded = false;
@@ -147,7 +148,7 @@ private:
    void loadDeltaLine(const std::string& aszLine);
 
    void expandAdditionLine( std::string& aszLine );
-   void collapseCardLine(  )
+   void collapseCardLine( std::string& aszLine );
 
    void saveHistory();
    void saveMeta();

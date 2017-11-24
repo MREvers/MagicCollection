@@ -227,10 +227,16 @@ CollectionItem::GetProtoType() const
    return CollectionItem::ToCardLine(Address(), "", lstAllCommonTraits);
 }
 
+vector<TraitItem> 
+CollectionItem::GetIdentifyingTraits()
+{
+   return m_lstIdentifyingTraits;
+}
+
 // Returns the first trait key that has the input value
 bool 
 CollectionItem::MatchIdentifyingTrait( const std::string& aszValue, 
-                                       std::string rszKey )
+                                       std::string& rszKey )
 {
    for( auto trait : m_lstIdentifyingTraits )
    {

@@ -24,6 +24,13 @@ public:
       Family = 0x1
    };
 
+   enum HashType : int
+   {
+      Ids = 0x2,
+      Meta = 0x4,
+      Default = 0x7
+   };
+
 private:
    // Use static constructor to build this class.
    CopyItem( const Identifier& aAddrParentIdentifier );
@@ -33,7 +40,7 @@ private:
 public:
    ~CopyItem();
 
-   std::string GetHash();
+   std::string GetHash(HashType aiHashType = Default);
    std::string GetSession() const;
    Address GetAddress() const;
    std::string GetUID() const;

@@ -10,8 +10,8 @@ using namespace std;
 
 // An ID will be given to the collection if there is a parent.
 Collection::Collection(string aszName, 
-	CollectionSource* aoSource,
-	string aszID)
+   CollectionSource* aoSource,
+   string aszID)
 {
    m_ptrCollectionTracker = new CollectionTracker(this);
    m_ptrCollectionDetails = new CollectionDetails();
@@ -92,8 +92,8 @@ Collection::AddItemFrom(
 
 void 
 Collection::RemoveItem(string aszName, 
-	string aszIdentifyingHash, 
-	bool abCloseTransaction)
+   string aszIdentifyingHash, 
+   bool abCloseTransaction)
 {
    RemoveAction rmAction;
    rmAction.SetUID(aszIdentifyingHash);
@@ -106,10 +106,10 @@ Collection::RemoveItem(string aszName,
 
 void 
 Collection::ChangeItem(string aszName, 
-	string aszIdentifyingHash, 
-	vector<Tag> alstChanges, 
-	vector<Tag> alstMetaChanges, 
-	bool abCloseTransaction)
+   string aszIdentifyingHash, 
+   vector<Tag> alstChanges, 
+   vector<Tag> alstMetaChanges, 
+   bool abCloseTransaction)
 {
    ChangeAction chAction;
    chAction.SetIDs(alstChanges);
@@ -124,12 +124,12 @@ Collection::ChangeItem(string aszName,
 
 void 
 Collection::ReplaceItem(
-	string aszName, 
-	string aszIdentifyingHash, 
-	string aszNewName, 
-	vector<Tag> alstIdChanges, 
-	vector<Tag> alstMetaChanges, 
-	bool abCloseTransaction)
+   string aszName, 
+   string aszIdentifyingHash, 
+   string aszNewName, 
+   vector<Tag> alstIdChanges, 
+   vector<Tag> alstMetaChanges, 
+   bool abCloseTransaction)
 {
    ReplaceAction rpAction;
    rpAction.SetIDs(alstIdChanges);
@@ -154,9 +154,9 @@ Collection::GetMetaData()
    // For Each tagged item, produces "LongName : MetaData"
    for each(auto metaData in m_lstTaggedItems)
    {
-	  string szMetaData = metaData.first + ": {" +
-					          metaData.second.first + "=\"" +
-	                      metaData.second.second + "\" }";
+     string szMetaData = metaData.first + ": {" +
+                         metaData.second.first + "=\"" +
+                         metaData.second.second + "\" }";
       lstRetval.push_back(szMetaData);
    }
 
@@ -201,7 +201,7 @@ Collection::InitializeCollection( string aszFileName,
          return false;
       }
 
-	   m_ptrCollectionDetails->SetFile(aszFileName);
+      m_ptrCollectionDetails->SetFile(aszFileName);
 
       loader.GetNameAndCollectionLines(lstFileLines, szName, lstCardLines);
       m_ptrCollectionDetails->SetName(szName);
@@ -217,7 +217,7 @@ Collection::InitializeCollection( string aszFileName,
 
 void 
 Collection::LoadCollection( string aszFileName, 
-	                         CollectionFactory* aoFactory )
+                            CollectionFactory* aoFactory )
 {
    map<int, list<CopyItem*>> mapNewlyAddedItems;
    map<int, list<CopyItem*>> mapExistingItems;
@@ -232,6 +232,12 @@ Collection::LoadCollection( string aszFileName,
 
    loader.GetFileLines( aszFileName, lstFileLines );
    loader.GetNameAndCollectionLines( lstFileLines, szName, lstCardLines );
+
+   // If the cardline is shorthand, expand it.
+   for( auto& szCardLine : lstCardLines )
+   {
+      expandAdditionLine(szCardLine);
+   }
 
    // Store off all the existing copies in mapExistingItems.
    loader.CaptureUnlistedItems( GetIdentifier(),
@@ -314,7 +320,9 @@ Collection::LoadChanges(vector<string> lstLines)
 }
 
 vector<string> 
-Collection::GetCollectionList(MetaTagType atagType, bool abCollapsed)
+Collection::GetCollectionList( MetaTagType atagType,
+                               bool abCollapsed,
+                               CopyItem::HashType ahashType )
 {
    bool aiCollapsed = abCollapsed;
    static const function<string(const pair<string, int>&)> fnExtractor 
@@ -333,7 +341,7 @@ Collection::GetCollectionList(MetaTagType atagType, bool abCollapsed)
 
       for( auto copy : lstCopies )
       {
-         string szHash = copy->GetHash();
+         string szHash = copy->GetHash(ahashType);
          int iCounted = ListHelper::List_Find(szHash, lstSeenHashes,
                                               fnExtractor);
          if( ( !aiCollapsed ) || ( iCounted == -1 ) )
@@ -380,12 +388,12 @@ Collection::GetShortList()
    vector<pair<string, vector<string>>> lstSeenHashes;
 
    vector<int> lstCol = getCollection();
-   for( auto iItem : lstCol )
+   for( auto& iItem : lstCol )
    {
       item = m_ptrCollectionSource->GetCardPrototype(iItem);
       lstCopies = item->FindCopies(GetIdentifier(), All);
 
-      for( auto copy : lstCopies )
+      for( auto& copy : lstCopies )
       {
          string szHash = copy->GetHash();
          int iCounted = ListHelper::List_Find(szHash, lstSeenHashes,
@@ -411,7 +419,7 @@ Collection::GetShortList()
       string szNewLine = "x" + to_string(iCounted) + " " + lstRetVal[i];
 
       szNewLine += " : { ";
-      for( auto szUID : lstSeenHashes[i].second )
+      for( auto& szUID : lstSeenHashes[i].second )
       {
          szNewLine += CopyItem::GetUIDKey() + "=\"" + szUID + "\" ";
       }
@@ -442,9 +450,9 @@ Collection::getCollection()
 
 CopyItem* 
 Collection::addItem(
-	const string& aszName, 
-	const vector<Tag>& alstAttrs, 
-	const vector<Tag>& alstMetaTags)
+   const string& aszName, 
+   const vector<Tag>& alstAttrs, 
+   const vector<Tag>& alstMetaTags)
 {
    CopyItem* cItem;
    int iCache = m_ptrCollectionSource->LoadCard(aszName);
@@ -580,21 +588,21 @@ Collection::unregisterItem( int aiCacheIndex )
 
 void 
 Collection::modifyItem(
-	CopyItem* aptCopy, 
-	const vector<Tag>& alstChanges, 
-	const vector<Tag>& alstMetaChanges)
+   CopyItem* aptCopy, 
+   const vector<Tag>& alstChanges, 
+   const vector<Tag>& alstMetaChanges)
 {
    for (size_t i = 0; i < alstChanges.size(); i++)
    {
       aptCopy->
-		  SetIdentifyingAttribute(alstChanges[i].first, alstChanges[i].second);
+        SetIdentifyingAttribute(alstChanges[i].first, alstChanges[i].second);
    }
 
    for (size_t i = 0; i < alstMetaChanges.size(); i++)
    {
       MetaTagType mTagType = CopyItem::DetermineMetaTagType(alstMetaChanges[i].first);
       aptCopy->
-		  SetMetaTag(alstMetaChanges[i].first, alstMetaChanges[i].second, mTagType);
+        SetMetaTag(alstMetaChanges[i].first, alstMetaChanges[i].second, mTagType);
    }
 }
 
@@ -890,40 +898,51 @@ Collection::expandAdditionLine( string& rszLine )
 {
    string szKey;
    string szDetails;
+   string szName;
+   string szId;
+   string szCount;
 
-	int iDetEnd = rszLine.find_first_of( ']' );
-	if( iDetEnd == rszLine.size() - 1 )
-	{
-		int iDetStart = rszLine.find_first_of('[');
-		string szName = rszLine.substr(0, iDetStart);
-		string szId = rszLine.substr(iDetStart+1, rszLine.size() - iDetStart - 2);
-	   auto card = m_ptrCollectionSource->GetCardPrototype(szName);
+   int iDetEnd = rszLine.find_first_of( ']' );
+   int iNameStart = rszLine.find_first_of( ' ' );
+   if( iNameStart == string::npos )
+   {
+      iNameStart = 0;
+   }
+
+   if( iDetEnd == rszLine.size() - 1 )
+   {
+      int iDetStart = rszLine.find_first_of('[');
+     szCount = rszLine.substr(0, iNameStart);
+      szName = rszLine.substr(iNameStart, iDetStart-iNameStart);
+     szName = StringHelper::Str_Trim(szName, ' ');
+      szId = rszLine.substr(iDetStart+1, rszLine.size() - iDetStart - 2);
+      auto card = m_ptrCollectionSource->GetCardPrototype(szName);
 
       auto vecVals = StringHelper::Str_Split(szId, ",");
 
       // Find the key for each unpair value.
-      for( auto szPair : vecVals )
+      for( auto& szPair : vecVals )
       {
          bool bGoodVal = false;
 
-		   // Check if the dets are solo.
-		   bool bNeedMatch = szId.find_first_of('=') < 0;
-		   if( bNeedMatch )
-		   {
-			   if( card.Good() )
-			   {
-				   bGoodVal = card->MatchIdentifyingTrait(szPair, szKey);
-			   }
+         // Check if the dets are solo.
+         bool bNeedMatch = szId.find_first_of('=') == string::npos;
+         if( bNeedMatch )
+         {
+            if( card.Good() )
+            {
+               bGoodVal = card->MatchIdentifyingTrait(szPair, szKey);
+            }
          
             if( bGoodVal )
             {
                szPair = szKey + "=" + szPair;
             }
-		   }
+         }
       }
 
       // Now we have to put quotes around each of the "values"
-      for( auto szPair : vecVals )
+      for( auto& szPair : vecVals )
       {
          auto vecSplitPair = StringHelper::Str_Split(szPair, "=");
          if( vecSplitPair.size() == 2 )
@@ -937,17 +956,114 @@ Collection::expandAdditionLine( string& rszLine )
          }
       }
 
-		// Wrap szID with { }
+      // Wrap szID with { }
       szDetails = "{ ";
-      for( auto szPair : vecVals )
+      for( auto& szPair : vecVals )
       {
          szDetails += szPair;
          szDetails += " ";
       }
-	   szDetails = "}";
+      szDetails += "}";
 
-      rszLine = szName + " " + szDetails;
-	}
+      rszLine = szCount + " " + szName + " " + szDetails;
+   }
+}
+
+// This will ignore any meta tags.
+void 
+Collection::collapseCardLine( std::string& rszLine )
+{
+   Config* config = Config::Instance();
+   string szFirstKey = "";
+   vector<Tag> vecPairedKeys;
+   vector<string> vecIdentifyingKeys;
+   vector<TraitItem> vecPrototypeTraits;
+   CollectionItem::PseudoIdentifier oParser;
+
+   bool bGoodParse = CollectionItem::ParseCardLine(rszLine, oParser);
+   if( bGoodParse )
+   {     
+      // Get which traits are paired from the config.
+      vecIdentifyingKeys = config->GetIdentifyingAttributes();
+      vecPairedKeys = config->GetPairedKeysList();
+
+      vector<string> vecKeepKeys;
+      vector<string> vecRemoveKeys;
+      for( auto keyPair : vecPairedKeys )
+      {
+         int iHaveFirst = ListHelper::List_Find( keyPair.first, vecKeepKeys );
+         int iIgnoreFirst = ListHelper::List_Find( keyPair.first, vecRemoveKeys );
+         int iHaveSecond = ListHelper::List_Find( keyPair.second, vecKeepKeys );
+         int iIgnoreSecond = ListHelper::List_Find( keyPair.second, vecRemoveKeys );
+         
+         // We already have this key.
+         // Remove its pair.
+         if( iHaveFirst != -1 || iIgnoreFirst != -1 )
+         {
+            if( iIgnoreSecond == -1 && iHaveSecond == -1 )
+            {
+               vecRemoveKeys.push_back(keyPair.second);
+               continue;
+            }
+         }
+
+         if( iHaveSecond != -1 || iIgnoreSecond != -1 )
+         {
+            if( iIgnoreFirst == -1 && iHaveFirst == -1 )
+            {
+               vecKeepKeys.push_back(keyPair.first);
+               continue;
+            }
+         }
+
+         vecKeepKeys.push_back( keyPair.first );
+         vecRemoveKeys.push_back( keyPair.second );
+      }
+      
+      for( auto szRemoveKey : vecRemoveKeys )
+      {
+         int iKeyInd = ListHelper::List_Find( szRemoveKey, vecIdentifyingKeys );
+         vecIdentifyingKeys.erase( vecIdentifyingKeys.begin() + iKeyInd );
+      }
+
+      // Now get the trait value for each of the remaining keys.
+      // A list of each key needed to identify a card.
+      // Use the first of a pair for paired keys.
+      vector<string> vecImportantValues;
+      auto oCard = m_ptrCollectionSource->GetCardPrototype(oParser.Name);
+      if( oCard.Good() )
+      {
+         for( auto keepKey : vecIdentifyingKeys )
+         {
+            string szFoundValue = "";
+            int iTagInd = ListHelper::List_Find( keepKey, oParser.Identifiers, 
+                                                 config->GetTagHelper(Key) );
+            if( iTagInd != -1 )
+            {
+               szFoundValue = oParser.Identifiers[iTagInd].second;
+            }
+
+            if( szFoundValue != "" )
+            {
+               vecImportantValues.push_back(szFoundValue);
+            }
+         }
+      }
+
+      // Now collapse the values.
+      string szShort = "x" + to_string(oParser.Count) + " " + oParser.Name;
+      szShort += " ";
+      for( auto szVal : vecImportantValues )
+      {
+         szShort += "[";
+         szShort += szVal;
+         szShort += ",";         
+      }
+      szShort = szShort.substr(0, szShort.size()-1);
+      szShort += "]";
+
+      rszLine = szShort;
+   }
 }
 
 void 
@@ -1032,13 +1148,13 @@ Collection::saveOverhead()
    localtime_s(&otm, &time);
 
    oColFile << Config::CollectionDefinitionKey
-	        << " ID=\"" << GetIdentifier().GetFullAddress() << "\"" << endl;
+           << " ID=\"" << GetIdentifier().GetFullAddress() << "\"" << endl;
 
    oColFile << Config::CollectionDefinitionKey 
-	        << " CC=\"" << m_ptrCollectionDetails->GetChildrenCount() << "\"" << endl;
+           << " CC=\"" << m_ptrCollectionDetails->GetChildrenCount() << "\"" << endl;
 
    oColFile << Config::CollectionDefinitionKey 
-	        << " Session=\"" << put_time(&otm, "%F_%T") << "\"" << endl;
+           << " Session=\"" << put_time(&otm, "%F_%T") << "\"" << endl;
 
    for( auto szLine : m_ptrCollectionDetails->GetProcessLines() )
    {
@@ -1050,7 +1166,11 @@ Collection::saveOverhead()
 
 void Collection::saveCollection()
 {
-   vector<string> lstLines = GetCollectionList(None);
+   vector<string> lstLines = GetCollectionList(None, true, CopyItem::HashType::Ids);
+   for( auto& szLine : lstLines )
+   {
+      collapseCardLine(szLine);
+   }
 
    ofstream oColFile;
    oColFile.open(m_ptrCollectionDetails->GetFile());

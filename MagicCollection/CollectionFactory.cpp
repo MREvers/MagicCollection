@@ -49,7 +49,7 @@ CollectionFactory::LoadCollectionFromFile(string aszFileName)
    // and vice versa.
    if( m_setInLoading.find( aszFileName ) != m_setInLoading.end() )
    {
-	   return szRetVal;
+      return szRetVal;
    }
 
    if( !m_ColSource->IsLoaded() )

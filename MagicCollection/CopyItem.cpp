@@ -41,7 +41,7 @@ CopyItem::CopyItem( const Identifier& aAddrParentIdentifier,
 }
 
 // Returns the hash. Hashes on parent, PUBLIC (so not the parent TAG) metatags, and the idattrs.
-string CopyItem::GetHash()
+string CopyItem::GetHash(HashType aiHashType)
 {
    function<string(const MetaTag&)> fnExtractor = GetMetaTagKeyViewer();
    int iMetaHash = ListHelper::List_Find(string(Config::HashKey), m_lstMetaTags, fnExtractor);
@@ -49,24 +49,36 @@ string CopyItem::GetHash()
    if ( ( iMetaHash == -1 ) || ( m_bNeedHash ) )
    {
       string szHashString = m_Address.GetFullAddress();
-      vector<Tag>::iterator iter_Tags = m_lstIdentifyingTags.begin();
-      for (; iter_Tags != m_lstIdentifyingTags.end(); ++iter_Tags)
+      if( aiHashType & HashType::Ids > 0 )
       {
-         // This requires that the tags have an ordering.
-         // This ordering can be determined, by the order
-         // of the MetaTag object in the collection object.
-         szHashString += iter_Tags->second;
+         vector<Tag>::iterator iter_Tags = m_lstIdentifyingTags.begin();
+         for (; iter_Tags != m_lstIdentifyingTags.end(); ++iter_Tags)
+         {
+           // This requires that the tags have an ordering.
+           // This ordering can be determined, by the order
+           // of the MetaTag object in the collection object.
+           szHashString += iter_Tags->second;
+         }
       }
 
       // Only iterate of public metatags
-      vector<Tag> lstMetaList = this->GetMetaTags(Public);
-      vector<Tag>::iterator iter_MetaTags = lstMetaList.begin();
-      for (; iter_MetaTags != lstMetaList.end(); ++iter_MetaTags)
+      if( aiHashType & HashType::Meta > 0 )
       {
-         szHashString += iter_MetaTags->first + iter_MetaTags->second;
+         vector<Tag> lstMetaList = this->GetMetaTags(Public);
+         vector<Tag>::iterator iter_MetaTags = lstMetaList.begin();
+         for (; iter_MetaTags != lstMetaList.end(); ++iter_MetaTags)
+         {
+            szHashString += iter_MetaTags->first + iter_MetaTags->second;
+         }
       }
+      
+      // Calculate the hash.
       string szHash = Config::Instance()->GetHash(szHashString);
-      SetMetaTag(Config::HashKey, szHash, Hidden, false);
+      
+      if( aiHashType == HashType::Default )
+      {
+         SetMetaTag(Config::HashKey, szHash, Hidden, false);
+      }
 
       m_bNeedHash = false;
       return szHash;

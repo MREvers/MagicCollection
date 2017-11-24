@@ -35,7 +35,7 @@ bool
 CollectionIO::GetNameAndCollectionLines(
       vector<string>  alstAllLines, 
       string&         rlstIOLines,
-      vector<string>& rlstPreprocessingLines)
+      vector<string>& rlstCollectionLines)
 {
    // There must be one line with quotations. (Exactly One)
    // This is the name. All others will be interpreted as cards or thrown away.
@@ -50,7 +50,7 @@ CollectionIO::GetNameAndCollectionLines(
       }
       else
       {
-         rlstPreprocessingLines.push_back(*iter_Lines);
+         rlstCollectionLines.push_back(*iter_Lines);
       }
    }
 

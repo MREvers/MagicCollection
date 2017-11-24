@@ -117,10 +117,10 @@ int CollectionSource::LoadCard(std::string aszCardName)
          }
 
          std::map<std::string, std::vector<std::string>> 
-			 lstUnfixedAttrs = oSource->GetNonUniqueAttributeRestrictions(m_AllCharBuff);
+          lstUnfixedAttrs = oSource->GetNonUniqueAttributeRestrictions(m_AllCharBuff);
 
          std::map<std::string, std::vector<std::string>> 
-			 lstFixedAttrs;
+          lstFixedAttrs;
 
          std::map<std::string, std::vector<std::string>>::iterator iter_UnfixedAttrs = lstUnfixedAttrs.begin();
          for (; iter_UnfixedAttrs != lstUnfixedAttrs.end(); ++iter_UnfixedAttrs)

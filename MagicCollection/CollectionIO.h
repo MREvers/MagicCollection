@@ -26,7 +26,7 @@ public:
    bool CollectionIO::GetFileLines( std::string aszFileName,
                                     std::vector<std::string>& rlstFileLines );
    bool GetNameAndCollectionLines(std::vector<std::string> alstAllLines,
-      std::string& rszName, std::vector<std::string>& rlstPreprocessingLines);
+      std::string& rszName, std::vector<std::string>& rlstCardLines);
 
    bool CaptureUnlistedItems(Location aAddrColID,
       CollectionSource* aptCollectionSource,
