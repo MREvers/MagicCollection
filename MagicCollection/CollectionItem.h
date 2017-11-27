@@ -88,7 +88,7 @@ private:
 public:
    std::vector<TraitItem> GetIdentifyingTraits();
    bool MatchIdentifyingTrait( const std::string& aszValue,
-                        std::string& rszKey );
+                               std::string& rszKey );
 
    // Attempts to set an identifying trait on a copy item.
    // Returns true if the value is valid.
@@ -122,8 +122,5 @@ public:
                                   const std::vector<Tag>& alstAttrs    = std::vector<Tag>(),
                                   const std::vector<Tag>& alstMetaTags = std::vector<Tag>(), 
                                   const Identifier& aAddrCompareID        = Location() );
-
-private:
-   static bool isNameChar( const char& c );
 };
 

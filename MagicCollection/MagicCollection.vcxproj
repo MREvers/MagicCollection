@@ -191,6 +191,7 @@
     <ClCompile Include="SourceObject.cpp" />
     <ClCompile Include="StoreFrontBackEnd.cpp" />
     <ClCompile Include="StringHelper.cpp" />
+    <ClCompile Include="StringInterface.cpp" />
     <ClCompile Include="TestClass.cpp" />
     <ClCompile Include="TraitItem.cpp" />
     <ClCompile Include="Transaction.cpp" />
@@ -232,6 +233,7 @@
     <ClInclude Include="SourceObject.h" />
     <ClInclude Include="StoreFrontBackEnd.h" />
     <ClInclude Include="StringHelper.h" />
+    <ClInclude Include="StringInterface.h" />
     <ClInclude Include="TestClass.h" />
     <ClInclude Include="TraitItem.h" />
     <ClInclude Include="Transaction.h" />

@@ -640,7 +640,7 @@ void Collection::loadMetaTagFile()
 
       // Gets the first matching item resident in this collection.
       auto matchingCopy = item->FindCopy(szPlainHash, Hash);
-      if (matchingCopy.Good())
+      if( matchingCopy.Good() )
       {
          MetaTagType mTagType;
          auto copy = matchingCopy.Value()->get();
@@ -649,7 +649,7 @@ void Collection::loadMetaTagFile()
             mTagType = CopyItem::DetermineMetaTagType(lstMetaTags[t].first);
             copy->SetMetaTag( lstMetaTags[t].first, 
                               lstMetaTags[t].second,
-                              mTagType, false);
+                              mTagType, false );
          }
       }
    }
@@ -912,9 +912,9 @@ Collection::expandAdditionLine( string& rszLine )
    if( iDetEnd == rszLine.size() - 1 )
    {
       int iDetStart = rszLine.find_first_of('[');
-     szCount = rszLine.substr(0, iNameStart);
+      szCount = rszLine.substr(0, iNameStart);
       szName = rszLine.substr(iNameStart, iDetStart-iNameStart);
-     szName = StringHelper::Str_Trim(szName, ' ');
+      szName = StringHelper::Str_Trim(szName, ' ');
       szId = rszLine.substr(iDetStart+1, rszLine.size() - iDetStart - 2);
       auto card = m_ptrCollectionSource->GetCardPrototype(szName);
 
@@ -1166,7 +1166,12 @@ Collection::saveOverhead()
 
 void Collection::saveCollection()
 {
-   vector<string> lstLines = GetCollectionList(None, true, CopyItem::HashType::Ids);
+   // Group lists only by id. When loading, these lists are only
+   // used to create a template card. We only need the base details.
+   vector<string> lstLines = GetCollectionList( None, true,
+                                                CopyItem::HashType::Ids );
+
+   // Convert the lines to shorthand
    for( auto& szLine : lstLines )
    {
       collapseCardLine(szLine);

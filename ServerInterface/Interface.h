@@ -62,6 +62,7 @@ public:
 private:
 	CStoreFrontBackEnd* m_StoreFrontBackEnd;
 
+public:
 	List<String^>^ convertStrVecToLst(vector<string> alstTrans);
    List<HTag^>^ convertTagVecToLst(vector<Tag> alstTups);
 

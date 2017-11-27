@@ -156,6 +156,9 @@
     <ClCompile Include="CollectionTest.cpp">
       <Filter>Tests</Filter>
     </ClCompile>
+    <ClCompile Include="StringInterface.cpp">
+      <Filter>CollectorsBackEnd</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="JSONImporter.h">
@@ -277,6 +280,9 @@
     </ClInclude>
     <ClInclude Include="CollectionTest.h">
       <Filter>Tests</Filter>
+    </ClInclude>
+    <ClInclude Include="StringInterface.h">
+      <Filter>CollectorsBackEnd</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

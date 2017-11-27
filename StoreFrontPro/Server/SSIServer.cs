@@ -26,6 +26,7 @@ namespace StoreFrontPro.Server
       // functions are here. It acts as a BLOB class for ease of use due to the nature of 
       // managed <-> unmanaged communications, despite being an 'anti-pattern'.
       private static ServerClientInterface SCI;
+      //private static StringController StringIFace;
 
       // PUBLIC interface
       public static ServerIFace Server

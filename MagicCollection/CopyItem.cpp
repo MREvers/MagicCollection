@@ -46,10 +46,11 @@ string CopyItem::GetHash(HashType aiHashType)
    function<string(const MetaTag&)> fnExtractor = GetMetaTagKeyViewer();
    int iMetaHash = ListHelper::List_Find(string(Config::HashKey), m_lstMetaTags, fnExtractor);
 
-   if ( ( iMetaHash == -1 ) || ( m_bNeedHash ) )
+   if ( ( iMetaHash == -1 ) || ( m_bNeedHash ) || 
+        ( aiHashType != HashType::Default ) )
    {
       string szHashString = m_Address.GetFullAddress();
-      if( aiHashType & HashType::Ids > 0 )
+      if( ( aiHashType & HashType::Ids ) == Ids )
       {
          vector<Tag>::iterator iter_Tags = m_lstIdentifyingTags.begin();
          for (; iter_Tags != m_lstIdentifyingTags.end(); ++iter_Tags)
@@ -62,7 +63,7 @@ string CopyItem::GetHash(HashType aiHashType)
       }
 
       // Only iterate of public metatags
-      if( aiHashType & HashType::Meta > 0 )
+      if( ( aiHashType & HashType::Meta ) == Meta )
       {
          vector<Tag> lstMetaList = this->GetMetaTags(Public);
          vector<Tag>::iterator iter_MetaTags = lstMetaList.begin();

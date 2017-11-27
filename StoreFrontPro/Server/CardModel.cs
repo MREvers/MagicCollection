@@ -251,7 +251,7 @@ namespace StoreFrontPro.Server
          string szIdentifier;
          if (aszIdentifier.Trim().Substring(0, 1) == "x")
          {
-            szIdentifier = lstIdentifierAndTags[0].Trim().Substring(2).Trim();
+            szIdentifier = lstIdentifierAndTags[0].Trim().Substring(1).Trim();
          }
          else
          {

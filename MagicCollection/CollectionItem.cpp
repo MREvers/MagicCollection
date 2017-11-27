@@ -1,16 +1,19 @@
 #include "CollectionItem.h"
 #include "Addresser.h"
+#include "StringInterface.h"
 
 using namespace std;
 
-CollectionItem::PseudoIdentifier::PseudoIdentifier()
+CollectionItem::
+PseudoIdentifier::PseudoIdentifier()
 {
 }
 
-CollectionItem::PseudoIdentifier::PseudoIdentifier(unsigned int aiCount,
-                                                   string aszName, 
-                                                   string aszDetails, 
-                                                   string aszMeta)
+CollectionItem::
+PseudoIdentifier::PseudoIdentifier(unsigned int aiCount,
+                                   string aszName, 
+                                   string aszDetails, 
+                                   string aszMeta)
 {
    Count = aiCount;
    Name = aszName;
@@ -21,7 +24,8 @@ CollectionItem::PseudoIdentifier::PseudoIdentifier(unsigned int aiCount,
    CollectionItem::ParseTagString(aszMeta, MetaTags);
 }
 
-CollectionItem::PseudoIdentifier::~PseudoIdentifier()
+CollectionItem::
+PseudoIdentifier::~PseudoIdentifier()
 {
 }
 
@@ -261,7 +265,8 @@ CollectionItem::SetIdentifyingTrait( CopyItem* aptItem,
       [](const TraitItem& item )->string { return item.GetKeyName(); };
 
    int iFound;
-   iFound = ListHelper::List_Find( aszTraitKey, m_lstIdentifyingTraits, fnTraitExtractor );
+   iFound = ListHelper::List_Find( aszTraitKey, m_lstIdentifyingTraits,
+                                   fnTraitExtractor );
    if( iFound == -1 ) { return false; }
 
    TraitItem trait = m_lstIdentifyingTraits[iFound];
@@ -330,154 +335,32 @@ CollectionItem::setCopyPairAttrs( CopyItem* aptItem, const string& aszKey, int i
 }
 
 bool
-CollectionItem::ParseCardLine(const string& aszLine, PseudoIdentifier& rPIdentifier)
+CollectionItem::ParseCardLine( const string& aszLine,
+                               PseudoIdentifier& rPIdentifier )
 {
-   string szLine;
+   StringInterface parser;
+   string szName, szDetails, szMeta;
    unsigned int iCount;
-   string szMeta;
-   string szDetails;
-   string szName;
-   szLine = StringHelper::Str_Trim(aszLine, ' ');
 
-   unsigned int i = 0;
-   if (szLine.size() > 0 && szLine[0] == 'x') { i++; }
-
-   string szNum = "";
-   while (i < szLine.size() && szLine.at(i) < '9' && szLine.at(i) > '0')
+   bool bGoodParse = parser.ParseCardLine( aszLine, iCount, szName,
+                                           szDetails, szMeta );
+   if( bGoodParse )
    {
-      szNum = szNum + szLine.at(i);
-      i++;
+      // Output the details
+      rPIdentifier = PseudoIdentifier(iCount, szName, szDetails, szMeta);
    }
-
-   if (i >= szLine.size())
+   else
    {
       return false;
    }
 
-   if (szNum == "")
-   {
-      szNum = "1";
-   }
-
-   try
-   {
-      iCount = stoi(szNum);
-   }
-   catch (...)
-   {
-      return false;
-   }
-
-   if (szLine.at(i) == 'x')
-   {
-      i++;
-   }
-
-   if (i >= szLine.size())
-   {
-      return false;
-   }
-
-   szName = "";
-   unsigned int iter_size = szLine.size();
-   char cChar;
-   while( ( i < iter_size ) && ( isNameChar(szLine.at(i)) ) )
-   {
-      szName = szName + szLine.at(i);
-      i++;
-   }
-
-   szName.erase(0, szName.find_first_not_of(' '));
-   szName.erase(szName.find_last_not_of(' ') + 1);
-
-   while (i < iter_size && szLine.at(i) == ' ')
-   {
-      i++;
-   }
-
-   bool hasDets = false;
-   bool hasMeta = false;
-   if (i < iter_size)
-   {
-      hasDets = szLine.at(i) == '{';
-      hasMeta = szLine.at(i) == ':';
-   }
-
-   szDetails = "";
-   if (i < iter_size && hasDets)
-   {
-      while (i < iter_size && szLine.at(i) != '}')
-      {
-         szDetails += szLine.at(i);
-         i++;
-      }
-      if (i < iter_size)
-      {
-         szDetails += szLine.at(i);
-         i++;
-      }
-   }
-
-   if (!hasMeta && hasDets)
-   {
-      while (i < iter_size && szLine.at(i) != ':')
-      {
-         i++;
-      }
-      hasMeta = (i < iter_size) && (szLine.at(i) == ':');
-   }
-
-   szMeta = "";
-   if (i < iter_size && hasMeta)
-   {
-      i++;
-      while (i < iter_size)
-      {
-         szMeta += szLine.at(i);
-         i++;
-      }
-   }
-
-   // Output the details
-   rPIdentifier = PseudoIdentifier(iCount, szName, szDetails, szMeta);
    return true;
 }
 
 bool CollectionItem::ParseTagString(const string& aszDetails, vector<Tag>& rlstTags)
 {
-   vector<Tag> lstKeyVals;
-   vector<string> lstPairs;
-   vector<string> lstVal;
-
-   vector<string> lstDetails = StringHelper::Str_Split(aszDetails, " ");
-
-   vector<string>::iterator iter_attrs;
-   for (iter_attrs = lstDetails.begin(); 
-        iter_attrs != lstDetails.end(); 
-        ++iter_attrs)
-   {
-      lstPairs = StringHelper::Str_Split(*iter_attrs, "=");
-      if (lstPairs.size() > 1)
-      {
-         lstVal = StringHelper::Str_Split(lstPairs[1], "\"");
-         if (lstVal.size() == 3)
-         {
-            string szVal = lstVal[1];
-            lstKeyVals.push_back(make_pair(lstPairs[0], szVal));
-         }
-      }
-   }
-   rlstTags = lstKeyVals;
-   return true;
-}
-
-bool CollectionItem::isNameChar( const char& c )
-{
-   return ( ( 'a' <= c && c <= 'z' ) ||
-            ( 'A' <= c && c <= 'Z' ) ||
-            ( c == ',' ) || 
-            ( c == ' ' ) || 
-            ( c == '-' ) );
+   StringInterface parser;
+   return parser.ParseTagString(aszDetails, rlstTags);
 }
 
 string 
