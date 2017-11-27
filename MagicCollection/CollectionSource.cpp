@@ -196,7 +196,8 @@ bool CollectionSource::IsSyncNeeded(const Location& aAddrNeedSync)
 }
 
 std::vector<int>
-CollectionSource::GetCollectionCache(Location aAddrColID, CollectionItemType aColItemType)
+CollectionSource::GetCollectionCache( Location aAddrColID, 
+                                      CollectionItemType aColItemType )
 {
    std::vector<int> lstRetVal;
 
@@ -212,7 +213,8 @@ CollectionSource::GetCollectionCache(Location aAddrColID, CollectionItemType aCo
 }
 
 std::vector<std::shared_ptr<CopyItem>>
-CollectionSource::GetCollection(Location aAddrColID, CollectionItemType aColItemType)
+CollectionSource::GetCollection( Location aAddrColID,
+                                 CollectionItemType aColItemType )
 {
    std::vector<std::shared_ptr<CopyItem>> lstRetVal;
 
@@ -252,7 +254,7 @@ CollectionSource::GetAllCardsStartingWith(std::string aszText)
             pairICache = m_lstSearchCache[i];
          if (pairICache.first == aszText)
          {
-            std::vector<SourceObject>::iterator iter_Result = pairICache.second.begin();
+            auto iter_Result = pairICache.second.begin();
             for (; iter_Result != pairICache.second.end(); ++iter_Result)
             {
                lstCards.push_back((iter_Result)->GetName(m_AllCharBuff));
@@ -363,7 +365,7 @@ int
 CollectionSource::findInCache( std::string aszName,
                                bool abCaseSensitive )
 {
-   std::vector<CollectionItem>::iterator iter_ColObj = m_lstoCardCache.begin();
+   auto iter_ColObj = m_lstoCardCache.begin();
    int index = 0;
    for (; iter_ColObj != m_lstoCardCache.end(); ++iter_ColObj)
    {
