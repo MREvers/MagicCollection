@@ -93,11 +93,10 @@ void CollectionSource::HotSwapLib(std::string aszFileName)
 int CollectionSource::LoadCard(std::string aszCardName)
 {
    Config* config = Config::Instance();
-   int iCacheLocation = -1;
    std::string szCardName = StringHelper::Str_Trim(aszCardName, ' ');
 
    // Since it is faster to look in the cache, check that first.
-   iCacheLocation = findInCache(szCardName, false);
+   int iCacheLocation = findInCache(szCardName, false);
    if (iCacheLocation == -1)
    {
       // Look in the Source Object Buffer for a matching item.
@@ -106,37 +105,26 @@ int CollectionSource::LoadCard(std::string aszCardName)
       if (iFound != -1)
       {
          SourceObject* oSource = &m_lstCardBuffer.at(iFound);
+         
+         // Get the static Attrs
+         std::vector<Tag> lstStaticAttrs = oSource->GetAttributes(m_AllCharBuff);
 
-         std::vector<Tag> lstStaticAttrs;
-         std::vector<Tag> lstAttrs = oSource->GetAttributes(m_AllCharBuff);
-
-         std::vector<Tag>::iterator att_iter = lstAttrs.begin();
-         for (; att_iter != lstAttrs.end(); ++att_iter)
-         {
-            lstStaticAttrs.push_back(std::make_pair(att_iter->first, att_iter->second));
-         }
-
-         std::map<std::string, std::vector<std::string>> 
-          lstUnfixedAttrs = oSource->GetNonUniqueAttributeRestrictions(m_AllCharBuff);
-
-         std::map<std::string, std::vector<std::string>> 
-          lstFixedAttrs;
-
-         std::map<std::string, std::vector<std::string>>::iterator iter_UnfixedAttrs = lstUnfixedAttrs.begin();
-         for (; iter_UnfixedAttrs != lstUnfixedAttrs.end(); ++iter_UnfixedAttrs)
-         {
-            lstFixedAttrs[iter_UnfixedAttrs->first] = iter_UnfixedAttrs->second;
-         }
+         // Build the trait items from each of the ID attrs and their
+         // allowed values.
+         auto lstAttrRestrictions = oSource->GetIDAttrRestrictions(m_AllCharBuff);
 
          std::vector<TraitItem> lstIdentifyingTraits;
-         std::map<std::string, std::vector<std::string>>::iterator iter_Traits = lstFixedAttrs.begin();
-         for (; iter_Traits != lstFixedAttrs.end(); ++iter_Traits)
+         auto iter_Traits = lstAttrRestrictions.begin();
+         for (; iter_Traits != lstAttrRestrictions.end(); ++iter_Traits)
          {
-            TraitItem newTrait(iter_Traits->first, iter_Traits->second, config->GetPairedKeysList());
+            TraitItem newTrait( iter_Traits->first,
+                                iter_Traits->second,
+                                config->GetPairedKeysList() );
             lstIdentifyingTraits.push_back(newTrait);
          }
 
-         CollectionItem oCard(aszCardName, lstStaticAttrs, lstIdentifyingTraits);
+         CollectionItem oCard( aszCardName, lstStaticAttrs,
+                               lstIdentifyingTraits );
 
          // Store the location of the CollectionItem in the cache
          iCacheLocation = m_lstoCardCache.size();
@@ -228,7 +216,7 @@ CollectionSource::GetCollection(Location aAddrColID, CollectionItemType aColItem
 {
    std::vector<std::shared_ptr<CopyItem>> lstRetVal;
 
-   for( auto item : m_lstoCardCache )
+   for( auto& item : m_lstoCardCache )
    {
       auto lstCopies = item.FindCopies(aAddrColID, aColItemType);
 

@@ -9,7 +9,7 @@ StringController::StringController()
 }
 
 System::Boolean 
-StringController::ParseCardString( String^% ahszInput,
+StringController::ParseCardString( String^ ahszInput,
                                    System::Int32% rhiCount,
                                    String^% rhszName,
                                    List<HTag^>^% rvecPairDets,
@@ -30,9 +30,9 @@ StringController::ParseCardString( String^% ahszInput,
    {
       rhiCount = iCount;
       rhszName = gcnew String(szName.c_str());
-      //rvecPairDets = ServerClientInterface::convertTagVecToLst(vecDetTags);
-      //rvecPairMetas = ServerClientInterface::convertTagVecToLst(vecMetaTags);
+      rvecPairDets = MarshalHelper::ConvertTagVecToLst(vecDetTags);
+      rvecPairMetas = MarshalHelper::ConvertTagVecToLst(vecMetaTags);
    }
 
-   return System::Boolean(true);
+   return System::Boolean(bGoodParse);
 }

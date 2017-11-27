@@ -41,8 +41,18 @@ StringInterface::ParseCardLine( const std::string& aszLine,
       unsigned int iTryParse, iParseChars;
       string szMaybeNum = szLine.substr(0, iFirstBreak);
 
-      iTryParse = stoul(szMaybeNum, &iParseChars);
-      if( iParseChars != iFirstBreak )
+      // An exception is thrown if there are 0 num chars.
+      try
+      {
+         iTryParse = stoul(szMaybeNum, &iParseChars);
+      }
+      catch(...)
+      {
+         iParseChars = 0;
+      }
+
+      if( (iParseChars != iFirstBreak) &&
+          (iParseChars != 0) )
       {
          // There are non num chars mixed in the number.
          return false;
@@ -99,6 +109,7 @@ StringInterface::ParseCardLine( const std::string& aszLine,
    rszName = szName;
 
    szLine = szLine.substr(iNameEnd);
+   iColon = iColon - iNameEnd;
 
    // STEP 4. Get the details if there are any.
    if( bHasDets )
@@ -153,10 +164,9 @@ StringInterface::ParseCardLine( const std::string& aszLine,
                                 vector<Tag>& rszDetails,
                                 vector<Tag>& rszMeta ) const
 {
-   string szDets, szMeta, szName;
-   unsigned iCount;
+   string szDets, szMeta;
    
-   bool bGoodParse = ParseCardLine( aszLine, iCount, szName, szDets, szMeta );
+   bool bGoodParse = ParseCardLine( aszLine, riCount, rszName, szDets, szMeta );
    if( bGoodParse )
    {
       bGoodParse &= ParseTagString(szDets, rszDetails);

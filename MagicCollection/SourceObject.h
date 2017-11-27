@@ -44,7 +44,7 @@ public:
                              const char* aiSearchBuffer ) const;
    std::vector<std::pair<std::string, std::string>> GetAttributes(char* aiSearchBuffer);
 
-   std::map<std::string, std::vector<std::string>> GetNonUniqueAttributeRestrictions(char* aiSearchBuffer);
+   std::map<std::string, std::vector<std::string>> GetIDAttrRestrictions(char* aiSearchBuffer);
 
    unsigned int GetBufferOffset() const;
    void SetBufferOffset(unsigned int aiOffset);

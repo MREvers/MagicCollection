@@ -245,44 +245,17 @@ namespace StoreFrontPro.Server
       /// <param name="aszIdentifier"></param>
       private void parseIdentifier(string aszIdentifier)
       {
-         if(aszIdentifier.Length == 0) { return; }
-         List<string> lstIdentifierAndTags = aszIdentifier.Split(':').ToList();
-         
-         string szIdentifier;
-         if (aszIdentifier.Trim().Substring(0, 1) == "x")
-         {
-            szIdentifier = lstIdentifierAndTags[0].Trim().Substring(1).Trim();
-         }
-         else
-         {
-            szIdentifier = lstIdentifierAndTags[0].Trim();
-         }
+         int iCount = 1;
+         string szName = "";
+         List<Tuple<string,string>> lstTupDets, lstTupMeta;
+         lstTupDets = new List<Tuple<string, string>>();
+         lstTupMeta = new List<Tuple<string, string>>();
 
-         List<string> lstNameAndIDs = szIdentifier.Split('{').ToList();
-         string szName = lstNameAndIDs[0].Trim();
+         ServerInterface.Card.ParseCardString( aszIdentifier, ref iCount, ref szName, 
+                                               ref lstTupDets, ref lstTupMeta );
          PrototypeName = szName;
-
-         string szDetails = "";
-         if (lstNameAndIDs.Count > 1)
-         {
-            szDetails = lstNameAndIDs[1].Trim();
-            IdentifyingAttributes = ParseTagList(szDetails);
-         }
-         else
-         {
-            IdentifyingAttributes = new List<Tuple<string, string>>();
-         }
-
-         string szUIDs = "";
-         List<Tuple<string,string>> lstUIDs = new List<Tuple<string, string>>();
-         if (lstIdentifierAndTags.Count > 1)
-         {
-            szUIDs = lstIdentifierAndTags[1].Trim();
-            lstUIDs = ParseTagList(szUIDs);
-         }
-
-         // Store the UIDs.
-         this.UIDs = lstUIDs.Select(x => x.Item2).ToList();
+         IdentifyingAttributes = lstTupDets;
+         UIDs = lstTupMeta.Select(x => x.Item2).ToList();
 
          setDisplayName();
       }

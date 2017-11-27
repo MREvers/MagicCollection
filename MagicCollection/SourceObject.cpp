@@ -101,7 +101,7 @@ SourceObject::GetAttributes(char* aiSearchBuffer)
 }
 
 std::map<std::string, std::vector<std::string>> 
-SourceObject::GetNonUniqueAttributeRestrictions(char* aiSearchBuffer)
+SourceObject::GetIDAttrRestrictions(char* aiSearchBuffer)
 {
    std::map<std::string, std::vector<std::string>> mapNonUAttrs;
    Config* config = Config::Instance();

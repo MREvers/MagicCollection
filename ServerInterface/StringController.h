@@ -11,7 +11,7 @@ public ref class StringController
 public:
    StringController();
 
-   System::Boolean ParseCardString( String^% ahszInput,
+   System::Boolean ParseCardString( String^ ahszInput,
                                     System::Int32% rhiCount,
                                     String^% rhszName,
                                     List<HTag^>^% rvecPairDets,
