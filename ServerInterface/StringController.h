@@ -4,11 +4,7 @@
 #include <msclr\marshal.h>
 #include <msclr\marshal_cppstd.h>
 
-typedef std::pair<std::string, std::string> Tag;
-
-typedef System::String String;
-typedef System::Tuple<String^, String^> HTag;
-template<typename T> using List = System::Collections::Generic::List<T>;
+#include "MarshalHelper.h"
 
 public ref class StringController
 {

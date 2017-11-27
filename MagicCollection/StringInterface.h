@@ -3,7 +3,7 @@
 #include<vector>
 #include "Config.h"
 
-class StringInterface
+class __declspec(dllexport) StringInterface
 {
 public:
    StringInterface();

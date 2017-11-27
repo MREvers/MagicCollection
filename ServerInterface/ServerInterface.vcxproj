@@ -129,9 +129,13 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Interface.h" />
+    <ClInclude Include="MarshalHelper.h" />
+    <ClInclude Include="StringController.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Interface.cpp" />
+    <ClCompile Include="MarshalHelper.cpp" />
+    <ClCompile Include="StringController.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\MagicCollection\MagicCollection.vcxproj">

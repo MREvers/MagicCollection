@@ -2,13 +2,8 @@
 #using <mscorlib.dll>
 #using <System.dll>
 #include <msclr\marshal_cppstd.h>
+#include "MarshalHelper.h"
 #include "..\MagicCollection\StoreFrontBackEnd.h"
-
-typedef std::pair<std::string, std::string> Tag;
-
-typedef System::String String;
-typedef System::Tuple<String^, String^> HTag;
-template<typename T> using List = System::Collections::Generic::List<T>;
 
 using namespace std;
 
@@ -61,13 +56,5 @@ public:
 
 private:
 	CStoreFrontBackEnd* m_StoreFrontBackEnd;
-
-public:
-	List<String^>^ convertStrVecToLst(vector<string> alstTrans);
-   List<HTag^>^ convertTagVecToLst(vector<Tag> alstTups);
-
-	vector<Tag> revertTupLstToVec(List<HTag^>^ hlstMetaTagsOne);
-   vector<string> revertStrLstToVec(List<String^>^ hlstChanges);
-  
 };
 

@@ -896,11 +896,7 @@ void Collection::loadDeltaLine(const string& aszLine)
 void 
 Collection::expandAdditionLine( string& rszLine )
 {
-   string szKey;
-   string szDetails;
-   string szName;
-   string szId;
-   string szCount;
+   string szKey, szDetails, szName, szId, szCount;
 
    int iDetEnd = rszLine.find_first_of( ']' );
    int iNameStart = rszLine.find_first_of( ' ' );

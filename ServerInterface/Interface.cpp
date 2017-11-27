@@ -49,8 +49,8 @@ ServerClientInterface::GetImagesPath()
 List<HTag^>^ 
 ServerClientInterface::GetPairedAttributes()
 {
-   return convertTagVecToLst(m_StoreFrontBackEnd->GetPairedAttributes());
- }
+   return MarshalHelper::ConvertTagVecToLst(m_StoreFrontBackEnd->GetPairedAttributes());
+}
 
 String^ 
 ServerClientInterface::GetCardPrototype(String^ ahszCardName)
@@ -94,7 +94,7 @@ ServerClientInterface::GetCollectionMetaData(String^ ahszCollectionName)
 {
 	string szCollectionName = msclr::interop::marshal_as<string>(ahszCollectionName);
 	vector<string> lstMeta = m_StoreFrontBackEnd->GetCollectionMetaData(szCollectionName);
-	return convertStrVecToLst(lstMeta);
+	return MarshalHelper::ConvertStrVecToLst(lstMeta);
 }
 
 // [ { card name - long, [ <tags> ] }, ... }
@@ -108,7 +108,7 @@ ServerClientInterface::GetCollectionList(String^ ahszCollectionName, System::Int
 	vector<string> lstCollection = m_StoreFrontBackEnd->GetCollectionList(szCollectionName, iVisibility);
 
 	List<String^>^ hlstCollection;
-	hlstCollection = convertStrVecToLst(lstCollection);
+	hlstCollection = MarshalHelper::ConvertStrVecToLst(lstCollection);
 
 	return hlstCollection;
 }
@@ -116,7 +116,7 @@ ServerClientInterface::GetCollectionList(String^ ahszCollectionName, System::Int
 void ServerClientInterface::SubmitBulkChanges(String^ ahszCollectionName, List<String^>^ ahlstBulkChanges)
 {
 	string szCollection = msclr::interop::marshal_as<string>(ahszCollectionName);
-	vector<string> lstChanges = revertStrLstToVec(ahlstBulkChanges);
+	vector<string> lstChanges = MarshalHelper::RevertStrLstToVec(ahlstBulkChanges);
 	m_StoreFrontBackEnd->SubmitBulkChanges(szCollection, lstChanges);
 }
 
@@ -137,7 +137,7 @@ ServerClientInterface::GetMetaTags( String^ ahszCardName, String^ ahszUID )
    string szCardName = msclr::interop::marshal_as<string>(ahszCardName);
    string szUID = msclr::interop::marshal_as<string>(ahszUID);
 
-   return convertTagVecToLst(m_StoreFrontBackEnd->GetMetaTags(szCardName, szUID));
+   return MarshalHelper::ConvertTagVecToLst(m_StoreFrontBackEnd->GetMetaTags(szCardName, szUID));
 }
 
 List<HTag^>^ 
@@ -146,7 +146,7 @@ ServerClientInterface::GetIdentifyingAttributes( String^ ahszCardName, String^ a
    string szCardName = msclr::interop::marshal_as<string>(ahszCardName);
    string szUID = msclr::interop::marshal_as<string>(ahszUID);
 
-   return convertTagVecToLst(m_StoreFrontBackEnd->GetIdentifyingAttributes(szCardName, szUID));
+   return MarshalHelper::ConvertTagVecToLst(m_StoreFrontBackEnd->GetIdentifyingAttributes(szCardName, szUID));
 }
 
 String^ 
@@ -168,59 +168,4 @@ System::Boolean
 ServerClientInterface::IsConfigLoaded()
 {
    return m_StoreFrontBackEnd->ConfigIsLoaded();
-}
-
-List<String^>^
-ServerClientInterface::convertStrVecToLst(vector<string> alstTrans)
-{
-	List<String^>^ hlstRetVal = gcnew List<String^>();
-	vector<string>::iterator iter_stringList = alstTrans.begin();
-	for (; iter_stringList != alstTrans.end(); ++iter_stringList)
-	{
-		hlstRetVal->Add(gcnew String(iter_stringList->c_str()));
-	}
-
-	return hlstRetVal;
-}
-
-List<HTag^>^ 
-ServerClientInterface::convertTagVecToLst( vector<pair<string, string>> alstTups )
-{
-   List<HTag^>^ hlstRetVal = gcnew List<HTag^>();
-   for( auto pair : alstTups )
-   {
-      String^ hszOne = gcnew String(pair.first.c_str());
-      String^ hszTwo = gcnew String(pair.second.c_str());
-      hlstRetVal->Add(gcnew System::Tuple<String^, String^>(hszOne, hszTwo));
-   }
-
-   return hlstRetVal;
-}
-
-vector<Tag> 
-ServerClientInterface::revertTupLstToVec(List<HTag^>^ hlstMetaTags)
-{
-	vector<Tag> lstMetaTagPairs;
-	for (int i = 0; i < hlstMetaTags->Count; i++)
-	{
-		pair<string, string> pair;
-		string szFirst = msclr::interop::marshal_as<string>(hlstMetaTags[i]->Item1);
-		string szSecond = msclr::interop::marshal_as<string>(hlstMetaTags[i]->Item2);
-		pair.first = szFirst;
-		pair.second = szSecond;
-		lstMetaTagPairs.push_back(pair);
-	}
-	return lstMetaTagPairs;
-}
-
-vector<string>
-ServerClientInterface::revertStrLstToVec(List<String^>^ hlstChanges)
-{
-   vector<string> lstStrings;
-   for (int i = 0; i < hlstChanges->Count; i++)
-   {
-      string szFirst = msclr::interop::marshal_as<string>(hlstChanges[i]);
-      lstStrings.push_back(szFirst);
-   }
-   return lstStrings;
 }

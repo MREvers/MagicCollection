@@ -11,19 +11,17 @@ typedef std::pair<std::string, std::string> Tag;
 typedef System::String String;
 typedef System::Tuple<String^, String^> HTag;
 template<typename T> using List = System::Collections::Generic::List<T>;
-/*
+
 using namespace std;
 
-ref class MarshalHelper
+public ref class MarshalHelper
 {
 public:
    MarshalHelper();
 
-	List<String^>^ convertStrVecToLst(vector<string> alstTrans);
-   List<HTag^>^ convertTagVecToLst(vector<Tag> alstTups);
+   static List<String^>^ ConvertStrVecToLst(vector<string> alstTrans);
+   static List<HTag^>^ ConvertTagVecToLst(vector<Tag> alstTups);
 
-	vector<Tag> revertTupLstToVec(List<HTag^>^ hlstMetaTagsOne);
-   vector<string> revertStrLstToVec(List<String^>^ hlstChanges);
+   static vector<string> RevertStrLstToVec(List<String^>^ hlstChanges);
+   static vector<Tag> RevertTupLstToVec(List<HTag^>^ hlstMetaTagsOne);
 };
-
-*/
