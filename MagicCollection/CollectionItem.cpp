@@ -209,6 +209,9 @@ CollectionItem::GetName() const
 string 
 CollectionItem::GetProtoType() const
 {
+   StringInterface strIface;
+   string szResult;
+   
    // Start with static common traits
    vector<Tag> lstAllCommonTraits(m_lstCommonTraits);
 
@@ -216,16 +219,10 @@ CollectionItem::GetProtoType() const
    // These appear as <Key>, *Val1::Val2...
    for each (TraitItem trait in m_lstIdentifyingTraits)
    {
-      string szTraitVal = "";
-      bool first = true;
-      for each (string possibleTrait in trait.GetAllowedValues())
-      {
-         if (!first) { szTraitVal += "::"; }
-         else { szTraitVal += "*"; } // This * will indicate it is an identifier.
-         szTraitVal += possibleTrait;
-         first = false;
-      }
-      lstAllCommonTraits.push_back(make_pair(trait.GetKeyName(), szTraitVal));
+      auto vals = trait.GetAllowedValues();
+      strIface.ListToDelimStr(vals.cbegin(), vals.cend(), szResult);
+      
+      lstAllCommonTraits.push_back(make_pair(trait.GetKeyName(), szResult));
    }
 
    return CollectionItem::ToCardLine(Address(), "", lstAllCommonTraits);
@@ -357,7 +354,8 @@ CollectionItem::ParseCardLine( const string& aszLine,
    return true;
 }
 
-bool CollectionItem::ParseTagString(const string& aszDetails, vector<Tag>& rlstTags)
+bool CollectionItem::ParseTagString( const string& aszDetails, 
+                                     vector<Tag>& rlstTags )
 {
    StringInterface parser;
    return parser.ParseTagString(aszDetails, rlstTags);
@@ -370,48 +368,47 @@ CollectionItem::ToCardLine( const Identifier& aAddrParentID,
                             const vector<Tag>& alstMetaTags,
                             const Identifier& aAddrCompareID )
 {
-   string szLine = aszName;
-   szLine += " { ";
+   StringInterface parser;
+   Config* config = Config::Instance();
+   string szAddressKey = CopyItem::GetAddressKey();
+   vector<Tag> lstMetaTags(alstMetaTags);
+   
+   // Don't specify the parent if the parent is requesting the
+   // the string.
+   bool bExcludeParent = true;
+   bExcludeParent = aAddrCompareID == aAddrParentID;
 
-   vector<Tag>::const_iterator iter_keyValPairs;
-   if (alstAttrs.size() > 0)
+   // Check if the parent is specified in the metatags.
+   if( bExcludeParent )
    {
-      iter_keyValPairs = alstAttrs.cbegin();
-      for (; iter_keyValPairs != alstAttrs.cend(); ++iter_keyValPairs)
+      for( auto& pairMeta : lstMetaTags )
       {
-         szLine += iter_keyValPairs->first;
-         szLine += "=\"";
-         szLine += iter_keyValPairs->second;
-         szLine += "\" ";
+         if( pairMeta.first == szAddressKey )
+         {
+            bExcludeParent = Address( pairMeta.second ) == aAddrCompareID;
+            break;
+         }
       }
-
-   }
-   szLine += "}";
-
-   if (alstMetaTags.size() == 0)
-   {
-      return szLine;
    }
 
-   szLine += " : { ";
-
-   iter_keyValPairs = alstMetaTags.begin();
-   unsigned int iDummy;
-   for (; iter_keyValPairs != alstMetaTags.end(); ++iter_keyValPairs)
+   // Remove the parent from meta tags if there is one.
+   // Otherwise, add the parent.
+   if( bExcludeParent )
    {
-      if ( !( aAddrCompareID.GetMain() == "" )       &&
-            ( iter_keyValPairs->first == "Address" ) &&
-            ( Address(iter_keyValPairs->second) == aAddrCompareID ) )
+      int iFound = ListHelper::List_Find( szAddressKey,
+                                          lstMetaTags,
+                                          config->GetTagHelper() );
+      if( iFound != -1 )
       {
-         continue;
+         lstMetaTags.erase(lstMetaTags.begin() + iFound);
       }
-      szLine += iter_keyValPairs->first;
-      szLine += "=\"";
-      szLine += iter_keyValPairs->second;
-      szLine += "\" ";
    }
-   szLine += "}";
+   else
+   {
+      auto pairParent = make_pair(szAddressKey, aAddrCompareID.GetFullAddress());
+      lstMetaTags.push_back(pairParent);
+   }
 
-   return szLine;
+   return parser.ToCardLine(aszName, alstAttrs, lstMetaTags);
 }
 

@@ -28,7 +28,7 @@ namespace StoreFrontPro.Server
       private static ServerClientInterface SCI;
 
       // This can be initialized here because it is relatively small.
-      private static StringController StringIFace = new StringController();
+      private static StringController StringInterface = new StringController();
 
       // PUBLIC interface
       public static ServerIFace Server
@@ -55,6 +55,15 @@ namespace StoreFrontPro.Server
             return singleton._Collection;
          }
       }
+      public static StringIFace Strings 
+      {
+         get 
+         {
+            if (singleton == null) { InitServer(); }
+            return singleton._String;
+         }
+      }
+
 
       public static void ListenForDebug(IServerObserver Observer)
       {
@@ -83,6 +92,7 @@ namespace StoreFrontPro.Server
       private ServerIFace _Server;
       private CardIFace _Card;
       private CollectionIFace _Collection;
+      private StringIFace _String;
       #endregion
 
       #region Private Methods
@@ -96,6 +106,7 @@ namespace StoreFrontPro.Server
          _Server = new ServerIFace();
          _Card = new CardIFace();
          _Collection = new CollectionIFace();
+         _String = new StringIFace();
 
          m_QueueLock = new Mutex();
          m_lstServerQueue = new List<Action>();

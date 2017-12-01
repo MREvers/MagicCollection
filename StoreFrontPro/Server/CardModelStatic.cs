@@ -31,28 +31,22 @@ namespace StoreFrontPro.Server
          }
 
          var optionedAttributes = new List<string>();
+         var removeAttr = new List<string>();
          foreach (var Key in CommonAttributes.Keys)
          {
             string Value = CommonAttributes[Key];
 
             // '*' indicates that the value is restricted key.
+            // TODO make this star a function from the server.
             if (Value.Contains("*"))
             {
-               optionedAttributes.Add(Key.Trim(' ').Trim('*'));
+               AttributeOptions.Add(Key, ServerInterface.Strings.ParseListDelimString(Value));
+               removeAttr.Add(Key);
             }
          }
 
-         foreach (var Key in optionedAttributes)
+         foreach(var Key in removeAttr)
          {
-            string Value = CommonAttributes[Key];
-
-            // Remove '*'
-            Value = Value.Substring(1);
-            List<string> lstSplitOps = Value.Split(new string[] { "::" }, StringSplitOptions.RemoveEmptyEntries)
-                                            .ToList();
-
-            AttributeOptions.Add(Key, lstSplitOps);
-
             CommonAttributes.Remove(Key);
          }
       }

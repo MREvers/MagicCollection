@@ -66,6 +66,7 @@
     <Compile Include="Server\SSICollectionInterface.cs" />
     <Compile Include="Server\SSIServer.cs" />
     <Compile Include="Server\SSIServerInterface.cs" />
+    <Compile Include="Server\SSIStringInterface.cs" />
     <Compile Include="StoreFront.cs" />
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>

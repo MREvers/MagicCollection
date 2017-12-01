@@ -251,8 +251,8 @@ namespace StoreFrontPro.Server
          lstTupDets = new List<Tuple<string, string>>();
          lstTupMeta = new List<Tuple<string, string>>();
 
-         ServerInterface.Card.ParseCardString( aszIdentifier, ref iCount, ref szName, 
-                                               ref lstTupDets, ref lstTupMeta );
+         ServerInterface.Strings.ParseCardString( aszIdentifier, ref iCount, ref szName, 
+                                                  ref lstTupDets, ref lstTupMeta );
          PrototypeName = szName;
          IdentifyingAttributes = lstTupDets;
          UIDs = lstTupMeta.Select(x => x.Item2).ToList();

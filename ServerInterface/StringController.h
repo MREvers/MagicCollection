@@ -16,5 +16,8 @@ public:
                                     String^% rhszName,
                                     List<HTag^>^% rvecPairDets,
                                     List<HTag^>^% rvecPairMetas );
+
+   System::Boolean ParseListDelimString( String^ ahszInput, 
+                                         List<String^>^% rlstRetval );
 };
 

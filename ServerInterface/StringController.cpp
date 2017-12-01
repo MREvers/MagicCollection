@@ -36,3 +36,20 @@ StringController::ParseCardString( String^ ahszInput,
 
    return System::Boolean(bGoodParse);
 }
+
+System::Boolean 
+StringController::ParseListDelimString( String^ ahszInput,
+                                        List<String^>^% rlstRetval )
+{
+   StringInterface parser;
+   vector<string> vecItems;
+   string szInput =  msclr::interop::marshal_as<string>(ahszInput);
+
+   bool bGoodParse = parser.ParseListDelimString(szInput, vecItems);
+   if( bGoodParse )
+   {
+      rlstRetval = MarshalHelper::ConvertStrVecToLst(vecItems);
+   }
+
+   return System::Boolean(bGoodParse);
+}

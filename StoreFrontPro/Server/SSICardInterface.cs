@@ -48,14 +48,6 @@ namespace StoreFrontPro.Server
          {
             return SCI.GetCardString(aszCardname, aszUID);
          }
-
-         public bool ParseCardString( string aszCardString, ref int riCount,
-                                      ref string rszName,
-                                      ref List<Tuple<string,string>> rlstDets, 
-                                      ref List<Tuple<string,string>> rlstMeta ) 
-         {
-            return StringIFace.ParseCardString(aszCardString, ref riCount, ref rszName, ref rlstDets, ref rlstMeta);
-         }
       }
    }
 }

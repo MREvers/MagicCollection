@@ -15,11 +15,11 @@ StringInterface::~StringInterface()
 // This can handle forms of
 // [[x]<#>] <name> [{<Dets>}] [: {<Meta>}]
 bool 
-StringInterface::ParseCardLine( const std::string& aszLine,
+StringInterface::ParseCardLine( const string& aszLine,
                                 unsigned int& riCount,
-                                std::string& rszName,
-                                std::string& rszDetails,
-                                std::string& rszMeta ) const
+                                string& rszName,
+                                string& rszDetails,
+                                string& rszMeta ) const
 {
    string szLine, szMeta, szDetails, szName;
    
@@ -158,7 +158,7 @@ StringInterface::ParseCardLine( const std::string& aszLine,
 }
 
 bool 
-StringInterface::ParseCardLine( const std::string& aszLine,
+StringInterface::ParseCardLine( const string& aszLine,
                                 unsigned int& riCount,
                                 string& rszName,
                                 vector<Tag>& rszDetails,
@@ -177,8 +177,8 @@ StringInterface::ParseCardLine( const std::string& aszLine,
 }
 
 bool
-StringInterface::ParseTagString( const std::string& aszDetails,
-                                 std::vector<Tag>& rlstTags ) const
+StringInterface::ParseTagString( const string& aszDetails,
+                                 vector<Tag>& rlstTags ) const
 {
    vector<Tag> lstKeyVals;
    vector<string> lstPairs, lstVal;
@@ -193,14 +193,49 @@ StringInterface::ParseTagString( const std::string& aszDetails,
       lstPairs = StringHelper::Str_Split(*iter_attrs, "=");
       if (lstPairs.size() > 1)
       {
-         lstVal = StringHelper::Str_Split(lstPairs[1], "\"");
-         if (lstVal.size() == 3)
-         {
-            string szVal = lstVal[1];
-            lstKeyVals.push_back(make_pair(lstPairs[0], szVal));
-         }
+         string szVal = StringHelper::Str_Trim(lstPairs[1], '\"');
+         lstKeyVals.push_back(make_pair(lstPairs[0], szVal));
       }
    }
    rlstTags = lstKeyVals;
    return true;
+}
+
+bool 
+StringInterface::ParseListDelimString( const string& aszDelimStr,
+                                       vector<string>& rlstStrings,
+                                       const string& aszIndicatorString,
+                                       const string& aszDelim ) const
+{
+   if( aszIndicatorString != aszDelimStr.substr( 0, aszIndicatorString.size() ) )
+   {
+      return false;
+   }
+
+   string szParseStr = aszDelimStr.substr(aszIndicatorString.size());
+   rlstStrings = StringHelper::Str_Split(szParseStr, aszDelim);
+   return true;
+}
+
+string 
+StringInterface::ToCardLine( const string& aszName,
+                             const vector<Tag>& alstAttrs,
+                             const vector<Tag>& alstMetaTags )
+{
+   string szTagline, szLine;
+   
+   szLine = aszName;
+
+   szLine += " ";
+   PairListToTagStr(alstAttrs.cbegin(), alstAttrs.cend(), szTagline);
+   szLine += szTagline;
+
+   if( alstMetaTags.size() > 0 )
+   {
+      szLine += " : ";
+      PairListToTagStr(alstMetaTags.cbegin(), alstMetaTags.cend(), szTagline);
+      szLine += szTagline;
+   }
+
+   return szLine;
 }
