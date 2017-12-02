@@ -173,9 +173,6 @@
     <ClCompile Include="Collection.cpp" />
     <ClCompile Include="CopyTest.cpp" />
     <ClCompile Include="jsoncpp.cpp" />
-    <ClCompile Include="JSONImporter.cpp">
-      <Optimization Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MaxSpeed</Optimization>
-    </ClCompile>
     <ClCompile Include="JSONImporterTwo.cpp" />
     <ClCompile Include="ListHelper.cpp" />
     <ClCompile Include="MD5.cpp" />
@@ -218,7 +215,6 @@
     <ClInclude Include="Collection.h" />
     <ClInclude Include="CopyTest.h" />
     <ClInclude Include="Addresser.h" />
-    <ClInclude Include="JSONImporter.h" />
     <ClInclude Include="JSONImporterTwo.h" />
     <ClInclude Include="ListHelper.h" />
     <ClInclude Include="MD5.h" />

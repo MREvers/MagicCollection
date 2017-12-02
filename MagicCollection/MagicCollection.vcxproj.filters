@@ -36,9 +36,6 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="JSONImporter.cpp">
-      <Filter>CollectorsBackEnd\Importer</Filter>
-    </ClCompile>
     <ClCompile Include="ServerIFace\ClientSocket.cpp">
       <Filter>CollectorsBackEnd\ServerIFace</Filter>
     </ClCompile>
@@ -164,9 +161,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="JSONImporter.h">
-      <Filter>CollectorsBackEnd\Importer</Filter>
-    </ClInclude>
     <ClInclude Include="ServerIFace\ClientSocket.h">
       <Filter>CollectorsBackEnd\ServerIFace</Filter>
     </ClInclude>
