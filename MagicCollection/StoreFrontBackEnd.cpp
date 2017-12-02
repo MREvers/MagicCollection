@@ -3,6 +3,7 @@
 #include "CollectionTest.h"
 #include "CollectionItemTest.h"
 #include "CopyTest.h"
+#include "JSONImporterTwo.h"
 
 CStoreFrontBackEnd::CStoreFrontBackEnd()
 {
@@ -248,7 +249,7 @@ void CStoreFrontBackEnd::SubmitBulkChanges(std::string aszCollection, std::vecto
 
 void CStoreFrontBackEnd::ImportCollectionSource()
 {
-   JSONImporter JI;
+   JSONImporterTwo JI;
    JI.ImportJSON(Config::Instance()->GetImportSourceFile());
    m_ColSource->HotSwapLib(Config::Instance()->GetSourceFile());
 }

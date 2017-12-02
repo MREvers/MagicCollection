@@ -159,6 +159,9 @@
     <ClCompile Include="StringInterface.cpp">
       <Filter>CollectorsBackEnd</Filter>
     </ClCompile>
+    <ClCompile Include="JSONImporterTwo.cpp">
+      <Filter>CollectorsBackEnd\Importer</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="JSONImporter.h">
@@ -283,6 +286,9 @@
     </ClInclude>
     <ClInclude Include="StringInterface.h">
       <Filter>CollectorsBackEnd</Filter>
+    </ClInclude>
+    <ClInclude Include="JSONImporterTwo.h">
+      <Filter>CollectorsBackEnd\Importer</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

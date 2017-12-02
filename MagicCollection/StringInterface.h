@@ -48,7 +48,7 @@ public:
          szResult += *iter;
          szResult += aszDelim;
       }
-      rszResult = szResult;//szResult.substr(0, szResult.size() - aszDelim.size());
+      rszResult = szResult.substr(0, szResult.size()-aszDelim.size());
       return true;
    }
 

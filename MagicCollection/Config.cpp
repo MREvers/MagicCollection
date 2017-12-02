@@ -150,6 +150,24 @@ std::string Config::GetHash(std::string& aszHashingString)
    return szResult;
 }
 
+std::vector<std::string> 
+Config::GetPairedKeys( const std::string& aszKey )
+{
+   std::vector<std::string> vecRetval;
+   for( auto& tag : m_lstPairedKeys )
+   {
+      if( tag.first == aszKey )
+      {
+         vecRetval.push_back(tag.second);
+      }
+      else if( tag.second == aszKey )
+      {
+         vecRetval.push_back(tag.first);
+      }
+   }
+   return vecRetval;
+}
+
 std::vector<std::pair<std::string, std::string>>& Config::GetPairedKeysList()
 {
    return m_lstPairedKeys;
@@ -190,25 +208,25 @@ std::string Config::GetHexID( unsigned long aulValue )
    return std::string( stream.str().substr(0, 3) );
 }
 
-bool Config::IsIdentifyingAttributes(std::string aszAttrs)
+bool Config::IsIdentifyingAttributes(const std::string& aszAttrs)
 {
    return ListHelper::List_Find(aszAttrs, m_lstIdentifyingAttributes) != -1;
 }
 
-bool Config::IsPairedKey(std::string aszKey)
+bool Config::IsPairedKey(const std::string& aszKey)
 {
    return   ListHelper::List_Find(aszKey, m_lstPairedKeys, m_fnKeyExtractor) != -1 ||
           ListHelper::List_Find(aszKey, m_lstPairedKeys, m_fnValueExtractor) != -1;
 }
 
-bool Config::IsValidKey(std::string aszKey)
+bool Config::IsValidKey(const std::string& aszKey)
 {
    // A valid key is either a static attr or identifying attr
    return ListHelper::List_Find(aszKey, m_lstStaticAttributes) != -1 ||
       ListHelper::List_Find(aszKey, m_lstIdentifyingAttributes) != -1;
 }
 
-bool Config::IsStaticAttribute(std::string aszAttr)
+bool Config::IsStaticAttribute(const std::string& aszAttr)
 {
    return ListHelper::List_Find(aszAttr, m_lstStaticAttributes) != -1;
 }

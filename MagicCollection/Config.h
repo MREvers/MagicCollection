@@ -43,6 +43,7 @@ public:
 
    std::string GetHash(std::string& aszHashingString);
 
+   std::vector<std::string> GetPairedKeys(const std::string& aszKey);
    std::vector<Tag>& GetPairedKeysList();
    std::vector<std::string>& GetIdentifyingAttributes();
    std::vector<std::string>& GetStaticAttributes();
@@ -51,10 +52,10 @@ public:
    const std::function<std::string(const Tag&)> GetTagHelper(TagHelperType aiMode = Key) const;
    std::string GetHexID( unsigned long aulValue );
 
-   bool IsPairedKey(std::string aszKey);
-   bool IsValidKey(std::string aszKey);
-   bool IsStaticAttribute(std::string aszAttrs);
-   bool IsIdentifyingAttributes(std::string aszAttrs);
+   bool IsPairedKey(const std::string& aszKey);
+   bool IsValidKey(const std::string& aszKey);
+   bool IsStaticAttribute(const std::string& aszAttrs);
+   bool IsIdentifyingAttributes(const std::string& aszAttrs);
 
    bool IsLoaded();
 
