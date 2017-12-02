@@ -7,6 +7,8 @@
 #include "rapidxml-1.13\rapidxml_utils.hpp"
 #include "json.hpp"
 
+#include "CollectionSource.h"
+
 // Converts the MTGJSON to XML.
 class JSONImporterTwo
 {
@@ -46,9 +48,11 @@ private:
                        std::basic_string<char, std::char_traits<char>, std::allocator<char>> szTwo ) const
       {
          std::string szOneLow = szOne;
+         szOneLow = StringHelper::convertToSearchString(szOneLow);
          transform(szOneLow.begin(), szOneLow.end(), szOneLow.begin(), ::tolower);
 
          std::string szTwoLow = szTwo;
+         szTwoLow = StringHelper::convertToSearchString(szTwoLow);
          transform(szTwoLow.begin(), szTwoLow.end(), szTwoLow.begin(), ::tolower);
 
          return szOneLow < szTwoLow;

@@ -348,16 +348,45 @@ CollectionSource::findInBuffer(std::string aszCardName, bool abCaseSensitive)
 {
    // Binary search chokes on all sorts of characters so Im just 
    // using linear search.
-   std::string szName;
-   int iLength = m_lstCardBuffer.size();
-   for (size_t i = 0; i < iLength; i++)
-   {
-      szName = m_lstCardBuffer.at(i).GetName(m_AllCharBuff);
-      if (szName == aszCardName)
-      {
-         return i;
-      }
-   }
+   std::string szCardNameFixed = convertToSearchString(aszCardName);
+	if (!abCaseSensitive)
+	{
+		std::transform( szCardNameFixed.begin(),
+                      szCardNameFixed.end(),
+                      szCardNameFixed.begin(), ::tolower );
+	}
+
+	int iSize = m_lstCardBuffer.size();
+	int iLeft = 0;
+	int iRight = iSize;
+	if (iRight < 1)
+	{
+		return -1;
+	}
+
+	std::string szName;
+	while (iLeft <= iRight)
+	{
+		int middle = (iLeft + iRight) / 2;
+
+		if (middle < 0 || middle >= iSize)
+		{
+			return -1;
+		}
+
+		szName = convertToSearchString(m_lstCardBuffer.at(middle).GetName(m_AllCharBuff));
+		if (!abCaseSensitive)
+		{
+			std::transform(szName.begin(), szName.end(), szName.begin(), ::tolower);
+		}
+
+		if (szName == szCardNameFixed)
+			return middle;
+		else if (szName < szCardNameFixed)
+			iLeft = middle + 1;
+		else
+			iRight = middle - 1;
+	}
    return -1;
 }
 

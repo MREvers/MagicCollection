@@ -194,3 +194,26 @@ StringHelper::Find_First_Instance_In( const std::string& aszString,
    }
    return std::string::npos;
 }
+
+std::string 
+StringHelper::convertToSearchString(const std::string& aszSearch)
+{
+   std::string szRetval = "";
+   for( size_t i = 0; i < aszSearch.size(); i++ )
+   {
+      if( isSearchCharacter(aszSearch[i]) )
+      {
+         szRetval += aszSearch[i];
+      }
+   }
+   return szRetval;
+}
+
+bool 
+StringHelper::isSearchCharacter(char c)
+{
+   return ('a' <= c && c <= 'z') || 
+          ('A' <= c && c <= 'Z') ||
+          ('0' <= c && c <= '9') || 
+          (' ' == c);
+}

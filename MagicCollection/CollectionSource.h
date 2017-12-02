@@ -80,6 +80,8 @@ private:
 private:
    static const unsigned int ms_iMaxBufferSize = 5000000;
 
+public:
    static std::string convertToSearchString(const std::string& aszSearch);
+private:   
    static bool isSearchCharacter(char c);
 };
