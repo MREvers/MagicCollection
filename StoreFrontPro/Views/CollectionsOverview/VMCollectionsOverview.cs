@@ -78,6 +78,7 @@ namespace StoreFrontPro.Views.CollectionsOverview
       {
          if (!string.IsNullOrEmpty(aszCollectionName))
          {
+            // TODO: This should call a function to check for/update before posting.
             CollectionPreview.Clear();
             Model.Item.Where(x => x.CollectionName == aszCollectionName)
                 .FirstOrDefault()

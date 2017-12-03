@@ -60,74 +60,100 @@ std::string StringHelper::Str_Clean(const std::string& src)
 
    return szRetVal;
 }
-
-std::vector<std::string> StringHelper::Str_Split(std::string& aszSplit, std::string aszDelim)
+ 
+std::vector<std::string> 
+StringHelper::Str_CmdLineParse( const std::string& srz )
 {
-   if (aszSplit.size() < aszDelim.size())
+   std::vector<std::string>  lstRetval;
+   int iFirstQuote = srz.find_first_of('\"');
+   if( iFirstQuote == -1 )
    {
-      std::vector<std::string> lstSZs;
-      lstSZs.push_back(aszSplit);
-      return lstSZs;
+      auto lstSplit = Str_Split( srz, " " );
+      for( auto parm : lstSplit )
+      {
+         lstRetval.push_back(parm);
+      }
    }
    else
    {
-      int iDelimSize = aszDelim.size();
-      int iSplitSize = aszSplit.size();
-      std::vector<std::string> lstSZs;
-      std::string szBefore = "";
-      std::string szFocus = "";
-
-      int i = 0;
-      while (i < iSplitSize)
+      std::string szThis = srz.substr(0, iFirstQuote);
+      if( iFirstQuote > 0 )
       {
-         if (szFocus.size() >= iDelimSize)
+         szThis = Str_Trim( szThis, ' ' );
+         auto lstSplit = Str_Split( szThis, " " );
+         for( auto parm : lstSplit )
          {
-            szBefore += szFocus[0];
-
-            for (int t = 0; t < iDelimSize - 1; t++)
+            if( parm.size() > 0 )
             {
-               szFocus[t] = szFocus[t + 1];
+               lstRetval.push_back(parm);
             }
-
-            szFocus[aszDelim.size() - 1] = aszSplit[i];
          }
-
-         if (szFocus.size() < iDelimSize)
-         {
-            szFocus += aszSplit[i];
-         }
-
-
-         if (szFocus == aszDelim)
-         {
-            lstSZs.push_back(szBefore);
-            szBefore = "";
-            szFocus = "";
-         }
-
-         // The Delimiter couldn't possibly be in the remaining chars because there aren't
-         // enough. So Add the remaining chars.
-         if (i + iDelimSize == iSplitSize)
-         {
-            szBefore += szFocus;
-
-            for (int t = 1; t < iDelimSize; t++)
-            {
-               szBefore += aszSplit[i + t];
-            }
-
-            lstSZs.push_back(szBefore);
-            break;
-         }
-
-         i++;
       }
 
-      return lstSZs;
+      if( iFirstQuote + 1 < srz.size() )
+      {
+         std::string szNext = srz.substr(iFirstQuote+1);
+         int iSecondQuote = szNext.find_first_of('\"');
+         if( iSecondQuote == -1 )
+         {
+            iSecondQuote = szNext.size() - 1;
+         }
+         lstRetval.push_back( szNext.substr(0, iSecondQuote) );
+
+         if( iSecondQuote != szNext.size() - 1 )
+         {
+            std::string szNextParse = szNext.substr(iSecondQuote+1);
+            auto lstNextParse = Str_CmdLineParse(szNextParse);
+            for( auto parm : lstNextParse )
+            {
+               lstRetval.push_back(parm);
+            }
+         }
+      }
    }
+
+   return lstRetval;
 }
 
-std::vector<std::string> StringHelper::SplitIntoLines(std::string aszString)
+std::vector<std::string> 
+StringHelper::Str_Split(const std::string& aszSplit, const std::string& aszDelim)
+{
+   std::vector<std::string> vecRetval;
+   if( aszDelim.size() == 0 ) 
+   { 
+      vecRetval.push_back(aszSplit);
+      return vecRetval;
+   }
+
+   std::string szSplit = aszSplit;
+   int iFindFirst = Find_First_Instance_In(szSplit, aszDelim);
+   if( iFindFirst == std::string::npos )
+   {
+      if( szSplit.size() > 0 )
+      {
+         vecRetval.push_back(szSplit);
+      }
+      return vecRetval;
+   }
+   else
+   {
+      if( iFindFirst > 0 )
+      {
+         vecRetval.push_back(szSplit.substr(0, iFindFirst));
+      }
+
+      auto vecRemaining = Str_Split(szSplit.substr(iFindFirst+aszDelim.size()), aszDelim);
+      for( auto& szNext : vecRemaining )
+      {
+         vecRetval.push_back(szNext);
+      }
+   }
+
+   return vecRetval;
+}
+
+std::vector<std::string> 
+StringHelper::SplitIntoLines(const std::string& aszString)
 {
    std::vector<std::string> lstLines;
    std::string szLine = "";
@@ -151,4 +177,43 @@ std::vector<std::string> StringHelper::SplitIntoLines(std::string aszString)
 
    }
    return lstLines;
+}
+
+int 
+StringHelper::Find_First_Instance_In( const std::string& aszString,
+                                      const std::string& aszFind )
+{
+   int i = 0;
+   while( i + aszFind.size() <= aszString.size() )
+   {
+      if( aszString.substr( i, aszFind.size() ) == aszFind )
+      {
+         return i;
+      }
+      i++;
+   }
+   return std::string::npos;
+}
+
+std::string 
+StringHelper::convertToSearchString(const std::string& aszSearch)
+{
+   std::string szRetval = "";
+   for( size_t i = 0; i < aszSearch.size(); i++ )
+   {
+      if( isSearchCharacter(aszSearch[i]) )
+      {
+         szRetval += aszSearch[i];
+      }
+   }
+   return szRetval;
+}
+
+bool 
+StringHelper::isSearchCharacter(char c)
+{
+   return ('a' <= c && c <= 'z') || 
+          ('A' <= c && c <= 'Z') ||
+          ('0' <= c && c <= '9') || 
+          (' ' == c);
 }

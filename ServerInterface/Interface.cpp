@@ -7,47 +7,64 @@ ServerClientInterface::ServerClientInterface()
 
 ServerClientInterface::~ServerClientInterface()
 {
-
+   delete m_StoreFrontBackEnd;
 }
 
-System::String^ ServerClientInterface::LoadCollection(System::String^ ahszCollectionFileName)
+String^ ServerClientInterface::LoadCollection(String^ ahszCollectionFileName)
 {
-	std::string szCollectionFileName = msclr::interop::marshal_as<std::string>(ahszCollectionFileName);
-	std::string szCollectionName = m_StoreFrontBackEnd->LoadCollection(szCollectionFileName);
+	string szCollectionFileName = msclr::interop::marshal_as<string>(ahszCollectionFileName);
+	string szCollectionName = m_StoreFrontBackEnd->LoadCollection(szCollectionFileName);
 	return gcnew System::String(szCollectionName.c_str());
 }
 
-System::String^ ServerClientInterface::CreateNewCollection(System::String^ aszCollectionName, System::String^ ahszParent)
+String^ ServerClientInterface::CreateNewCollection(String^ aszCollectionName, String^ ahszParent)
 {
-	std::string szCollectionFileName = msclr::interop::marshal_as<std::string>(aszCollectionName);
-	std::string szParentName = msclr::interop::marshal_as<std::string>(ahszParent);
-	return gcnew System::String(m_StoreFrontBackEnd->CreateNewCollection(szCollectionFileName, szParentName).c_str());
+	string szCollectionFileName = msclr::interop::marshal_as<string>(aszCollectionName);
+	string szParentName = msclr::interop::marshal_as<string>(ahszParent);
+	return gcnew String(m_StoreFrontBackEnd->CreateNewCollection(szCollectionFileName, szParentName).c_str());
 }
 
-void ServerClientInterface::SaveCollection(System::String^ aszCollectionName)
+void ServerClientInterface::SaveCollection(String^ aszCollectionName)
 {
-	std::string szCollectionName = msclr::interop::marshal_as<std::string>(aszCollectionName);
+	string szCollectionName = msclr::interop::marshal_as<string>(aszCollectionName);
 	m_StoreFrontBackEnd->SaveCollection(szCollectionName);
 }
 
-System::String^
+String^ ServerClientInterface::GetSourceFilePath()
+{
+   return gcnew String(m_StoreFrontBackEnd->GetSourceFilePath().c_str());
+}
+
+String^ ServerClientInterface::GetImportSourceFilePath()
+{
+   return gcnew String(m_StoreFrontBackEnd->GetImportSourceFilePath().c_str());
+}
+
+String^
 ServerClientInterface::GetImagesPath()
 {
-	return gcnew System::String(m_StoreFrontBackEnd->GetImagesPath().c_str());
+	return gcnew String(m_StoreFrontBackEnd->GetImagesPath().c_str());
 }
 
-System::String^ ServerClientInterface::GetCardPrototype(System::String^ ahszCardName)
+List<HTag^>^ 
+ServerClientInterface::GetPairedAttributes()
 {
-	std::string szCardName = msclr::interop::marshal_as<std::string>(ahszCardName);
-	return gcnew System::String(m_StoreFrontBackEnd->GetCardPrototype(szCardName).c_str());
+   return MarshalHelper::ConvertTagVecToLst(m_StoreFrontBackEnd->GetPairedAttributes());
 }
 
-System::Collections::Generic::List<System::String^>^ 
+String^ 
+ServerClientInterface::GetCardPrototype(String^ ahszCardName)
+{
+	string szCardName = msclr::interop::marshal_as<string>(ahszCardName);
+	return gcnew String(m_StoreFrontBackEnd->GetCardPrototype(szCardName).c_str());
+}
+
+List<String^>^
 ServerClientInterface::GetLoadedCollections()
 {
-	System::Collections::Generic::List<System::String^>^ hlstRetval = gcnew System::Collections::Generic::List<System::String^>();
-	std::vector<std::string> lstColList = m_StoreFrontBackEnd->GetLoadedCollections();
-	std::vector<std::string>::iterator iter_colCards = lstColList.begin();
+	List<String^>^ hlstRetval = gcnew List<String^>();
+	vector<string> lstColList = m_StoreFrontBackEnd->GetLoadedCollections();
+	vector<string>::iterator iter_colCards = lstColList.begin();
 	for (; iter_colCards != lstColList.end(); ++iter_colCards)
 	{
 		System::String^ hszCard = gcnew System::String(iter_colCards->c_str());
@@ -56,93 +73,99 @@ ServerClientInterface::GetLoadedCollections()
 	return hlstRetval;
 }
 
-System::Collections::Generic::List<System::String^>^ ServerClientInterface::GetAllCardsStartingWith(System::String^ ahszText)
+List<String^>^ 
+ServerClientInterface::GetAllCardsStartingWith(String^ ahszText)
 {
-	std::string szText = msclr::interop::marshal_as<std::string>(ahszText);
-	std::vector<std::string> lstCardList = m_StoreFrontBackEnd->GetAllCardsStartingWith(szText);
-	System::Collections::Generic::List<System::String^>^ hlstCardList = gcnew System::Collections::Generic::List<System::String^>();
+	string szText = msclr::interop::marshal_as<string>(ahszText);
+	vector<string> lstCardList = m_StoreFrontBackEnd->GetAllCardsStartingWith(szText);
+	List<String^>^ hlstCardList = gcnew List<String^>();
 	
-	std::vector<std::string>::iterator iter_Cards = lstCardList.begin();
+	vector<string>::iterator iter_Cards = lstCardList.begin();
 	for (; iter_Cards != lstCardList.end(); ++iter_Cards)
 	{
-		System::String^ hszCard = gcnew System::String(iter_Cards->c_str());
+		String^ hszCard = gcnew String(iter_Cards->c_str());
 		hlstCardList->Add(hszCard);
 	}
 	return hlstCardList;
 }
 
-System::Collections::Generic::List<System::String^>^
-ServerClientInterface::GetCollectionMetaData(System::String^ ahszCollectionName)
+List<String^>^
+ServerClientInterface::GetCollectionMetaData(String^ ahszCollectionName)
 {
-	std::string szCollectionName = msclr::interop::marshal_as<std::string>(ahszCollectionName);
-	std::vector<std::string> lstMeta = m_StoreFrontBackEnd->GetCollectionMetaData(szCollectionName);
-	return stringVectorToList(lstMeta);
+	string szCollectionName = msclr::interop::marshal_as<string>(ahszCollectionName);
+	vector<string> lstMeta = m_StoreFrontBackEnd->GetCollectionMetaData(szCollectionName);
+	return MarshalHelper::ConvertStrVecToLst(lstMeta);
 }
 
 // [ { card name - long, [ <tags> ] }, ... }
-System::Collections::Generic::List<System::String^>^
-ServerClientInterface::GetCollectionList(System::String^ ahszCollectionName, System::Boolean ahbCollapsed)
+List<String^>^
+ServerClientInterface::GetCollectionList(String^ ahszCollectionName, System::Int32 ahiVisibility)
 {
-	std::string szCollectionName = msclr::interop::marshal_as<std::string>(ahszCollectionName);
-	int iVisibility = 0xF;
-	bool bCollapsed = ahbCollapsed;
+	string szCollectionName = msclr::interop::marshal_as<string>(ahszCollectionName);
+	// int iVisibility = 0xF; // Everything
+   int iVisibility = ahiVisibility;
 
-	std::vector<std::string> lstCollection = m_StoreFrontBackEnd->GetCollectionList(szCollectionName, iVisibility, bCollapsed);
+	vector<string> lstCollection = m_StoreFrontBackEnd->GetCollectionList(szCollectionName, iVisibility);
 
-	System::Collections::Generic::List<System::String^>^ hlstCollection;
-	hlstCollection = stringVectorToList(lstCollection);
+	List<String^>^ hlstCollection;
+	hlstCollection = MarshalHelper::ConvertStrVecToLst(lstCollection);
 
 	return hlstCollection;
 }
 
-void ServerClientInterface::SubmitBulkChanges(System::String^ ahszCollectionName, System::Collections::Generic::List<System::String^>^ ahlstBulkChanges)
+void ServerClientInterface::SubmitBulkChanges(String^ ahszCollectionName, List<String^>^ ahlstBulkChanges)
 {
-	std::string szCollection = msclr::interop::marshal_as<std::string>(ahszCollectionName);
-	std::vector<std::string> lstChanges = stringListToVector(ahlstBulkChanges);
+	string szCollection = msclr::interop::marshal_as<string>(ahszCollectionName);
+	vector<string> lstChanges = MarshalHelper::RevertStrLstToVec(ahlstBulkChanges);
 	m_StoreFrontBackEnd->SubmitBulkChanges(szCollection, lstChanges);
 }
 
-void ServerClientInterface::ImportCollection()
+void 
+ServerClientInterface::SetAttribute( String^ ahszCardName, String^ ahszUID, String^ ahszKey, String^ ahszVal )
 {
-	m_StoreFrontBackEnd->ImportCollection();
+   string szCardName = msclr::interop::marshal_as<string>(ahszCardName);
+   string szUID = msclr::interop::marshal_as<string>(ahszUID);
+   string szKey = msclr::interop::marshal_as<string>(ahszKey);
+   string szVal = msclr::interop::marshal_as<string>(ahszVal);
+
+   m_StoreFrontBackEnd->SetAttribute(szCardName, szUID, szKey, szVal);
 }
 
-System::Collections::Generic::List<System::String^>^ 
-ServerClientInterface::stringVectorToList(std::vector<std::string> alstTrans)
+List<HTag^> ^
+ServerClientInterface::GetMetaTags( String^ ahszCardName, String^ ahszUID )
 {
-	System::Collections::Generic::List<System::String^>^ hlstRetVal = gcnew System::Collections::Generic::List<System::String^>();
-	std::vector<std::string>::iterator iter_stringList = alstTrans.begin();
-	for (; iter_stringList != alstTrans.end(); ++iter_stringList)
-	{
-		hlstRetVal->Add(gcnew System::String(iter_stringList->c_str()));
-	}
-	return hlstRetVal;
+   string szCardName = msclr::interop::marshal_as<string>(ahszCardName);
+   string szUID = msclr::interop::marshal_as<string>(ahszUID);
+
+   return MarshalHelper::ConvertTagVecToLst(m_StoreFrontBackEnd->GetMetaTags(szCardName, szUID));
 }
 
-std::vector<Tag> ServerClientInterface::tupleListToVector(
-	System::Collections::Generic::List<System::Tuple<System::String^, System::String^>^>^ hlstMetaTags)
+List<HTag^>^ 
+ServerClientInterface::GetIdentifyingAttributes( String^ ahszCardName, String^ ahszUID )
 {
-	std::vector<Tag> lstMetaTagPairs;
-	for (int i = 0; i < hlstMetaTags->Count; i++)
-	{
-		std::pair<std::string, std::string> pair;
-		std::string szFirst = msclr::interop::marshal_as<std::string>(hlstMetaTags[i]->Item1);
-		std::string szSecond = msclr::interop::marshal_as<std::string>(hlstMetaTags[i]->Item2);
-		pair.first = szFirst;
-		pair.second = szSecond;
-		lstMetaTagPairs.push_back(pair);
-	}
-	return lstMetaTagPairs;
+   string szCardName = msclr::interop::marshal_as<string>(ahszCardName);
+   string szUID = msclr::interop::marshal_as<string>(ahszUID);
+
+   return MarshalHelper::ConvertTagVecToLst(m_StoreFrontBackEnd->GetIdentifyingAttributes(szCardName, szUID));
 }
 
-std::vector<std::string>
-ServerClientInterface::stringListToVector(System::Collections::Generic::List<System::String^>^ hlstChanges)
+String^ 
+ServerClientInterface::GetCardString( String^ ahszCardName, String^ ahszUID )
 {
-   std::vector<std::string> lstStrings;
-   for (int i = 0; i < hlstChanges->Count; i++)
-   {
-      std::string szFirst = msclr::interop::marshal_as<std::string>(hlstChanges[i]);
-      lstStrings.push_back(szFirst);
-   }
-   return lstStrings;
+   string szCardName = msclr::interop::marshal_as<string>(ahszCardName);
+   string szUID = msclr::interop::marshal_as<string>(ahszUID);
+   String^ hszCard = gcnew String(m_StoreFrontBackEnd->GetCardString(szCardName, szUID).c_str());
+   return hszCard;
+}
+
+void
+ServerClientInterface::ImportCollection()
+{
+	m_StoreFrontBackEnd->ImportCollectionSource();
+}
+
+System::Boolean 
+ServerClientInterface::IsConfigLoaded()
+{
+   return m_StoreFrontBackEnd->ConfigIsLoaded();
 }

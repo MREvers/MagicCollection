@@ -14,10 +14,13 @@ namespace StoreFrontPro.Views.Interfaces.CollectionChanger
 {
    class VMCollectionEditor : ViewModel<CollectionModel>, IViewComponent, IVCISupporter
    {
-      private const string cszAddSearchBox = "ASB";
-      private const string cszRemoveSearchBox = "RSB";
-      private const string cszCollectionEditorItem = "CEI";
+      #region Interface Names
+      public const string AddSearchBox = "ASB";
+      public const string RemoveSearchBox = "RSB";
+      public const string CollectionEditorItem = "CEI";
+      #endregion
 
+      #region Data Binding
       public ObservableCollection<VCollectionEditorItem> TextChangesList { get; set; } =
          new ObservableCollection<VCollectionEditorItem>();
 
@@ -26,7 +29,9 @@ namespace StoreFrontPro.Views.Interfaces.CollectionChanger
 
       public RelayCommand AcceptCommand { get; set; }
       public RelayCommand CancelCommand { get; set; }
+      #endregion
 
+      #region Properties
       private List<MCollectionEditorItem> m_lstItems { get; set; }
 
       public string AddCardText
@@ -38,9 +43,13 @@ namespace StoreFrontPro.Views.Interfaces.CollectionChanger
       {
          get { return (RemoveCardSearchBox.DataContext as VMSuggestionsSearchBox).TextBoxValue; }
       }
+      #endregion
 
+      #region Events
       public event DisplayEventHandler DisplayEvent;
+      #endregion
 
+      #region Public Functions
       public VMCollectionEditor(CollectionModel Model, string RoutingName) : base(Model, RoutingName)
       {
          AcceptCommand = new RelayCommand(eAcceptCommand);
@@ -50,37 +59,46 @@ namespace StoreFrontPro.Views.Interfaces.CollectionChanger
          ViewClass VCAdd = ViewFactory.CreateSuggestionSearchBox(
             SearchCollection: ServerInterface.Server.GetAllCardsStartingWith,
             ActionName: "Add Card",
-            RoutingName: cszAddSearchBox);
+            RoutingName: AddSearchBox);
          VCAdd.HookDisplayEvent(DisplayEventHandler);
          AddCardSearchBox = VCAdd.View as VSuggestionsSearchBox;
 
          ViewClass VCRemove = ViewFactory.CreateSuggestionSearchBox(
             SearchCollection: Model.SearchCollection,
             ActionName: "Remove/Replace Card",
-            RoutingName: cszRemoveSearchBox);
+            RoutingName: RemoveSearchBox);
          VCRemove.HookDisplayEvent(DisplayEventHandler);
          RemoveCardSearchBox = VCRemove.View as VSuggestionsSearchBox;
       }
+      #endregion
 
       #region Private Methods
       private void addEditorItem(CollectionDelta aCDelta)
       {
-         ViewClass VC = ViewFactory.CreateCollectionEditorItem(aCDelta, cszCollectionEditorItem);
+         ViewClass VC = ViewFactory.CreateCollectionEditorItem(aCDelta, CollectionEditorItem);
          m_lstItems.Add((MCollectionEditorItem)VC.Model);
          TextChangesList.Add((VCollectionEditorItem)VC.View);
       }
 
       private List<string> getFunctionList()
       {
-         foreach (MCollectionEditorItem item in m_lstItems)
+         return m_lstItems.Select(x => itemToCommand(x)).ToList();
+      }
+
+      private string itemToCommand(MCollectionEditorItem amcei)
+      {
+         string szCommandChar = amcei.FunctionText.Substring(0, 1);
+         string szCount = " x" + amcei.Amount;
+         string szId =  amcei.FunctionText.Substring(1);
+
+         // if the item is an addition, include the set.
+         // The set selection occurs after the card is decided, so this must be added here.
+         if( szCommandChar == "+" || szCommandChar == "%")
          {
-            item.FunctionText = item.FunctionText + " { set=\"" + item.SelectedSet + "\" } ";
+            szId += " { set=\"" + amcei.SelectedSet + "\" }";
          }
 
-         List<string> lstOutput = m_lstItems
-             .Select(x => x.FunctionText.Substring(0, 1) + " x" + x.Amount + x.FunctionText.Substring(1))
-             .ToList();
-         return lstOutput;
+         return szCommandChar + szCount + szId;
       }
 
       private List<string> getIdentifierOptions(string szCard)
@@ -108,28 +126,34 @@ namespace StoreFrontPro.Views.Interfaces.CollectionChanger
       #region Event Handlers
       private void eSearchOKEventHandler(string aszSourceName)
       {
-         if (aszSourceName == cszAddSearchBox)
+         if (aszSourceName == AddSearchBox)
          {
-            eAddCardEventHandler(null, null);
+            eAddCardEventHandler();
          }
          else
          {
-            eRemoveCardEventHandler(null, null);
+            eRemoveCardEventHandler();
          }
       }
 
-      private void eRemoveCardEventHandler(object Source, DisplayEventArgs Event)
+      private void eRemoveCardEventHandler()
       {
          CollectionDelta delta = Model.GetDeltaCommand(AddCard: AddCardText, RemoveIdealIdentifier: RemoveCardText);
-         addEditorItem(delta);
          clearSearchBoxes();
+         if (delta != null)
+         {
+            addEditorItem(delta);
+         }
       }
 
-      private void eAddCardEventHandler(object Source, DisplayEventArgs Event)
+      private void eAddCardEventHandler()
       {
-         CollectionDelta delta = Model.GetDeltaCommand(AddCard: AddCardText, RemoveIdealIdentifier: RemoveCardText);
-         addEditorItem(delta);
+         CollectionDelta delta = Model.GetDeltaCommand(AddCard: AddCardText, RemoveIdealIdentifier: "");
          clearSearchBoxes();
+         if (delta != null)
+         {
+            addEditorItem(delta);
+         }
       }
 
       private void eAcceptCommand(object canExecute)
@@ -180,7 +204,7 @@ namespace StoreFrontPro.Views.Interfaces.CollectionChanger
 
          VCISuggestionsSearchBox VCAddIS = new VCISuggestionsSearchBox(
             OK: (x) => { return (x as VMCollectionEditor).eSearchOKEventHandler; });
-         
+
          _IRouter.AddInterface(VCAddIS);
       }
       #endregion

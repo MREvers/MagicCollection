@@ -25,15 +25,14 @@ ReplaceAction::Execute(TransactionManager* aoCol)
    TryGet<CollectionItem> refItemTwo = refSource->GetCardPrototype(m_szNewName);
    if (!refItemTwo.Good()) { return false; }
 
-   std::shared_ptr<CopyItem> refCItem;
-   refCItem = refItem->FindCopyItem( m_szIdentifyingHash, 
-                                     refCollection->GetIdentifier() );
-   if (refCItem == nullptr) { return false; }
+   auto refcitem = refItem->FindCopy( m_szUID );
+   if (!refcitem.Good()) { return false; }
 
-   m_lstUndoMetaChanges = refCItem->GetMetaTags(MetaTagType::Any);
-   m_lstUndoIdChanges = refCItem->GetIdentifyingAttributes();
+   auto copy = refcitem->get();
+   m_lstUndoMetaChanges = copy->GetMetaTags(Any);
+   m_lstUndoIdChanges = copy->GetIdentifyingAttributes();
 
-   aoCol->Replace( m_szName, m_szIdentifyingHash, m_szNewName, 
+   aoCol->Replace( m_szName, m_szUID, m_szNewName, 
                    m_lstIdChanges, m_lstMetaChanges );
    return true;
 }
@@ -61,9 +60,9 @@ ReplaceAction::SetName(std::string aszName)
 }
 
 void
-ReplaceAction::SetHash(std::string aszHash)
+ReplaceAction::SetUID(std::string aszHash)
 {
-   m_szIdentifyingHash = aszHash;
+   m_szUID = aszHash;
 }
 
 void
@@ -94,12 +93,12 @@ ReplaceAction::getUndoAction(TransactionManager* aoCol) const
    if (!refItem.Good()) { return false; }
    
    std::string szHashRM;  
-   szHashRM = refItem->GetHash( refCollection->GetIdentifier(),
+   szHashRM = refItem->GenerateHash( refCollection->GetIdentifier(),
                                 m_lstIdChanges, m_lstMetaChanges );
 
    ReplaceAction* rpAction = new ReplaceAction();
    rpAction->SetName(m_szNewName);
-   rpAction->SetHash(szHashRM);
+   rpAction->SetUID(szHashRM);
    rpAction->SetIDs(m_lstUndoIdChanges);
    rpAction->SetMeta(m_lstUndoMetaChanges);
    rpAction->SetNewCard(m_szName);

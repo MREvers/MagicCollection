@@ -11,25 +11,40 @@ public:
    void SetName(std::string aszName);
    std::string GetName();
 
-   void SetFileName(std::string aszFileName);
+   void SetFileName( std::string aszFileName, 
+                     bool abDefaultLocation = false );
    std::string GetFileName();
 
-   void SetTimeStamp(unsigned long aulTimeStamp);
+   void SetFile(std::string aszFile);
+   std::string GetFile();
+
+   void SetTimeStamp(unsigned long aulTimeStamp = 0);
    unsigned long GetTimeStamp();
 
    void SetChildrenCount(unsigned int auiChildCount);
    unsigned int GetChildrenCount();
    void IncrementChildCount();
 
-   void SetAddress(const Address& aAddress);
+   void SetInitialized(bool abInits);
+   bool IsInitialized();
+
+   void SetProcessLines(const std::vector<std::string>& alstProcesslines);
+   std::vector<std::string> GetProcessLines();
+
+   void SetAddress(const Location& aAddress);
    void AssignAddress(std::string aszStringAddress);
-   Address* GetAddress();
+   Location* GetAddress();
 
 private:
+   bool m_bInitialized;
    std::string m_szName;
+   std::string m_szFile;
    std::string m_szFileName;
    unsigned long m_ulTimeStamp;
    unsigned int m_iChildrenCount;
-   Address* m_ptrAddress;
+   std::vector<std::string> m_vecProcessLines;
+
+   // The address of a collection is always a location. ie. only has 1 subaddr.
+   Location* m_ptrAddress;
 };
 

@@ -4,7 +4,7 @@
 RemoveAction::RemoveAction()
 {
    m_szName = "";
-   m_szIdentifyingHash = "";
+   m_szUID = "";
 }
 
 
@@ -20,14 +20,14 @@ RemoveAction::Execute(TransactionManager* aoCol)
    TryGet<CollectionItem> refItem = refSource->GetCardPrototype(m_szName);
    if (!refItem.Good()) { return false; }
 
-   std::shared_ptr<CopyItem> refCItem;
-   refCItem = refItem->FindCopyItem(m_szIdentifyingHash, m_AddrResidentIn);
-   if (refCItem == nullptr) { return false; }
-
-   m_lstMetaOfRMItem = refCItem->GetMetaTags(MetaTagType::Any);
-   m_lstTagsOfRMItem = refCItem->GetIdentifyingAttributes();
-
-   aoCol->Remove(m_szName, m_szIdentifyingHash, m_AddrResidentIn);
+   auto refCItem = refItem->FindCopy(m_szUID);
+   if (!refCItem.Good()) { return false; }
+   
+   auto copy = refCItem.Value()->get();
+   m_lstMetaOfRMItem = copy->GetMetaTags(MetaTagType::Any);
+   m_lstTagsOfRMItem = copy->GetIdentifyingAttributes();
+   
+   aoCol->Remove(m_szName, m_szUID);
    return true;
 }
 
@@ -53,7 +53,6 @@ RemoveAction::getUndoAction(TransactionManager* aoCol) const
    return std::shared_ptr<Action>(adRetVal);
 }
 
-// It is the responsibility of the caller to delete this.
 std::shared_ptr<Action>
 RemoveAction::GetCopy() const
 {
@@ -61,20 +60,15 @@ RemoveAction::GetCopy() const
    return std::shared_ptr<Action>(ptCopy);
 }
 
+
 void 
-RemoveAction::SetName(std::string aszName)
+RemoveAction::SetName(const std::string& aszName)
 {
    m_szName = aszName;
 }
 
 void 
-RemoveAction::SetHash(std::string aszIDHash)
+RemoveAction::SetUID(const std::string& aszUID)
 {
-   m_szIdentifyingHash = aszIDHash;
-}
-
-void 
-RemoveAction::SetResi(const Address& aAddress)
-{
-   m_AddrResidentIn = aAddress;
+   m_szUID = aszUID;
 }

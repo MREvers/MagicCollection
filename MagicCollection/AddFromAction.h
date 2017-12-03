@@ -21,9 +21,9 @@ public:
 private:
    std::string m_szName;
    std::string m_szIdentifyingHash;
-   Address m_FromAddress;
+   Location m_FromAddress;
 
-   Address m_ToAddress;
+   //Location m_ToAddress;
 
    std::shared_ptr<Action> getUndoAction(TransactionManager* aoCol) const override;
 };

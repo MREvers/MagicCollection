@@ -1,0 +1,17 @@
+﻿<UserControl x:Class="StoreFrontPro.Views.Interfaces.CardInterface.VAttributeEditorItem"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:StoreFrontPro.Views.Interfaces.CardInterface"
+             mc:Ignorable="d" 
+             d:DesignHeight="24" d:DesignWidth="300">
+    <Grid>
+      <Grid.ColumnDefinitions>
+         <ColumnDefinition Width="2*"/>
+         <ColumnDefinition/>
+      </Grid.ColumnDefinitions>
+      <TextBox Grid.Column="0"  HorizontalAlignment="Stretch" IsReadOnly="True" Text="{Binding AttributeName}"/>
+      <ComboBox Grid.Column="1"  ItemsSource="{Binding PossibleValues}" Text="{Binding Path=Set, Mode=TwoWay}"/>
+   </Grid>
+</UserControl>

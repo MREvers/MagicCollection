@@ -12,7 +12,7 @@ using System.Windows.Media;
 
 namespace StoreFrontPro.Views.CollectionViews.Deckbox
 {
-   class VMFancyCollectionItem : ViewModel<CardModel>
+   class VMFancyCollectionItem : ViewModel<CardModel>, IViewComponent
    {
       public List<string> LST_TEMP_IMPORTANT_ATTRS = new List<string>()
         {
@@ -22,11 +22,16 @@ namespace StoreFrontPro.Views.CollectionViews.Deckbox
 
       public int Columns { get; set; } = 3;
 
-      public ObservableCollection<UIElement> DisplayedProperties { get; set; } = new ObservableCollection<UIElement>();
+      public RelayCommand MouseOver { get; set; }
+      public ObservableCollection<UIElement> DisplayedProperties { get; set; } =
+         new ObservableCollection<UIElement>();
 
-      public VMFancyCollectionItem(CardModel Model, string RoutingName, int Columns = 3) : base(Model, RoutingName)
+      public VMFancyCollectionItem(CardModel Model, string RoutingName, int Columns = 3) 
+         : base(Model, RoutingName)
       {
          this.Columns = Columns;
+         MouseOver = new RelayCommand(eClicked);
+         Model.Register(this);
          SyncWithModel();
       }
 
@@ -37,7 +42,7 @@ namespace StoreFrontPro.Views.CollectionViews.Deckbox
          if (Columns != 1)
          {
             DisplayedProperties.Add(new TextBox() { Text = "x" + Model.Count, IsReadOnly = true });
-            DisplayedProperties.Add(new TextBox() { Text = Model.CardName, IsReadOnly = true });
+            DisplayedProperties.Add(new TextBox() { Text = Model.DisplayName, IsReadOnly = true });
             foreach (string szKey in LST_TEMP_IMPORTANT_ATTRS)
             {
                if (szKey == "manaCost")
@@ -55,14 +60,29 @@ namespace StoreFrontPro.Views.CollectionViews.Deckbox
          }
          else
          {
-            DisplayedProperties.Add(new TextBox() { Text = Model.CardName, IsReadOnly = true });
+            DisplayedProperties.Add(new TextBox() { Text = Model.DisplayName, IsReadOnly = true });
          }
       }
+
+      private void eClicked(object canExecute)
+      {
+         DisplayEventArgs eventArgs = new DisplayEventArgs(VCIFancyCollectionItem.Clicked, Model);
+         DisplayEvent?.Invoke(this, eventArgs);
+      }
+
+      #region IViewComponent
+      public event DisplayEventHandler DisplayEvent;
+
+      public List<StoreFrontMenuItem> GetMenuItems()
+      {
+         throw new NotImplementedException();
+      }
+      #endregion
 
       #region IViewModel
       public override void ModelUpdated()
       {
-         throw new NotImplementedException();
+         SyncWithModel();
       }
       #endregion
    }

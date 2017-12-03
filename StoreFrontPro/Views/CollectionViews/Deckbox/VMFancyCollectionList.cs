@@ -1,4 +1,5 @@
 ﻿using StoreFrontPro.Server;
+using StoreFrontPro.Support.SortingList;
 using StoreFrontPro.Tools;
 using System;
 using System.Collections.Generic;
@@ -11,12 +12,13 @@ using System.Windows;
 
 namespace StoreFrontPro.Views.CollectionViews.Deckbox
 {
-   class VMFancyCollectionList : ViewModel<BasicModel<List<CardModel>>>
+   class VMFancyCollectionList : ViewModel<BasicModel<List<CardModel>>>, IViewComponent, IVCISupporter
    {
       public ObservableCollection<VFancyCollectionItem> Cards { get; set; } = 
          new ObservableCollection<VFancyCollectionItem>();
 
       private bool _CollapsedView = false;
+
       private bool CollapsedView
       {
          get
@@ -26,7 +28,8 @@ namespace StoreFrontPro.Views.CollectionViews.Deckbox
       }
 
       public VMFancyCollectionList(BasicModel<List<CardModel>> Model, string RoutingName,
-                                   bool CollapsedView = false) : base(Model, RoutingName)
+                                   bool CollapsedView = false)
+         : base(Model, RoutingName)
       {
          _CollapsedView = CollapsedView;
          SyncWithModel();
@@ -47,90 +50,106 @@ namespace StoreFrontPro.Views.CollectionViews.Deckbox
             return;
          }
 
-         Cards.Clear();
+         clearCards();
          List<CardModel> lstCMs = Model.Item.ToList();
          Dictionary<string, List<CardModel>> mapCardTypeGroup = new Dictionary<string, List<CardModel>>();
 
-         VFancyCollectionItem fancyCollectionItemV;
-         VMFancyCollectionItem fancyCollectionItemVM;
+         SortingList grouping = new SortingList(Model);
+         grouping.SortOn("types", "Creature", "Land");
+         grouping.SortOn("cmc");
+         grouping.SortOnFeature = true;
 
-         foreach (CardModel cm in Model.Item)
+         foreach( var group in grouping.GetGroups() )
          {
-            string szTypeGroup = cm.GetAttr("types");
-            szTypeGroup = szTypeGroup.Contains("Creature") ? "Creature" : szTypeGroup;
-            if (!mapCardTypeGroup.ContainsKey(szTypeGroup))
+            if( group.GroupList.Count() == 0 ) { continue; }
+
+            CardModel modelGroupHeader = new CardModel(group.Grouping, "");
+            ViewClass listItem = ViewFactory.CreateFancyCollectionItem(modelGroupHeader, 1, "");
+            Cards.Add((VFancyCollectionItem)listItem.View);
+
+            foreach( var model in group.GroupList )
             {
-               mapCardTypeGroup.Add(szTypeGroup, new List<CardModel>() { cm });
-            }
-            else
-            {
-               mapCardTypeGroup[szTypeGroup].Add(cm);
+               addCard(model);
             }
          }
 
-         // Land, Creature, Non Creature.
-         if (mapCardTypeGroup.ContainsKey("Land"))
+         eListChanged();
+      }
+
+      private void addCard(CardModel model)
+      {
+         ViewClass listItem = ViewFactory.CreateFancyCollectionItem(model, 3, "");
+         ((VMFancyCollectionItem)listItem.ViewModel).DisplayEvent += DisplayEventHandler;
+         Cards.Add((VFancyCollectionItem)listItem.View);
+      }
+
+      private void clearCards()
+      {
+         foreach( var display in Cards )
          {
-            fancyCollectionItemV = new VFancyCollectionItem();
-            fancyCollectionItemVM = new VMFancyCollectionItem(new CardModel("Land", ""), "", 1);
-            fancyCollectionItemV.DataContext = fancyCollectionItemVM;
-            Cards.Add(fancyCollectionItemV);
-
-            foreach (CardModel cm in mapCardTypeGroup["Land"])
-            {
-               fancyCollectionItemV = new VFancyCollectionItem();
-               fancyCollectionItemVM = new VMFancyCollectionItem(cm, "");
-               fancyCollectionItemV.DataContext = fancyCollectionItemVM;
-               Cards.Add(fancyCollectionItemV);
-            }
-
-            mapCardTypeGroup.Remove("Land");
+             ((VMFancyCollectionItem)display.DataContext).DisplayEvent -= DisplayEventHandler;
          }
 
-         if (mapCardTypeGroup.ContainsKey("Creature"))
-         {
-            fancyCollectionItemV = new VFancyCollectionItem();
-            fancyCollectionItemVM = new VMFancyCollectionItem(new CardModel("Creature", ""), "", 1);
-            fancyCollectionItemV.DataContext = fancyCollectionItemVM;
-            Cards.Add(fancyCollectionItemV);
+         Cards.Clear();
+      }
 
-            foreach (CardModel cm in mapCardTypeGroup["Creature"])
-            {
-               fancyCollectionItemV = new VFancyCollectionItem();
-               fancyCollectionItemVM = new VMFancyCollectionItem(cm, "");
-               fancyCollectionItemV.DataContext = fancyCollectionItemVM;
-               Cards.Add(fancyCollectionItemV);
-            }
+      private void eChildClicked(CardModel model)
+      {
+         DisplayEventArgs eventArgs = new DisplayEventArgs(VCIFancyCollectionList.ChildClicked, model);
+         DisplayEvent?.Invoke(this, eventArgs);
+      }
 
-            mapCardTypeGroup.Remove("Creature");
-         }
-
-         if (mapCardTypeGroup.Keys.Count > 0)
-         {
-            fancyCollectionItemV = new VFancyCollectionItem();
-            fancyCollectionItemVM = new VMFancyCollectionItem(new CardModel("Other", ""), "", 1);
-            fancyCollectionItemV.DataContext = fancyCollectionItemVM;
-            Cards.Add(fancyCollectionItemV);
-
-            foreach (string szKey in mapCardTypeGroup.Keys)
-            {
-               foreach (CardModel cm in mapCardTypeGroup[szKey])
-               {
-                  fancyCollectionItemV = new VFancyCollectionItem();
-                  fancyCollectionItemVM = new VMFancyCollectionItem(cm, "");
-                  fancyCollectionItemV.DataContext = fancyCollectionItemVM;
-                  Cards.Add(fancyCollectionItemV);
-               }
-            }
-         }
-
-         DiagnosticTools.Stop("View Deckbox");
+      private void eListChanged()
+      {
+         DisplayEventArgs eventArgs = new DisplayEventArgs(VCIFancyCollectionList.ListChanged);
+         DisplayEvent?.Invoke(this, eventArgs);
       }
 
       #region IViewModel
       public override void ModelUpdated()
       {
          SyncWithModel();
+      }
+      #endregion
+
+      #region IVCISupporter
+      public void DisplayEventHandler(object source, DisplayEventArgs e)
+      {
+         GetRouter().Call(source.GetType(), this, e.Key, e.Args);
+      }
+
+      public InterfaceRouter GetRouter()
+      {
+         return IRouter;
+      }
+
+      static InterfaceRouter _IRouter = null;
+      static InterfaceRouter IRouter
+      {
+         get
+         {
+            if (_IRouter == null) { BuildInterface(); }
+            return _IRouter;
+         }
+      }
+
+      static void BuildInterface()
+      {
+         _IRouter = new InterfaceRouter();
+
+         VCIFancyCollectionItem RTIS = new VCIFancyCollectionItem(
+             Clicked: (x) => { return (x as VMFancyCollectionList).eChildClicked; });
+         _IRouter.AddInterface(RTIS);
+      }
+      #endregion
+
+      #region IViewComponent
+      public event DisplayEventHandler DisplayEvent;
+
+      
+      public List<StoreFrontMenuItem> GetMenuItems()
+      {
+         throw new NotImplementedException();
       }
       #endregion
    }

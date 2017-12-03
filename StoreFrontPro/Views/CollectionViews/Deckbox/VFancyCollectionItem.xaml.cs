@@ -61,5 +61,10 @@ namespace StoreFrontPro.Views.CollectionViews.Deckbox
                 MainGrid.ColumnDefinitions[0].Width = new GridLength(24);
             }
         }
-    }
+
+      private void MainGrid_MouseDown(object sender, MouseButtonEventArgs e)
+      {
+         (DataContext as VMFancyCollectionItem).MouseOver.Execute(null);
+      }
+   }
 }

@@ -1,5 +1,6 @@
 #include "Config.h"
 
+#include <sstream>
 /*
 const char * const CollectionObject::LstUniqueTraits[] = { "manaCost", "colors", "name", "power",
 "toughness", "loyalty", "text" };
@@ -8,14 +9,20 @@ const char * const CollectionObject::LstNonUniqueTraits[] = { "set", "multiverse
 */
 
 Config* Config::ms_pConfig = nullptr;
+Config* Config::ms_pTestConfig = nullptr;
 char* Config::MetaFileExtension = "meta";
 char* Config::HistoryFileExtension = "history";
+char* Config::OverheadFileExtension = "data";
+char* Config::TrackingTagId = "__";
+char* Config::IgnoredTagId = "_";
 char* Config::HashKey = "__hash";
 char* Config::NotFoundString = "NF";
 char* Config::CollectionDefinitionKey = ":";
+bool Config::ms_bTestMode = false;
 
 Config::Config()
 {
+   m_bIsFileConfig = false;
    m_fnKeyExtractor = [](Tag atag)->std::string { return atag.first; };
    m_fnValueExtractor = [](Tag atag)->std::string { return atag.second; };
 
@@ -27,6 +34,7 @@ Config::Config()
    else
    {
       initConfigSettings(file);
+      m_bIsFileConfig = true;
    }
 }
 
@@ -37,8 +45,13 @@ Config::~Config()
 
 std::string Config::GetSourceFile()
 {
-   std::cout << ".\\Config\\" + m_szSourceFolder + "\\" + m_szSourceFile << std::endl;
    return ".\\Config\\" + m_szSourceFolder + "\\" + m_szSourceFile;
+}
+
+std::string 
+Config::GetSourceFolder()
+{
+   return ".\\Config\\" + m_szSourceFolder;
 }
 
 std::string Config::GetImportSourceFile()
@@ -46,7 +59,14 @@ std::string Config::GetImportSourceFile()
    return ".\\Config\\" + m_szSourceFolder + "\\" + m_szImportSource;
 }
 
-std::string Config::GetHistoryFolderName()
+std::string 
+Config::GetOverheadFolerName()
+{
+   return m_szOverheadFolder;
+}
+
+std::string 
+Config::GetHistoryFolderName()
 {
    return m_szHistoryFolder;
 }
@@ -71,25 +91,50 @@ std::string Config::GetCollectionsFolderName()
    return m_szCollectionsFolder;
 }
 
-std::string Config::GetKeyCode(std::string aszFullKey)
+// Returns a numerical key code
+// -1 if not found.
+char
+Config::GetKeyCode(std::string aszFullKey)
 {
-   std::vector<std::pair<std::string, std::string>>::iterator iter_KeyMappings = m_lstKeyCodeMappings.begin();
+   static std::map<std::string, char> mapFastKey;
+   auto mapKey =  mapFastKey.find( aszFullKey );
+   if( mapKey != mapFastKey.end() )
+   {
+      return mapKey->second;
+   }
+
+   auto iter_KeyMappings = m_lstKeyCodeMappings.begin();
    for (; iter_KeyMappings != m_lstKeyCodeMappings.end(); ++iter_KeyMappings)
    {
       if (iter_KeyMappings->first == aszFullKey)
       {
-         return iter_KeyMappings->second;
+         char cCode = 0;
+         size_t cNumChars;
+         cCode = std::stoi(iter_KeyMappings->second, &cNumChars);
+         if( cNumChars > 0 )
+         {
+            mapFastKey.insert(std::make_pair(aszFullKey, cCode));
+            return cCode;
+         }
+         else
+         {
+            return -1;
+         }
       }
    }
 
-   return "";
+   return -1;
 }
-std::string Config::GetFullKey(std::string aszKeyCode)
+
+std::string 
+Config::GetFullKey(char aiKeyCode)
 {
-   std::vector<std::pair<std::string, std::string>>::iterator iter_KeyMappings = m_lstKeyCodeMappings.begin();
+   auto iter_KeyMappings = m_lstKeyCodeMappings.begin();
    for (; iter_KeyMappings != m_lstKeyCodeMappings.end(); ++iter_KeyMappings)
    {
-      if (iter_KeyMappings->second == aszKeyCode)
+      size_t iNumChars;
+      char cCode = std::stoi(iter_KeyMappings->second, &iNumChars);
+      if( (iNumChars > 0) && (cCode == aiKeyCode) )
       {
          return iter_KeyMappings->first;
       }
@@ -104,6 +149,24 @@ std::string Config::GetHash(std::string& aszHashingString)
    std::string szResult = md5Hasher->hexdigest();
    delete md5Hasher;
    return szResult;
+}
+
+std::vector<std::string> 
+Config::GetPairedKeys( const std::string& aszKey )
+{
+   std::vector<std::string> vecRetval;
+   for( auto& tag : m_lstPairedKeys )
+   {
+      if( tag.first == aszKey )
+      {
+         vecRetval.push_back(tag.second);
+      }
+      else if( tag.second == aszKey )
+      {
+         vecRetval.push_back(tag.first);
+      }
+   }
+   return vecRetval;
 }
 
 std::vector<std::pair<std::string, std::string>>& Config::GetPairedKeysList()
@@ -124,7 +187,7 @@ std::vector<std::string>& Config::GetPerCollectionMetaTags()
    return m_lstPerCollectionMetaTags;
 }
 
-std::function<std::string(Tag)> Config::GetTagHelper(TagHelperType aiMode)
+const std::function<std::string(const Tag&)> Config::GetTagHelper(TagHelperType aiMode) const
 {
    if (aiMode == Key)
    {
@@ -136,27 +199,43 @@ std::function<std::string(Tag)> Config::GetTagHelper(TagHelperType aiMode)
    }
 }
 
-bool Config::IsIdentifyingAttributes(std::string aszAttrs)
+std::string Config::GetHexID( unsigned long aulValue )
+{
+   std::stringstream stream;
+   stream << std::setfill( '0' ) << std::setw( 3 ) << std::hex;
+   
+   stream << aulValue;
+
+   return std::string( stream.str().substr(0, 3) );
+}
+
+bool Config::IsIdentifyingAttributes(const std::string& aszAttrs)
 {
    return ListHelper::List_Find(aszAttrs, m_lstIdentifyingAttributes) != -1;
 }
 
-bool Config::IsPairedKey(std::string aszKey)
+bool Config::IsPairedKey(const std::string& aszKey)
 {
-   return ListHelper::List_Find(aszKey, m_lstPairedKeys, m_fnKeyExtractor) != -1 ||
-      ListHelper::List_Find(aszKey, m_lstPairedKeys, m_fnValueExtractor) != -1;
+   return   ListHelper::List_Find(aszKey, m_lstPairedKeys, m_fnKeyExtractor) != -1 ||
+          ListHelper::List_Find(aszKey, m_lstPairedKeys, m_fnValueExtractor) != -1;
 }
 
-bool Config::IsValidKey(std::string aszKey)
+bool Config::IsValidKey(const std::string& aszKey)
 {
    // A valid key is either a static attr or identifying attr
    return ListHelper::List_Find(aszKey, m_lstStaticAttributes) != -1 ||
       ListHelper::List_Find(aszKey, m_lstIdentifyingAttributes) != -1;
 }
 
-bool Config::IsStaticAttribute(std::string aszAttr)
+bool Config::IsStaticAttribute(const std::string& aszAttr)
 {
    return ListHelper::List_Find(aszAttr, m_lstStaticAttributes) != -1;
+}
+
+bool 
+Config::IsLoaded()
+{
+   return m_bIsFileConfig;
 }
 
 Config* Config::Instance()
@@ -166,7 +245,50 @@ Config* Config::Instance()
       ms_pConfig = new Config();
    }
 
+   if( ms_pTestConfig == nullptr && ms_bTestMode )
+   {
+      ms_pTestConfig = new Config(TestInstance());
+   }
+
+   if( ms_bTestMode )
+   {
+      return ms_pTestConfig;
+   }
+
    return ms_pConfig;
+}
+
+void
+Config::SetTestMode( bool abMode )
+{
+   ms_bTestMode = abMode;
+}
+
+Config 
+Config::TestInstance()
+{
+   Config cTest;
+   cTest.m_lstIdentifyingAttributes.clear();
+   cTest.m_lstKeyCodeMappings.clear();
+   cTest.m_lstPairedKeys.clear();
+   cTest.m_lstPerCollectionMetaTags.clear();
+   cTest.m_lstStaticAttributes.clear();
+   cTest.m_szSourceFolder = "Test";
+   cTest.m_szSourceFile = "TestSource.xml";
+
+   cTest.m_lstStaticAttributes.push_back("name");
+   cTest.m_lstIdentifyingAttributes.push_back("set");
+   cTest.m_lstIdentifyingAttributes.push_back("mud");
+   cTest.m_lstIdentifyingAttributes.push_back("solo");
+
+   cTest.m_lstPairedKeys.push_back(std::make_pair("set","mud"));
+
+   cTest.m_lstKeyCodeMappings.push_back(std::make_pair("name", "1"));
+   cTest.m_lstKeyCodeMappings.push_back(std::make_pair("set", "2"));
+   cTest.m_lstKeyCodeMappings.push_back(std::make_pair("mud", "3"));
+   cTest.m_lstKeyCodeMappings.push_back(std::make_pair("solo", "4"));
+
+   return cTest;
 }
 
 void Config::initDefaultSettings()
@@ -174,6 +296,7 @@ void Config::initDefaultSettings()
    m_lstStaticAttributes.push_back("manaCost");
    m_lstStaticAttributes.push_back("colors");
    m_lstStaticAttributes.push_back("name");
+   m_lstStaticAttributes.push_back("names");
    m_lstStaticAttributes.push_back("power");
    m_lstStaticAttributes.push_back("toughness");
    m_lstStaticAttributes.push_back("loyalty");
@@ -206,6 +329,7 @@ void Config::initDefaultSettings()
    m_szCollectionsFolder = "Collections";
    m_szHistoryFolder = "Data";
    m_szMetaFolder = "Data";
+   m_szOverheadFolder = "Data";
 }
 
 void Config::initConfigSettings(std::ifstream& asConfig)
@@ -305,6 +429,9 @@ void Config::initConfigSettings(std::ifstream& asConfig)
 
    xmlNode_Node = xmlNode_Collections->first_node("HistoryFolder");
    m_szHistoryFolder = xmlNode_Node->value();
+
+   xmlNode_Node = xmlNode_Collections->first_node("OverheadFolder");
+   m_szOverheadFolder = xmlNode_Node->value();
 
    xmlNode_Node = xmlNode_Collections->first_node("MetaFolder");
    m_szMetaFolder = xmlNode_Node->value();

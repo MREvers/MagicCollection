@@ -23,37 +23,41 @@ public:
    CollectionIO();
    ~CollectionIO();
 
-   std::vector<std::string> GetFileLines(std::string aszFileName);
-   bool GetPreprocessLines(std::vector<std::string> alstAllLines,
-      std::vector<std::string>& rlstIOLines,
-      std::vector<std::string>& rlstPreprocessingLines);
+   bool CollectionIO::GetFileLines( std::string aszFileName,
+                                    std::vector<std::string>& rlstFileLines );
+   bool GetNameAndCollectionLines(std::vector<std::string> alstAllLines,
+      std::string& rszName, std::vector<std::string>& rlstCardLines);
 
-   bool CaptureUnlistedItems(Address aAddrColID,
+   bool CaptureUnlistedItems(Location aAddrColID,
       CollectionSource* aptCollectionSource,
       std::map<int, std::list<CopyItem*>>& rlstAdditionalItems,
       std::map<int, std::list<CopyItem*>>& rlstAlreadyCapturedItems);
 
-   bool ConsolodateLocalItems(Address aAddrColID,
+   bool ConsolodateLocalItems(Location aAddrColID,
       CollectionSource* aptCollectionSource,
       std::map<int, std::list<CopyItem*>>& rlstPotentialDuplicates,
       std::map<int, std::list<CopyItem*>>& rlstNonDuplicates);
 
-   bool RejoinAsyncedLocalItems(Address aAddrColID,
+   bool RejoinAsyncedLocalItems(Location aAddrColID,
       CollectionSource* aptCollectionSource,
       unsigned long aulNewItemTS,
       std::map<int, std::list<CopyItem*>>& rlstPotentialDuplicates,
       std::map<int, std::list<CopyItem*>>& rlstNonDuplicates);
 
-   bool ConsolodateBorrowedItems(Address aAddrColID,
+   bool ConsolodateBorrowedItems(Location aAddrColID,
       CollectionSource* aptCollectionSource,
       CollectionFactory* aptCollFactory);
 
-   bool ReleaseUnfoundReferences(Address aAddrColID,
+   bool RegisterRemainingInList( std::vector<int>& alstRegistry, 
+                                 std::map<int, std::list<CopyItem*>>& amapNewItems );
+
+   bool ReleaseUnfoundReferences(Location aAddrColID,
       CollectionSource* aptCollectionSource);
 
    bool CollectionFileExists(std::string aszFileName);
    std::string GetCollectionFile(std::string aszCollectionName);
    std::string GetMetaFile(std::string aszCollectionName);
    std::string GetHistoryFile(std::string aszCollectionName);
+   std::string GetOverheadFile(std::string aszCollectionName);
 };
 

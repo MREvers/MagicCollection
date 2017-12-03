@@ -15,34 +15,11 @@ using System.Xml;
 
 namespace StoreFrontPro
 {
-   class DiagnosticTools
-   {
-      class Timed
-      {
-         public string Name = "";
-         public ulong Time = 0;
-      }
-
-      static List<Timed> times = new List<Timed>();
-      static Stopwatch timer = new Stopwatch();
-      static public void Start()
-      {
-         timer.Reset();
-         timer.Start();
-      }
-
-      static public void Stop(string aszName)
-      {
-         timer.Stop();
-         times.Add(new Timed { Name = aszName, Time = (ulong)timer.ElapsedMilliseconds });
-      }
-   }
-
    /// <summary>
    /// This class controls the main window essentially.
    /// Switches sub-views and displays other windows.
    /// </summary>
-   class StoreFront: IModel
+   class StoreFront: IModel, IServerObserver
    {
       public const string cszStoreFrontVMName = "SFVM";
 
@@ -55,10 +32,17 @@ namespace StoreFrontPro
       #region Public Functions
       public StoreFront(Window MainWindow)
       {
-         ServerInterface.Server.Register(() => { Collections.NotifyViewModel(); });
+         ServerInterface.Server.RegisterChangeListener(() => { Collections.NotifyViewModel(); });
+         ServerInterface.ListenForDebug(this);
 
+         // The server must be loaded before the view.
+         // We can access server fields because those are instantiated synchronously.
          Collections = new BasicModel<List<CollectionModel>>(ServerInterface.Server.Collections, Sync);
          StoreFrontVM = new VMStoreFront(Model: this, RoutingName: cszStoreFrontVMName);
+
+         // The loading indicator is closed when a "ServerReady" Message is received.
+         StoreFrontVM.ShowLoadingIndicator();
+
          m_ucMainWindow = MainWindow;
       }
 
@@ -69,6 +53,28 @@ namespace StoreFrontPro
 
       public void LoadLatestJSON()
       {
+         string szZipPath = ServerInterface.Server.GetImportSourceFilePath() + ".zip";
+         string szExtractPath = Path.GetDirectoryName(szZipPath);
+
+         if (Directory.Exists(szExtractPath))
+         {
+            foreach (var file in Directory.EnumerateFiles(szExtractPath))
+            {
+               File.Delete(file);
+            }
+         }
+         else
+         {
+            Directory.CreateDirectory(szExtractPath);
+         }
+
+         using (var client = new WebClient())
+         {
+            client.DownloadFile("https://mtgjson.com/json/AllSets.json.zip", szZipPath);
+         }
+
+         System.IO.Compression.ZipFile.ExtractToDirectory(szZipPath, szExtractPath);
+
          ServerInterface.Server.ImportJSONCollectionAS();
       }
 
@@ -113,6 +119,31 @@ namespace StoreFrontPro
       public void DisableNotification()
       {
          throw new NotImplementedException();
+      }
+      #endregion
+
+      #region IServerObserver
+      public void ServerMessage(string Message)
+      {
+         if (!Application.Current.Dispatcher.CheckAccess())
+         {
+            Action wrapperDispatch = () => { ServerMessage(Message); };
+            Application.Current.Dispatcher.BeginInvoke(wrapperDispatch);
+            return;
+         }
+
+         if( Message == ServerInterface.LoadIndication )
+         {
+            StoreFrontVM.ShowLoadingIndicator();
+         }
+         else if( Message == ServerInterface.DoneIndication )
+         {
+            StoreFrontVM.CloseLoadingIndicator();
+         }
+         else if( Message == ServerInterface.ServerReady )
+         {
+            StoreFrontVM.CloseLoadingIndicator();
+         }
       }
       #endregion
    }

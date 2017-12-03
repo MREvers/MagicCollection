@@ -14,9 +14,6 @@ namespace StoreFrontPro.Views.CollectionViews.Cube
 {
    class VMCollectionCube : ViewModel<CollectionModel>, IViewComponent, IVCISupporter
    {
-      private const string cszCardGroupDisplayName = "CGDN";
-      private const string cszCollectionEditorName = "CEN";
-
       private MultiDisplay _OperationWindow = new MultiDisplay();
 
       public event DisplayEventHandler DisplayEvent;
@@ -29,13 +26,7 @@ namespace StoreFrontPro.Views.CollectionViews.Cube
 
       public VMCollectionCube(CollectionModel Model, string RoutingName) : base(Model, RoutingName)
       {
-         if (Model.IsCollapsedCollection)
-         {
-            Model.IsCollapsedCollection = false;
-            Model.Sync();
-         }
-
-         VMCardGroupDisplay collectionCubeVM = new VMCardGroupDisplay(Model.CollectionItems, cszCardGroupDisplayName);
+         VMCardGroupDisplay collectionCubeVM = new VMCardGroupDisplay(Model.CollectionItems, VCICollectionCube.CardGroupDisplay);
          OperationWindow.SetNewDisplay(
              Name: "CollectionView",
              NewDisplay: new VCardGroupDisplay(),
@@ -47,7 +38,7 @@ namespace StoreFrontPro.Views.CollectionViews.Cube
       #region Event Handlers
       private void eDisplayCollectionEditorCommand(object canExecute)
       {
-         VMCollectionEditor collectionsOverviewVM = new VMCollectionEditor(Model, cszCollectionEditorName);
+         VMCollectionEditor collectionsOverviewVM = new VMCollectionEditor(Model, VCICollectionCube.CollectionEditor);
          OperationWindow.ShowOverlay(new VCollectionEditor() { DataContext = collectionsOverviewVM });
       }
 

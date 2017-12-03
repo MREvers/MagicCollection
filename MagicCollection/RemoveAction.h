@@ -16,14 +16,12 @@ public:
 
    std::shared_ptr<Action> GetCopy() const override;
 
-   void SetName(std::string aszName);
-   void SetHash(std::string aszIDHas);
-   void SetResi(const Address& aAddress);
+   void SetName(const std::string& aszName);
+   void SetUID(const std::string& aszUID);
 
 private:
    std::string m_szName;
-   std::string m_szIdentifyingHash;
-   Address m_AddrResidentIn;
+   std::string m_szUID;
 
    std::vector<Tag> m_lstTagsOfRMItem;
    std::vector<Tag> m_lstMetaOfRMItem;

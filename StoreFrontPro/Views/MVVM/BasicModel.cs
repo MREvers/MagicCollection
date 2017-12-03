@@ -9,7 +9,6 @@ namespace StoreFrontPro.Views
    class BasicModel<T>: IModel, IDisposable
    {
       public T Item;
-      private List<IViewModel> viewModels = new List<IViewModel>();
       private Action<bool> syncAction;
       private bool notify;
 
@@ -19,30 +18,51 @@ namespace StoreFrontPro.Views
          syncAction = aSyncAction;
       }
 
+      #region IModel
+      private List<WeakReference<IViewModel>> viewModels = new List<WeakReference<IViewModel>>();
       public void NotifyViewModel()
       {
-         viewModels.ForEach(x => x.ModelUpdated());
+         viewModels.ForEach(x => 
+         {
+            IViewModel model;
+            if(x.TryGetTarget(out model))
+            {
+               model.ModelUpdated();
+            }
+         });
       }
 
       public void Register(IViewModel item)
       {
-         viewModels.Add(item);
+         viewModels.Add(new WeakReference<IViewModel>(item));
       }
 
       public void UnRegister(IViewModel item)
       {
-         viewModels.Remove(item);
+         // Find the model that corresponds.
+         var lstRemoves = new List<WeakReference<IViewModel>>();
+         foreach(var model in viewModels)
+         {
+            IViewModel test;
+            if(model.TryGetTarget(out test))
+            {
+               if( test == item )
+               {
+                  lstRemoves.Add(model);
+               }
+            }
+         }
+
+         foreach( var model in lstRemoves )
+         {
+            viewModels.Remove(model);
+         }
       }
 
       public void Sync(bool ASync = true)
       {
          syncAction?.Invoke(ASync);
          if (notify) { NotifyViewModel(); }
-      }
-
-      public void Dispose()
-      {
-         viewModels.Clear();
       }
 
       public void EnableNotification(bool abNotify = false)
@@ -54,6 +74,12 @@ namespace StoreFrontPro.Views
       public void DisableNotification()
       {
          notify = false;
+      }
+      #endregion
+
+      public void Dispose()
+      {
+         viewModels.Clear();
       }
 
       public static implicit operator T (BasicModel<T> Model)

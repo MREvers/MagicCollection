@@ -8,43 +8,41 @@ ListHelper::~ListHelper()
 {
 }
 
-std::vector<std::pair<std::string, std::string>> ListHelper::ConvertMapToList(std::map<std::string, std::string>  aMap)
+std::vector<std::pair<std::string, std::string>>
+ListHelper::ConvertMapToList(const std::map<std::string, std::string>& aMap)
 {
    std::vector<std::pair<std::string, std::string>> lstRetVal;
-   std::map<std::string, std::string>::iterator iter_Map = aMap.begin();
-   for (; iter_Map != aMap.end(); ++iter_Map)
+   std::map<std::string, std::string>::const_iterator iter_Map = aMap.cbegin();
+   for( ; iter_Map != aMap.cend(); ++iter_Map )
    {
-      lstRetVal.push_back(std::make_pair(iter_Map->first, iter_Map->second));
+      lstRetVal.push_back( std::make_pair( iter_Map->first, iter_Map->second ) );
    }
    return lstRetVal;
 }
 
-bool ListHelper::CompareKeyValPairList(std::vector<std::pair<std::string, std::string>> alstFirst,
-   std::vector<std::pair<std::string, std::string>> alstSecond)
+bool ListHelper::CompareKeyValPairList( const std::vector<std::pair<std::string, std::string>>& alstFirst,
+                                        const std::vector<std::pair<std::string, std::string>>& alstSecond )
 {
-   bool bMatch = true;
+   bool bMatch = alstFirst.size() == alstSecond.size();
 
-   if (bMatch = (alstFirst.size() == alstSecond.size()))
+   if( bMatch )
    {
-      std::vector<std::pair<std::string, std::string>>::iterator iter_First = alstFirst.begin();
-      std::vector<std::pair<std::string, std::string>>::iterator iter_Second = alstSecond.begin();
+      std::vector<std::pair<std::string, std::string>>::const_iterator iter_First = alstFirst.cbegin();
+      std::vector<std::pair<std::string, std::string>>::const_iterator iter_Second = alstSecond.cbegin();
 
-      for (; iter_First != alstFirst.end(); ++iter_First)
+      for( ; iter_First != alstFirst.cend(); ++iter_First )
       {
          bool bFoundMatch = false;
-         for (; iter_Second != alstSecond.end(); ++iter_Second)
+         for( ; iter_Second != alstSecond.cend(); ++iter_Second )
          {
-            if (iter_First->first == iter_Second->first)
+            if( ( iter_First->first  == iter_Second->first ) && 
+                ( iter_First->second == iter_Second->second ) )
             {
-               if (iter_First->second == iter_Second->second)
-               {
-                  bFoundMatch = true;
-                  break;
-               }
+               bFoundMatch = true;
             }
          }
 
-         if (!bFoundMatch)
+         if( !bFoundMatch )
          {
             bMatch = false;
             break;

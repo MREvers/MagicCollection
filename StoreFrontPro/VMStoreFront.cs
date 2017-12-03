@@ -14,14 +14,25 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Controls;
+using StoreFrontPro.Support.LoadingIndicator;
 
 namespace StoreFrontPro
 {
    class VMStoreFront : ViewModel<StoreFront>, IVCISupporter
    {
-      public const string cszCollectionOverview = "ColOverview";
-      public const string cszDeckboxViewName = "DBVM";
-      public const string cszCubeViewName = "CVN";
+      #region Static Names
+      public const string CollectionOverview = "ColOverview";
+      public const string DeckboxView = "DBVM";
+      public const string CubeView = "CVN";
+      #endregion
+
+      #region Bindings
+      private bool _MenuEnabled = true;
+      public bool MenuEnabled
+      {
+         get { return _MenuEnabled; }
+         set { _MenuEnabled = value; OnPropertyChanged(); }
+      }
 
       public RelayCommand CloseCommand { get; set; }
       public RelayCommand CollectionsOverviewCommand { get; set; }
@@ -39,7 +50,9 @@ namespace StoreFrontPro
          get { return _OperationWindow; }
          set { _OperationWindow = value; OnPropertyChanged(); }
       }
+      #endregion
 
+      #region Public Functions
       public VMStoreFront(StoreFront Model, string RoutingName) : base(Model, RoutingName)
       {
          Model.Register(this);
@@ -54,9 +67,23 @@ namespace StoreFrontPro
          showCollectionsOverview();
       }
 
+      public void ShowLoadingIndicator()
+      {
+         MenuEnabled = false;
+         OperationWindow.ShowOverlay(new LoadIndicator());
+      }
+
+      public void CloseLoadingIndicator()
+      {
+         MenuEnabled = true;
+         OperationWindow.CloseOverlay();
+      }
+      #endregion
+
+      #region Private Methods
       private void showCollectionsOverview()
       {
-         VMCollectionsOverview collectionsOverviewVM = new VMCollectionsOverview(Model.Collections, cszCollectionOverview);
+         VMCollectionsOverview collectionsOverviewVM = new VMCollectionsOverview(Model.Collections, CollectionOverview);
          OperationWindow.SetNewDisplay(
              Name: "Overview",
              NewDisplay: new VCollectionsOverview(),
@@ -66,7 +93,7 @@ namespace StoreFrontPro
 
       private void showCollectionCubeView(CollectionModel CollectionModel)
       {
-         VMCollectionCube collectionCubeVM = new VMCollectionCube(CollectionModel, cszCubeViewName);
+         VMCollectionCube collectionCubeVM = new VMCollectionCube(CollectionModel, CubeView);
          OperationWindow.SetNewDisplay(
              Name: "Overview",
              NewDisplay: new VCollectionCube(),
@@ -76,7 +103,7 @@ namespace StoreFrontPro
 
       private void showCollectionDeckBox(CollectionModel CollectionModel)
       {
-         VMCollectionDeckBox collectionFancyVM = new VMCollectionDeckBox(CollectionModel, cszDeckboxViewName);
+         VMCollectionDeckBox collectionFancyVM = new VMCollectionDeckBox(CollectionModel, DeckboxView);
          OperationWindow.SetNewDisplay(
              Name: "Fancy",
              NewDisplay: new VCollectionDeckBox(),
@@ -121,6 +148,7 @@ namespace StoreFrontPro
       {
          Model.LoadLatestJSON();
       }
+      #endregion
 
       #region IViewModel
       public override void ModelUpdated()

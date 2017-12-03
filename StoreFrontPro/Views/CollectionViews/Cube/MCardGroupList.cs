@@ -9,41 +9,47 @@ using StoreFrontPro.Tools;
 
 namespace StoreFrontPro.Views.CollectionViews.Cube
 {
-   class MCardGroupList: IModel
+   /// <summary>
+   /// This class wraps a List<CardModel> model.
+   /// </summary>
+   class MCardGroupList : IModel, IViewModel
    {
+      static string DefaultAttribute = "Colorless";
+
       private List<CardModel> _ungroupedList;
       public List<CardModel> GroupedList
       {
-         get { return getFilteredList(_ungroupedList); }
+         get { return _ungroupedList; }
       }
+
+      public BasicModel<List<CardModel>> BaseModel;
 
       public string GroupName;
       public List<string> ExpectedAttributes;
       private string m_szFilteringAttribute;
       private List<string> m_szAttributeSet;
 
-      public MCardGroupList(string FilteredAttribute, string ExpectedAttribute, List<string> AttributeSet, List<CardModel> BaseList)
+      public MCardGroupList( string FilteredAttribute, string ExpectedAttribute,
+                             List<string> AttributeSet, BasicModel<List<CardModel>> BaseList )
       {
-         _ungroupedList = BaseList;
+         BaseList.Register(this);
+         BaseModel = BaseList;
+         ExpectedAttributes = ExpectedAttribute.Split('\\').ToList();
+         GroupName = ExpectedAttribute == "" ? DefaultAttribute : ExpectedAttribute;
 
          m_szFilteringAttribute = FilteredAttribute;
-
-         // Split the expected attributes on '/'
-         ExpectedAttributes = ExpectedAttribute.Split('\\').ToList();
-
          m_szAttributeSet = AttributeSet;
-
-         GroupName = ExpectedAttribute;
+         ModelUpdated();
       }
 
+      #region Private functions
       // Can eventually use a strategy pattern to decide how to filter. TODO
       private List<CardModel> getFilteredList(List<CardModel> alstList)
       {
          return filterListOnIdentityAndCMC(alstList);
       }
 
-
-      public List<CardModel> filterListOnIdentityAndCMC(List<CardModel> alstNew)
+      private List<CardModel> filterListOnIdentityAndCMC(List<CardModel> alstNew)
       {
          List<CardModel> lstRetVal = new List<CardModel>();
 
@@ -80,7 +86,7 @@ namespace StoreFrontPro.Views.CollectionViews.Cube
          if (!string.IsNullOrEmpty(szMC))
          {
             int iSpecStart = Math.Max(szMC.IndexOf('}'), 0);
-            if (!int.TryParse(szMC.Substring(1, iSpecStart - 1), out iCMC))
+            if (!int.TryParse(szMC.Substring(1, Math.Max(iSpecStart - 1, 0)), out iCMC))
             {
                iCMC = 0;
             }
@@ -90,21 +96,23 @@ namespace StoreFrontPro.Views.CollectionViews.Cube
 
          return iCMC + iNumSpecs;
       }
+      #endregion
 
       #region IModel
+      private List<IViewModel> m_lstViewers = new List<IViewModel>();
       public void Register(IViewModel item)
       {
-         throw new NotImplementedException();
+         m_lstViewers.Add(item);
       }
 
       public void UnRegister(IViewModel item)
       {
-
+         m_lstViewers.Remove(item);
       }
 
       public void NotifyViewModel()
       {
-         throw new NotImplementedException();
+         m_lstViewers.ForEach(x => x.ModelUpdated());
       }
 
       public void EnableNotification(bool abNotify)
@@ -120,6 +128,19 @@ namespace StoreFrontPro.Views.CollectionViews.Cube
       public void Sync(bool ASync = true)
       {
          throw new NotImplementedException();
+      }
+      #endregion
+
+      #region IViewModel
+      public void ModelUpdated()
+      {
+         _ungroupedList = getFilteredList(BaseModel);
+         NotifyViewModel();
+      }
+
+      public void FreeModel()
+      {
+         BaseModel.UnRegister(this);
       }
       #endregion
    }

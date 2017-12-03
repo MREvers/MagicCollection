@@ -1,10 +1,12 @@
 #include "CollectionDetails.h"
 
-
+#include <ctime>
+#include "Config.h"
+#include "StringHelper.h"
 
 CollectionDetails::CollectionDetails()
 {
-   m_ptrAddress = new Address();
+   m_ptrAddress = new Location();
 }
 
 
@@ -26,11 +28,17 @@ CollectionDetails::GetName()
 }
 
 void 
-CollectionDetails::SetFileName(std::string aszFileName)
+CollectionDetails::SetFileName(std::string aszFileName, bool abDefaultLocation)
 {
    m_szFileName = aszFileName;
+   
+   if( abDefaultLocation )
+   {
+      SetFile(Config::Instance()->GetCollectionsDirectory() + "\\\\" + m_szFileName + ".txt");
+   }
 }
 
+// Returns the name of the file to save to.
 std::string 
 CollectionDetails::GetFileName()
 {
@@ -38,8 +46,34 @@ CollectionDetails::GetFileName()
 }
 
 void 
+CollectionDetails::SetFile( std::string aszFile )
+{
+   m_szFile = aszFile;
+
+   // Get the file name.
+   auto lstSplitFile = StringHelper::Str_Split(aszFile, "\\");
+   auto szFile = lstSplitFile[lstSplitFile.size() - 1];
+   auto lstSplitExt = StringHelper::Str_Split(szFile, ".");
+   szFile = lstSplitExt[0];
+
+   SetFileName(szFile);
+}
+std::string 
+CollectionDetails::GetFile()
+{
+   return m_szFile;
+}
+
+void 
 CollectionDetails::SetTimeStamp(unsigned long aulTimeStamp)
 {
+   if( aulTimeStamp == 0 )
+   {
+      time_t timer;
+      time(&timer);
+      aulTimeStamp = timer;
+   }
+
    m_ulTimeStamp = aulTimeStamp;
 }
 
@@ -68,10 +102,34 @@ CollectionDetails::IncrementChildCount()
 }
 
 void 
-CollectionDetails::SetAddress(const Address& aAddress)
+CollectionDetails::SetInitialized( bool abInits )
+{
+   m_bInitialized = abInits;
+}
+
+bool 
+CollectionDetails::IsInitialized()
+{
+   return m_bInitialized;
+}
+
+void 
+CollectionDetails::SetProcessLines( const std::vector<std::string>& alstProcesslines )
+{
+   m_vecProcessLines = alstProcesslines;
+}
+
+std::vector<std::string> 
+CollectionDetails::GetProcessLines()
+{
+   return m_vecProcessLines;
+}
+
+void 
+CollectionDetails::SetAddress(const Location& aAddress)
 {
    delete m_ptrAddress;
-   m_ptrAddress = new Address(aAddress);
+   m_ptrAddress = new Location(aAddress);
 }
 
 void 
@@ -84,10 +142,10 @@ CollectionDetails::AssignAddress(std::string aszStringAddress)
    }
 
    delete m_ptrAddress;
-   m_ptrAddress = new Address(aszStringAddress);
+   m_ptrAddress = new Location(aszStringAddress);
 }
 
-Address* 
+Location* 
 CollectionDetails::GetAddress()
 {
    return m_ptrAddress;

@@ -5,9 +5,10 @@
 #include <iterator>
 #include <process.h>
 
-#include "JSONImporter.h"
 #include "CollectionSource.h"
 #include "CollectionFactory.h"
+
+using namespace std;
 
 class __declspec(dllexport) CStoreFrontBackEnd
 {
@@ -15,22 +16,46 @@ public:
    CStoreFrontBackEnd();
    ~CStoreFrontBackEnd();
 
-   void SaveCollection(std::string aszCollectionName);
-   std::string LoadCollection(std::string aszCollectionFile);
-   std::string CreateNewCollection(std::string aszCollectionName, std::string aszParent);
-   std::vector<std::string> GetLoadedCollections();
+   // Self Test
+   //
+   bool SelfTest();
 
-   std::vector<std::string> GetCollectionMetaData(std::string aszCollection);
-   std::vector<std::string> GetCollectionList(std::string aszCollection, int aiVisibility, bool bCollapsed);
-   std::string GetCardPrototype(std::string aszCardName);
+   // Program Management
+   //
+   bool ConfigIsLoaded();
 
-   std::vector<std::string> GetAllCardsStartingWith(std::string aszSearch);
+   // Collection Manager Accessors
+   //
+   string CreateNewCollection(string aszCollectionName, string aszParent);
+   string LoadCollection(string aszCollectionFile);
+   vector<string> GetLoadedCollections();
 
-   std::string GetImagesPath();
+   // Collection Accessors
+   //
+   void SaveCollection(string aszCollectionName);
+   void SubmitBulkChanges(string aszCollection, vector<string> alstChanges);
+   vector<string> GetCollectionMetaData(string aszCollection);
+   vector<string> GetCollectionList(string aszCollection, int aiVisibility);
 
-   void SubmitBulkChanges(std::string aszCollection, std::vector<std::string> alstChanges);
-   
-   void ImportCollection();
+   // Card Accessors
+   //
+   void SetAttribute(string aszCardName, string aszUID, string aszKey, string aszVal);
+   vector<pair<string,string>> GetMetaTags(string aszCardName, string aszUID);
+   vector<pair<string,string>> GetIdentifyingAttributes(string aszCardName, string aszUID);
+   string GetCardString(string aszCardname, string aszUID);
+
+   // Source Accessors
+   //
+   vector<string> GetAllCardsStartingWith(string aszSearch);
+   string GetCardPrototype(string aszCardName);
+   void ImportCollectionSource();
+
+   // Config accessors
+   //
+   vector<pair<string, string>> GetPairedAttributes();
+   string GetImagesPath();
+   string GetSourceFilePath();
+   string GetImportSourceFilePath();
 
 private:
    CollectionFactory* m_ColFactory; // This will be the main interaction.

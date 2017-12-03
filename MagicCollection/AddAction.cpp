@@ -17,9 +17,15 @@ AddAction::~AddAction()
 bool 
 AddAction::Execute(TransactionManager* aoCol)
 {
-   aoCol->Add(m_szName, m_lstIDs, m_lstMetas);
+   CopyItem* cItem = aoCol->Add(m_szName, m_lstIDs, m_lstMetas);
+   
+   if( cItem != nullptr )
+   {
+      m_szAddedUID = cItem->GetUID();
+      return true;
+   }
 
-   return true;
+   return false;
 }
 
 bool 
@@ -35,19 +41,18 @@ AddAction::Rollback(TransactionManager* aoCol)
 std::shared_ptr<Action>
 AddAction::getUndoAction(TransactionManager* aoCol) const
 {
+   std::string szHashRM;  
    Collection* refCollection = aoCol->GetCollection();
    CollectionSource* refSource = aoCol->GetSource();
 
    TryGet<CollectionItem> refItem = refSource->GetCardPrototype(m_szName);
    if (!refItem.Good()) { return false; }
    
-   std::string szHashRM;  
-   szHashRM = refItem->GetHash( refCollection->GetIdentifier(),
-                                m_lstIDs, m_lstMetas );
+   szHashRM = refItem->GenerateHash( refCollection->GetIdentifier(),
+                                     m_lstIDs, m_lstMetas );
 
    RemoveAction* rmRetVal = new RemoveAction();
-   rmRetVal->SetHash(szHashRM);
-   rmRetVal->SetResi(refCollection->GetIdentifier());
+   rmRetVal->SetUID(szHashRM);
    rmRetVal->SetName(m_szName);
 
    return std::shared_ptr<Action>(rmRetVal);

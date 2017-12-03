@@ -29,6 +29,8 @@ public:
 
    std::string GetImportSourceFile();
    std::string GetSourceFile();
+   std::string GetSourceFolder();
+   std::string GetOverheadFolerName();
    std::string GetHistoryFolderName();
    std::string GetMetaFolderName();
    std::string GetImagesFolder();
@@ -36,30 +38,27 @@ public:
    std::string GetCollectionsDirectory();
    std::string GetCollectionsFolderName();
 
-   std::string GetKeyCode(std::string aszFullKey);
-   std::string GetFullKey(std::string aszKeyCode);
+   char GetKeyCode(std::string aszFullKey);
+   std::string GetFullKey(char aiKeyCode);
 
    std::string GetHash(std::string& aszHashingString);
 
+   std::vector<std::string> GetPairedKeys(const std::string& aszKey);
    std::vector<Tag>& GetPairedKeysList();
    std::vector<std::string>& GetIdentifyingAttributes();
    std::vector<std::string>& GetStaticAttributes();
    std::vector<std::string>& GetPerCollectionMetaTags();
 
-   std::function<std::string(Tag)> GetTagHelper(TagHelperType aiMode = Key);
+   const std::function<std::string(const Tag&)> GetTagHelper(TagHelperType aiMode = Key) const;
+   std::string GetHexID( unsigned long aulValue );
 
-   bool IsPairedKey(std::string aszKey);
-   bool IsValidKey(std::string aszKey);
-   bool IsStaticAttribute(std::string aszAttrs);
-   bool IsIdentifyingAttributes(std::string aszAttrs);
+   bool IsPairedKey(const std::string& aszKey);
+   bool IsValidKey(const std::string& aszKey);
+   bool IsStaticAttribute(const std::string& aszAttrs);
+   bool IsIdentifyingAttributes(const std::string& aszAttrs);
 
-   static Config* Instance();
+   bool IsLoaded();
 
-   static char* Config::MetaFileExtension;
-   static char* Config::HistoryFileExtension;
-   static char* Config::HashKey;
-   static char* Config::NotFoundString;
-   static char* Config::CollectionDefinitionKey;
 private:
    std::vector<Tag> m_lstKeyCodeMappings;
    std::vector<Tag> m_lstPairedKeys;
@@ -75,12 +74,32 @@ private:
    std::string m_szHistoryFolder;
    std::string m_szMetaFolder;
    std::string m_szImagesFolder;
+   std::string m_szOverheadFolder;
 
-   std::function<std::string(Tag)> m_fnKeyExtractor;
-   std::function<std::string(Tag)> m_fnValueExtractor;
+   std::function<std::string(const Tag&)> m_fnKeyExtractor;
+   std::function<std::string(const Tag&)> m_fnValueExtractor;
 
    void initDefaultSettings();
    void initConfigSettings(std::ifstream& asConfig);
 
+   bool m_bIsFileConfig;
+
+public:
+   static Config* Instance();
+   static void SetTestMode(bool abMode);
+   static Config TestInstance();
+
+   static char* Config::TrackingTagId;
+   static char* Config::IgnoredTagId;
+   static char* Config::MetaFileExtension;
+   static char* Config::HistoryFileExtension;
+   static char* Config::OverheadFileExtension;
+   static char* Config::HashKey;
+   static char* Config::NotFoundString;
+   static char* Config::CollectionDefinitionKey;
+
+private:
+   static bool ms_bTestMode;
    static Config* Config::ms_pConfig;
+   static Config* Config::ms_pTestConfig;
 };

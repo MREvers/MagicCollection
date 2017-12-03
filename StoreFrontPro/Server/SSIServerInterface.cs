@@ -4,6 +4,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Media.Animation;
 
 namespace StoreFrontPro.Server
 {
@@ -13,9 +16,26 @@ namespace StoreFrontPro.Server
    /// SI => Server Interface
    /// </summary>
    partial class ServerInterface
-   { 
+   {
       public class ServerIFace
       {
+         #region Config
+         public string GetImagesFolderPath()
+         {
+            return SCI.GetImagesPath();
+         }
+
+         public string GetImportSourceFilePath()
+         {
+            return SCI.GetImportSourceFilePath();
+         }
+
+         public string GetSourceFilePath()
+         {
+            return SCI.GetSourceFilePath();
+         }
+         #endregion
+
          // It is expected that any object referenced in these actions
          // survives to running time of the application.
          private List<Action> Notifiers;
@@ -27,7 +47,11 @@ namespace StoreFrontPro.Server
             Notifiers = new List<Action>();
          }
 
-         public void Register(Action aAction)
+         /// <summary>
+         /// Notified whenever a collection model is created.
+         /// </summary>
+         /// <param name="aAction"></param>
+         public void RegisterChangeListener(Action aAction)
          {
             Notifiers.Add(aAction);
          }
@@ -51,6 +75,17 @@ namespace StoreFrontPro.Server
             if (szColID != "NF")
             {
                inGenerateCollectionModel(szColID);
+
+               // Notify each existing collection to update.
+               foreach( var collection in getCollectionModels() )
+               {
+                  if( collection.ID != szColID )
+                  {
+                     // This is "ASYNC" because we want the sync to occur "Synchronously"
+                     // on the services thread.
+                     collection.Sync(true);
+                  }
+               }
             }
          }
 
@@ -71,8 +106,8 @@ namespace StoreFrontPro.Server
          private void inGenerateCollectionModel(string aszCollectionID)
          {
             List<string> lstLoadedCollections = SCI.GetLoadedCollections();
-            if( ( lstLoadedCollections.Contains(aszCollectionID) ) &&
-                ( !Collections.Select(x => x.ID).Contains(aszCollectionID) ) )
+            if ((lstLoadedCollections.Contains(aszCollectionID)) &&
+                (!Collections.Select(x => x.ID).Contains(aszCollectionID)))
             {
                createCollectionModel(aszCollectionID);
             }
@@ -85,26 +120,39 @@ namespace StoreFrontPro.Server
             notify();
          }
 
-         public void GenerateCopyModelAS( string Identifier, string CollectionName,
-                                          Action<CardModel> Callback, bool UICallback = false )
-         {
-            GenerateCopyModelsAS( new List<string>() { Identifier}, CollectionName,
-                                  (lst)=> { Callback(lst.FirstOrDefault()); }, UICallback );
-         }
-
-         public void GenerateCopyModelsAS( List<string> Identifiers, string CollectionName,
-                                           Action<List<CardModel>> Callback, bool UICallback = false )
+         public void GenerateCopyModelAS(string Identifier, string CollectionName,
+                                          Action<CardModel> Callback, bool UICallback = false)
          {
             singleton.enqueueService(() =>
             {
-               Callback?.Invoke(Identifiers.Select((x) => { return createCopyModel(x, CollectionName); }).ToList());
+               Callback?.Invoke(GenerateCopyModel(Identifier, CollectionName));
             }, UICallback);
          }
 
-         private CardModel createCopyModel(string aszIdentifier, string aszCollectionName)
+         public void GenerateCopyModelsAS(List<string> Identifiers, string CollectionName,
+                                           Action<List<CardModel>> Callback, bool UICallback = false)
+         {
+            singleton.enqueueService(() =>
+            {
+               Callback?.Invoke(GenerateCopyModels(Identifiers, CollectionName));
+            }, UICallback);
+         }
+
+         public List<CardModel> GenerateCopyModels(List<string> Identifiers, string CollectionName)
+         {
+            return Identifiers.Select((x) => { return GenerateCopyModel(x, CollectionName); }).ToList();
+         }
+
+         public CardModel GenerateCopyModel(string aszIdentifier, string aszCollectionName)
          {
             CardModel newCopy = new CardModel(aszIdentifier, aszCollectionName);
             return newCopy;
+         }
+
+         public CardModel GenerateCopyModelFromName(string aszName, string aszCollectionName)
+         {
+            string szPrototype = ServerInterface.Card.GetProtoType(aszName);
+            return GenerateCopyModel(szPrototype, aszCollectionName);
          }
 
          public void SyncServerTask(Action aCallback, bool UICallback = false)
@@ -169,8 +217,13 @@ namespace StoreFrontPro.Server
          {
             singleton.enqueueService(() =>
             {
-               SCI.ImportCollection();
-            }, false);
+               ImportJSONCollection();
+            }, false, true);
+         }
+
+         public void ImportJSONCollection()
+         {
+            SCI.ImportCollection();
          }
 
          public void CreateCollection(string aszName, string aszParent = "")

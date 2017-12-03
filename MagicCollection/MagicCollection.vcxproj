@@ -29,7 +29,7 @@
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
-    <CharacterSet>Unicode</CharacterSet>
+    <CharacterSet>MultiByte</CharacterSet>
     <CLRSupport>false</CLRSupport>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
@@ -37,7 +37,7 @@
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
-    <CharacterSet>Unicode</CharacterSet>
+    <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
@@ -157,21 +157,23 @@
     <ClCompile Include="AddAction.cpp" />
     <ClCompile Include="AddFromAction.cpp" />
     <ClCompile Include="Addresser.cpp" />
+    <ClCompile Include="AddressTest.cpp" />
     <ClCompile Include="ChangeAction.cpp" />
     <ClCompile Include="CollectionDeltaClass.cpp" />
     <ClCompile Include="CollectionDetails.cpp" />
     <ClCompile Include="CollectionFactory.cpp" />
     <ClCompile Include="CollectionIO.cpp" />
     <ClCompile Include="CollectionItem.cpp" />
+    <ClCompile Include="CollectionItemTest.cpp" />
     <ClCompile Include="CollectionSource.cpp" />
+    <ClCompile Include="CollectionTest.cpp" />
     <ClCompile Include="CollectionTracker.cpp" />
     <ClCompile Include="Config.cpp" />
     <ClCompile Include="CopyItem.cpp" />
     <ClCompile Include="Collection.cpp" />
+    <ClCompile Include="CopyTest.cpp" />
     <ClCompile Include="jsoncpp.cpp" />
-    <ClCompile Include="JSONImporter.cpp">
-      <Optimization Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MaxSpeed</Optimization>
-    </ClCompile>
+    <ClCompile Include="JSONImporterTwo.cpp" />
     <ClCompile Include="ListHelper.cpp" />
     <ClCompile Include="MD5.cpp" />
     <ClCompile Include="MetaTag.cpp" />
@@ -187,6 +189,8 @@
     <ClCompile Include="SourceObject.cpp" />
     <ClCompile Include="StoreFrontBackEnd.cpp" />
     <ClCompile Include="StringHelper.cpp" />
+    <ClCompile Include="StringInterface.cpp" />
+    <ClCompile Include="TestClass.cpp" />
     <ClCompile Include="TraitItem.cpp" />
     <ClCompile Include="Transaction.cpp" />
     <ClCompile Include="TransactionManager.cpp" />
@@ -195,19 +199,23 @@
     <ClInclude Include="Action.h" />
     <ClInclude Include="AddAction.h" />
     <ClInclude Include="AddFromAction.h" />
-    <ClInclude Include="Addresser.h" />
+    <ClInclude Include="AddressTest.h" />
     <ClInclude Include="ChangeAction.h" />
     <ClInclude Include="CollectionDeltaClass.h" />
     <ClInclude Include="CollectionDetails.h" />
     <ClInclude Include="CollectionFactory.h" />
     <ClInclude Include="CollectionIO.h" />
     <ClInclude Include="CollectionItem.h" />
+    <ClInclude Include="CollectionItemTest.h" />
     <ClInclude Include="CollectionSource.h" />
+    <ClInclude Include="CollectionTest.h" />
     <ClInclude Include="CollectionTracker.h" />
     <ClInclude Include="Config.h" />
     <ClInclude Include="CopyItem.h" />
     <ClInclude Include="Collection.h" />
-    <ClInclude Include="JSONImporter.h" />
+    <ClInclude Include="CopyTest.h" />
+    <ClInclude Include="Addresser.h" />
+    <ClInclude Include="JSONImporterTwo.h" />
     <ClInclude Include="ListHelper.h" />
     <ClInclude Include="MD5.h" />
     <ClInclude Include="MetaTag.h" />
@@ -223,6 +231,8 @@
     <ClInclude Include="SourceObject.h" />
     <ClInclude Include="StoreFrontBackEnd.h" />
     <ClInclude Include="StringHelper.h" />
+    <ClInclude Include="StringInterface.h" />
+    <ClInclude Include="TestClass.h" />
     <ClInclude Include="TraitItem.h" />
     <ClInclude Include="Transaction.h" />
     <ClInclude Include="TransactionManager.h" />

@@ -1,14 +1,19 @@
 #include "CollectionItem.h"
 #include "Addresser.h"
+#include "StringInterface.h"
 
-CollectionItem::PseudoIdentifier::PseudoIdentifier()
+using namespace std;
+
+CollectionItem::
+PseudoIdentifier::PseudoIdentifier()
 {
 }
 
-CollectionItem::PseudoIdentifier::PseudoIdentifier(unsigned int aiCount,
-                                                   std::string aszName, 
-                                                   std::string aszDetails, 
-                                                   std::string aszMeta)
+CollectionItem::
+PseudoIdentifier::PseudoIdentifier(unsigned int aiCount,
+                                   string aszName, 
+                                   string aszDetails, 
+                                   string aszMeta)
 {
    Count = aiCount;
    Name = aszName;
@@ -19,16 +24,17 @@ CollectionItem::PseudoIdentifier::PseudoIdentifier(unsigned int aiCount,
    CollectionItem::ParseTagString(aszMeta, MetaTags);
 }
 
-CollectionItem::PseudoIdentifier::~PseudoIdentifier()
+CollectionItem::
+PseudoIdentifier::~PseudoIdentifier()
 {
 }
 
-CollectionItem::CollectionItem(std::string aszName,
-                               std::vector<Tag> alstCommon, 
-                               std::vector<TraitItem> alstRestrictions)
+CollectionItem::CollectionItem( const string& aszItemName, 
+                                const vector<Tag>& alstCommon,
+                                const vector<TraitItem>& alstRestrictions )
 {
-   m_szName = aszName;
-   m_lstCommonTraits = alstCommon;
+   m_szName               = aszItemName;
+   m_lstCommonTraits      = alstCommon;
    m_lstIdentifyingTraits = alstRestrictions;
 }
 
@@ -38,128 +44,64 @@ CollectionItem::~CollectionItem()
    m_lstCopies.clear();
 }
 
-std::string CollectionItem::GetName()
+shared_ptr<CopyItem>
+CollectionItem::AddCopy( const Location& aAddrColID,
+                         const vector<Tag>& alstAttrTags,
+                         const vector<Tag>& alstMetaTags )
 {
-   return m_szName;
+   CopyItem* newCopy = createCopy(aAddrColID, alstAttrTags, alstMetaTags);
+   m_lstCopies.push_back(shared_ptr<CopyItem>(newCopy));
+   return m_lstCopies.back();
 }
 
-CopyItem* 
-CollectionItem::AddCopyItem( const Address& aAddrColID,
-                             std::vector<Tag> alstAttrs,
-                             std::vector<Tag> alstMetaTags )
+bool 
+CollectionItem::RemoveCopy( const Location& aAddrColID,
+                            const string aszUniqueID )
 {
-   CopyItem* newCopy = GenerateCopy(aAddrColID, alstAttrs, alstMetaTags);
-   m_lstCopies.push_back(std::shared_ptr<CopyItem>(newCopy));
-   return newCopy;
+   shared_ptr<CopyItem> ptCopy;
+   auto nCopy = FindCopy( aszUniqueID );
+
+   if( nCopy.Good() )
+   {
+      ptCopy = *nCopy.Value();
+      int iRefCnt = ptCopy->RemoveResident( (const Location)aAddrColID );
+
+      if( iRefCnt == 0 )
+      {
+         DeleteCopy( ptCopy.get() );
+      }
+      return true;
+   }
+   return false;
 }
 
-CopyItem* 
-CollectionItem::GenerateCopy( const Address& aAddrColID,
-                              std::vector<Tag> alstAttrs,
-                              std::vector<Tag> alstMetaTags )
+string 
+CollectionItem::GenerateHash( const Identifier& aAddrIdentifier,
+                              const vector<Tag>& alstAttrs,
+                              const vector<Tag>& alstMetaTags ) const
 {
-   CopyItem* newCopy = new CopyItem(&m_lstIdentifyingTraits, aAddrColID,
-                                    alstAttrs, alstMetaTags);
+   CopyItem* hashCopy = createCopy( aAddrIdentifier, alstAttrs, alstMetaTags );
+   string szHash = hashCopy->GetHash();
+   delete hashCopy;
 
-   return newCopy;
+   return szHash;
 }
 
 void 
-CollectionItem::RemoveCopyItem( const Address& aAddrColID,
-                                std::string aszHash )
+CollectionItem::DeleteCopy( const string& aszUniqueHash )
 {
-   std::vector<std::shared_ptr<CopyItem>>::iterator iter_Copies;
-
-   for ( iter_Copies = m_lstCopies.begin();
-         iter_Copies != m_lstCopies.end(); 
-         ++iter_Copies)
+   auto copy = FindCopy( aszUniqueHash );
+   if( copy.Good() )
    {
-      CopyItem* cItem = iter_Copies->get();
-      if (cItem->GetMetaTag(Config::HashKey, Hidden) == aszHash)
-      {
-         if (cItem->IsParent(aAddrColID) && 
-             cItem->GetResidentIn().size() <= 1)
-         {
-            m_lstCopies.erase(iter_Copies);
-         }
-         else
-         {
-            cItem->RemoveResident(aAddrColID);
-         }
-
-         break;
-      }
+      DeleteCopy( copy.Value()->get() );
    }
-
 }
 
 void 
-CollectionItem::RemoveResidentFromItem( CopyItem* acItem, 
-                                        const Address& aAddrColID )
+CollectionItem::DeleteCopy(CopyItem* ociRemove)
 {
-   std::function<CopyItem* (std::shared_ptr<CopyItem>)> fnExtractor;
-   fnExtractor = [](std::shared_ptr<CopyItem> aptr)->
-                                    CopyItem* { return aptr.get(); };
-   int iFound = ListHelper::List_Find(acItem, m_lstCopies, fnExtractor);
-   if (-1 != iFound)
-   {
-      acItem->RemoveResident(aAddrColID);
-      if (acItem->GetParent() == "" &&
-          acItem->GetResidentIn().size() == 0)
-      {
-         m_lstCopies.erase(m_lstCopies.begin() + iFound);
-      }
-   }
-}
-
-std::shared_ptr<CopyItem> 
-CollectionItem::FindCopyItem( std::string aszHash,
-                              const Address& aAddrResidentIn )
-{
-   Addresser addr;
-   std::vector<std::shared_ptr<CopyItem>>::iterator iter_Copies;
-
-   for ( iter_Copies  = m_lstCopies.begin(); 
-         iter_Copies != m_lstCopies.end(); 
-         ++iter_Copies )
-   {
-      CopyItem* cItem = iter_Copies->get();
-      if ( cItem->GetHash() == aszHash &&
-           (aAddrResidentIn.Main == "" || cItem->IsResidentIn(aAddrResidentIn)) )
-      {
-         return *iter_Copies;
-      }
-   }
-
-   return std::shared_ptr<CopyItem>(nullptr);
-}
-
-std::vector<std::shared_ptr<CopyItem>>
-CollectionItem::FindAllCopyItems(std::string aszHash, const Address& aptAddress)
-{
-   std::vector<std::shared_ptr<CopyItem>> lstRetval;
-   std::vector<std::shared_ptr<CopyItem>>::iterator iter_Copies;
-
-   for (iter_Copies = m_lstCopies.begin();
-        iter_Copies != m_lstCopies.end();
-        ++iter_Copies)
-   {
-      CopyItem* cItem = iter_Copies->get();
-      if (cItem->GetMetaTag(Config::HashKey, Hidden) == aszHash &&
-         (aptAddress.Main == "" || cItem->IsResidentIn(aptAddress)))
-      {
-         lstRetval.push_back(*iter_Copies);
-      }
-   }
-
-   return lstRetval;
-}
-
-void CollectionItem::Erase(CopyItem* ociRemove)
-{
-   std::function<CopyItem* (std::shared_ptr<CopyItem>)> fnExtractor;
-   fnExtractor = [](std::shared_ptr<CopyItem> aptr)->
-                                    CopyItem* { return aptr.get(); };
+   const static function<CopyItem* (const shared_ptr<CopyItem>&)> fnExtractor =
+      [](const shared_ptr<CopyItem>& aptr)->CopyItem* { return aptr.get(); };
 
    int iFound = ListHelper::List_Find(ociRemove, m_lstCopies, fnExtractor);
    if (iFound > -1)
@@ -168,274 +110,305 @@ void CollectionItem::Erase(CopyItem* ociRemove)
    }
 }
 
-std::vector<std::shared_ptr<CopyItem>> 
-CollectionItem::GetCopiesForCollection(const Address& aAddrCollectionIdentifier,
-                                       CollectionItemType aItemType)
+string 
+CollectionItem::CopyToString( CopyItem const* aptItem,
+                              const MetaTagType& aAccessType,
+                              const Identifier& aAddrCompareID ) const
 {
-   std::vector<std::shared_ptr<CopyItem>> lstRetVal;
-   std::vector<std::shared_ptr<CopyItem>> ::iterator iter_Copies = m_lstCopies.begin();
+   return ToCardLine( aptItem->GetAddress(), GetName(),
+                      aptItem->GetIdentifyingAttributes(),
+                      aptItem->GetMetaTags(aAccessType),
+                      aAddrCompareID );
+}
 
-   for (; iter_Copies != m_lstCopies.end(); ++iter_Copies)
+TryGetCopy<shared_ptr<CopyItem>>
+CollectionItem::FindCopy( const string& aszUID, 
+                          FindType aiType  ) const
+{
+   TryGetCopy<shared_ptr<CopyItem>> oRetval;
+   bool match = false;
+   for( auto ptCopy : m_lstCopies )
    {
-      if ((aItemType & Local) > 0 &&
-          (*iter_Copies)->IsParent(aAddrCollectionIdentifier))
+      match |= (aiType & UID)  > 0 && ptCopy->GetUID()  == aszUID;
+      match |= (aiType & Hash) > 0 && ptCopy->GetHash() == aszUID;
+      if( match )
       {
-         lstRetVal.push_back(*iter_Copies);
+         oRetval.Set( shared_ptr<CopyItem>(ptCopy) );
+         break;
       }
-      else if ((aItemType & Borrowed) > 0 &&
-         !(*iter_Copies)->IsParent(aAddrCollectionIdentifier) &&
-         (*iter_Copies)->IsResidentIn(aAddrCollectionIdentifier))
+   }
+
+   return oRetval;
+}
+
+// Returns each copy
+vector<shared_ptr<CopyItem>> 
+CollectionItem::FindCopies( const Identifier& aCollection,
+                            CollectionItemType aSearchType ) const
+{
+   vector<shared_ptr<CopyItem>> copies;
+   for( auto iSub : aCollection.GetAddresses() )
+   {
+      Location location = Location(aCollection.GetMain(), iSub);
+
+      auto newCopies = FindCopies(location, aSearchType);
+      for( auto copy : newCopies )
       {
-         lstRetVal.push_back(*iter_Copies);
+         bool bAlreadyHave = false;
+         for( auto alreadyCopy : copies )
+         {
+            bAlreadyHave |= copy.get() == alreadyCopy.get();
+         }
+
+         if( !bAlreadyHave )
+         {
+            copies.push_back(copy);
+         }
       }
-      else if ((aItemType & Virtual) > 0 &&
-         (*iter_Copies)->GetParent() == "" &&
-         (*iter_Copies)->IsResidentIn(aAddrCollectionIdentifier))
+   }
+
+   return copies;
+}
+
+vector<shared_ptr<CopyItem>> 
+CollectionItem::FindCopies( const Location& aCollection,
+                            CollectionItemType aSearchType ) const
+{
+   vector<shared_ptr<CopyItem>> lstRetVal;
+   for( auto copy : m_lstCopies )
+   {
+      if( ( aSearchType & Local )         &&
+          ( copy->IsParent(aCollection) ) )
       {
-         lstRetVal.push_back(*iter_Copies);
+         lstRetVal.push_back(copy);
+      }
+      else if( ( aSearchType & Borrowed )        &&
+               ( !copy->IsParent(aCollection) )  && 
+               ( copy->IsResidentIn(aCollection) ) )
+      {
+         lstRetVal.push_back(copy);
+      }
+      else if( ( aSearchType & Virtual )         &&
+               ( copy->IsVirtual() )             &&
+               ( copy->IsResidentIn(aCollection) ) )
+      {
+         lstRetVal.push_back(copy);
       }
    }
 
    return lstRetVal;
 }
 
-std::string 
-CollectionItem::GetHash(const Address& aAddrIdentifier,
-                        std::vector<Tag> alstAttrs,
-                        std::vector<Tag> alstMetaTags)
-{
-   CopyItem copyToHash(&m_lstIdentifyingTraits, aAddrIdentifier, 
-                       alstAttrs, alstMetaTags);
 
-   return copyToHash.GetHash();
+string 
+CollectionItem::GetName() const
+{
+   return m_szName;
 }
 
-std::string 
-CollectionItem::GetCardString(CopyItem* aItem, MetaTagType aTagType,
-                              const Address& aAddrAddress)
+string 
+CollectionItem::GetProtoType() const
 {
-   return CollectionItem::ToCardLine(aItem->GetParent(), m_szName, 
-                                     aItem->GetIdentifyingAttributes(), 
-                                     aItem->GetMetaTags(aTagType), aAddrAddress);
-}
+   StringInterface strIface;
+   string szResult;
+   
+   // Start with static common traits
+   vector<Tag> lstAllCommonTraits(m_lstCommonTraits);
 
-std::string 
-CollectionItem::GetProtoTypeString()
-{
-   // Include multi traits in this list
-   std::vector<Tag> lstAllCommonTraits(m_lstCommonTraits);
+   // Include identifying traits
+   // These appear as <Key>, *Val1::Val2...
    for each (TraitItem trait in m_lstIdentifyingTraits)
    {
-      std::string szTraitVal = "";
-      bool first = true;
-      for each (std::string possibleTrait in trait.GetAllowedValues())
-      {
-         if (!first) { szTraitVal += "::"; }
-         else { szTraitVal += "*"; } // This * will indicate it is an identifier.
-         szTraitVal += possibleTrait;
-         first = false;
-      }
-      lstAllCommonTraits.push_back(std::make_pair(trait.GetKeyName(), szTraitVal));
+      auto vals = trait.GetAllowedValues();
+      strIface.ListToDelimStr(vals.cbegin(), vals.cend(), szResult);
+      
+      lstAllCommonTraits.push_back(make_pair(trait.GetKeyName(), szResult));
    }
 
    return CollectionItem::ToCardLine(Address(), "", lstAllCommonTraits);
 }
 
-std::vector<Tag> CollectionItem::GetCommonTraits()
+vector<TraitItem> 
+CollectionItem::GetIdentifyingTraits()
 {
-   return m_lstCommonTraits;
+   return m_lstIdentifyingTraits;
+}
+
+// Returns the first trait key that has the input value
+bool 
+CollectionItem::MatchIdentifyingTrait( const std::string& aszValue, 
+                                       std::string& rszKey )
+{
+   for( auto trait : m_lstIdentifyingTraits )
+   {
+      auto values = trait.GetAllowedValues();
+      int iFoundVal = ListHelper::List_Find(aszValue, values);
+      if( iFoundVal != -1 )
+      {
+         rszKey = trait.GetKeyName();
+         return true;
+      }
+   }
+
+   return false;
+}
+
+bool 
+CollectionItem::SetIdentifyingTrait( CopyItem* aptItem,
+                                     const string& aszTraitKey,
+                                     const string& aszTraitValue ) const
+{
+   const static function<string(const TraitItem& )> fnTraitExtractor =
+      [](const TraitItem& item )->string { return item.GetKeyName(); };
+
+   int iFound;
+   iFound = ListHelper::List_Find( aszTraitKey, m_lstIdentifyingTraits,
+                                   fnTraitExtractor );
+   if( iFound == -1 ) { return false; }
+
+   TraitItem trait = m_lstIdentifyingTraits[iFound];
+   iFound = ListHelper::List_Find( aszTraitValue, trait.GetAllowedValues() );
+   if( iFound == -1 ) { return false; }
+
+   // Set the trait
+   aptItem->SetIdentifyingAttribute( aszTraitKey, aszTraitValue );
+   setCopyPairAttrs( aptItem, aszTraitKey, iFound );
+}
+
+// Sets all the ident traits to their defaults.
+void 
+CollectionItem::SetIdentifyingTraitDefaults( CopyItem* aptItem ) const
+{
+   // Include default values for IDAttrs NOT specified.
+   for( auto IDAttrs : m_lstIdentifyingTraits )
+   {
+      SetIdentifyingTrait( aptItem, IDAttrs.GetKeyName(), IDAttrs.GetDefaultValue() );
+   }
+}
+
+CopyItem* 
+CollectionItem::createCopy( const Identifier& aAddrColID,
+                            const vector<Tag>& alstAttrs,
+                            const vector<Tag>& alstMetaTags ) const
+{
+   return CopyItem::CreateCopyItem( this, aAddrColID, alstAttrs, alstMetaTags );
+}
+
+void 
+CollectionItem::setCopyPairAttrs( CopyItem* aptItem, const string& aszKey, int iVal ) const
+{
+   const static function<string(const TraitItem&)> fnExtractor = 
+      [](const TraitItem& aTI)->string { return aTI.GetKeyName(); };
+
+   vector<string> lstPartners;
+
+   // Find any traits paied with the key.
+   vector<Tag> lstPairs = Config::Instance()->GetPairedKeysList();
+   for each (Tag var in lstPairs)
+   {
+      if( ( var.first == aszKey ) &&
+          ( ListHelper::List_Find(var.second, lstPartners) == -1 ) )
+      {
+         lstPartners.push_back(var.second);
+      }
+      else if( ( var.second == aszKey ) &&
+               ( ListHelper::List_Find(var.first, lstPartners) == -1 ) )
+      {
+         lstPartners.push_back(var.first);
+      }
+   }
+
+   // Search for the trait and asign it.
+   for each (string szKey in lstPartners)
+   {
+      // Verify the trait is an identifying trait.
+      int iIsAttr = ListHelper::List_Find(szKey, m_lstIdentifyingTraits, fnExtractor);
+      if (iIsAttr != -1)
+      {
+         TraitItem foundTrait = m_lstIdentifyingTraits.at(iIsAttr);
+         aptItem->SetIdentifyingAttribute( szKey, foundTrait.GetAllowedValues().at( iVal ) );
+      }
+   }
 }
 
 bool
-CollectionItem::ParseCardLine(std::string aszLine, PseudoIdentifier& rPIdentifier)
+CollectionItem::ParseCardLine( const string& aszLine,
+                               PseudoIdentifier& rPIdentifier )
 {
+   StringInterface parser;
+   string szName, szDetails, szMeta;
    unsigned int iCount;
-   std::string szMeta;
-   std::string szDetails;
-   std::string szName;
-   aszLine = StringHelper::Str_Trim(aszLine, ' ');
 
-   unsigned int i = 0;
-   if (aszLine.size() > 0 && aszLine[0] == 'x') { i++; }
-
-   std::string szNum = "";
-   while (i < aszLine.size() && aszLine.at(i) < '9' && aszLine.at(i) > '0')
+   bool bGoodParse = parser.ParseCardLine( aszLine, iCount, szName,
+                                           szDetails, szMeta );
+   if( bGoodParse )
    {
-      szNum = szNum + aszLine.at(i);
-      i++;
+      // Output the details
+      rPIdentifier = PseudoIdentifier(iCount, szName, szDetails, szMeta);
    }
-
-   if (i >= aszLine.size())
+   else
    {
       return false;
    }
 
-   if (szNum == "")
-   {
-      szNum = "1";
-   }
-
-   try
-   {
-      iCount = std::stoi(szNum);
-   }
-   catch (...)
-   {
-      return false;
-   }
-
-   if (aszLine.at(i) == 'x')
-   {
-      i++;
-   }
-
-   if (i >= aszLine.size())
-   {
-      return false;
-   }
-
-   szName = "";
-   unsigned int iter_size = aszLine.size();
-   while (i < iter_size &&
-      ((aszLine.at(i) >= 'a' && aszLine.at(i) <= 'z') ||
-      (aszLine.at(i) >= 'A' && aszLine.at(i) <= 'Z') ||
-         (aszLine.at(i) == ',' || aszLine.at(i) == ' ' || aszLine.at(i) == '-')))
-   {
-      szName = szName + aszLine.at(i);
-      i++;
-   }
-
-   szName.erase(0, szName.find_first_not_of(' '));
-   szName.erase(szName.find_last_not_of(' ') + 1);
-
-   while (i < iter_size && aszLine.at(i) == ' ')
-   {
-      i++;
-   }
-
-   bool hasDets = false;
-   bool hasMeta = false;
-   if (i < iter_size)
-   {
-      hasDets = aszLine.at(i) == '{';
-      hasMeta = aszLine.at(i) == ':';
-   }
-
-   szDetails = "";
-   if (i < iter_size && hasDets)
-   {
-      while (i < iter_size && aszLine.at(i) != '}')
-      {
-         szDetails += aszLine.at(i);
-         i++;
-      }
-      if (i < iter_size)
-      {
-         szDetails += aszLine.at(i);
-         i++;
-      }
-   }
-
-   if (!hasMeta && hasDets)
-   {
-      while (i < iter_size && aszLine.at(i) != ':')
-      {
-         i++;
-      }
-      hasMeta = (i < iter_size) && (aszLine.at(i) == ':');
-   }
-
-   szMeta = "";
-   if (i < iter_size && hasMeta)
-   {
-      i++;
-      while (i < iter_size)
-      {
-         szMeta += aszLine.at(i);
-         i++;
-      }
-   }
-
-   // Output the details
-   rPIdentifier = PseudoIdentifier(iCount, szName, szDetails, szMeta);
    return true;
 }
 
-bool CollectionItem::ParseTagString(std::string aszDetails, std::vector<Tag>& rlstTags)
+bool CollectionItem::ParseTagString( const string& aszDetails, 
+                                     vector<Tag>& rlstTags )
 {
-   std::vector<Tag> lstKeyVals;
-   std::vector<std::string> lstPairs;
-   std::vector<std::string> lstVal;
+   StringInterface parser;
+   return parser.ParseTagString(aszDetails, rlstTags);
+}
 
-   std::vector<std::string> lstDetails = StringHelper::Str_Split(aszDetails, " ");
+string 
+CollectionItem::ToCardLine( const Identifier& aAddrParentID,
+                            const string& aszName,
+                            const vector<Tag>& alstAttrs,   
+                            const vector<Tag>& alstMetaTags,
+                            const Identifier& aAddrCompareID )
+{
+   StringInterface parser;
+   Config* config = Config::Instance();
+   string szAddressKey = CopyItem::GetAddressKey();
+   vector<Tag> lstMetaTags(alstMetaTags);
+   
+   // Don't specify the parent if the parent is requesting the
+   // the string.
+   bool bExcludeParent = true;
+   bExcludeParent = aAddrCompareID == aAddrParentID;
 
-   std::vector<std::string>::iterator iter_attrs;
-   for (iter_attrs = lstDetails.begin(); 
-        iter_attrs != lstDetails.end(); 
-        ++iter_attrs)
+   // Check if the parent is specified in the metatags.
+   if( bExcludeParent )
    {
-      lstPairs = StringHelper::Str_Split(*iter_attrs, "=");
-      if (lstPairs.size() > 1)
+      for( auto& pairMeta : lstMetaTags )
       {
-         lstVal = StringHelper::Str_Split(lstPairs[1], "\"");
-         if (lstVal.size() == 3)
+         if( pairMeta.first == szAddressKey )
          {
-            std::string szVal = lstVal[1];
-            lstKeyVals.push_back(std::make_pair(lstPairs[0], szVal));
+            bExcludeParent = Address( pairMeta.second ) == aAddrCompareID;
+            break;
          }
       }
    }
-   rlstTags = lstKeyVals;
-   return true;
+
+   // Remove the parent from meta tags if there is one.
+   // Otherwise, add the parent.
+   if( bExcludeParent )
+   {
+      int iFound = ListHelper::List_Find( szAddressKey,
+                                          lstMetaTags,
+                                          config->GetTagHelper() );
+      if( iFound != -1 )
+      {
+         lstMetaTags.erase(lstMetaTags.begin() + iFound);
+      }
+   }
+   else
+   {
+      auto pairParent = make_pair(szAddressKey, aAddrCompareID.GetFullAddress());
+      lstMetaTags.push_back(pairParent);
+   }
+
+   return parser.ToCardLine(aszName, alstAttrs, lstMetaTags);
 }
 
-std::string CollectionItem::ToCardLine(const Address& aAddrParentID,
-   std::string aszName,
-   std::vector<Tag> alstAttrs,
-   std::vector<Tag> alstMetaTags,
-   const Address& aAddrCompareID)
-{
-   std::string szLine = aszName;
-   szLine += " { ";
-
-   std::vector<Tag>::iterator iter_keyValPairs;
-   if (alstAttrs.size() > 0)
-   {
-      iter_keyValPairs = alstAttrs.begin();
-      for (; iter_keyValPairs != alstAttrs.end(); ++iter_keyValPairs)
-      {
-         szLine += iter_keyValPairs->first;
-         szLine += "=\"";
-         szLine += iter_keyValPairs->second;
-         szLine += "\" ";
-      }
-
-   }
-   szLine += "}";
-
-   if (alstMetaTags.size() == 0)
-   {
-      return szLine;
-   }
-
-   szLine += " : { ";
-
-   iter_keyValPairs = alstMetaTags.begin();
-   unsigned int iDummy;
-   for (; iter_keyValPairs != alstMetaTags.end(); ++iter_keyValPairs)
-   {
-      if (!(aAddrCompareID.Main == "") &&
-         (iter_keyValPairs->first == "Address") &&
-         (Address(iter_keyValPairs->second) == aAddrCompareID))
-      {
-         continue;
-      }
-      szLine += iter_keyValPairs->first;
-      szLine += "=\"";
-      szLine += iter_keyValPairs->second;
-      szLine += "\" ";
-   }
-   szLine += "}";
-
-   return szLine;
-}

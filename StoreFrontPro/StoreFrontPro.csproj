@@ -33,6 +33,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -59,10 +60,13 @@
     <Compile Include="Server\CardModel.cs" />
     <Compile Include="Server\CardModelStatic.cs" />
     <Compile Include="Server\CollectionModel.cs" />
+    <Compile Include="Server\ImageHandler.cs" />
+    <Compile Include="Server\IServerObserver.cs" />
     <Compile Include="Server\SSICardInterface.cs" />
     <Compile Include="Server\SSICollectionInterface.cs" />
     <Compile Include="Server\SSIServer.cs" />
     <Compile Include="Server\SSIServerInterface.cs" />
+    <Compile Include="Server\SSIStringInterface.cs" />
     <Compile Include="StoreFront.cs" />
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
@@ -71,11 +75,42 @@
     <Compile Include="StoreFrontMain.xaml.cs">
       <DependentUpon>StoreFrontMain.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Support\LoadingIndicator\LoadIndicator.xaml.cs">
+      <DependentUpon>LoadIndicator.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Support\MultiDisplay\MultiDisplay.xaml.cs">
       <DependentUpon>MultiDisplay.xaml</DependentUpon>
     </Compile>
     <Compile Include="Support\MultiDisplay\VCIMultiDisplay.cs" />
+    <Compile Include="Support\SortingList\SortingList.cs" />
     <Compile Include="Tools\Extensions.cs" />
+    <Compile Include="Views\CollectionViews\Deckbox\VCIFancyCollectionItem.cs" />
+    <Compile Include="Views\CollectionViews\Deckbox\VCIFancyCollectionList.cs" />
+    <Compile Include="Views\Components\CardImageDock\MCardImageDock.cs" />
+    <Compile Include="Views\Components\CardImageDock\VCardImageDock.xaml.cs">
+      <DependentUpon>VCardImageDock.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Components\CardImageDock\VCICardImageDock.cs" />
+    <Compile Include="Views\Components\CardImageDock\VMCardImageDock.cs" />
+    <Compile Include="Views\Components\CopySelector\VCopy.xaml.cs">
+      <DependentUpon>VCopy.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Components\CopySelector\VCopySelector.xaml.cs">
+      <DependentUpon>VCopySelector.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Components\CopySelector\VMCopy.cs" />
+    <Compile Include="Views\Components\CopySelector\VMCopySelector.cs" />
+    <Compile Include="Views\Interfaces\CardInterface\MAttributeEditorItem.cs" />
+    <Compile Include="Views\Interfaces\CardInterface\VAttributeEditorItem.xaml.cs">
+      <DependentUpon>VAttributeEditorItem.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Interfaces\CardInterface\VCardChanger.xaml.cs">
+      <DependentUpon>VCardChanger.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Interfaces\CardInterface\VCIAttributeEditorItem.cs" />
+    <Compile Include="Views\Interfaces\CardInterface\VCICardChanger.cs" />
+    <Compile Include="Views\Interfaces\CardInterface\VMAttributeEditorItem.cs" />
+    <Compile Include="Views\Interfaces\CardInterface\VMCardChanger.cs" />
     <Compile Include="Views\MVVM\BasicModel.cs" />
     <Compile Include="Views\CollectionsOverview\VCICollectionsOverview.cs" />
     <Compile Include="Views\CollectionsOverview\VCollectionsOverview.xaml.cs">
@@ -187,6 +222,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Support\LoadingIndicator\LoadIndicator.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Support\MultiDisplay\MultiDisplay.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -223,6 +262,18 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Views\Components\CardImageDock\VCardImageDock.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Components\CopySelector\VCopy.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Components\CopySelector\VCopySelector.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\Components\ManaViewer\VManaViewer.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -240,6 +291,14 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\Components\VCCollectionsMenuList.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Interfaces\CardInterface\VAttributeEditorItem.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Interfaces\CardInterface\VCardChanger.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
