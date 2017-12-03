@@ -42,11 +42,12 @@ StringInterface::ParseCardLine( const string& aszLine,
       string szMaybeNum = szLine.substr(0, iFirstBreak);
 
       // An exception is thrown if there are 0 num chars.
-      try
+      if( ( szMaybeNum.size() > 0 ) && 
+          ( isdigit( szMaybeNum[0] ) ) )
       {
          iTryParse = stoul(szMaybeNum, &iParseChars);
       }
-      catch(...)
+      else
       {
          iParseChars = 0;
       }
@@ -66,7 +67,8 @@ StringInterface::ParseCardLine( const string& aszLine,
       }
    }
 
-   if( (((int)riCount) < 0) || (szLine.size() == 0) )
+   if( ( ((int)riCount) < 0 ) || 
+       ( szLine.size() == 0 ) )
    {
       return false;
    }

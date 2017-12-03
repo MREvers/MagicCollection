@@ -36,7 +36,8 @@ SourceObject::AddAttribute(
       iInsertion = 0;
    }
 
-   unsigned int iSizeIncrease = insertAttribute(value, aplstCharBuf, aiMaxBuffSize, iInsertion);
+   unsigned int iSizeIncrease = insertAttribute( value, aplstCharBuf,
+                                                 aiMaxBuffSize, iInsertion );
 
    // Shift all field codes down
    for( int i = ms_iNumKeys-2; i >= iInsertion; --i )

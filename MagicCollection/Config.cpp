@@ -97,9 +97,10 @@ char
 Config::GetKeyCode(std::string aszFullKey)
 {
    static std::map<std::string, char> mapFastKey;
-   if( mapFastKey.find( aszFullKey ) != mapFastKey.end() )
+   auto mapKey =  mapFastKey.find( aszFullKey );
+   if( mapKey != mapFastKey.end() )
    {
-      return mapFastKey[aszFullKey];
+      return mapKey->second;
    }
 
    auto iter_KeyMappings = m_lstKeyCodeMappings.begin();
@@ -128,7 +129,7 @@ Config::GetKeyCode(std::string aszFullKey)
 std::string 
 Config::GetFullKey(char aiKeyCode)
 {
-   std::vector<std::pair<std::string, std::string>>::iterator iter_KeyMappings = m_lstKeyCodeMappings.begin();
+   auto iter_KeyMappings = m_lstKeyCodeMappings.begin();
    for (; iter_KeyMappings != m_lstKeyCodeMappings.end(); ++iter_KeyMappings)
    {
       size_t iNumChars;

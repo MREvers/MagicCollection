@@ -43,8 +43,15 @@ CollectionTracker::Track()
             iter_Copy++ )
       {
          // Map a copy of the current state so that it may be used to track.
-         m_mapNew[*iter_Item].
-            push_back(std::make_pair(*iter_Copy, CopyItem(**iter_Copy)));
+         CopyItem copyOfCopy = CopyItem(**iter_Copy);
+         
+         // This points to the actual copy. When we come back to track changes,
+         // if the item at the pointer is different from the copy of it, then it
+         // has changed.
+         std::shared_ptr<CopyItem> copyOfPointerToCopy = *iter_Copy;
+
+         SnapShot copySnapshot = std::make_pair(copyOfPointerToCopy, copyOfCopy);
+         m_mapNew[*iter_Item].push_back(copySnapshot);
       }
       
    }
@@ -76,31 +83,42 @@ CollectionTracker::CalculateChanges()
         iter_Current != mapNew.end();
         iter_Current++ )
    {
-      iter_FoundItem = mapOld.find(iter_Current->first);
+      unsigned int iCurrentItemType = iter_Current->first;
+
+      // lstSnapshots is a list of all the copys for item
+      // 'iCurrentItemType' as they were at the time of
+      // last track.
+      CopyList* lstNewSnapshots = &iter_Current->second;
+
+      iter_FoundItem = mapOld.find(iCurrentItemType);
       if (iter_FoundItem != mapOld.end())
       {
+         CopyList* lstOldSnapshots = &iter_FoundItem->second;
          // Excellent, this type of thing exists both before
          // and after.
-         for (iter_CopyCurrent  = iter_Current->second.begin();
-              iter_CopyCurrent != iter_Current->second.end();
+         for (iter_CopyCurrent  = lstNewSnapshots->begin();
+              iter_CopyCurrent != lstNewSnapshots->end();
               iter_CopyCurrent++)
          {
-            CopyItem* cToFind = iter_CopyCurrent->first.get();
-            int iFound = ListHelper::List_Find( cToFind,
-                                                iter_FoundItem->second, 
+            // Try to find if this snapshot's memory location corresponds
+            // to a snapshot's memory location in the old list.
+            // If so, then compare the snapshots to see what changed.
+            CopyItem* cCopyCurrentState = iter_CopyCurrent->first.get();
+            int iFound = ListHelper::List_Find( cCopyCurrentState,
+                                                *lstOldSnapshots, 
                                                 fnPtrCmper );
             if (iFound != -1 )
             {
-               CopyItem cFound = iter_FoundItem->second.at(iFound).second;
-               if (cToFind->GetHash() != cFound.GetHash())
+               CopyItem cSnapshotCopy = lstOldSnapshots->at(iFound).second;
+               if (cCopyCurrentState->GetHash() != cSnapshotCopy.GetHash())
                {
                   // If this item has been changed since last track.
                   // Otherwise, do nothing.
-                  mapChanged[iter_Current->first].
+                  mapChanged[iCurrentItemType].
                      push_back(*iter_CopyCurrent);
 
-                  mapChangedPrevState[iter_Current->first].
-                     push_back(iter_FoundItem->second[iFound]);
+                  mapChangedPrevState[iCurrentItemType].
+                     push_back(lstOldSnapshots->at(iFound));
                }
 
                // Erase the item from mapOld.
@@ -110,18 +128,18 @@ CollectionTracker::CalculateChanges()
             else
             {
                // This item has been added.
-               mapAdded[iter_Current->first].push_back(*iter_CopyCurrent);
+               mapAdded[iCurrentItemType].push_back(*iter_CopyCurrent);
             }
          }
       }
       else
       {
          // All these items have been added since last track.
-         for (iter_CopyCurrent  = iter_Current->second.begin();
-              iter_CopyCurrent != iter_Current->second.end();
+         for (iter_CopyCurrent  = lstNewSnapshots->begin();
+              iter_CopyCurrent != lstNewSnapshots->end();
               iter_CopyCurrent++)
          {
-            mapAdded[iter_Current->first].push_back(*iter_CopyCurrent);
+            mapAdded[iCurrentItemType].push_back(*iter_CopyCurrent);
          }
       }
    }
@@ -151,22 +169,22 @@ CollectionTracker::CalculateChanges()
    colAddress = m_ptrTrackedCollection->GetIdentifier();
    colSource = m_ptrTrackedCollection->m_ptrCollectionSource;
 
-   CopyList::iterator iter_Copy;
+   CopyList::iterator iter_CurrentSnapshot;
    std::map<unsigned int, CopyList>::iterator iter_Items;
    for ( iter_Items  = mapAdded.begin();
          iter_Items != mapAdded.end();
          iter_Items++ )
    {
       TryGet<CollectionItem> item = colSource->GetCardPrototype(iter_Items->first);
-      for (iter_Copy  = iter_Items->second.begin();
-           iter_Copy != iter_Items->second.end();
-           iter_Copy++)
+      for (iter_CurrentSnapshot  = iter_Items->second.begin();
+           iter_CurrentSnapshot != iter_Items->second.end();
+           iter_CurrentSnapshot++)
       {
          szNote = "+ " + CollectionItem::ToCardLine(
-            (*iter_Copy).first->GetAddress(),
+            (*iter_CurrentSnapshot).first->GetAddress(),
             item->GetName(),
-            (*iter_Copy).first->GetIdentifyingAttributes(),
-            (*iter_Copy).first->GetMetaTags(MetaTagType::Visible),
+            (*iter_CurrentSnapshot).first->GetIdentifyingAttributes(),
+            (*iter_CurrentSnapshot).first->GetMetaTags(MetaTagType::Visible),
             colAddress);
          lstAdds.push_back(szNote);
       }
@@ -177,15 +195,15 @@ CollectionTracker::CalculateChanges()
         iter_Items++)
    {
       TryGet<CollectionItem> item = colSource->GetCardPrototype(iter_Items->first);
-      for (iter_Copy  = iter_Items->second.begin();
-           iter_Copy != iter_Items->second.end();
-           iter_Copy++)
+      for (iter_CurrentSnapshot  = iter_Items->second.begin();
+           iter_CurrentSnapshot != iter_Items->second.end();
+           iter_CurrentSnapshot++)
       {
          szNote = "- " + CollectionItem::ToCardLine(
-            (*iter_Copy).first->GetAddress(),
+            (*iter_CurrentSnapshot).first->GetAddress(),
             item->GetName(),
-            (*iter_Copy).first->GetIdentifyingAttributes(),
-            (*iter_Copy).first->GetMetaTags(MetaTagType::Visible),
+            (*iter_CurrentSnapshot).first->GetIdentifyingAttributes(),
+            (*iter_CurrentSnapshot).first->GetMetaTags(MetaTagType::Visible),
             colAddress);
          lstRemoves.push_back(szNote);
       }
@@ -195,22 +213,26 @@ CollectionTracker::CalculateChanges()
         iter_Items != mapChanged.end();
         iter_Items++)
    {
-      TryGet<CollectionItem> item = colSource->GetCardPrototype(iter_Items->first);
-      for (iter_Copy  = iter_Items->second.begin();
-           iter_Copy != iter_Items->second.end();
-           iter_Copy++)
+      unsigned int iCurrentItemType = iter_Items->first;
+      CopyList* lstSnapshots = &iter_Items->second;
+      CopyList* lstOldSnapshots = &mapChangedPrevState.at(iCurrentItemType);
+
+      TryGet<CollectionItem> item = colSource->GetCardPrototype(iCurrentItemType);
+      for( int i = 0; i < lstSnapshots->size(); i++ )
       {
+         CopyItem* currentSnapshot = &lstSnapshots->at(i).second;
+         CopyItem* oldSnapshot = &lstOldSnapshots->at(i).second;
          szNote = "% " + CollectionItem::ToCardLine(
-            (*iter_Copy).second.GetAddress(),
+            oldSnapshot->GetAddress(),
             item->GetName(),
-            (*iter_Copy).second.GetIdentifyingAttributes(),
-            (*iter_Copy).second.GetMetaTags(MetaTagType::Visible),
+            oldSnapshot->GetIdentifyingAttributes(),
+            oldSnapshot->GetMetaTags(MetaTagType::Visible),
             colAddress);
          szNote += "-> " + CollectionItem::ToCardLine(
-            (*iter_Copy).first->GetAddress(),
+            currentSnapshot->GetAddress(),
             item->GetName(),
-            (*iter_Copy).first->GetIdentifyingAttributes(),
-            (*iter_Copy).first->GetMetaTags(MetaTagType::Visible),
+            currentSnapshot->GetIdentifyingAttributes(),
+            currentSnapshot->GetMetaTags(MetaTagType::Visible),
             colAddress);
          lstChanges.push_back(szNote);
       }

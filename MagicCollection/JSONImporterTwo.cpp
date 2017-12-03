@@ -357,24 +357,10 @@ JSONImporterTwo::ensureUniqueAttr( std::string& rszDelimd,
       iHighestCopy++;
 
       auto vecPossibleSplit = StringHelper::Str_Split(szExistVal, "-");
-      if( vecPossibleSplit.size() > 1 )
+      if( ( vecPossibleSplit.size() > 1 ) &&
+          ( isdigit( vecPossibleSplit[1][0] ) ) )
       {
-         bool bSecondIsNumber;
-         try
-         {
-            unsigned int iChars;
-            stoi(vecPossibleSplit[1], &iChars);
-            bSecondIsNumber = iChars > 0;
-         }
-         catch (...)
-         {
-            bSecondIsNumber = false;
-         }
-
-         if( bSecondIsNumber )
-         {
-            szExistVal = vecPossibleSplit[0];
-         }
+         szExistVal = vecPossibleSplit[0];
       }
    }
 

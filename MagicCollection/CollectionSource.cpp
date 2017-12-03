@@ -348,7 +348,7 @@ CollectionSource::findInBuffer(std::string aszCardName, bool abCaseSensitive)
 {
    // Binary search chokes on all sorts of characters so Im just 
    // using linear search.
-   std::string szCardNameFixed = convertToSearchString(aszCardName);
+   std::string szCardNameFixed = StringHelper::convertToSearchString(aszCardName);
 	if (!abCaseSensitive)
 	{
 		std::transform( szCardNameFixed.begin(),
@@ -374,10 +374,12 @@ CollectionSource::findInBuffer(std::string aszCardName, bool abCaseSensitive)
 			return -1;
 		}
 
-		szName = convertToSearchString(m_lstCardBuffer.at(middle).GetName(m_AllCharBuff));
+		szName = m_lstCardBuffer.at(middle).GetName(m_AllCharBuff);
+      szName = StringHelper::convertToSearchString(szName);
 		if (!abCaseSensitive)
 		{
-			std::transform(szName.begin(), szName.end(), szName.begin(), ::tolower);
+			std::transform( szName.begin(), szName.end(), 
+                         szName.begin(), ::tolower );
 		}
 
 		if (szName == szCardNameFixed)
@@ -423,26 +425,4 @@ void CollectionSource::finalizeBuffer()
    memcpy(newBufferSize, m_AllCharBuff, m_iAllCharBuffSize);
    delete[] m_AllCharBuff;
    m_AllCharBuff = newBufferSize;
-}
-
-std::string 
-CollectionSource::convertToSearchString(const std::string& aszSearch)
-{
-   std::string szRetval = "";
-   for( size_t i = 0; i < aszSearch.size(); i++ )
-   {
-      if( isSearchCharacter(aszSearch[i]) )
-      {
-         szRetval += aszSearch[i];
-      }
-   }
-   return szRetval;
-}
-
-bool CollectionSource::isSearchCharacter(char c)
-{
-   return ('a' <= c && c <= 'z') || 
-          ('A' <= c && c <= 'Z') ||
-          ('0' <= c && c <= '9') || 
-          (' ' == c);
 }
