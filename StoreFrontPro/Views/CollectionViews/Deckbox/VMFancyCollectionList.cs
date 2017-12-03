@@ -63,7 +63,8 @@ namespace StoreFrontPro.Views.CollectionViews.Deckbox
          {
             if( group.GroupList.Count() == 0 ) { continue; }
 
-            CardModel modelGroupHeader = new CardModel(group.Grouping, "");
+            string szGroupName = group.Grouping + " (" + countCardsInGroup(group.GroupList) + ")";
+            CardModel modelGroupHeader = new CardModel(szGroupName, "");
             ViewClass listItem = ViewFactory.CreateFancyCollectionItem(modelGroupHeader, 1, "");
             Cards.Add((VFancyCollectionItem)listItem.View);
 
@@ -91,6 +92,17 @@ namespace StoreFrontPro.Views.CollectionViews.Deckbox
          }
 
          Cards.Clear();
+      }
+
+      private int countCardsInGroup(IEnumerable<CardModel> alstModels) 
+      {
+         int iCount = 0;
+         foreach( CardModel model in alstModels ) 
+         {
+            iCount += model.Count;
+         }
+
+         return iCount;
       }
 
       private void eChildClicked(CardModel model)

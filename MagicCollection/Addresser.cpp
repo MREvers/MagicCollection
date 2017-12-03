@@ -2,6 +2,7 @@
 
 #include <time.h>
 
+#include "Config.h"
 #include "StringHelper.h"
 #include "ListHelper.h"
 
@@ -163,19 +164,29 @@ Identifier::parseIdName( const string& aszID )
 
    // Record the family name.
    lstUIandPF = StringHelper::Str_Split(aszID, string("-"));
-   m_szMain = lstUIandPF[0];
+   if( lstUIandPF.size() > 0 )
+   {
+      m_szMain = lstUIandPF[0];
+   }
+   else
+   {
+      m_szMain = Config::NotFoundString;
+   }
 
    // Add the parsed subAddresses, default to 1 if none named.
    lstUIandPF.push_back("1");
-   lstSubAddresses = StringHelper::Str_Split(lstUIandPF[1], string(","));
-   size_t iSAC = lstSubAddresses.size();
-   for (size_t i = 0; i < iSAC; i++)
+   if( lstUIandPF.size() > 1 )
    {
-      szSubAddress = lstSubAddresses[i];
-      iSubAddress = stoi(szSubAddress, &iNumChars);
-      if (iNumChars > 0)
+      lstSubAddresses = StringHelper::Str_Split(lstUIandPF[1], string(","));
+      size_t iSAC = lstSubAddresses.size();
+      for (size_t i = 0; i < iSAC; i++)
       {
-         addSubAddress(m_veciSubAddresses, iSubAddress);
+         szSubAddress = lstSubAddresses[i];
+         iSubAddress = stoi(szSubAddress, &iNumChars);
+         if (iNumChars > 0)
+         {
+            addSubAddress(m_veciSubAddresses, iSubAddress);
+         }
       }
    }
 
