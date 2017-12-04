@@ -8,7 +8,7 @@
         <ItemsControl ItemsSource="{Binding CategoryGroups}">
             <ItemsControl.ItemsPanel>
                 <ItemsPanelTemplate>
-                    <WrapPanel ScrollViewer.HorizontalScrollBarVisibility="Visible" Orientation="Vertical"/>
+                    <WrapPanel Orientation="Vertical"/>
                 </ItemsPanelTemplate>
             </ItemsControl.ItemsPanel>
         </ItemsControl>
