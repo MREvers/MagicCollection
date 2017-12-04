@@ -126,7 +126,7 @@ StringHelper::Str_Split(const std::string& aszSplit, const std::string& aszDelim
    }
 
    std::string szSplit = aszSplit;
-   int iFindFirst = Find_First_Instance_In(szSplit, aszDelim);
+   int iFindFirst = szSplit.find(aszDelim);
    if( iFindFirst == std::string::npos )
    {
       if( szSplit.size() > 0 )
@@ -179,21 +179,6 @@ StringHelper::SplitIntoLines(const std::string& aszString)
    return lstLines;
 }
 
-int 
-StringHelper::Find_First_Instance_In( const std::string& aszString,
-                                      const std::string& aszFind )
-{
-   int i = 0;
-   while( i + aszFind.size() <= aszString.size() )
-   {
-      if( aszString.substr( i, aszFind.size() ) == aszFind )
-      {
-         return i;
-      }
-      i++;
-   }
-   return std::string::npos;
-}
 
 std::string 
 StringHelper::convertToSearchString(const std::string& aszSearch)

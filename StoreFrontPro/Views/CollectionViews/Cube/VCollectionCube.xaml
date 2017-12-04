@@ -8,7 +8,6 @@
               d:DesignHeight="380" d:DesignWidth="620">
     <Grid>
         <!-- When there are other things at the highest level that are VM tied, this is the binding needed. -->
-        <ContentPresenter 
-                Content="{Binding OperationWindow}"/>
+        <ContentPresenter Content="{Binding OperationWindow}"/>
     </Grid>
 </UserControl>

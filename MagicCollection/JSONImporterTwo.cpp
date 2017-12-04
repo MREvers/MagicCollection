@@ -350,7 +350,7 @@ JSONImporterTwo::ensureUniqueAttr( std::string& rszDelimd,
    unsigned int iHighestCopy = 0;
    for( auto& szExistVal : vecExistingVals )
    {
-      if( StringHelper::Find_First_Instance_In( szExistVal, aszNewVal ) == string::npos )
+      if( szExistVal.find(aszNewVal) == string::npos )
       {
          continue;
       }
@@ -369,7 +369,7 @@ JSONImporterTwo::ensureUniqueAttr( std::string& rszDelimd,
       int iIter = 1;
       for( auto& szCopy : vecExistingVals )
       {
-         if( StringHelper::Find_First_Instance_In( szCopy, aszNewVal ) != string::npos )
+         if( szCopy.find(aszNewVal) != string::npos )
          {
             szCopy = szCopy + "-" + to_string(iIter);
             iIter++;
