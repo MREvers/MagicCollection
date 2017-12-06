@@ -5,6 +5,7 @@
 #include "ChangeAction.h"
 #include "ReplaceAction.h"
 #include "AddFromAction.h"
+#include "StringInterface.h"
 
 using namespace std;
 
@@ -386,7 +387,11 @@ Collection::GetShortList()
    vector<string> lstRetVal;
    TryGet<CollectionItem> item;
    vector<shared_ptr<CopyItem>> lstCopies;
-   vector<pair<string, vector<string>>> lstSeenHashes;
+   vector<pair<string, vector<string>>> lstSeenHashes;   
+   string szUIDKey = CopyItem::GetUIDKey();
+   StringInterface stringIface;
+   vector<Tag> vecUIDPairs;
+   string szUIDTagLine;
 
    vector<int> lstCol = getCollection();
    for( auto& iItem : lstCol )
@@ -411,27 +416,24 @@ Collection::GetShortList()
          }
       }
    }
-
-   vector<string> lstNewRetVal;
+   
+   vector<string> vecNewRetval;
    for (size_t i = 0; i < lstRetVal.size(); i++)
    {
       int iCounted = lstSeenHashes[i].second.size();
       string szNewLine = "x" + to_string(iCounted) + " " + lstRetVal[i];
-
-      szNewLine += " : { ";
+      
+      vecUIDPairs.clear();
       for( auto& szUID : lstSeenHashes[i].second )
       {
-         szNewLine += CopyItem::GetUIDKey() + "=\"" + szUID + "\" ";
+         vecUIDPairs.push_back(make_pair(szUIDKey, szUID));
       }
-      szNewLine += "}";
-
-      lstNewRetVal.push_back(szNewLine);
+      
+      szNewLine = stringIface.ToCardLine(szNewLine, vector<Tag>(), vecUIDPairs);
+      vecNewRetval.push_back(szNewLine);
    }
 
-   lstRetVal.clear();
-   lstRetVal = lstNewRetVal;
-
-   return lstRetVal;
+   return vecNewRetval;
 }
 
 vector<int> 

@@ -228,9 +228,12 @@ StringInterface::ToCardLine( const string& aszName,
    
    szLine = aszName;
 
-   szLine += " ";
-   PairListToTagStr(alstAttrs.cbegin(), alstAttrs.cend(), szTagline);
-   szLine += szTagline;
+   if( alstAttrs.size() > 0 )
+   {
+      szLine += " ";
+      PairListToTagStr(alstAttrs.cbegin(), alstAttrs.cend(), szTagline);
+      szLine += szTagline;
+   }
 
    if( alstMetaTags.size() > 0 )
    {
