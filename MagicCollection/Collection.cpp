@@ -42,6 +42,7 @@ string Collection::GetName()
 
 Location Collection::GetIdentifier()
 {
+
    return Location(*m_ptrCollectionDetails->GetAddress());
 }
 
@@ -400,8 +401,7 @@ Collection::GetShortList()
                                               fnExtractor);
          if( iCounted == -1 )
          {
-            string szRep = item->CopyToString( copy.get(), None, 
-                                               GetIdentifier() );
+            string szRep = item->CopyToString( copy.get(), None );
             lstRetVal.push_back(szRep);
             lstSeenHashes.push_back(make_pair(szHash, vector<string>(1, copy->GetUID())));
          }

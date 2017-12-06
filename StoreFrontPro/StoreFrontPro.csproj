@@ -58,6 +58,7 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Server\CardModel.cs" />
+    <Compile Include="Server\CardModelPool.cs" />
     <Compile Include="Server\CardModelStatic.cs" />
     <Compile Include="Server\CollectionModel.cs" />
     <Compile Include="Server\ImageHandler.cs" />

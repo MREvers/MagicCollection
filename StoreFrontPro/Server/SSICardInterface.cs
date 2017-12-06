@@ -21,7 +21,7 @@ namespace StoreFrontPro.Server
 
          public void DownloadAndCacheImage(Action<BitmapImage> aCallback, CardModel aoCardModel)
          {
-            ImageHandler.Handler.GetImage(aCallback, aoCardModel);
+            ImagePool.Handler.GetImage(aCallback, aoCardModel);
          }
 
          public List<Tuple<string,string>> GetPairedAttributes()

@@ -63,18 +63,18 @@ namespace StoreFrontPro.Server
       }
    }
 
-   class ImageHandler
+   class ImagePool
    {
       static int Poolsize = 10;
-      static Image[] ImagePool = new Image[Poolsize];
-      static ImageHandler instance = null;
+      static Image[] ImageObjectPool = new Image[Poolsize];
+      static ImagePool instance = null;
      
-      public ImageHandler()
+      public ImagePool()
       {
          // Initialize the pool.
          for( int i = 0; i < Poolsize; i++ )
          {
-            ImagePool[i] = new Image(i);
+            ImageObjectPool[i] = new Image(i);
          }
       }
 
@@ -90,7 +90,7 @@ namespace StoreFrontPro.Server
          if( iHave >= 0 )
          {
             shiftOnImage(iHave);
-            ImageReceiver?.Invoke(ImagePool[iHave].Item);
+            ImageReceiver?.Invoke(ImageObjectPool[iHave].Item);
             return;
          }
 
@@ -100,7 +100,7 @@ namespace StoreFrontPro.Server
          {
             shiftOnImage(iLRU);
 
-            Image imageLRU = ImagePool[iLRU];
+            Image imageLRU = ImageObjectPool[iLRU];
             imageLRU.ImageGroup = Model.GetImagePath();
 
             ImageLoadingObject imageLO = new ImageLoadingObject(imageLRU, ImageReceiver, Model);
@@ -145,7 +145,7 @@ namespace StoreFrontPro.Server
       {
          for( int i = 0; i < Poolsize; i++ )
          {
-            if( aszGroup == ImagePool[i].ImageGroup )
+            if( aszGroup == ImageObjectPool[i].ImageGroup )
             {
                return i;
             }
@@ -166,11 +166,11 @@ namespace StoreFrontPro.Server
          int iLowestRank = Poolsize;
          for( int i = 0; i < Poolsize; i++ )
          {
-            if( ImagePool[i].Rank < iLowestRank ) 
+            if( ImageObjectPool[i].Rank < iLowestRank ) 
             {
-               if( !ImagePool[i].Loading )
+               if( !ImageObjectPool[i].Loading )
                {
-                  iLowestRank = ImagePool[i].Rank;
+                  iLowestRank = ImageObjectPool[i].Rank;
                   indexLowestRank = i;
                }
 
@@ -196,11 +196,11 @@ namespace StoreFrontPro.Server
          {
             if( i == aiImage )
             {
-               ImagePool[i].Rank = Poolsize - 1;
+               ImageObjectPool[i].Rank = Poolsize - 1;
             }
             else
             {
-               ImagePool[i].Rank--;
+               ImageObjectPool[i].Rank--;
             }
          }
       }
@@ -291,13 +291,13 @@ namespace StoreFrontPro.Server
          return false;
       }
 
-      public static ImageHandler Handler
+      public static ImagePool Handler
       {
          get
          {
             if( instance == null )
             {
-               instance = new ImageHandler();
+               instance = new ImagePool();
             }
             return instance;
          }

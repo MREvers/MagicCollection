@@ -256,7 +256,8 @@ CollectionItem::MatchIdentifyingTrait( const std::string& aszValue,
 bool 
 CollectionItem::SetIdentifyingTrait( CopyItem* aptItem,
                                      const string& aszTraitKey,
-                                     const string& aszTraitValue ) const
+                                     const string& aszTraitValue,
+                                     bool bSession ) const
 {
    const static function<string(const TraitItem& )> fnTraitExtractor =
       [](const TraitItem& item )->string { return item.GetKeyName(); };
@@ -271,7 +272,7 @@ CollectionItem::SetIdentifyingTrait( CopyItem* aptItem,
    if( iFound == -1 ) { return false; }
 
    // Set the trait
-   aptItem->SetIdentifyingAttribute( aszTraitKey, aszTraitValue );
+   aptItem->SetIdentifyingAttribute( aszTraitKey, aszTraitValue, bSession );
    setCopyPairAttrs( aptItem, aszTraitKey, iFound );
 }
 
@@ -282,7 +283,7 @@ CollectionItem::SetIdentifyingTraitDefaults( CopyItem* aptItem ) const
    // Include default values for IDAttrs NOT specified.
    for( auto IDAttrs : m_lstIdentifyingTraits )
    {
-      SetIdentifyingTrait( aptItem, IDAttrs.GetKeyName(), IDAttrs.GetDefaultValue() );
+      SetIdentifyingTrait( aptItem, IDAttrs.GetKeyName(), IDAttrs.GetDefaultValue(), false );
    }
 }
 
@@ -294,6 +295,7 @@ CollectionItem::createCopy( const Identifier& aAddrColID,
    return CopyItem::CreateCopyItem( this, aAddrColID, alstAttrs, alstMetaTags );
 }
 
+// Does not update session.
 void 
 CollectionItem::setCopyPairAttrs( CopyItem* aptItem, const string& aszKey, int iVal ) const
 {
@@ -326,7 +328,7 @@ CollectionItem::setCopyPairAttrs( CopyItem* aptItem, const string& aszKey, int i
       if (iIsAttr != -1)
       {
          TraitItem foundTrait = m_lstIdentifyingTraits.at(iIsAttr);
-         aptItem->SetIdentifyingAttribute( szKey, foundTrait.GetAllowedValues().at( iVal ) );
+         aptItem->SetIdentifyingAttribute( szKey, foundTrait.GetAllowedValues().at( iVal ), false );
       }
    }
 }
@@ -361,6 +363,9 @@ bool CollectionItem::ParseTagString( const string& aszDetails,
    return parser.ParseTagString(aszDetails, rlstTags);
 }
 
+// This function is agnostic of the card object. It assumes that the 
+// parent is the input parent ID. If the parent is also specified in the 
+// metatags, they should be the same.
 string 
 CollectionItem::ToCardLine( const Identifier& aAddrParentID,
                             const string& aszName,
@@ -376,36 +381,29 @@ CollectionItem::ToCardLine( const Identifier& aAddrParentID,
    // Don't specify the parent if the parent is requesting the
    // the string.
    bool bExcludeParent = true;
-   bExcludeParent = aAddrCompareID == aAddrParentID;
+
+   // If the parent is empty and the compare is default(empty) then the
+   // parent will not be included.
+   bExcludeParent = aAddrCompareID.IsEmpty() || aAddrCompareID == aAddrParentID;
 
    // Check if the parent is specified in the metatags.
-   if( bExcludeParent )
-   {
-      for( auto& pairMeta : lstMetaTags )
-      {
-         if( pairMeta.first == szAddressKey )
-         {
-            bExcludeParent = Address( pairMeta.second ) == aAddrCompareID;
-            break;
-         }
-      }
-   }
+   int iFound = ListHelper::List_Find( szAddressKey,
+                                       lstMetaTags,
+                                       config->GetTagHelper() );
 
    // Remove the parent from meta tags if there is one.
    // Otherwise, add the parent.
    if( bExcludeParent )
    {
-      int iFound = ListHelper::List_Find( szAddressKey,
-                                          lstMetaTags,
-                                          config->GetTagHelper() );
       if( iFound != -1 )
       {
          lstMetaTags.erase(lstMetaTags.begin() + iFound);
       }
    }
-   else
+   else if( iFound == -1 )
    {
-      auto pairParent = make_pair(szAddressKey, aAddrCompareID.GetFullAddress());
+      // Add the parent if it wasn't already found in the metatags.
+      auto pairParent = make_pair(szAddressKey, aAddrParentID.GetFullAddress());
       lstMetaTags.push_back(pairParent);
    }
 

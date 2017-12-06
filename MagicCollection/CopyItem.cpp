@@ -17,7 +17,8 @@ CopyItem::CopyItem( const Identifier& aAddrParentIdentifier )
    // Set the chain ID and session here. 
    // If one is set later, it will just overwrite this...
    setUID(config->GetHexID(addr.GetRandom()));
-   itemChanged();
+   
+   // itemChanged(); called by setParent.
 
    m_bNeedHash = true;
 }
@@ -132,7 +133,7 @@ void CopyItem::SetParent( const Identifier& aAddrTestAddress )
 {
    string szParent = aAddrTestAddress.GetFullAddress();
    setParent( szParent );
-   setMetaTag( GetAddressKey(), szParent, Public );
+   setMetaTag( GetAddressKey(), szParent, Public, false );
    
    int iFamily = findFamilyMember(aAddrTestAddress);
    if( iFamily != -1 )
@@ -410,11 +411,13 @@ void CopyItem::itemChanged()
    SetMetaTag(GetSessionKey(), ss.str(), MetaTagType::Tracking, false);
 }
 
+// Does not update session.
 void CopyItem::setUID(string aszNewID)
 {
-   SetMetaTag(GetUIDKey(), aszNewID, MetaTagType::Tracking);
+   SetMetaTag(GetUIDKey(), aszNewID, MetaTagType::Tracking, false);
 }
 
+// Does not update session
 void CopyItem::setParent(string aszNewParent)
 {
    Address newAddress( aszNewParent );

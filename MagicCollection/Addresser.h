@@ -28,6 +28,7 @@ public:
    Identifier(const std::string& aszId);
    ~Identifier();
 
+   virtual bool IsEmpty() const;
    virtual std::vector<unsigned int> GetAddresses() const = 0;
 
    std::string GetMain() const;
@@ -62,7 +63,6 @@ public:
    Address(const std::string& aszId);
    ~Address();
 
-   bool IsEmpty() const;
    std::vector<unsigned int> GetAddresses() const override;
 
    bool ContainsLocation(const Location& aLoc, Address& rAddrIn = Address()) const;

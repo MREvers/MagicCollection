@@ -94,7 +94,8 @@ public:
    // Returns true if the value is valid.
    bool SetIdentifyingTrait( CopyItem* aptItem,
                              const std::string& aszTraitKey,
-                             const std::string& aszTraitValue ) const;
+                             const std::string& aszTraitValue,
+                             bool bSession = true ) const;
    void SetIdentifyingTraitDefaults( CopyItem* aptItem ) const;
 
    void DeleteCopy( CopyItem* aptItem );

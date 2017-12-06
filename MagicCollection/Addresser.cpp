@@ -95,6 +95,12 @@ Identifier::~Identifier()
 
 }
 
+bool 
+Identifier::IsEmpty() const
+{
+   return m_veciSubAddresses.size()==0;
+}
+
 vector<unsigned int> 
 Identifier::GetAddresses() const
 {
@@ -350,12 +356,6 @@ Address::~Address()
 
 }
 
-bool 
-Address::IsEmpty() const
-{
-   return m_veciSubAddresses.size()==0;
-}
-
 vector<unsigned int> 
 Address::GetAddresses() const
 {
@@ -515,6 +515,9 @@ Location::Location( const string& aszMain, unsigned int aiSA )
 {
    m_iAddress = aiSA;
    m_szMain = aszMain;
+
+   // Add the address to this vector so the "IsEmpty" function works.
+   m_veciSubAddresses.push_back(m_iAddress);
 }
 
 Location::~Location()
