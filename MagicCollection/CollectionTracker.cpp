@@ -181,10 +181,10 @@ CollectionTracker::CalculateChanges()
            iter_CurrentSnapshot++)
       {
          szNote = "+ " + CollectionItem::ToCardLine(
-            (*iter_CurrentSnapshot).first->GetAddress(),
+            iter_CurrentSnapshot->first->GetAddress(),
             item->GetName(),
-            (*iter_CurrentSnapshot).first->GetIdentifyingAttributes(),
-            (*iter_CurrentSnapshot).first->GetMetaTags(MetaTagType::Visible),
+            iter_CurrentSnapshot->first->GetIdentifyingAttributes(),
+            iter_CurrentSnapshot->first->GetMetaTags(MetaTagType::Visible),
             colAddress);
          lstAdds.push_back(szNote);
       }
@@ -199,11 +199,12 @@ CollectionTracker::CalculateChanges()
            iter_CurrentSnapshot != iter_Items->second.end();
            iter_CurrentSnapshot++)
       {
+		 CopyItem* oldSnapshot = &iter_CurrentSnapshot->second;
          szNote = "- " + CollectionItem::ToCardLine(
-            (*iter_CurrentSnapshot).first->GetAddress(),
+            oldSnapshot->GetAddress(),
             item->GetName(),
-            (*iter_CurrentSnapshot).first->GetIdentifyingAttributes(),
-            (*iter_CurrentSnapshot).first->GetMetaTags(MetaTagType::Visible),
+            oldSnapshot->GetIdentifyingAttributes(),
+            oldSnapshot->GetMetaTags(MetaTagType::Visible),
             colAddress);
          lstRemoves.push_back(szNote);
       }
